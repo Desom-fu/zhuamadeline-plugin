@@ -9,6 +9,7 @@ from .function import open_data, save_data, print_zhua, time_decode
 from .list1 import madeline_data1
 from .list2 import madeline_data2
 from .list3 import madeline_data3
+from .list4 import madeline_data4
 from .config import *
 from nonebot import get_bots, on_fullmatch
 from nonebot.log import logger
@@ -582,9 +583,9 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     # img = information[2]
     # description = information[3]
     # 根据对手的猎场状态获取 madelinenameb
-    if str(oppo_liechang) in {"1", "2", "3"}:
+    try:
         madelinenameb = print_zhua(levelb, numb, str(oppo_liechang))
-    else:
+    except:
         madelinenameb = "none"
         
     if stat == 5:
@@ -690,11 +691,12 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         
     
 
-# .ck0内容
-ck0 = on_fullmatch(['.jjc','。jjc'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
-@ck0.handle()
-async def ck0_handle(bot: Bot, event: GroupMessageEvent):
+# .jjc内容
+jjc = on_fullmatch(['.jjc','。jjc'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@jjc.handle()
+async def jjc_handle(bot: Bot, event: GroupMessageEvent):
     pvp_data = open_data(pvp_path)
+    bar_data = open_data(bar_path)  # 读取 bar 数据（包含 pvp_guess）
     pvp_coldtime_data = open_data(pvp_coldtime_path)
     current_time = int(time.time())
     current_time_2 = datetime.datetime.now()
@@ -717,7 +719,7 @@ async def ck0_handle(bot: Bot, event: GroupMessageEvent):
     # 调用开放时间检查模块
     is_open, close_text = pvp_opening(current_time_2)
     if not is_open:
-        await ck0.finish(close_text, at_sender=True)
+        await jjc.finish(close_text, at_sender=True)
     if pvp_data == {}:
         if (pvp_coldtime_data != {}):
             last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
@@ -727,8 +729,8 @@ async def ck0_handle(bot: Bot, event: GroupMessageEvent):
                 remaining_seconds = 1800 - cooldown_seconds  # 计算剩余冷却时间
                 remaining_minutes = remaining_seconds // 60  # 剩余分钟数
                 remaining_seconds = remaining_seconds % 60  # 剩余秒数
-                await ck0.finish(f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", at_sender=True)
-        await ck0.finish("madeline竞技场尚未开启！")
+                await jjc.finish(f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", at_sender=True)
+        await jjc.finish("madeline竞技场尚未开启！")
 
     i = 0
     text = f"总回合数：{totalCount}\n"
@@ -736,32 +738,54 @@ async def ck0_handle(bot: Bot, event: GroupMessageEvent):
     text += f"本回合持续时间：{hours}h{minutes}min\n"  # 更新为小时和分钟
     text += f"本次回合奖励：{reward}草莓\n"
     text += f"当前时间奖励：{timeReward}草莓\n"
-    text += f"本局目前总奖励：{total}草莓\n\n"
-    text += "当前战况："
+    text += f"本局目前总奖励：{total}草莓"
     for v in pvp_data['list']:
         text += "\n\n"
         i += 1  # 编号
-        liechang_number = "1"
         # 加入回合数
         join_count = v[5] if len(v) > 5 else "暂无数据"
         hunt_bonus = v[4]
-        # 开新要改
-        if (hunt_bonus == 1):
-            liechang_number = "2"
-        elif (hunt_bonus == 2):
-            liechang_number = "3"
-        rank = v[3]
-        nickname = v[2]  # QQ号
+        # 开新猎场要改，展示是哪个猎场的
+        liechang_map = {
+            0: "1",
+            1: "2",
+            2: "3",
+            3: "4",
+            4: "5",
+        }
+
+        liechang_number = liechang_map.get(hunt_bonus, "1")  # 默认为 "1"
         madeline = v[1].split('_')
+        nickname = v[2]  # QQ号
+        rank = v[3]
         level = madeline[0]
         num = madeline[1]
-        if (liechang_number == '1'):
-            name = madeline_data1.get(level, {}).get(num, {}).get('name', "未知名称")
-        elif (liechang_number == '2'):
-            name = madeline_data2.get(level, {}).get(num, {}).get('name', "未知名称")
-        elif (liechang_number == '3'):
-            name = madeline_data3.get(level, {}).get(num, {}).get('name', "未知名称")
-        text += f"擂台{i}：\n[{nickname}] 的 [{level}级{name}]\n该madeline的常驻战力：[{rank}]\n所在猎场：[{liechang_number}]号猎场\n加入回合数：[{join_count}]"
+        # 从数据中查询
+        madeline_data = {
+            '1': madeline_data1,
+            '2': madeline_data2,
+            '3': madeline_data3,
+            '4': madeline_data4,
+        }
+
+        name = madeline_data.get(liechang_number, {}).get(level, {}).get(num, {}).get('name', "未知名称")
+
+        # 检查是否有人下注
+        has_bet = "否"
+        for key, value in bar_data.items():
+            if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess", {}).get("ifguess", 0) == 1:
+                if value["pvp_guess"]["pos"] == i:  # 判断是否对应当前擂台
+                    has_bet = "是"
+                    break  # 只要找到一个人下注，就可以退出循环
+
+        text += (
+            f"擂台{i}：\n"
+            f"[{nickname}] 的 [{level}级{name}]\n"
+            f"该madeline的常驻战力：[{rank}]\n"
+            f"所在猎场：[{liechang_number}]号猎场\n"
+            f"加入回合数：[{join_count}]\n"
+            f"本擂台是否有人下注：[{has_bet}]"
+        )
 
     # 创建转发消息
     forward_message = [
