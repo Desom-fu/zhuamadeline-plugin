@@ -282,11 +282,11 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             demon_data[group_id]['turn_start_time'] = int(time.time())
             demon_data[group_id]['turn'] = random.randint(0, 1)
             # 随机生成道具并分配给两位玩家
-            for i in range(random.randint(1 + add_max//2 + pangguang_add//2, 4 + add_max//2)):
-                demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len))  # 玩家1的道具
-                demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len))  # 玩家2的道具
             player0 = str(demon_data[group_id]['pl'][0])
             player1 = str(demon_data[group_id]['pl'][1])
+            for i in range(random.randint(1 + add_max//2 + pangguang_add//2, 4 + add_max//2)):
+                demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))  # 玩家1的道具
+                demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))  # 玩家2的道具
             # 生成道具信息
             item_0 = ", ".join(item_dic.get(i, "未知道具") for i in demon_data[group_id]['item_0'])
             item_1 = ", ".join(item_dic.get(i, "未知道具") for i in demon_data[group_id]['item_1'])
@@ -302,8 +302,8 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
                 msg += "急速模式\n\n"
             else:
                 msg += "正常模式\n\n"
-            msg += MessageSegment.at(player0) + f"道具({len(items_0)}/{demon_data[group_id]['item_max']})：" +f"\n{item_0}\n\n"
-            msg += MessageSegment.at(player1) + f"道具({len(items_1)}/{demon_data[group_id]['item_max']})：" +f"\n{item_1}\n\n"
+            msg += MessageSegment.at(player0) + f"\n道具({len(items_0)}/{demon_data[group_id]['item_max']})：" +f"\n{item_0}\n\n"
+            msg += MessageSegment.at(player1) + f"\n道具({len(items_1)}/{demon_data[group_id]['item_max']})：" +f"\n{item_1}\n\n"
             msg += f"- 双方hp:{str(hp)}/{demon_data[group_id]['hp_max']}\n"
             msg += f"- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
             pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
@@ -643,8 +643,14 @@ help_msg = f"""
 # 奖励设置
 jiangli = 350
 
+#特殊user_id增加bet2权重（为跑团而生的一个东西（（（）
+special_users = {
+    '123456': {19: 1000, 21: 3},
+    '789101': {22: 4}
+}
+
 # 定义权重表
-def get_random_item(identity_found, normal_mode_limit):
+def get_random_item(identity_found, normal_mode_limit, user_id):
     """根据模式返回一个随机道具"""
     
     item_count = len(item_dic)  # 道具总数
@@ -664,7 +670,13 @@ def get_random_item(identity_found, normal_mode_limit):
             weights[i] = 1
         for i in identity_mode_items:
             weights[i] = 2  # 增加稀有道具的出现概率
-    
+
+    # 特殊用户指定道具加成
+    if user_id in special_users:
+        for item_id, bonus in special_users[user_id].items():
+            if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
+                weights[item_id] += bonus  
+
     # 生成候选列表（按照权重扩展）
     valid_items = [i for i in weights if weights[i] > 0]
     item_choices = [i for i in valid_items for _ in range(weights[i])]
@@ -754,8 +766,8 @@ async def shoot(stp, group_id, message,args):
         hp_max = demon_data.get(group_id, {}).get('hp_max')
         clip = load()
         for i in range(random.randint(1+pangguang_add,3+add_max)):
-            demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len))
-            demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len))
+            demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))
+            demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))
         # 检查并限制道具数量上限为max
         demon_data[group_id]['item_0'] = demon_data[group_id]['item_0'][:item_max]  # 截取前max个道具
         demon_data[group_id]['item_1'] = demon_data[group_id]['item_1'][:item_max]  # 截取前max个道具
@@ -1022,7 +1034,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     elif item_name == "欲望之盒":
         randchoice = random.randint(1, 10)
         if randchoice <= 5:
-            new_item = get_random_item(identity_found, len(item_dic) - idt_len)
+            new_item = get_random_item(identity_found, len(item_dic) - idt_len, user_id)
             player_items.append(new_item)
             new_item_name = item_dic[new_item]
             msg += f"你打开了欲望之盒，获得了道具：{new_item_name}\n"
@@ -1039,7 +1051,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += f"你打开了欲望之盒，对对面造成了一点伤害！\n对方目前剩余hp为：{demon_data[group_id]['hp'][opponent_turn]}\n"
 
     elif item_name == "无中生有":
-        new_items = [get_random_item(identity_found, len(item_dic) - idt_len) for _ in range(2)]
+        new_items = [get_random_item(identity_found, len(item_dic) - idt_len, user_id) for _ in range(2)]
         player_items.extend(new_items)  # 添加新道具
         new_items_names = [item_dic[item] for item in new_items]
         if demon_data[group_id]["hcf"] <= 0:
@@ -1105,8 +1117,8 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             # 重新获取hp_max
             hp_max = demon_data.get(group_id, {}).get('hp_max')
             for i in range(random.randint(1+pangguang_add,3+add_max)):
-                demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len))
-                demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len))
+                demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))
+                demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))
             # 检查并限制道具数量上限为max
             demon_data[group_id]['item_0'] = demon_data[group_id]['item_0'][:item_max]  # 截取前max个道具
             demon_data[group_id]['item_1'] = demon_data[group_id]['item_1'][:item_max]  # 截取前max个道具
@@ -1126,7 +1138,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     elif item_name == "刷新票":
         num_items = len(player_items)
         player_items.clear()
-        player_items.extend([get_random_item(identity_found, len(item_dic) - idt_len) for _ in range(num_items)])
+        player_items.extend([get_random_item(identity_found, len(item_dic) - idt_len, user_id) for _ in range(num_items)])
         new_items_names = [item_dic[item] for item in player_items]
         msg += f"你刷新了你的所有道具，新道具为：{', '.join(new_items_names)}\n"
 
@@ -1141,6 +1153,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         demon_data[group_id]["hp"][player_turn] = random_hp
         msg += "恶魔掷出骰子……骰子掷出了新的hp值：\n"
         msg += f"你的的 hp 已变更成：{random_hp}！\n"
+        
     elif item_name == "天秤":
         len_player_items = len(player_items)
         len_opponent_items = len(opponent_items)
@@ -1152,6 +1165,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             if demon_data[group_id]["hp"][player_turn] >= hp_max:
                 demon_data[group_id]["hp"][player_turn] = hp_max
             msg += f"天秤的指针开始转动…… 检测到你的道具数量为：{len_player_items}，对面的道具数量为：{len_opponent_items}；\n由于{len_player_items}<{len_opponent_items}，你回复一点体力（最高恢复至上限！）！\n你目前的hp为：{demon_data[group_id]['hp'][player_turn]}\n"  
+    
     elif item_name == "双转团":
         if len(opponent_items) < item_max:
             opponent_items.append(15)  # 只有在对方道具少于 max_item 个时才获得双转团
@@ -1168,6 +1182,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 #写入文件
                 save_data(full_path, user_data)
                 msg += f"\n你在丢双转团的时候，意外从这个东西身上看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果\n"
+    
     elif item_name == "休养生息":
         demon_data[group_id]["hp"][player_turn] += 2
         demon_data[group_id]["hp"][opponent_turn] += 1
@@ -1176,6 +1191,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         if demon_data[group_id]["hp"][opponent_turn] >= hp_max:
             demon_data[group_id]["hp"][opponent_turn] = hp_max
         msg += f"休养生息，备战待敌；止兵止战，休养生息。\n你恢复了2点体力，对方恢复了1点体力（最高恢复至上限）。\n\n你的体力为{demon_data[group_id]["hp"][player_turn]}/{hp_max}\n对方的体力为{demon_data[group_id]["hp"][opponent_turn]}/{hp_max}\n"
+    
     elif item_name == "玩具枪":
         randchoice = random.randint(1, 2)
         if randchoice == 1:
@@ -1183,6 +1199,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += f"你使用了玩具枪，可没想到里面居然是真弹！你对对面造成了一点伤害！\n对方目前剩余hp为：{demon_data[group_id]['hp'][opponent_turn]}\n"    
         else: 
             msg += f"你使用了玩具枪，这确实是一个可以滋水的玩具水枪，无事发生。\n"
+    
     elif item_name == "血刃":
         if demon_data[group_id]["hp"][player_turn] == 1:
             player_items.append(20)
@@ -1190,17 +1207,19 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         else:
             randchoice = random.randint(1, 5)
             demon_data[group_id]["hp"][player_turn] -= 1
-            new_items = [get_random_item(identity_found, len(item_dic) - idt_len) for _ in range(2)]
+            new_items = [get_random_item(identity_found, len(item_dic) - idt_len, user_id) for _ in range(2)]
             player_items.extend(new_items)  # 添加新道具
             new_items_names = [item_dic[item] for item in new_items]
             msg += f"你使用了血刃，献祭自己1盎司鲜血，祈祷，获得了道具：{', '.join(new_items_names)}\n你目前剩余hp为：{demon_data[group_id]['hp'][player_turn]}/{hp_max}\n"    
             if randchoice == 5:
                 msg += f"\n“血刃？你怎么会在这里？0猎的工资不够你用的吗，还跑过来再就业？”"
                 msg += f"\n“唉，工作困难啊……抓玛德琳我太没存在感了，总是被人遗忘，必须要出来再就业了。”\n"
+    
     elif item_name == "烈弓":
         demon_data[group_id]['atk'] += 1
         demon_data[group_id]['add_atk'] = True
         msg += f"你使用了烈弓，开始叠花色！烈弓解除了限制，并且伤害+1！现在酒和小刀的伤害可无限叠加！这颗子弹的攻击力可以无限叠加！目前这颗子弹的攻击力为{demon_data[group_id]['atk'] + 1}！\n"
+    
     elif item_name == "黑洞":
         if opponent_items:  # 对方有道具
             # 随机选择对方道具
@@ -1211,7 +1230,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             player_items.append(stolen_item_id)  # 抢夺道具
 
             msg += (f"你召唤出黑洞！\n"
-                    f"空间剧烈扭曲……\n"
+                    f"空间开始剧烈扭曲……\n"
                     f"对方的【{stolen_item_name}】被黑洞吞噬，送进你的背包！\n")
         else:
             # 如果对方没有道具，黑洞会重新回到玩家背包
@@ -1226,6 +1245,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             demon_data[group_id]["hp"][player_turn] = hp_max
         demon_data[group_id]['turn'] = (player_turn + 1) % len(demon_data[group_id]['pl'])
         msg += f"你吃下了金苹果，因为太美味了，hp回复3点！但是由于过于美味，接下来你要好好回味这种味道，将直接跳过两个回合！不过对方的手铐和禁止卡也不能用了……\n当前hp：{demon_data[group_id]['hp'][player_turn]}/{hp_max}\n"
+    
     elif item_name == "铂金草莓":
         demon_data[group_id]["hp"][player_turn] += 1
         hp_max += 1
@@ -1233,6 +1253,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         if demon_data[group_id]["hp"][player_turn] >= hp_max:
             demon_data[group_id]["hp"][player_turn] = hp_max
         msg += f"因为是铂金草莓，所以能做到。吃下铂金草莓后，你的hp回复1点，并且双方的hp上限均+1！要不要尝试去拿一个9dp？\n当前hp：{demon_data[group_id]['hp'][player_turn]}/{hp_max}\n当前hp上限：{hp_max}\n"        
+    
     elif item_name == "肾上腺素":
         # 检查血量上限是否为1
         if demon_data[group_id]["hp_max"] <= 1:
@@ -1240,7 +1261,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += "你想使用肾上腺素，但是血量上限已经过低，你无法承受这种后果！\n"
         else:
             # 增加使用者的道具
-            new_item = get_random_item(identity_found, len(item_dic) - idt_len)
+            new_item = get_random_item(identity_found, len(item_dic) - idt_len, user_id)
             player_items.append(new_item)
             new_item_name = item_dic[new_item]
             # 调整hp上限和道具上限
