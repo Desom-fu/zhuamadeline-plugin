@@ -362,7 +362,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         pvp_guess['ifguess'] = 1 # 1为已猜，0为未猜
         pvp_guess['pos'] = pos
         pvp_guess['choose_rank'] = choose_rank
-        pvp_guess['choose_turn'] = choose_turn
+        pvp_guess['choose_turn'] = pvp_choose[5] # 不能用choose_turn
         pvp_guess['choose_nickname'] = choose_nickname
         # 上轮猜测清零
         bar_data[user_id]['last_pvp_guess_berry'] = 0
