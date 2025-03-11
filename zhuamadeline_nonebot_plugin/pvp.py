@@ -134,6 +134,8 @@ def pvp_guess_end():
     pvp_data = open_data(pvp_path)  # 读取 pvp 数据
     bar_data = open_data(bar_path)  # 读取 bar 数据（包含 pvp_guess）
     turn = pvp_data.get('count', 100)  # 获取当前轮数
+    back_text = False
+    text = ''
 
     for key, value in bar_data.items():
         if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess",{}).get("ifguess",0) == 1:
@@ -141,6 +143,7 @@ def pvp_guess_end():
             value.setdefault('bank', 0)
             pos = value["pvp_guess"].get("pos", -1)
             if 0 <= pos <= 9:  # 只处理 pos 在 0~9 之间的
+                back_text = True # 只有有人还在竞猜中才会被踢下去
                 choose_rank = value["pvp_guess"]["choose_rank"]
                 choose_turn = value["pvp_guess"]["choose_turn"]
 
@@ -164,8 +167,9 @@ def pvp_guess_end():
 
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
-
-    text = "本轮Madeline竞技场已结束，已经向对应竞猜的玩家发放对应的草莓，详情请输入 `.ck all` 查看。"
+    if back_text:
+        text = "\n\n本轮Madeline竞技场已结束，已经向对应竞猜的玩家发放对应的草莓，详情请输入 `.ck all` 查看。"
+        
     return text
 
     
@@ -672,7 +676,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         for v in set_final:
             text += MessageSegment.at(v)
             user_data[v]['berry'] += total
-        text += f"在这场角逐中取得胜利,全员获得{reward}+{timeReward}={total}草莓奖励！\n\n"
+        text += f"在这场角逐中取得胜利,全员获得{reward}+{timeReward}={total}草莓奖励！"
         pvp_data.clear()
         timestamp3 = int(time.time())
         guess_end_text = pvp_guess_end()
@@ -856,7 +860,7 @@ async def check_pvp_end_job():
         pvp_data.clear()
 
         # 发送奖励公告消息
-        text += f"\n22：00了，时间太晚了，madeline竞技场已经关闭，本局游戏强制结束！\n擂台上的玩家将获得{reward}+{timeReward}={total_reward}草莓的奖励，明天见哦！\n（＾∀＾●）ﾉｼ\n\n"
+        text += f"\n22：00了，时间太晚了，madeline竞技场已经关闭，本局游戏强制结束！\n擂台上的玩家将获得{reward}+{timeReward}={total_reward}草莓的奖励，明天见哦！\n（＾∀＾●）ﾉｼ"
         await bot.send_group_msg(group_id=group_id, message=text+guess_end_text)
 
         # 保存清空后的 PVP 数据和用户数据
