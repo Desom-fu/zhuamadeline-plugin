@@ -11,8 +11,8 @@ import math
 import time
 from pathlib import Path
 #加载商店信息和商店交互
-from .shop import item, today_item, forbid_recycle_item, fish_prices
-from .collection import collections
+from .shop import item, today_item, forbid_recycle_item, fish_prices, item_aliases
+from .collection import collections, collection_aliases
 import json
 #加载读取系统时间相关
 import datetime
@@ -131,8 +131,8 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 解析购买参数
     args = str(arg).strip().lower().split()
 
-    if len(args) == 1:  
-        buy_item_name = args[0]  
+    if len(args) == 1:
+        buy_item_name = args[0]
         n = 1  # 默认为 1
     elif len(args) == 2:
         buy_item_name = args[0]
@@ -142,9 +142,20 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                 await buy.finish("购买数量必须大于 0 哦~", at_sender=True)
         except ValueError:
             await buy.finish("请输入正确的道具数量哦~", at_sender=True)
-    else:    
+    else:
         await buy.finish("请检查购买指令或购买道具/藏品名称是否正确，正确指令为 .buy 道具|藏品 数量~", at_sender=True)
-    
+
+    # 处理别名转换
+    standard_item = get_alias_name(buy_item_name, item, item_aliases)
+    standard_collection = get_alias_name(buy_item_name, collections, collection_aliases)
+
+    # 如果匹配到道具或藏品的标准名称，就替换
+    if standard_item:
+        buy_item_name = standard_item
+    elif standard_collection:
+        buy_item_name = standard_collection
+
+    # 检查是否是今日商品
     if buy_item_name not in today_item:
         await buy.finish("请检查购买道具/藏品名称是否正确哦~", at_sender=True)
 
@@ -239,15 +250,31 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 recycle_item = on_command("recycle", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @recycle_item.handle()
 async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandArg()):
+    user_id = str(event.user_id)
     # 解析参数
-    args = str(arg).split(" ")
-    if len(args) not in [1,2]:
+    args = str(arg).strip().lower().split()
+    
+    if len(args) not in [1, 2]:
         await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量)", at_sender=True)
-    # 获取道具名称和数量
-    item_name = args[0]
-    if item_name == "":
+    
+    # 获取道具名称
+    item_name = args[0].strip()
+    
+    if not item_name:  # 防止用户输入空格导致 item_name 为空
         await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量)", at_sender=True)
-    item_quantity = 1  # 默认数量为1
+    
+    # 进行别名转换
+    standard_item = get_alias_name(item_name, item, item_aliases)
+    standard_collection = get_alias_name(item_name, collections, collection_aliases)
+    
+    # 如果匹配到道具或藏品的标准名称，就替换
+    if standard_item:
+        item_name = standard_item
+    elif standard_collection:
+        item_name = standard_collection
+    
+    # 获取数量（默认 1）
+    item_quantity = 1
     if len(args) == 2:
         try:
             item_quantity = int(args[1])
@@ -255,14 +282,13 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
                 raise ValueError
         except ValueError:
             await recycle_item.finish("道具数量必须为正整数！", at_sender=True)
-    user_id = str(event.user_id)
     # 检测道具名称是否在商品列表中
     if item_name not in item:
         await recycle_item.finish(f"现在整个抓玛德琳都没有这个道具 [{item_name}]，你为什么会想回收呢？", at_sender=True)
     # 检测道具名称是否在黑名单中
     if item_name in forbid_recycle_item:
         await recycle_item.finish(f"[{item_name}] 在道具回收黑名单中，你不能回收该道具哦！", at_sender=True)
-    # 打开据文件
+    # 打开数据文件
     data = {}
     if not (user_path / file_name).exists():
         await recycle_item.finish("玩家数据文件不存在！", at_sender=True)

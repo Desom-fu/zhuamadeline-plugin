@@ -49,7 +49,8 @@ __all__ = [
     "get_sorted_madelines",
     "madelinejd",
     'get_user_data',
-    'emoji_like'
+    'emoji_like',
+    'get_alias_name'
 ]
 
 #madeline图鉴
@@ -258,6 +259,16 @@ def madelinejd(user_id, target_level=None, nickname=None):
 
 
 #------------其他指令----------------
+# 辅助函数：获取标准名称
+def get_alias_name(name, item_dict, alias_dict):
+    """获取物品的标准名称"""
+    if name in item_dict:
+        return name  # 直接返回已有的标准名
+    for key, aliases in alias_dict.items():
+        if name in aliases:
+            return key  # 找到匹配的标准名称
+    return None  # 没找到
+
 # 获取用户数据的方法，避免重复的 try-except
 def get_user_data(user_data, user_id, key, default='normal'):
     return user_data.get(str(user_id), {}).get(key, default)

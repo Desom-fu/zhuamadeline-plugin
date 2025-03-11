@@ -9,16 +9,15 @@ import datetime
 import os
 import time
 from pathlib import Path
-from .function import find_madeline, get_sorted_madelines, get_madeline_data, madelinejd, save_data, open_data
+from .function import find_madeline, get_sorted_madelines, get_madeline_data, madelinejd, save_data, open_data, get_alias_name
 from .render import *
 import psutil
 import random
 import platform
 from .madelinejd import display_liechang_inventory, display_all_liechang_inventory
 from .config import zhuama_group
-
-from .shop import item
-from .collection import collections
+from .shop import item, item_aliases
+from .collection import collections, collection_aliases
 from .list1 import *
 from .list2 import *
 from .list3 import *
@@ -678,6 +677,10 @@ async def handle_fafang_item(event: GroupMessageEvent, arg: Message = CommandArg
     except ValueError:
         await fafang_item.finish("数量必须为正整数！", at_sender=True)
         return
+    # 检测别名
+    standard_item = get_alias_name(item_name, item, item_aliases)
+    if standard_item:
+        item_name = standard_item
     # 检查道具名称是否在商品列表中
     if item_name not in item:
         await fafang_item.finish(f"道具 [{item_name}] 不存在，请检查后重新输入！", at_sender=True)
@@ -736,6 +739,10 @@ async def handle_deduct_item(event: GroupMessageEvent, arg: Message = CommandArg
     if user_id not in data:
         await deduct_item.finish(f"[{user_id}] 未注册zhuamadeline账号！", at_sender=True)
         return
+    # 检测别名
+    standard_item = get_alias_name(item_name, item, item_aliases)
+    if standard_item:
+        item_name = standard_item
     # 检查玩家是否有道具栏
     if "item" not in data[user_id] or item_name not in data[user_id]["item"]:
         await deduct_item.finish(f"该玩家没有道具 [{item_name}]！", at_sender=True)
@@ -776,6 +783,11 @@ async def handle_fafang_item_global(event: GroupMessageEvent, arg: Message = Com
         await fafang_item_global.finish("数量必须为正整数！", at_sender=True)
         return
     
+    # 检测别名
+    standard_item = get_alias_name(item_name, item, item_aliases)
+    if standard_item:
+        item_name = standard_item
+        
     # 检查道具是否存在
     if item_name not in item:
         await fafang_item_global.finish(f"道具 [{item_name}] 不存在，请检查后重新输入！", at_sender=True)
@@ -822,6 +834,11 @@ async def handle_deduct_item_global(event: GroupMessageEvent, arg: Message = Com
         await deduct_item_global.finish("数量必须为正整数！", at_sender=True)
         return
     
+    # 检测别名
+    standard_item = get_alias_name(item_name, item, item_aliases)
+    if standard_item:
+        item_name = standard_item
+            
     # 检查道具是否存在
     if item_name not in item:
         await deduct_item_global.finish(f"道具 [{item_name}] 不存在，请检查后重新输入！", at_sender=True)
@@ -863,6 +880,11 @@ async def handle_change_all_items(event: GroupMessageEvent, arg: Message = Comma
     
     old_item, new_item = args
     
+    # 检测别名
+    standard_item = get_alias_name(new_item, item, item_aliases)
+    if standard_item:
+        new_item = standard_item
+        
     # 检查新道具是否存在
     if new_item not in item:
         await change_all_items.finish(f"道具 [{new_item}] 不存在，请检查后重新输入！", at_sender=True)
@@ -904,6 +926,11 @@ async def handle_change_user_item(bot: Bot, event: GroupMessageEvent, arg: Messa
         nickname = user_info.get("nickname", "未知昵称")
     except Exception:
         await query_items.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
+    
+    # 检测别名
+    standard_item = get_alias_name(new_item, item, item_aliases)
+    if standard_item:
+        new_item = standard_item
         
     # 检查新道具是否存在
     if new_item not in item:
@@ -1003,6 +1030,12 @@ async def handle_fafang_cangpin(event: GroupMessageEvent, arg: Message = Command
         await fafang_cangpin.finish("格式错误！请输入：.发放藏品 QQ号 藏品名称", at_sender=True)
         return
     user_id, item_name, item_quantity = args[0], args[1], 1
+    
+    # 检测别名
+    standard_collections = get_alias_name(item_name, collections, item_aliases)
+    if standard_collections:
+        item_name = standard_collections
+        
     # 检查藏品名称是否在商品列表中
     if item_name not in collections:
         await fafang_cangpin.finish(f"藏品 [{item_name}] 不存在，请检查后重新输入！", at_sender=True)
@@ -1057,6 +1090,12 @@ async def handle_deduct_cangpin(event: GroupMessageEvent, arg: Message = Command
     if user_id not in data:
         await deduct_cangpin.finish(f"[{user_id}] 未注册zhuamadeline账号！", at_sender=True)
         return
+    
+    # 检测别名
+    standard_collections = get_alias_name(item_name, collections, item_aliases)
+    if standard_collections:
+        item_name = standard_collections
+        
     # 检查玩家是否有藏品栏
     if "collections" not in data[user_id] or item_name not in data[user_id]["collections"]:
         await deduct_cangpin.finish(f"该玩家没有藏品 [{item_name}]！", at_sender=True)
