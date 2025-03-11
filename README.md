@@ -3,3 +3,5 @@
 
 本项目是基于zhuakid插件的二次魔改
 原项目地址：https://github.com/higer67/zhuakid-plugin
+原项目作者1：Higer67
+原项目作者2：Kairos流枫
