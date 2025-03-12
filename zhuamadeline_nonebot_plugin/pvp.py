@@ -175,7 +175,8 @@ def pvp_guess_end():
                 value["pvp_guess"]["ifguess"] = 0
                 value['bank'] += final_berry_reward
                 value['last_pvp_guess_berry'] = final_berry_reward
-                # 不管在不在0~9都改为0
+            else:
+                # 结束了竞猜的也改成0
                 value["pvp_guess"]["ifguess"] = 0
 
     # 保存数据
