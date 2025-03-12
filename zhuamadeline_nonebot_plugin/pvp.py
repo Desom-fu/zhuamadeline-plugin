@@ -115,10 +115,9 @@ def pvp_guess(pos):
                     choose_turn = 10
             
                 # 计算奖励
-                berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.15)
-                new_berry_reward = (berry_reward * 4) // 3  # 向下取整
-                tax = (new_berry_reward * 25) // 100  # 计算 25%
-                final_berry_reward = new_berry_reward - tax  # 确保最终值不变
+                berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.2)
+                tax = (berry_reward * 25) // 100  # 计算 25%
+                final_berry_reward = berry_reward - tax  # 确保最终值不变
 
                 # 加入奖池
                 bar_data["pots"] += tax
@@ -129,7 +128,7 @@ def pvp_guess(pos):
                 value["pvp_guess"]["choose_nickname"] = "暂无数据"
                 value['last_pvp_guess_berry'] = final_berry_reward
                 value['bank'] += final_berry_reward
-                text = f'竞猜本擂台的奖励已发放，发放了{new_berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！竞猜本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
+                text = f'竞猜本擂台的奖励已发放，发放了{berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！竞猜本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
 
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
@@ -160,10 +159,9 @@ def pvp_guess_end():
                     choose_turn = 10
 
                 # 计算奖励
-                berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.15)
-                new_berry_reward = (berry_reward * 4) // 3  # 向下取整
-                tax = (new_berry_reward * 25) // 100  # 计算 25%
-                final_berry_reward = new_berry_reward - tax  # 确保最终值不变
+                berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.2)
+                tax = (berry_reward * 25) // 100  # 计算 25%
+                final_berry_reward = berry_reward - tax  # 确保最终值不变
                 
                 # 加入奖池
                 bar_data["pots"] += tax
