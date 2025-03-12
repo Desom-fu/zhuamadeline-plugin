@@ -40,6 +40,7 @@ async def ticket_handle(event: GroupMessageEvent):
 
     #打开文件
     data = open_data(full_path)
+    bar_data = open_data(bar_path)
 
     user_id = str(event.get_user_id())
     group_id = str(event.group_id)
@@ -60,7 +61,6 @@ async def ticket_handle(event: GroupMessageEvent):
     #判断是否有强制次数随机
     if(not 'compulsion_count' in data[str(user_id)]):
         data[str(user_id)]['compulsion_count'] = 0
-        
     if(str(user_id) in data):
         if(data[str(user_id)]['event']!='nothing'):
             if data[str(user_id)]['event']!='compulsion_ggl':
@@ -76,11 +76,19 @@ async def ticket_handle(event: GroupMessageEvent):
         if(data[str(user_id)]['berry'] >= 0):
             berry = 50
             rnd = random.randint(1,100)
-            if(rnd <= 4): berry = 600
-            if(rnd > 5 and rnd <= 15): berry = 300
-            if(rnd > 15 and rnd <= 35): berry = 175
-            if(rnd > 35 and rnd <= 75): berry = 75
-            if(rnd > 75 and rnd <= 100): berry = 50
+            if rnd <= 4:
+                berry = 800
+            elif rnd > 5 and rnd <= 15:
+                berry = 400
+            elif rnd > 15 and rnd <= 35:
+                berry = 233
+            elif rnd > 35 and rnd <= 75:
+                berry = 100
+            elif rnd > 75 and rnd <= 100:
+                berry = 66
+
+            tax = berry * 25 // 100  # 计算 25%
+            berry_real = berry - tax  # 减去 25%
 
             #特别的对于藏品的判定
             if (rnd == 5):
@@ -99,9 +107,12 @@ async def ticket_handle(event: GroupMessageEvent):
                 #否则正常获得600草莓
                 else:
                     berry = 600
-            data[str(user_id)]['berry'] += (berry - 150)
-            
-            msg = f"本次刮刮乐你获得{str(berry)}草莓"
+            data[str(user_id)]['berry'] += (berry_real - 150)
+            # 初始化pots
+            bar_data.setdefault("pots", 0)
+            # 加入奖池
+            bar_data["pots"] += tax
+            msg = f"本次刮刮乐你获得{berry}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
             if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
                 data[str(user_id)]['compulsion_count'] -= 1
                 if data[str(user_id)]['compulsion_count']!= 0:
@@ -121,6 +132,7 @@ async def ticket_handle(event: GroupMessageEvent):
                     msg += f"\n\n哇！你似乎在负债过程中还得强制刮刮乐啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
             #写入文件
             save_data(user_path / file_name, data)
+            save_data(bar_path, bar_data)
 
             await ticket.finish(msg, at_sender=True)
         else:

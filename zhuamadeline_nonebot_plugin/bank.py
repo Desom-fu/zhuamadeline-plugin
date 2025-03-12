@@ -40,8 +40,8 @@ async def add_interest():
     bot = list(bots.values())[0]  # 获取第一个 Bot 实例
     bar_data = open_data(bar_path)
     pots = bar_data.setdefault("pots", 0)
-    pots_send = bar_data.setdefault("pots_send", False)
-    if pots_send:
+    interest_send = bar_data.setdefault("interest_send", False)
+    if interest_send:
         return
     for user_id, user_bar in bar_data.items():
         if user_id.isdigit() and isinstance(user_bar, dict):  # 跳过非用户数据（如 "pots"）
@@ -57,8 +57,8 @@ async def add_interest():
                 user_bar["interest"] += interest  # 记录总利息
                 user_bar["bank"] += interest  # 利息加到银行存款中
     # 加上底池
-    bar_data["pots"] = pots
-    bar_data["pots_send"] = True
+    bar_data["pots"] += pots
+    bar_data["interest_send"] = True
     save_data(bar_path, bar_data)
     # 发送通知
     await bot.send_group_msg(
@@ -69,8 +69,8 @@ async def add_interest():
 #取消
 def cancel_interest_send():
     bar_data = open_data(bar_path)
-    pots_send = bar_data.setdefault("pots_send", False)
-    bar_data["pots_send"] = False
+    bar_data.setdefault("interest_send", False)
+    bar_data["interest_send"] = False
     save_data(bar_path, bar_data)
 
 scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)

@@ -100,6 +100,8 @@ def pvp_guess(pos):
     bar_data = open_data(bar_path)  # 读取 bar 数据（包含 pvp_guess）
     turn = pvp_data.get('count', 100)  # 获取当前轮数
     text = None
+    # 初始化pots
+    bar_data.setdefault("pots", 0)
 
     for key, value in bar_data.items():
         if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess",{}).get("ifguess",0) == 1:
@@ -114,15 +116,20 @@ def pvp_guess(pos):
             
                 # 计算奖励
                 berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.15)
+                new_berry_reward = (berry_reward * 4) // 3  # 向下取整
+                tax = (new_berry_reward * 25) // 100  # 计算 25%
+                final_berry_reward = new_berry_reward - tax  # 确保最终值不变
 
+                # 加入奖池
+                bar_data["pots"] += tax
                 # 重置 pvp_guess 数据（但不修改 ifguess）
                 value["pvp_guess"]["pos"] = -1
                 value["pvp_guess"]["choose_rank"] = -1
                 value["pvp_guess"]["choose_turn"] = -1
                 value["pvp_guess"]["choose_nickname"] = "暂无数据"
-                value['last_pvp_guess_berry'] = berry_reward
-                value['bank'] += berry_reward
-                text = f'竞猜本擂台的奖励已发放，发放了{berry_reward}颗草莓！竞猜本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
+                value['last_pvp_guess_berry'] = final_berry_reward
+                value['bank'] += final_berry_reward
+                text = f'竞猜本擂台的奖励已发放，发放了{berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！竞猜本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
 
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
@@ -136,7 +143,9 @@ def pvp_guess_end():
     turn = pvp_data.get('count', 100)  # 获取当前轮数
     back_text = False
     text = ''
-
+    # 初始化pots
+    bar_data.setdefault("pots", 0)
+    
     for key, value in bar_data.items():
         if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess",{}).get("ifguess",0) == 1:
             # 初始化 bank，如果不存在则设置为 0
@@ -152,23 +161,27 @@ def pvp_guess_end():
 
                 # 计算奖励
                 berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.15)
+                new_berry_reward = (berry_reward * 4) // 3  # 向下取整
+                tax = (new_berry_reward * 25) // 100  # 计算 25%
+                final_berry_reward = new_berry_reward - tax  # 确保最终值不变
                 
+                # 加入奖池
+                bar_data["pots"] += tax
                 # 重置 pvp_guess 数据
                 value["pvp_guess"]["pos"] = -1
                 value["pvp_guess"]["choose_rank"] = -1
                 value["pvp_guess"]["choose_turn"] = -1
                 value["pvp_guess"]["choose_nickname"] = "暂无数据"
                 value["pvp_guess"]["ifguess"] = 0
-                value['bank'] += berry_reward
-                value['last_pvp_guess_berry'] = berry_reward
-            else:
+                value['bank'] += final_berry_reward
+                value['last_pvp_guess_berry'] = final_berry_reward
                 # 不管在不在0~9都改为0
                 value["pvp_guess"]["ifguess"] = 0
 
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
     if back_text:
-        text = "\n\n本轮Madeline竞技场已结束，已经向对应竞猜的玩家发放对应的草莓，详情请输入 `.ck all` 查看。"
+        text = "\n\n本轮Madeline竞技场已结束，已经向对应竞猜的玩家发放对应的税后草莓，详情请输入 `.ck all` 查看。"
         
     return text
 
@@ -778,7 +791,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
         has_bet = "否"
         for key, value in bar_data.items():
             if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess", {}).get("ifguess", 0) == 1:
-                if value["pvp_guess"]["pos"] == i:  # 判断是否对应当前擂台
+                if value["pvp_guess"]["pos"] == i-1:  # 判断是否对应当前擂台
                     has_bet = "是"
                     break  # 只要找到一个人下注，就可以退出循环
 
