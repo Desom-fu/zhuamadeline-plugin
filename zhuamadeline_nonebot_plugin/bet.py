@@ -284,6 +284,9 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             # 随机生成道具并分配给两位玩家
             player0 = str(demon_data[group_id]['pl'][0])
             player1 = str(demon_data[group_id]['pl'][1])
+            # 跑团状态指定第一个玩家先手，全局变量可随便改
+            if player0 == kp_pl:
+                demon_data[group_id]['turn'] = 0
             for i in range(random.randint(1 + add_max//2 + pangguang_add//2, 4 + add_max//2)):
                 demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))  # 玩家1的道具
                 demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))  # 玩家2的道具
@@ -619,6 +622,9 @@ turn_limit = {
     2: 1,    # "膀胱模式" 开启的轮数限制
     999: 1    # "跑团专用999模式" 开启的轮数限制
 }
+
+# 设定kp必定先手
+kp_pl = 1004643806
 
 # 定义道具效果的字典
 item_effects = {
