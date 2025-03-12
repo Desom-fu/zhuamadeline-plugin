@@ -669,7 +669,8 @@ final_jiangli = jiangli - bet_tax
 #特殊user_id增加bet2权重（为跑团而生的一个东西（（（）
 special_users = {
     '123456': {19: 1000, 21: 3},
-    '789101': {22: 4}
+    '789101': {22: 4},
+    '121096913': {17: 5}
 }
 
 # 定义权重表
@@ -687,18 +688,24 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
         # 普通模式：前 normal_mode_limit 个道具权重设为1，其他保持0
         for i in range(1, normal_mode_limit + 1):
             weights[i] = 1
-    else:
+    elif identity_found in [1,2]:
         # 身份模式：所有道具启用，部分稀有道具权重设为2
         for i in range(1, item_count + 1):
             weights[i] = 1
         for i in identity_mode_items:
             weights[i] = 2  # 增加稀有道具的出现概率
-
-    # 特殊用户指定道具加成
-    if user_id in special_users:
-        for item_id, bonus in special_users[user_id].items():
-            if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
-                weights[item_id] += bonus  
+    elif identity_found == 999:
+        # 特殊用户指定道具加成（暂时设定跑团模式才起作用）
+        if user_id in special_users:
+            for item_id, bonus in special_users[user_id].items():
+                if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
+                    weights[item_id] += bonus
+    
+    # # 特殊用户指定道具加成
+    # if user_id in special_users:
+    #     for item_id, bonus in special_users[user_id].items():
+    #         if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
+    #             weights[item_id] += bonus  
 
     # 生成候选列表（按照权重扩展）
     valid_items = [i for i in weights if weights[i] > 0]
