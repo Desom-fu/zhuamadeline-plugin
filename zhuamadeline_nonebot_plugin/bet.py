@@ -261,7 +261,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             if identity_found == 1:
                 add_max = 2
                 idt_len = 0
-            elif identity_found == 2:
+            elif identity_found in [2,999]:
                 add_max = 2
                 pangguang_add = 2
                 idt_len = 0
@@ -298,7 +298,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             msg += "- 本局模式："
             if identity_found == 1:
                 msg += "身份模式\n\n"
-            elif identity_found == 2:
+            elif identity_found in [2,999]:
                 msg += "急速模式\n\n"
             else:
                 msg += "正常模式\n\n"
@@ -616,7 +616,8 @@ death_turn = 12
 # 定义不同状态对应的轮数限制
 turn_limit = {
     1: death_turn,  # "死斗模式" 开启的轮数限制
-    2: 1    # "膀胱模式" 开启的轮数限制
+    2: 1,    # "膀胱模式" 开启的轮数限制
+    999: 1    # "跑团专用999模式" 开启的轮数限制
 }
 
 # 定义道具效果的字典
@@ -735,7 +736,7 @@ async def shoot(stp, group_id, message,args):
     if identity_found == 1:
         idt_len = 0
         add_max += 1
-    elif identity_found == 2:
+    elif identity_found in [2,999]:
         idt_len = 0
         add_max += 1
         pangguang_add += 2
@@ -764,18 +765,30 @@ async def shoot(stp, group_id, message,args):
         demon_data[group_id]['game_turn'] += 1
         # 判断是否开启死斗模式：根据不同的状态和轮数进行血量上限扣减
         if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
-            
-            if demon_data[group_id]["hp_max"] > 1:
+            msg += f'- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
+            if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
                 demon_data[group_id]["hp_max"] -= 1
                 new_hp_max = demon_data[group_id]["hp_max"]
                 msg += f'- {new_hp_max+1}>1，扣1点hp上限，当前hp上限：{new_hp_max}\n'
-                
                 # 校准所有玩家血量不得超过hp上限
                 for player_index, player_id in enumerate(demon_data[group_id]['pl']):
                     current_hp = demon_data[group_id]["hp"][player_index]
                     if current_hp > new_hp_max:
                         demon_data[group_id]["hp"][player_index] = new_hp_max
-
+                        
+            # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
+            elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
+                old_hp_max = demon_data[group_id]["hp_max"]
+                demon_data[group_id]["hp_max"] -= 2
+                if demon_data[group_id]["hp_max"] <= 1:
+                    demon_data[group_id]["hp_max"] = 1
+                new_hp_max = demon_data[group_id]["hp_max"]
+                msg += f'- {old_hp_max}>1，扣2点hp上限，当前hp上限：{new_hp_max}\n'
+                # 校准所有玩家血量不得超过hp上限
+                for player_index, player_id in enumerate(demon_data[group_id]['pl']):
+                    current_hp = demon_data[group_id]["hp"][player_index]
+                    if current_hp > new_hp_max:
+                        demon_data[group_id]["hp"][player_index] = new_hp_max
 
         msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n\n'
         # 重新获取hp_max
@@ -978,7 +991,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     if identity_found == 1:
         idt_len = 0
         add_max += 1
-    elif identity_found == 2:
+    elif identity_found in [2,999]:
         idt_len = 0
         add_max += 1
         pangguang_add += 2
@@ -1121,10 +1134,24 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
                 msg += f'- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
 
-                if demon_data[group_id]["hp_max"] > 1:
+                if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
                     demon_data[group_id]["hp_max"] -= 1
                     new_hp_max = demon_data[group_id]["hp_max"]
                     msg += f'- {new_hp_max+1}>1，扣1点hp上限，当前hp上限：{new_hp_max}\n'
+
+                    # 校准所有玩家血量不得超过hp上限
+                    for player_index, player_id in enumerate(demon_data[group_id]['pl']):
+                        current_hp = demon_data[group_id]["hp"][player_index]
+                        if current_hp > new_hp_max:
+                            demon_data[group_id]["hp"][player_index] = new_hp_max
+                # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
+                elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
+                    old_hp_max = demon_data[group_id]["hp_max"]
+                    demon_data[group_id]["hp_max"] -= 2
+                    if demon_data[group_id]["hp_max"] <= 1:
+                        demon_data[group_id]["hp_max"] = 1
+                    new_hp_max = demon_data[group_id]["hp_max"]
+                    msg += f'- {old_hp_max}>1，扣2点hp上限，当前hp上限：{new_hp_max}\n'
 
                     # 校准所有玩家血量不得超过hp上限
                     for player_index, player_id in enumerate(demon_data[group_id]['pl']):
@@ -1441,7 +1468,7 @@ async def check_handle(event: GroupMessageEvent):
         if demon_data[group_id]['game_turn'] > death_turn:
             msg += '（死斗）'
         msg += "身份模式\n"
-    elif identity_found == 2:
+    elif identity_found in [2,999]:
         # 1轮以后死斗模式显示
         if demon_data[group_id]['game_turn'] > 1:
             msg += '（死斗）'
