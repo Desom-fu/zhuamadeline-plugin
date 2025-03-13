@@ -1554,3 +1554,38 @@ async def coolclear_handle(bot:Bot, event: GroupMessageEvent, arg: Message = Com
     data[str(user_id)]['coolclear'] = new_status
     save_data(full_path ,data)
     await coolclear.finish('玩家'+MessageSegment.at(user_id) + f"已经成功切换至{status_text}", at_sender=True)
+
+#全服补偿发放草莓
+fafang_buchang = on_command("全服补偿发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@fafang_buchang.handle()
+async def fafang_buchang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    #判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    #解析参数
+    jiangli = int(str(arg))
+    if(jiangli <= 0):
+        return
+    
+    #打开文件
+    data = {}
+    data = open_data(user_path/file_name)
+
+    current_time = datetime.datetime.now()
+    threshold_time = datetime.datetime(2025, 3, 14, 0, 0, 0)  # 设定时间阈值
+
+    for user_id, user_data in data.items():
+        if isinstance(user_data, dict):
+            # 获取 work_end_time，如果没有则默认设定为 "1900-01-01 00:00:00"
+            work_end_time_str = user_data.setdefault('work_end_time', "1900-01-01 00:00:00")
+            work_end_time = datetime.datetime.strptime(work_end_time_str, "%Y-%m-%d %H:%M:%S")
+
+            # 只有 work_end_time 小于 2025-03-14 00:00:00 的用户才发奖励
+            if work_end_time < threshold_time:
+                user_data['berry'] = user_data.get('berry', 0) + jiangli  # 给用户增加奖励
+
+    #写入文件
+    save_data(user_path / file_name, data)
+    
+    await fafang_buchang.finish(f"已向全服果酱加工结束时间于2025-03-14前发放了{jiangli}颗草莓。", at_sender=True)
