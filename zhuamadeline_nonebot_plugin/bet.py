@@ -423,6 +423,8 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         user_double_ball["ticket_cost"] = ticket_cost
         user_double_ball["red_points"] = int(red_points)
         user_double_ball["blue_points"] = int(blue_points)
+        user_double_ball["ball_prize"] = 0
+        user_double_ball["refund"] = 0
         user_double_ball["ifplay"] = 1
     
         await bet.finish(f"你已成功参与双球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}", at_sender=True)
@@ -1727,7 +1729,7 @@ async def check_all_games():
         if isinstance(group_id, str) and group_id.isdigit():
             await check_timeout(group_id)
 
-# 游戏4，双色球开奖
+# 游戏4，双球竞猜
 def reward_percentage(pool: int) -> int:
     """根据奖池金额计算中奖奖励比例（整数百分比）"""
     if pool <= 1000:
@@ -1829,7 +1831,7 @@ async def double_ball_lottery():
             bar_data[str(winner)]["bank"] += reward_per_winner
             bar_data[str(winner)]["double_ball"]["prize"] = reward_per_winner
             msg_list.append(MessageSegment.at(winner))  # @中奖者
-        msg_list.append(f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！")
+        msg_list.append(f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all查看`")
 
     else:
         msg_list.append("很遗憾，本次无人中奖！")
