@@ -666,11 +666,13 @@ jiangli = 466
 bet_tax = (jiangli * 25) // 100  # 向下取整计算 25%
 final_jiangli = jiangli - bet_tax
 
+# 全局变量——事件（单位s）
+turn_time = 600
+
 #特殊user_id增加bet2权重（为跑团而生的一个东西（（（）
 special_users = {
     '123456': {19: 1000, 21: 3},
-    '789101': {22: 4},
-    '121096913': {17: 5}
+    '789101': {22: 4}
 }
 
 # 定义权重表
@@ -694,18 +696,12 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
             weights[i] = 1
         for i in identity_mode_items:
             weights[i] = 2  # 增加稀有道具的出现概率
-    elif identity_found == 999:
-        # 特殊用户指定道具加成（暂时设定跑团模式才起作用）
-        if user_id in special_users:
-            for item_id, bonus in special_users[user_id].items():
-                if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
-                    weights[item_id] += bonus
     
-    # # 特殊用户指定道具加成
-    # if user_id in special_users:
-    #     for item_id, bonus in special_users[user_id].items():
-    #         if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
-    #             weights[item_id] += bonus  
+    # 特殊用户指定道具加成
+    if user_id in special_users:
+        for item_id, bonus in special_users[user_id].items():
+            if 1 <= item_id <= len(item_dic):  # 确保道具ID合法
+                weights[item_id] += bonus  
 
     # 生成候选列表（按照权重扩展）
     valid_items = [i for i in weights if weights[i] > 0]
@@ -1472,7 +1468,7 @@ async def check_handle(event: GroupMessageEvent):
     identity_found = demon_data[group_id]['identity']
     # 步时信息
     elapsed = int(time.time()) - demon_data[group_id]['turn_start_time']
-    remaining_seconds = 600 - elapsed# 计算剩余冷却时间
+    remaining_seconds = turn_time - elapsed # 计算剩余冷却时间, 全局变量，设定时间（秒）
     remaining_minutes = remaining_seconds // 60  # 剩余分钟数
     remaining_seconds = remaining_seconds % 60  # 剩余秒数
     msg = "- 本局模式："
@@ -1631,7 +1627,7 @@ async def check_timeout(group_id):
     if group_id not in demon_data:
         demon_data[group_id] = demon_default
     elapsed = int(time.time()) - demon_data[group_id]['turn_start_time']
-    if elapsed > 600:  # 10分钟
+    if elapsed > turn_time:  # 全局变量，设定时间（秒）
         # 判断游戏是否开始
         if demon_data[group_id]['start']:
             # 获取双方玩家
