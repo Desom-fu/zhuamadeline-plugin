@@ -90,14 +90,5 @@ async def update_cooldown(event: Event):
             logger.info("这条消息添加冷却")
             user_id = str(event.get_user_id())
             group_id = str(event.group_id)
-            now_time = time.time()
-            cd_data = open_data(cd_path)
-            if user_id not in cd_data:
-                cd_data[user_id] = {}
-            if group_id not in cd_data:
-                cd_data['group']= {}
-                cd_data['group'][group_id] = {}
-            cd_data[user_id]["coldtime"] = now_time
-            cd_data['group'][group_id]["coldtime"] = now_time
-            save_data(cd_path, cd_data)
+            all_cool_time(cd_path, user_id, group_id)
 

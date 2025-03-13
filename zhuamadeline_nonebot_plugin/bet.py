@@ -81,6 +81,16 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "注意1：每局Madeline竞技场只能使用竞猜一次！\n" +
             "注意2：不能对在场超过5回合的玛德琳下注"
         )
+    elif game_type == '4':
+        await rule.finish(
+            "“游戏”4：双球竞猜\n" +
+            "本“游戏”入场费为50-200草莓（随奖池变化），入场费计入奖池！\n" +
+            "本“游戏”开放时间为每天的6:00 - 22:00！\n" +
+            "在开放时间内，使用 `.bet 4/红色球数字(1-10)/蓝色球数字(1-10)` 来进行押注哦！\n" +
+            "每天的 22:30 将会开奖，若有人红色蓝色球对应号码均匹配，将直接获得奖池的若干份额哦！如果多人同时中奖，将平分当前份额的奖池哦！\n" +
+            "如果只猜中一个也不用担心，会返还入场费的80%！\n"+
+            "你在竞猜的时候同时也能玩其他“游戏”哦！"
+        )
     else:
         await rule.finish("请输入正确的“游戏”编号，例如.rule 1", at_sender=True)
 
@@ -98,13 +108,12 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     nick_name = event.sender.nickname
     current_time = int(time.time())  # 当前时间戳
     args = str(arg)
-    try:
-        game_type_split = args.strip().split("/") # 检测需不需要分割
-        game_type = game_type_split[0]
-        second_game_type = game_type_split[1]
-    except:
-        game_type = args  # 获取玩家选择的“游戏”
-        second_game_type = False
+    game_type_split = args.strip().split("/")  # 按 "/" 分割输入
+    # 查找游戏类型
+    game_type = game_type_split[0] if len(game_type_split) > 0 else args
+    second_game_type = game_type_split[1] if len(game_type_split) > 1 else False
+    third_game_type = game_type_split[2] if len(game_type_split) > 2 else False
+
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
         if(not 'berry' in data[str(user_id)]):
@@ -115,16 +124,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         bar_data[user_id] = {}
         bar_data[user_id]['status'] = 'nothing'
     # 添加全局冷却
-    now_time = time.time()
-    cd_data = open_data(cd_path)
-    if user_id not in cd_data:
-        cd_data[user_id] = {}
-    if group_id not in cd_data:
-         cd_data['group']= {}
-         cd_data['group'][group_id] = {}
-    cd_data[user_id]["coldtime"] = now_time
-    cd_data['group'][group_id]["coldtime"] = now_time
-    save_data(cd_path, cd_data)
+    all_cool_time(cd_path, user_id, group_id)
     # 写入数据
     save_data(full_path, data)
     #一些啥都干不了的buff
@@ -318,8 +318,6 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         else:
             await bet.finish("游戏已开始，无法再次加入！")
     elif game_type == '3':
-        # if user_id != '121096913':
-        #     await bet.finish("目前还有bug，暂不支持哦！", at_sender=True)
         # 初始化必要字段
         pvp_guess = bar_data[user_id].setdefault('pvp_guess', {})
         bar_data[user_id].setdefault('last_pvp_guess_berry', 0)
@@ -379,6 +377,55 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         save_data(full_path, data)
         # 上台回合只能写pvp_choose[5]以防显示错误
         await bet.finish(f"你已经消耗{kouchu_berry}颗草莓成功进行竞技场猜测！你所选的擂台为[{pos+1}]，该擂台擂主为[{choose_nickname}]，上台回合为[{pvp_choose[5]}]，所选占擂Madeline的战力为[{choose_rank}]！", at_sender=True)
+    # “游戏”4逻辑：双球竞猜
+    elif game_type == '4':
+        try:
+            red_points = int(second_game_type)
+            blue_points = int(third_game_type)
+        except ValueError:
+            await bet.finish("请输入正确的红蓝双球的号码哦！", at_sender=True)
+        
+        if not (1 <= red_points <= 10) or not (1 <= blue_points <= 10):
+            await bet.finish("红蓝双球的号码只能是1-10之间哦！", at_sender=True)
+        
+        # 获取当前时间
+        current_time = datetime.datetime.now()
+        current_hour = current_time.hour
+        
+        # 不在开放时间内，不开放
+        if not (6 <= current_hour < 22):
+             await bet.finish("当前不在双球竞猜开放时间（6:00 - 22:00）内，无法进行双球竞猜哦！", at_sender=True)
+    
+        # 获取用户数据
+        user_bar = bar_data.setdefault(user_id, {})
+        user_double_ball = user_bar.setdefault('double_ball', {})
+    
+        # 检查是否已经玩过
+        if user_double_ball.get("ifplay") == 1:
+             await bet.finish("你今天已经已经猜测过了，无法重复进行哦！", at_sender=True)
+    
+        # 读取奖池
+        pots = bar_data.setdefault("pots", 0)
+        if not isinstance(pots, int) or pots < 0:
+            pots = 0  # 确保 pots 是有效数值
+    
+        # 获取门票费用
+        ticket_cost = reward_amount(pots)
+    
+        # 扣除门票费用
+        if data.get(user_id, {}).get("berry", 0) < ticket_cost:
+             await bet.finish(f"你的草莓数量不足！需要{ticket_cost}颗草莓。", at_sender=True)
+    
+        data[user_id]["berry"] -= ticket_cost
+        bar_data["pots"] += ticket_cost
+    
+        # 记录游戏数据
+        user_double_ball["ticket_cost"] = ticket_cost
+        user_double_ball["red_points"] = int(red_points)
+        user_double_ball["blue_points"] = int(blue_points)
+        user_double_ball["ifplay"] = 1
+    
+        await bet.finish(f"你已成功参与双球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}", at_sender=True)
     else:
         await bet.finish("请输入正确的游戏类型哦！", at_sender=True)
 
@@ -393,16 +440,7 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
 
     bar_data = open_data(bar_path)
     # 添加全局冷却
-    now_time = time.time()
-    cd_data = open_data(cd_path)
-    if user_id not in cd_data:
-        cd_data[user_id] = {}
-    if group_id not in cd_data:
-         cd_data['group']= {}
-         cd_data['group'][group_id] = {}
-    cd_data[user_id]["coldtime"] = now_time
-    cd_data['group'][group_id]["coldtime"] = now_time
-    save_data(cd_path, cd_data)
+    all_cool_time(cd_path, user_id, group_id)
     #判断是否开辟event事件栏
     if(not 'event' in data[str(user_id)]):
         data[str(user_id)]['event'] = 'nothing'
@@ -928,16 +966,7 @@ async def fire_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     demon_data = open_data(demon_path)
     player_turn = demon_data[group_id]["turn"]
     # 添加全局冷却
-    now_time = time.time()
-    cd_data = open_data(cd_path)
-    if user_id not in cd_data:
-        cd_data[user_id] = {}
-    if group_id not in cd_data:
-         cd_data['group']= {}
-         cd_data['group'][group_id] = {}
-    cd_data[user_id]["coldtime"] = now_time
-    cd_data['group'][group_id]["coldtime"] = now_time
-    save_data(cd_path, cd_data)
+    all_cool_time(cd_path, user_id, group_id)
     
     if demon_data[group_id]["start"] == False:
         await fire.finish("恶魔轮盘du尚未开始！",at_sender = True)
@@ -974,16 +1003,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     demon_data = open_data(demon_path)
     player_turn = demon_data[group_id]["turn"]
     # 添加全局冷却
-    now_time = time.time()
-    cd_data = open_data(cd_path)
-    if user_id not in cd_data:
-        cd_data[user_id] = {}
-    if group_id not in cd_data:
-         cd_data['group']= {}
-         cd_data['group'][group_id] = {}
-    cd_data[user_id]["coldtime"] = now_time
-    cd_data['group'][group_id]["coldtime"] = now_time
-    save_data(cd_path, cd_data)
+    all_cool_time(cd_path, user_id, group_id)
     add_max = 0
     pangguang_add = 0
     if demon_data[group_id]["start"] == False:
@@ -1706,3 +1726,123 @@ async def check_all_games():
     for group_id in list(demon_data.keys()):
         if isinstance(group_id, str) and group_id.isdigit():
             await check_timeout(group_id)
+
+# 游戏4，双色球开奖
+def reward_percentage(pool: int) -> int:
+    """根据奖池金额计算中奖奖励比例（整数百分比）"""
+    if pool <= 1000:
+        return 100  # 100%
+    elif pool <= 3000:
+        return int(75 + (100 - 75) * (3000 - pool) / (3000 - 1000))  # 100% -> 75%
+    elif pool <= 7000:
+        return int(50 + (75 - 50) * (7000 - pool) / (7000 - 3000))  # 75% -> 50%
+    elif pool <= 15000:
+        return int(30 + (50 - 30) * (15000 - pool) / (15000 - 7000))  # 50% -> 30%
+    elif pool <= 30000:
+        return int(20 + (30 - 20) * (30000 - pool) / (30000 - 15000))  # 30% -> 20%
+    else:
+        return 10  # 10%
+    
+def reward_amount(pool: int) -> int:
+    """门票费"""
+    if pool < 1000:
+        return 50
+    elif pool <= 5000:
+        return 100
+    elif pool <= 10000:
+        return 150
+    elif pool <= 15000:
+        return 200
+    elif pool <= 20000:
+        return 250
+    else:
+        return 300
+    
+# 22:15 重置 double_ball_send
+@scheduler.scheduled_job("cron", hour=22, minute=15)
+async def reset_double_ball_send():
+    bar_data = open_data(bar_path)
+    bar_data.setdefault("double_ball_send", False)
+    bar_data["double_ball_send"] = False
+    save_data(bar_path, bar_data)
+
+# 22:30 开奖
+@scheduler.scheduled_job("cron", hour=22, minute=30)
+async def double_ball_lottery():
+    bots = get_bots()
+    if not bots:
+        logger.error("没有可用的Bot实例，无法开奖！")
+        return
+    bot = list(bots.values())[0]
+
+    bar_data = open_data(bar_path)
+    pots = bar_data.setdefault("pots", 0)
+
+    if bar_data.get("double_ball_send", False):
+        return  # 如果已经开奖，则返回
+
+    red_ball = random.randint(1, 10)
+    blue_ball = random.randint(1, 10)
+
+    winners = []
+    single_match_users = []
+    total_refund = 0
+
+    for user_id, user_bar in bar_data.items():
+        if user_id.isdigit() and isinstance(user_bar, dict):
+            user_bar.setdefault("bank", 0)
+            user_bar.setdefault("double_ball", {})
+
+            bet_data = user_bar["double_ball"]
+            if not bet_data:
+                continue  # 用户没有下注
+
+            ticket_cost = bet_data.get("ticket_cost", 0)
+            user_red = bet_data.get("red_points")
+            user_blue = bet_data.get("blue_points")
+
+            # 中奖处理
+            if user_red == red_ball and user_blue == blue_ball:
+                winners.append(int(user_id))  # 记录中奖者
+
+            # 只猜中一个数字的玩家
+            elif user_red == red_ball or user_blue == blue_ball:
+                bet_data["refund"] = ticket_cost  # 记录返还的门票费用
+                total_refund += ticket_cost
+                user_bar["bank"] += ticket_cost
+                single_match_users.append(int(user_id))
+
+            # 开奖后，重置 ifplay
+            bet_data["ifplay"] = 0
+
+    # 计算奖金
+    reward_percentage_val = reward_percentage(pots)
+    total_reward = int(pots * reward_percentage_val / 100)
+    msg_list = [f"🎉 本次开奖号码：红 {red_ball}，蓝 {blue_ball} 🎉\n"]
+
+    if winners:
+        reward_per_winner = total_reward // len(winners)
+        msg_list.append(f"🏆 奖池总额：[{pots}]颗草莓\n")
+        msg_list.append(f"🎁 本次总奖金：[{total_reward}]颗草莓\n")
+        msg_list.append("🎊 恭喜 ")
+        for winner in winners:
+            bar_data[str(winner)]["bank"] += reward_per_winner
+            bar_data[str(winner)]["double_ball"]["prize"] = reward_per_winner
+            msg_list.append(MessageSegment.at(winner))  # @中奖者
+        msg_list.append(f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！")
+
+    else:
+        msg_list.append("很遗憾，本次无人中奖！")
+
+    # 额外信息：只猜中一个数字的玩家
+    if single_match_users:
+        msg_list.append("\n猜中一位数字的玩家，已经返还了门票费用哦！请通过`.ck all查看`")
+
+    # 扣除奖池金额
+    bar_data["pots"] -= total_refund
+    msg_list.append(f"\n当前奖池剩余{bar_data['pots']}颗草莓！")
+    bar_data["double_ball_send"] = True  # 设置开奖标记
+
+    save_data(bar_path, bar_data)
+
+    await bot.send_group_msg(group_id=1017615898, message=msg_list)  # 替换群号

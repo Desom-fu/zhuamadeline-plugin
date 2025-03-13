@@ -19,6 +19,7 @@ import threading
 import requests
 import asyncio
 import json
+import time
 
 __all__ = [
     'madeline_path_lc1',
@@ -50,7 +51,8 @@ __all__ = [
     "madelinejd",
     'get_user_data',
     'emoji_like',
-    'get_alias_name'
+    'get_alias_name',
+    'all_cool_time'
 ]
 
 #madeline图鉴
@@ -259,6 +261,15 @@ def madelinejd(user_id, target_level=None, nickname=None):
 
 
 #------------其他指令----------------
+# 添加全局冷却
+def all_cool_time(cd_path, user_id, group_id):
+    # 添加全局冷却
+    now_time = time.time()
+    cd_data = open_data(cd_path)
+    cd_data.setdefault(user_id, {})["coldtime"] = now_time
+    cd_data.setdefault("group", {}).setdefault(group_id, {})["coldtime"] = now_time
+    save_data(cd_path, cd_data)
+
 # 辅助函数：获取标准名称
 def get_alias_name(name, item_dict, alias_dict):
     """获取物品的标准名称"""

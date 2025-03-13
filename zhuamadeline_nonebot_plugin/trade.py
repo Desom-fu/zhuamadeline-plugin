@@ -98,17 +98,8 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
     user_id = event.get_user_id()
     if (str(user_id) in data):
         # 添加全局冷却
-        now_time = time.time()
         group_id = str(event.group_id)
-        cd_data = open_data(cd_path)
-        if user_id not in cd_data:
-            cd_data[user_id] = {}
-        if group_id not in cd_data:
-            cd_data['group']= {}
-            cd_data['group'][group_id] = {}
-        cd_data[user_id]["coldtime"] = now_time
-        cd_data['group'][group_id]["coldtime"] = now_time
-        save_data(cd_path, cd_data)
+        all_cool_time(cd_path, user_id, group_id)
     #判断是否开辟event事件栏
     if(not 'event' in data[str(user_id)]):
         data[str(user_id)]['event'] = 'nothing'

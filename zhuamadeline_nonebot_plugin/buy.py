@@ -122,11 +122,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         await buy.finish("你还没尝试抓过madeline.....", at_sender=True)
 
     # 处理冷却时间
-    now_time = time.time()
-    cd_data = open_data(cd_path)
-    cd_data.setdefault(user_id, {})["coldtime"] = now_time
-    cd_data.setdefault("group", {}).setdefault(group_id, {})["coldtime"] = now_time
-    save_data(cd_path, cd_data)
+    all_cool_time(cd_path, user_id, group_id)
 
     # 解析购买参数
     args = str(arg).strip().lower().split()
