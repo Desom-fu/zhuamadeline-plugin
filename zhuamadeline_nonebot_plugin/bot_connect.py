@@ -10,6 +10,7 @@ from .whitelist import whitelist_rule2
 user_path = Path() / "data" / "UserList"
 file_name = "UserData.json"
 full_path = user_path / file_name
+prefix_list = ["/","~","!",'@',"*","%","^","$","#",",","-","=","./"]
 
 # 检查别人传过来的berry门槛是否足够
 berry = on_command('berry_check', permission=GROUP, priority=1, block=True, rule=whitelist_rule2)
@@ -20,7 +21,7 @@ async def berry_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         await berry.finish("命令格式错误！正确格式：.berry_check <prefix> <user_id> <threshold> <command_prefix>(可选，默认为berry)", at_sender=True)
     user_data = open_data(full_path)
     prefix = str(args[0])
-    if prefix not in ["/","~","!",'@',"*","%","^","$","#",",","-","=","./"]:
+    if prefix not in prefix_list:
         await berry.finish("Unsupport Prefix!", at_sender=True)
     user_id = str(args[1])
     check = 404
@@ -60,7 +61,7 @@ async def berry_change_handle(event: GroupMessageEvent, arg: Message = CommandAr
         await berry_change.finish("命令格式错误！正确格式：.berry_change <prefix> <user_id> <berry_num> <command_prefix>(可选，默认为berry)", at_sender=True)
     user_data = open_data(full_path)
     prefix = str(args[0])
-    if prefix not in ["/","~","!",'！',"*","%","^","$","#",","]:
+    if prefix not in prefix_list:
         await berry.finish("Unsupport Prefix!", at_sender=True)
     user_id = str(args[1])
     num = int(args[2])
@@ -99,7 +100,7 @@ async def berryck_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     user_data = open_data(full_path)
     prefix = str(args[0])
     berry = 'FORBID'
-    if prefix not in ["/","~","!",'！',"*","%","^","$","#",","]:
+    if prefix not in prefix_list:
         await berryck.finish("Unsupport Prefix!", at_sender=True)
     user_id = str(args[1])
     check = 404
