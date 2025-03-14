@@ -172,10 +172,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             else:
                 next_time = current_time + datetime.timedelta(minutes=30)
                 #检测回想之核
-                try:
-                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
-                except:
-                    dream = 0
+                dream = data[str(user_id)]['collections'].get("回想之核", 0)
                 if dream >= 1:
                     next_time = current_time + datetime.timedelta(minutes=29)                
                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -187,10 +184,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             items = data[str(user_id)].get('item', {})
             next_time = current_time + datetime.timedelta(minutes=30)
             #检测回想之核
-            try:
-                dream = data[str(user_id)]['collections'].get("回想之核", 0)
-            except:
-                dream = 0
+            dream = data[str(user_id)]['collections'].get("回想之核", 0)
             if dream >= 1:
                 next_time = current_time + datetime.timedelta(minutes=29)
             data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -204,10 +198,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         current_time = datetime.datetime.now()
         next_time = current_time + datetime.timedelta(minutes=30)
         #检测回想之核
-        try:
-            dream = data[str(user_id)]['collections'].get("回想之核", 0)
-        except:
-            dream = 0
+        dream = data[str(user_id)]['collections'].get("回想之核", 0)
         if dream >= 1:
             next_time = current_time + datetime.timedelta(minutes=29)
         data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -238,10 +229,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             nickname = event.sender.nickname
             # next_time = current_time + datetime.timedelta(minutes=10)
             # #检测回想之核
-            # try:
-            #     dream = data[str(user_id)]['collections'].get("回想之核", 0)
-            # except:
-            #     dream = 0
+            # dream = data[str(user_id)]['collections'].get("回想之核", 0)
             # if dream >= 1:
             #     next_time = current_time + datetime.timedelta(minutes=9)
             # data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -580,10 +568,11 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     # 开新猎场要改
     liechang_names = {
         '0': 'Madeline竞技场',
-        '1': '1号猎场',
-        '2': '2号猎场',
-        '3': '3号猎场',
-        '4': '4号猎场'
+        '1': '一号猎场 - 古代遗迹',
+        '2': '二号猎场 - 异域茂林',
+        '3': '三号猎场 - 翡翠矿井',
+        '4': '四号猎场 - 地下终端',
+        '5': '五号猎场 - 遗忘深渊',
     }
     liechang_name = liechang_names.get(liechang_number, "未知猎场")
     # 生成消息
