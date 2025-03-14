@@ -68,9 +68,10 @@ file_names = {
     '3': "UserList3.json",
     '4': "UserList4.json",
 }
-user_list2 = Path() / "data" / "UserList" / "UserList2.json"
-user_list3 = Path() / "data" / "UserList" / "UserList3.json"
-user_list4 = Path() / "data" / "UserList" / "UserList4.json"
+# user_list1 = Path() / "data" / "UserList" / "UserList1.json"
+# user_list2 = Path() / "data" / "UserList" / "UserList2.json"
+# user_list3 = Path() / "data" / "UserList" / "UserList3.json"
+# user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 # 用户数据文件路径
 full_path = Path() / "data" / "UserList" / "UserData.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
