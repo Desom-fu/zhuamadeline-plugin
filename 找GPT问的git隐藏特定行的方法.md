@@ -7,8 +7,8 @@ git config filter.hide_sensitive.clean "sed -e '/#HIDE_THIS_LINE/d' -e '/#HIDE_B
 git config filter.hide_sensitive.smudge "cat"
 ```
 解释
-- e '/#HIDE_THIS_LINE/d' → 删除单行（包含 #HIDE_THIS_LINE）。
-- e '/#HIDE_BLOCK_START/,/#HIDE_BLOCK_END/d' → 删除多行（从 #HIDE_BLOCK_START 到 #HIDE_BLOCK_END 之间的内容）。
+- `-e '/#HIDE_THIS_LINE/d'` → 删除单行（包含 `#HIDE_THIS_LINE`）。
+- `-e '/#HIDE_BLOCK_START/,/#HIDE_BLOCK_END/d'` → 删除多行（从 `#HIDE_BLOCK_START` 到 `#HIDE_BLOCK_END` 之间的内容）。
 
 ## 2. 在 .gitattributes 里应用到所有文件
 
