@@ -61,13 +61,16 @@ pvp_path = Path() / "data" / "UserList" / "pvp.json"
 pvp_coldtime_path = Path() / "data" / "UserList" / "pvp_coldtime.json"
 user_path = Path() / "data" / "UserList"
 file_name = "UserData.json"
+# 开新猎场要改
 file_names = {
     '1': "UserList1.json",
     '2': "UserList2.json",
-    '3': "UserList3.json"
+    '3': "UserList3.json",
+    '4': "UserList4.json",
 }
 user_list2 = Path() / "data" / "UserList" / "UserList2.json"
 user_list3 = Path() / "data" / "UserList" / "UserList3.json"
+user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 # 用户数据文件路径
 full_path = Path() / "data" / "UserList" / "UserData.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
@@ -82,7 +85,6 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         return
     commands = [
         ".状态",
-        ".玩家数",
         ".全服发放草莓 草莓数量",
         ".全服扣除草莓 草莓数量",
         ".查询草莓 QQ号",
@@ -97,6 +99,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".设定能量 QQ号 能量数量",
         ".账单 (日期)",
         ".清除冷却 QQ号",
+        ".全服清除冷却",
         ".补货",
         ".发放道具 QQ号 道具名称 数量",
         ".扣除道具 QQ号 道具名称 数量",
@@ -148,9 +151,6 @@ async def handle_status(event: GroupMessageEvent):
 len_user = on_command("玩家数", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @len_user.handle()
 async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
-    #判断是不是管理员账号
-    if str(event.user_id) not in bot_owner_id:
-        return
 
     #打开文件
     data = {}
@@ -187,7 +187,7 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     #写入文件
     save_data(user_path / file_name, data)
     
-    await fafang.finish(f"已向全服发放{jiangli}个草莓", at_sender=True)
+    await fafang.finish(f"已向全服发放{jiangli}颗草莓", at_sender=True)
     
 #全服扣除草莓
 kouchu = on_command("全服扣除草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -215,7 +215,7 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     #写入文件
     save_data(user_path / file_name, data)
     
-    await fafang.finish(f"已向全服扣除{jiangli}个草莓", at_sender=True)
+    await fafang.finish(f"已向全服扣除{jiangli}颗草莓", at_sender=True)
 
 #查询某个玩家的草莓
 ck_admin_single = on_command("查询草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -394,7 +394,7 @@ async def transfer_handle(event: GroupMessageEvent, arg: Message = CommandArg())
     data[user_b]['berry'] += transfer_amount
     # 写入文件
     save_data(user_path / file_name, data)
-    await transfer_berry.finish(f"已成功将 {transfer_amount} 个草莓从" +MessageSegment.at(user_a)+ "转移给" +MessageSegment.at(user_b)+"！", at_sender=True)
+    await transfer_berry.finish(f"已成功将 {transfer_amount} 颗草莓从" +MessageSegment.at(user_a)+ "转移给" +MessageSegment.at(user_b)+"！", at_sender=True)
 
 # 查询某个玩家的能量
 ck_energy = on_command("查询能量", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -620,12 +620,48 @@ async def timeClear_Admin(event: GroupMessageEvent, arg: Message = CommandArg())
     data[str(user_id)]['next_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
     data[str(user_id)]['next_clock_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
     data[str(user_id)]['work_end_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-    if str(user_id) in bot_owner_id:
-        data[str(user_id)]['next_fishing_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    # if str(user_id) in bot_owner_id:
+    #     data[str(user_id)]['next_fishing_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
     #写入文件
     save_data(user_path / file_name, data)
     await admin_timeClear.finish(MessageSegment.at(user_id)+f"的冷却已清除", at_sender=True)
+
+# 全服清除冷却
+clear_all_cd = on_command("全服清除冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+
+@clear_all_cd.handle()
+async def clear_all_cd_handle(event: GroupMessageEvent):
+    # 判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    data = {}
+    if os.path.exists(user_path / file_name):
+        data = open_data(user_path / file_name)
+
+    # 没有玩家数据就直接返回
+    if not data:
+        await clear_all_cd.finish("没有玩家数据可清除", at_sender=True)
+        return
+
+    current_time = datetime.datetime.now()
+    next_time_r = current_time + datetime.timedelta(seconds=1)
+
+    # 遍历所有玩家，清除冷却时间
+    for user_id, v in data.items():
+        if isinstance(v, dict):  # 确保数据格式正确
+            v['next_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
+            v['next_clock_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
+            v['work_end_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            # if str(user_id) in bot_owner_id:
+            #     v['next_fishing_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    # 写入文件
+    save_data(user_path / file_name, data)
+
+    await clear_all_cd.finish("全服玩家的冷却已清除", at_sender=True)
+
 
 # 手动补货命令
 admin_Restock = on_command("补货", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
