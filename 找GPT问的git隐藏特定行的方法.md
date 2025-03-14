@@ -42,7 +42,7 @@ SECRET_CONFIG = {
 #HIDE_BLOCK_END
 ```
 
-单行 #HIDE_THIS_LINE 也会被删除。
+单行 `#HIDE_THIS_LINE` 也会被删除。
 
 ## 4. 让 Git 重新索引所有文件
 
@@ -68,9 +68,9 @@ git config --unset filter.hide_sensitive.smudge
 
 ## 最终效果
 
-✅ 隐藏单行 (#HIDE_THIS_LINE)
+✅ 隐藏单行 (`#HIDE_THIS_LINE`)
 
-✅ 隐藏多行 (#HIDE_BLOCK_START / #HIDE_BLOCK_END)
+✅ 隐藏多行 (`#HIDE_BLOCK_START` / `#HIDE_BLOCK_END`)
 
 ✅ 适用于所有文件，不需要手动添加特定文件到 .gitattributes
 
