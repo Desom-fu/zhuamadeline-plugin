@@ -1847,4 +1847,4 @@ async def double_ball_lottery():
 
     save_data(bar_path, bar_data)
 
-    await bot.send_group_msg(group_id=1017615898, message=msg_list)  # 替换群号
+    await bot.send_group_msg(group_id=zhuama_group, message=msg_list)  # 替换群号

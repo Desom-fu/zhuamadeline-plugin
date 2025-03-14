@@ -6,10 +6,6 @@ from pathlib import Path
 from .function import save_data, open_data
 from .whitelist import whitelist_rule2
 
-
-
-test_hide = 5
-
 user_path = Path() / "data" / "UserList"
 file_name = "UserData.json"
 full_path = user_path / file_name

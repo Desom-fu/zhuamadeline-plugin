@@ -1,0 +1,847 @@
+import datetime
+import json
+import random
+import math
+from pathlib import Path
+from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot import get_bot
+from .list1 import *
+from .list2 import *
+from .list3 import *
+from .list4 import *
+from .function import open_data, save_data, print_zhua, time_decode
+from .config import ban, bot_owner_id, connect_bot_id
+from .whitelist import whitelist_rule
+from .shop import item
+from .pvp import check_liechang
+#事件系统
+#在道具使用和普通的抓madeline中会触发
+
+user_path = Path() / "data" / "UserList" / "UserData.json"
+user_list1 = Path() / "data" / "UserList" / "UserList1.json"
+user_list2 = Path() / "data" / "UserList" / "UserList2.json"
+user_list3 = Path() / "data" / "UserList" / "UserList3.json"
+user_list4 = Path() / "data" / "UserList" / "UserList4.json"
+stuck_path = Path() / "data" / "UserList" / "Struct.json"
+bar_path = Path() / "data" / "UserList" / "bar.json"
+
+#脱险事件
+async def outofdanger(data, user_id, message, current_time, next_time_r):
+    stuck_data = open_data(stuck_path)  # 打开被困名单
+    user_info = data.setdefault(str(user_id), {})
+    liechang_number = user_info.get('lc','1')
+    buff = user_info.get("buff", "normal")
+    user_info.setdefault("buff2", "normal")
+    user_info.setdefault("lucky_times", 0)
+    
+    # 检测是否在名单中
+    if user_id in stuck_data:
+        # 处理幸运状态逻辑
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        # 是否到时间了
+        if current_time >= next_time_r:
+            user_info["buff"] = "normal"
+            del stuck_data[user_id]
+            save_data(user_path, data)
+            save_data(stuck_path, stuck_data)
+            await message.finish("恭喜你成功脱险....", at_sender=True)
+        else:
+            save_data(user_path, data)
+            await message.finish("你还处在危险之中...", at_sender=True)
+        return
+    # 有buff也解除
+    if buff in ["hurt", "lost", "confuse"]:
+        # 处理幸运状态逻辑
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        user_info["buff"] = "normal"
+        user_info["next_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        if user_info["buff2"] == "lucky" and user_info["lucky_times"] == 0:
+            user_info["buff2"] = "normal"
+        save_data(user_path, data)
+        msg = "恭喜你成功脱险...." if buff in ["hurt", "lost"] else "看了半天你还是没想明白这是什么东西，但你意识到不能再在原地停留了"
+        await message.finish(msg, at_sender=True)
+    
+    # 没到时间加1幸运
+    if current_time <= next_time_r:
+        # 处理幸运状态逻辑
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        return
+
+    # 0猎加1幸运
+    if liechang_number == "0":
+        # 处理幸运状态逻辑
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        return
+
+
+async def event_happen(user_data, user_id, message):
+    # 设定默认值
+    user_info = user_data.setdefault(user_id, {})
+    # 读取猎场编号
+    liechang_number = user_info.get('lc', '1')
+
+    # 猎场函数映射
+    liechang_functions = {
+        '1': PlainStuck,
+        '2': ForestStuck,
+        '3': CrystalStuck,
+        '4': LabStuck,
+        '5': AbyssStuck,
+    }
+    # 获取对应的函数
+    event_function = liechang_functions.get(liechang_number)
+    if event_function is None:  # 如果猎场编号无效
+        raise ValueError("错误的猎场编号")
+    # 调用对应的函数
+    await event_function(user_data, user_id, message)
+
+# 一猎事件
+async def PlainStuck(user_data, user_id, message):
+    # 初始化默认值
+    user_id = str(user_id)
+    user_info = user_data.setdefault(user_id, {})
+    user_info.setdefault('berry', 0)
+    items = user_info.setdefault('item', {})
+    collections = user_info.setdefault('collections', {})
+    user_info.setdefault('event', 'nothing')
+    user_info.setdefault('trade', {})
+    user_info.setdefault('buff2', 'normal')
+    user_info.setdefault('lucky_times', 0)
+    liechang_number = user_info.get('lc', '1')
+    current_time = datetime.datetime.now()
+    
+    # 获取调律器
+    rnd_regu = 20 if collections.get("调律器", 0) >= 1 else 0
+    
+    rnd = random.randint(1, 1000)
+    # 遇到金矿
+    if rnd <= 20 + rnd_regu:
+        berry = random.randint(100, 200)
+        user_info['berry'] += berry
+        save_data(user_path, user_data)
+        await message.finish(f"呀，你在庇护所外面的草丛里发现了一片草莓丛，你摘了{berry}颗草莓！", at_sender=True)
+
+    # 获得神秘碎片
+    elif rnd <= 40 + rnd_regu and items.get('神秘碎片', 0) < 5:
+        next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        items['神秘碎片'] = items.get('神秘碎片', 0) + 1
+        save_data(user_path, user_data)
+        await message.finish("你在一个人迹罕至的地方捡到了一个泛着蓝光的神秘碎片，出于好奇和困惑你在此观察了一个小时", at_sender=True)
+
+    # 获得幸运药水
+    elif rnd <= 50 + rnd_regu:
+        items['幸运药水'] = items.get('幸运药水', 0) + 1
+        save_data(user_path, user_data)
+        await message.finish("你捡到了一瓶奇怪的药水，似乎是别人遗留下来的？", at_sender=True)
+
+    # 获得木质十字架
+    elif rnd <= 60 + rnd_regu and '木质十字架' not in collections:
+        collections['木质十字架'] = 1
+        save_data(user_path, user_data)
+        await message.finish("这是？？？\n输入.cp 木质十字架 以查看具体效果", at_sender=True)
+
+    # 获得天使之羽
+    elif rnd <= 70 + rnd_regu and '天使之羽' not in collections:
+        collections['天使之羽'] = 1
+        save_data(user_path, user_data)
+        await message.finish("一片散发着柔和光芒的羽毛缓缓飘落在你的手中，羽毛上似乎蕴含着某种神秘的力量。\n输入.cp 天使之羽 以查看具体效果", at_sender=True)
+
+    # 遇到流浪商人
+    elif rnd <= 110 + rnd_regu:
+        data1 = open_data(user_list1)
+        if user_id not in data1:
+            return
+        user_info.setdefault("event", "nothing")
+        user_info.setdefault("trade", {})
+            
+        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+            user_info["lucky_times"] += 1
+        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
+            user_info['buff2'] = 'normal'
+        user_info['event'] = 'trading'
+
+        k1 = random.choice(list(data1[user_id].keys()))
+        k = k1.split('_')
+        level = int(k[0])
+        num = k[1]
+        if [level, int(num)] in rabbit_madeline1:
+            priceRate = 0.8
+        else:
+            priceRate = 1
+        name = madeline_data1.get(str(level)).get(num).get('name')
+        if level == 1:
+            price = random.randint(5, 20)
+            amount = random.randint(1, 5)
+        elif level == 2:
+            price = random.randint(8, 25)
+            amount = random.randint(1, 4)
+        elif level == 3:
+            price = random.randint(15, 40)
+            amount = random.randint(1, 3)
+        elif level == 4:
+            price = random.randint(40, 120)
+            amount = random.randint(1, 2)
+        elif level == 5:
+            price = random.randint(120, 240)
+            amount = 1
+        else:
+            raise KeyError("Invalid level number")
+        price = math.floor(price * priceRate)
+
+        user_info['trade']['数量'] = amount
+        user_info['trade']['单价'] = price
+        user_info['trade']['物品'] = [int(liechang_number), k1]
+        user_info['event'] = 'trading'
+        next_time = current_time + datetime.timedelta(seconds=1)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        save_data(user_path, user_data)
+        await message.finish(
+            f"你遇到了一位流浪商人，他似乎想从你这里买点东西\n"
+            f"“你好啊，我在收集一些madeline。现在我需要{amount}个{name}”，我听说这好像是个{level}级的madeline，所以我愿意以每个madeline {price}草莓的价格收购，不知你是否愿意。”\n"
+            "只有拥有足够的该madeline才可确定交易，并且只能一次性卖完，不支持分批出售\n"
+            "输入.confirm 确定出售，输入.deny 拒绝本次交易", at_sender=True)
+    else:
+        return
+            
+    
+# 二号猎场事件
+async def ForestStuck(user_data, user_id, message):
+    # 初始化默认值
+    user_id = str(user_id)
+    user_info = user_data.setdefault(user_id, {})
+    user_info.setdefault('berry', 0)
+    collections = user_info.setdefault("collections", {})
+    items = user_info.setdefault("item", {})
+    user_info.setdefault('debuff', "normal")
+    user_info.setdefault("buff2", "normal")
+    user_info.setdefault("lucky_times", 0)
+    user_info.setdefault("event", "nothing")
+    user_info.setdefault("trade", {})
+    liechang_number = user_info.get('lc', '1')
+    current_time = datetime.datetime.now()
+    
+    # 获取调律器
+    rnd_regu = 20 if collections.get("调律器", 0) >= 1 else 0
+
+    # 打开被困名单
+    stuck_data = open_data(stuck_path)
+
+    # 判断是否迷路（默认迷路）
+    lost = 0 if items.get("指南针", 0) >= 1 else 1
+
+    # 迷路事件
+    if lost == 1:
+        # 处理幸运状态逻辑，迷路不扣幸运
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        rnd = random.randint(1, 10)
+        if rnd <= 2:
+            return
+        else:
+            next_time = current_time + datetime.timedelta(minutes=479 if collections.get("回想之核", 0) >= 1 else 480)
+            user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['buff'] = 'lost'
+            # 加入森林被困名单
+            stuck_data[user_id] = '2'
+            # 正面buff检测逻辑（已提前setdefault）
+            if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+                user_info["lucky_times"] += 1
+            if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
+                user_info['buff2'] = 'normal'
+            # 写入数据
+            save_data(user_path, user_data)
+            save_data(stuck_path, stuck_data)
+            # 发送消息
+            await message.finish("你在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhuamadeline指令)", at_sender=True)
+
+    ###### 其他事件 #####
+    rnd = random.randint(1, 1000)
+    # 遇到金矿
+    if rnd <= 25 + rnd_regu:
+        berry = random.randint(150, 250)
+        user_info['berry'] += berry
+        save_data(user_path, user_data)
+        await message.finish(f"呀，你在森林里发现了一颗变异的草莓树（为什么会有草莓树？），你摘下了{berry}颗草莓！", at_sender=True)
+
+    # 遇到被困人员
+    elif rnd <= 150 + rnd_regu:
+        if len(stuck_data) >= 1:
+            save_id = random.choice(list(stuck_data.keys()))
+            if stuck_data[save_id] != '2':
+                return
+            user_info['berry'] += 75
+            # 确保被救者也存在于主数据中
+            rescue_user = user_data.setdefault(save_id, {})
+            rescue_user['next_time'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            del stuck_data[save_id]
+            # 正面buff检测逻辑（已提前setdefault）
+            save_data(user_path, user_data)
+            save_data(stuck_path, stuck_data)
+            await message.finish(f"恭喜你救出了森林里的" + MessageSegment.at(save_id) + "。\n本次奖励75草莓", at_sender=True)
+        else:
+            return
+
+    # 受伤事件
+    elif rnd <= 250 + rnd_regu:
+        next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        user_info['buff'] = 'hurt'
+        stuck_data[user_id] = '2'
+        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+            user_info["lucky_times"] += 1
+        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':    
+            user_info['buff2'] = 'normal'    
+        save_data(user_path, user_data)
+        save_data(stuck_path, stuck_data)
+        text = [
+            "你被路边的荆棘刺到了！",
+            "抓madeline的途中，你掉进了莫名奇妙塌陷的大坑里，",
+            "走着走着，树上的金草莓落下来砸到你身上，爆炸了，把你炸伤了！",
+            "你走进一个山洞，可此地暗得你完全找不着北，你一不小心就被山洞里的石头刮伤了！"
+        ]
+        await message.finish(random.choice(text) + "你需要原地等待一个小时，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
+
+    # 神秘碎片事件
+    elif rnd <= 270 + rnd_regu:
+        # 确保道具栏存在（已提前setdefault items）
+        if items.get('神秘碎片', 0) < 5:
+            next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
+            user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['buff'] = 'confuse'
+            items['神秘碎片'] = items.get('神秘碎片', 0) + 1
+            stuck_data[user_id] = '2'
+            save_data(user_path, user_data)
+            save_data(stuck_path, stuck_data)
+            await message.finish("你捡到了一个泛着蓝光的神秘碎片，出于好奇和困惑你在此观察了一个小时\n或许有人发现你的时候...你才会停止观察", at_sender=True)
+        else:
+            return
+
+    # 生命之叶事件
+    elif rnd <= 275 + rnd_regu:
+        if "生命之叶" not in collections:
+            collections["生命之叶"] = 1
+            save_data(user_path, user_data)
+            await message.finish(
+                "你在神秘森林中跋涉，寒冷的湿气缠绕在你周围，树影在雾中飘动。突然，一缕微光在脚下闪烁，几乎让人错以为是错觉。你蹲下去，拨开层层枯叶与苔藓，手指触碰到一片散发着温暖绿色光芒的叶子。\n“生命之叶”\n它在你掌中微微颤动，似乎蕴藏着久违的生机。周围的迷雾在这一刻似乎变得稍微稀薄，你感到一丝久违的希望。此物似乎带有古老而神秘的力量——一种与你旅程息息相关的力量。\n输入.cp 生命之叶 以查看具体效果",
+                at_sender=True)
+        else:
+            return
+
+    # 木质十字架事件
+    elif rnd <= 285 + rnd_regu:
+        if "木质十字架" not in collections:
+            collections["木质十字架"] = 1
+            save_data(user_path, user_data)
+            await message.finish("这是？？？\n输入.cp 木质十字架 以查看具体效果", at_sender=True)
+        else:
+            return
+
+    # 调律器事件
+    elif rnd <= 290 + rnd_regu:
+        if "调律器" not in collections:
+            collections["调律器"] = 1
+            save_data(user_path, user_data)
+            await message.finish("你感到一阵微妙的波动，似乎空气中有某种力量在流动。一件金属质感的仪器悄然出现在你手中，散发出微弱的光辉。\n输入.cp 调律器 以查看具体效果", at_sender=True)
+        else:
+            return
+
+    # 回想之核事件
+    elif rnd <= 291 + rnd_regu:
+        if "回想之核" not in collections:
+            collections["回想之核"] = 1
+            save_data(user_path, user_data)
+            await message.finish("你在探索之时，突然一颗光辉璀璨的核心缓缓漂浮到你掌心。它散发着奇异的光芒，仿佛能带来超凡的力量。\n输入.cp 回想之核 以查看具体效果", at_sender=True)
+        else:
+            return
+
+    # 流浪商人事件
+    elif rnd <= 341 + rnd_regu:
+        data2 = open_data(user_list2)
+        if user_id not in data2:
+            return
+        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+            user_info["lucky_times"] += 1
+        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
+            user_info['buff2'] = 'normal'
+        user_info['event'] = 'trading'
+
+        k1 = random.choice(list(data2[user_id].keys()))
+        k = k1.split('_')
+        level = int(k[0])
+        num = k[1]
+        if [level, int(num)] in rabbit_madeline2:
+            priceRate = 0.8
+        else:
+            priceRate = 1
+        name = madeline_data2.get(str(level)).get(num).get('name')
+        if level == 1:
+            price = random.randint(7, 25)
+            amount = random.randint(1, 5)
+        elif level == 2:
+            price = random.randint(10, 30)
+            amount = random.randint(1, 4)
+        elif level == 3:
+            price = random.randint(20, 50)
+            amount = random.randint(1, 3)
+        elif level == 4:
+            price = random.randint(50, 150)
+            amount = random.randint(1, 2)
+        elif level == 5:
+            price = random.randint(150, 300)
+            amount = 1
+        else:
+            raise KeyError("Invalid level number")
+
+        price = math.floor(price * priceRate)
+
+        user_info['trade']['数量'] = amount
+        user_info['trade']['单价'] = price
+        user_info['trade']['物品'] = [int(liechang_number), k1]
+        user_info['event'] = 'trading'
+        next_time = current_time + datetime.timedelta(seconds=1)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        save_data(user_path, user_data)
+        await message.finish(
+            f"你遇到了一位流浪商人，他似乎想从你这里买点东西\n"
+            f"“你好啊，我在收集一些madeline。现在我需要{amount}个{name}”，我听说这好像是个{level}级的madeline，所以我愿意以每个madeline {price}草莓的价格收购，不知你是否愿意。”\n"
+            "只有拥有足够的该madeline才可确定交易，并且只能一次性卖完，不支持分批出售\n"
+            "输入.confirm 确定出售，输入.deny 拒绝本次交易", at_sender=True)
+    else:
+        return
+
+
+
+#三号猎场事件
+async def CrystalStuck(user_data, user_id, message):
+    # 初始化默认值
+    user_id = str(user_id)
+    user_info = user_data.setdefault(user_id, {})
+    user_info.setdefault('berry', 0)
+    collections = user_info.setdefault("collections", {})
+    items = user_info.setdefault("item", {})
+    user_info.setdefault('event', 'nothing')
+    user_info.setdefault('trade', {})
+    user_info.setdefault('buff2', 'normal')
+    user_info.setdefault('lucky_times', 0)
+    user_info.setdefault('debuff', "normal")
+    liechang_number = user_info.get('lc', '1')
+    current_time = datetime.datetime.now()
+    
+    # 获取调律器
+    rnd_regu = 20 if collections.get("调律器", 0) >= 1 else 0
+    
+    bot = get_bot()
+    
+    #打开矿洞被困名单
+    stuck_data = open_data(stuck_path)
+    #是否拥有7个碎片
+    if(items.get('神秘碎片',0) < 5):
+        # 处理幸运状态逻辑，检测失败不扣幸运
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        await message.finish("在远古的水晶矿洞前，风轻轻吹过，岩石间传来阵阵低语。眼前的巨大门扉上镶嵌着神秘的符文，发出幽幽的光辉。你注意到面前门上的部分符文与你手上的碎片相契合\n或许......收集足够的碎片就可以打开这扇门？", at_sender=True)
+    
+    #计算三个猎场的五级
+    user_list = [user_list1, user_list2, user_list3]
+    num_of_level5 = 0
+    for file_path in user_list:
+        data = open_data(file_path)
+        if user_id in data:
+            for k in data[user_id].keys():
+                if int(k[0]) == 5:  # 直接判断级别
+                    num_of_level5 += 1
+    
+    if num_of_level5 < 9:
+        # 处理幸运状态逻辑，检测失败不扣幸运
+        if user_info["buff2"] == "lucky":
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            elif user_info["lucky_times"] == 0:
+                user_info["buff2"] = "normal"
+        await message.finish(f"水晶矿洞内传来了强大的灵力，这股力量使你无法前进。或许......多带几个猎场的高等级madeline可以抵御这股力量？\n你目前有{num_of_level5}个5级madeline", at_sender=True)
+
+    ######其他事件#####
+    rnd = random.randint(1,1000)
+    #抓到了特殊的道具
+    if rnd <= 100:  # 10% 几率
+        # debuff 检测逻辑
+        debuff = user_info.setdefault('debuff', 'normal')
+        if debuff == 'illusory':
+            return
+        
+        next_time = current_time + datetime.timedelta(minutes=29 if collections.get("回想之核", 0) >= 1 else 30)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        rnd_tool = random.randint(1, 1000)
+        
+        # 开辟道具栏
+        items.setdefault('草莓果酱', 0)
+        items.setdefault('时间秒表', 0)
+        items.setdefault('madeline提取器', 0)
+        
+        if rnd_tool < 20:
+            # 检查 ban 列表
+            mibao = ""
+            if user_id in ban:
+                if not '尘封的秘宝' in collections:
+                    collections['尘封的秘宝'] = 1
+                    mibao = "\n此外，在溶洞的一处昏暗角落，你意外发现了一件布满灰尘的秘宝。"
+                
+                items['madeline提取器'] += 1
+                items['时间秒表'] += 1
+                items['草莓果酱'] += 5
+
+                save_data(user_path, user_data)
+                await message.finish(
+                    f"你误打误撞迷失了方向，来到一处隐秘的小溶洞。"
+                    f"洞内一片寂静，昏暗中一张桌子上散落着几件道具："
+                    f"草莓果酱×5、时间秒表×1、madeline提取器×1。" + mibao,
+                    at_sender=True
+                )
+            
+            if not '鲜血之刃' in collections:
+                collections['鲜血之刃'] = 1
+                save_data(user_path, user_data)
+                await message.finish(
+                    "你误打误撞迷失了方向，来到一处隐秘的小溶洞。"
+                    "洞内一片寂静，昏暗中你看到鲜血之刃静静地插在一块满是裂痕的石台上，"
+                    "刀身被干涸的暗红血迹覆盖，仿佛在述说它的血腥过往。"
+                    "洞内的空气冰冷刺骨，死寂中隐约传来低沉的嗡鸣，如同它在呼唤，渴求鲜血的滋养。",
+                    at_sender=True
+                )
+        
+        # 其他奖励
+        elif 51 <= rnd_tool <= 160:
+            items['弹弓'] = items.get('弹弓', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个弹弓", at_sender=True)
+        
+        elif 331 <= rnd_tool <= 500:
+            items['一次性小手枪'] = items.get('一次性小手枪', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个一次性小手枪", at_sender=True)
+        
+        elif 501 <= rnd_tool <= 680:
+            items['充能陷阱'] = items.get('充能陷阱', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个充能陷阱", at_sender=True)
+        
+        elif 681 <= rnd_tool <= 840:
+            carrot_rnd = random.randint(1, 10)
+            if carrot_rnd > 2:
+                items['胡萝卜'] = items.get('胡萝卜', 0) + 1
+                save_data(user_path, user_data)
+                await message.finish("你发现了其他探险者在此遗落的一个胡萝卜，看起来还很新鲜，还能用。", at_sender=True)
+            else:
+                save_data(user_path, user_data)
+                await message.finish("你发现了其他探险者在此遗落的一个胡萝卜，但是看起来变质用不了了", at_sender=True)
+        
+        elif 841 <= rnd_tool <= 860:
+            items['madeline提取器'] = items.get('madeline提取器', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个madeline提取器", at_sender=True)
+
+        elif 861 <= rnd_tool <= 880:
+            items['时间秒表'] = items.get('时间秒表', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个时间秒表", at_sender=True)
+            
+        elif 881 <= rnd_tool <= 940:
+            items['道具盲盒'] = items.get('道具盲盒', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个道具盲盒", at_sender=True)
+            
+        elif 941 <= rnd_tool <= 1000:
+            items['万能解药'] = items.get('万能解药', 0) + 1
+            save_data(user_path, user_data)
+            await message.finish("你发现了其他探险者在此遗落的一个万能解药", at_sender=True)
+            
+    #受伤事件
+    elif(rnd<=250):
+        helmat = collections.get('矿工头盔', 0)
+        rnd_safe = 3 if helmat < 1 else random.randint(1, 3)
+        if rnd_safe <= 1:
+            return
+        #受伤1.5小时，在此期间什么都干不了
+        next_time = current_time + datetime.timedelta(minutes=89 if collections.get("回想之核", 0) >= 1 else 90)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        user_info['buff'] = 'hurt'
+        #加入山洞被困名单
+        stuck_data[user_id] = '3'
+        #负面事件加一次幸运
+        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+            user_info["lucky_times"] += 1
+        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
+            user_info['buff2'] = 'normal'
+        #写入主数据表
+        save_data(user_path, user_data)
+        #写入山洞被困名单
+        save_data(stuck_path, stuck_data)
+
+        #随机事件文本
+        text = [
+            "你一不小心碰到了TNT触发器，被炸了个半死！",
+            "你在爬天花板的时候，突然天花板塌了把你砸晕了！",
+            "你在丢炸弹的时候没掌握好后坐力，结果一不小心掉到坑里去了！",
+            "你在移动的板子上没站稳，掉下去被刺儿扎得满身疮痍！"
+        ]
+        #发送消息
+        await message.finish(random.choice(text)+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
+        
+    #挖矿事件
+    elif(rnd<=350 + rnd_regu): #35
+        #负面buff检测逻辑
+        if user_info['debuff'] == 'unlucky':
+            return
+        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
+            user_info['buff2'] = 'normal'
+        #设定冷却
+        next_time = current_time + datetime.timedelta(minutes=29 if collections.get("回想之核", 0) >= 1 else 30)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        #遇到水晶矿
+        rnd_crystal = random.randint(1,100)
+        if(rnd_crystal <= 50):
+            #奖励草莓
+            berry = 100
+            user_info['berry'] += berry             
+            #写入主数据表
+            save_data(user_path, user_data)
+            #发送消息
+            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是较为常见的绿色翡翠，不过作为翡翠来讲也是很值钱了。\n本次奖励{berry}颗草莓！", at_sender=True)
+        elif(rnd_crystal <= 90):
+            #奖励草莓
+            berry = 200
+            user_info['berry'] += berry
+            #写入主数据表
+            save_data(user_path, user_data)
+            #发送消息
+            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是不太常见的白色翡翠，是较为珍贵的翡翠之一。\n本次奖励{berry}颗草莓！", at_sender=True)
+        elif(rnd_crystal <= 100):
+            #奖励草莓
+            berry = 500
+            user_info['berry'] += berry
+            #写入主数据表
+            save_data(user_path, user_data)
+            #发送消息
+            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是相当稀有的紫色翡翠，是极为珍贵的翡翠之一。\n本次奖励{berry}颗草莓！", at_sender=True)
+        else:
+            return
+    #debuff事件
+    elif(rnd<=500+rnd_regu): #50
+        #首先玩家没有buff/debuff时才会随机触发
+        #有幸运正常抓
+        if user_info['buff2'] == 'lucky':
+            return
+        #有debuff正常抓
+        if user_info['debuff'] != 'normal':
+            return
+        # 检测磁力吸附手套
+        spider = collections.get("磁力吸附手套", 0)
+        # 检测到了就有1/3的概率避免debuff
+        if spider >= 1 and random.randint(1, 3) == 1:
+            return
+        # 负面buff增加幸运次数
+        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+            user_info["lucky_times"] += 1
+        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
+            user_info['buff2'] = 'normal'
+        #判断是否开辟恢复时间栏
+        if(not 'next_recover_time' in user_info):
+            user_info['next_recover_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        rnd_debuff = random.randint(1,4)
+        recover_hour = 4
+        if rnd_debuff==1:
+            #设定恢复时长为4小时后
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'illusory'
+            save_data(user_path, user_data)
+            await message.finish(f"你不小心走到了矿洞中氧气稀薄的地方，你感觉很难受，似乎{recover_hour}小时内无法再在本猎场抓到道具了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+        elif rnd_debuff==2:
+            #设定恢复时长为4小时后
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'poisoned'
+            #虽说让幸运buff消失是不可能事件，但我还是想写上
+            user_info["buff2"]='normal'
+            user_info["lucky_times"] = 0
+            save_data(user_path, user_data)
+            await message.finish(f"矿洞的墙壁上的植物似乎在释放有毒气体，你中毒了，抓madeline能力只剩1成，接下来{recover_hour}小时内在抓到madeline时不会获得草莓了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+        elif rnd_debuff==3:
+            #设定恢复时长为4小时后
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'unlucky'
+            save_data(user_path, user_data)
+            await message.finish(f"你不知道怎么回事，感觉像是被矿洞内的脏东西附身了，似乎有点不幸，接下来{recover_hour}小时内你不会再在此猎场内挖到宝石矿了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+        elif rnd_debuff==4:
+            #设定恢复时长为4小时后
+            recover_hour //= 2
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'clumsy'
+            save_data(user_path, user_data)
+            await message.finish(f"你突然被矿洞的一股魔力袭击了，除了万能解药以外的几乎全部能够主动使用的道具/藏品都失效了！接下来{recover_hour}小时内你无法使用任何道具了！。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+    #遇到被困人员
+    elif(rnd <= 600+rnd_regu): #60
+        if(len(stuck_data) >= 1):
+            save_id = random.choice(list(stuck_data.keys()))
+            if(stuck_data[save_id]!='3'): return
+            # 发放100草莓
+            user_info['berry'] += 100
+            # 确保被救者也存在于主数据中
+            rescue_user = user_data.setdefault(save_id, {})
+            rescue_user['next_time'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            del stuck_data[save_id]
+            #写入主数据表
+            save_data(user_path, user_data)
+            #写入被困名单
+            save_data(stuck_path, stuck_data)
+            await message.finish(f"恭喜你救出了矿洞里的"+ MessageSegment.at(save_id) +"。\n本次奖励100草莓", at_sender=True)
+        else:
+            #没有需要救的人就结束事件，正常抓madeline
+            return
+    #紫晶魄
+    elif(rnd<=610+rnd_regu):#61
+        #是否已经持有藏品"紫晶魄"
+        if(not '紫晶魄' in collections):
+            collections['紫晶魄'] = 1
+            #写入主数据表
+            save_data(user_path, user_data)
+            await message.finish("你从矿洞深处捡起一块紫色晶体，它的表面微微发光，散发着一种独特的能量。这时，你感到一股难以言喻的力量在你体内流动。\n输入.cp 紫晶魄 以查看具体效果", at_sender=True)
+        #否则就是正常抓
+        else:
+            return
+    #矿工头盔
+    elif(rnd<=620+rnd_regu):#62
+        #是否已经持有藏品"矿工头盔"
+        if(not '矿工头盔' in collections):
+            collections['矿工头盔'] = 1
+            #写入主数据表
+            save_data(user_path, user_data)
+            await message.finish("你发现了一顶矿工头盔，头盔上的灯光微微闪烁，为你指引前方的道路。即使在黑暗的矿洞中，它也能为你带来光明和安全。\n输入.cp 矿工头盔 以查看具体效果", at_sender=True)
+        #否则就是正常抓
+        else:
+            return
+    #调律器
+    elif(rnd<=625+rnd_regu):
+        #是否已经持有藏品"调律器"
+        if(not '调律器' in collections):
+            collections['调律器'] = 1
+            #写入主数据表
+            save_data(user_path, user_data)
+            await message.finish("你感到一阵微妙的波动，似乎空气中有某种力量在流动。一件金属质感的仪器悄然出现在你手中，散发出微弱的光辉。\n输入.cp 调律器 以查看具体效果", at_sender=True)
+        #否则就是正常抓
+        else:
+            return
+    #回想之核
+    elif(rnd<=626+rnd_regu):
+        #是否已经持有藏品"回想之核"
+        if(not '回想之核' in collections):
+            collections['回想之核'] = 1
+            #写入主数据表
+            save_data(user_path, user_data)
+            await message.finish("你在探索之时，突然一颗光辉璀璨的核心缓缓漂浮到你掌心。它散发着奇异的光芒，仿佛能带来超凡的力量。\n输入.cp 回想之核 以查看具体效果", at_sender=True)
+        #否则就是正常抓
+        else:
+            return
+    #星光乐谱
+    elif(rnd<=629+rnd_regu):
+        #是否已经持有藏品"星光乐谱"
+        if(not '星光乐谱' in collections):
+            collections['星光乐谱'] = 1
+            #写入主数据表
+            save_data(user_path, user_data)
+            await message.finish("在矿洞深处，你无意间发现了一块被岁月掩埋的石板。掀开尘土，你看见一份微弱发光的乐谱，纸页上星光闪烁，仿佛诉说着未知的故事。你小心地拾起它，感受到一股神秘的力量在你手心涌动。\n输入.cp 星光乐谱 以查看具体效果", at_sender=True)
+        #否则就是正常抓
+        else:
+            return
+    #商人
+    elif(rnd<=700+rnd_regu):
+        data3 = open_data(user_list3)
+        if user_id not in data3:
+            return
+        
+        #遇见商人不扣幸运
+        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
+            user_info["lucky_times"] += 1
+        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
+            user_info['buff2'] = 'normal'
+        
+        #变更事件为交易中
+        user_info['event'] = 'trading'
+        
+        #在该用户拥有的madeline列表里抽取一个拥有的madeline
+        k1 = random.choice(list(data3[user_id].keys()))
+        k = k1.split('_')
+        level = int(k[0]) #抽取的madeline等级
+        num = k[1] #抽取的madeline的ID
+        #胡萝卜池的madeline低价收购
+        if [level, int(num)] in rabbit_madeline3:
+            priceRate = 0.8
+        else:
+            priceRate = 1
+        name = madeline_data3.get(str(level)).get(num).get('name') #获取该madeline的名称
+        #规定单价和数量
+        if level == 1:
+            price = random.randint(10,30)
+            amount = random.randint(1,5)
+        elif level == 2:
+            price = random.randint(15,40)
+            amount = random.randint(1,4)
+        elif level == 3:
+            price = random.randint(25,65)
+            amount = random.randint(1,3)
+        elif level == 4:
+            price = random.randint(65,180)
+            amount = random.randint(1,2)
+        elif level == 5:
+            price = random.randint(180,350)
+            amount = 1
+        else:
+            raise KeyError("Invalid level number")
+        
+        price = math.floor(price * priceRate)
+        #交易属性栏要加入3个键值对：交易数量，交易单价，交易物品
+        user_info['trade']['数量'] = amount
+        user_info['trade']['单价'] = price
+        user_info['trade']['物品'] = [int(liechang_number),k1] #存储为[猎场号，madeline属性]
+        user_info['event'] = 'trading'
+        current_time = datetime.datetime.now()
+        next_time = current_time + datetime.timedelta(seconds=1)
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        #写入主数据表
+        save_data(user_path, user_data)
+        await message.finish(f"你遇到了一位流浪商人，他似乎想从你这里买点东西\n"+
+                             f"“你好啊，我在收集一些madeline。现在我需要{amount}个{name}”，我听说这好像是个{level}级的madeline，所以我愿意以每个madeline {price}草莓的价格收购，不知你是否愿意。”\n"+
+                             "只有拥有足够的该madeline才可确定交易，并且只能一次性卖完，不支持分批出售\n"+
+                             "输入.confirm 确定出售，输入.deny 拒绝本次交易", at_sender=True)
+    else:
+        return
+
+
+#四号猎场事件

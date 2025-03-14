@@ -1,23 +1,5 @@
-# 抓玛德琳主文件忽略
-zhuamadeline.py
-
-# 抓玛德琳事件文件忽略
-event.py
-
-# 抓玛德琳道具文件忽略
-item.py
-
-# 抓玛德琳藏品文件忽略
-collection.py
-
 # 抓玛德琳玛德琳列表文件忽略
 list*.py
-
-# 抓玛德琳白名单文件忽略
-whitelist.py
-
-# 抓玛德琳配置文件忽略
-config.py
 
 # 抓玛德琳文件夹忽略
 /MadelineLc*
