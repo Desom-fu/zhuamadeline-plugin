@@ -1638,6 +1638,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             """
                             可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
                             """
+                            # 开新猎场要改
                             nums = find_madeline(arg2.lower())
                             data2 = open_data(user_list2)
                             data3 = open_data(user_list3)
@@ -1648,16 +1649,18 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             # 判定猎场
                             if liechang_number=='2' or nums[2] == "2":  
                                 if str(user_id) not in data2:
-                                    await daoju.finish("你还未解锁通往第二猎场的道路，请先在第二猎场抓到任意一个Madeline哦！", at_sender=True)
+                                    await daoju.finish("你还未解锁通往异域茂林的道路，请先在第异域茂林抓到任意一个Madeline哦！", at_sender=True)
                             elif liechang_number=='3' or nums[2] == "3":  
                                 if data[str(user_id)].get("item").get('神秘碎片', 0) < 5:
-                                    await daoju.finish("你还未解锁通往第三猎场的道路...", at_sender=True)
+                                    await daoju.finish("你还未解锁通往翡翠矿井的道路...", at_sender=True)
                                 if str(user_id) not in data3:
-                                    await daoju.finish("请先在第三猎场抓到任意一个Madeline吧！", at_sender=True)
+                                    await daoju.finish("请先在翡翠矿井抓到任意一个Madeline吧！", at_sender=True)
                             # 4猎必须要有黄球才能使用提取器
                             elif liechang_number == "4" or nums[2] == "4":
                                 if(not '黄色球体' in data[str(user_id)]['collections']):
                                     await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用Madeline提取器……", at_sender = True)
+                                if str(user_id) not in data:
+                                    await daoju.finish("请先在地下终端抓到任意一个Madeline吧！", at_sender=True)
                                     
                             if(nums!=0):
                                 rnd = random.randint(1,100)

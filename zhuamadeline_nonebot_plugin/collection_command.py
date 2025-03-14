@@ -17,12 +17,7 @@ from .function import *
 from .event import *
 from .pvp import *
 from .whitelist import whitelist_rule
-
-
-
-user_path = Path("data") / "UserList"  # 指定路径
-file_name = "UserData.json"  # 文件名
-full_path = user_path / file_name  # 拼接完整路径
+from .config import full_path
 
 #查看藏品信息
 ckcp = on_command('藏品', aliases={"cp"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
