@@ -6,7 +6,8 @@
 git config filter.hide_sensitive.clean "sed -e '/#HIDE_THIS_LINE/d' -e '/#HIDE_BLOCK_START/,/#HIDE_BLOCK_END/d'"
 git config filter.hide_sensitive.smudge "cat"
 ```
-解释
+
+### 解释
 - `-e '/#HIDE_THIS_LINE/d'` → 删除单行（包含 `#HIDE_THIS_LINE`）。
 - `-e '/#HIDE_BLOCK_START/,/#HIDE_BLOCK_END/d'` → 删除多行（从 `#HIDE_BLOCK_START` 到 `#HIDE_BLOCK_END` 之间的内容）。
 
@@ -17,6 +18,12 @@ git config filter.hide_sensitive.smudge "cat"
 * filter=hide_sensitive
 ```
 这样所有文件都会自动应用 hide_sensitive 过滤器。
+
+如果你想 **让所有文件都应用 Git 过滤器**，但 **排除** `找GPT问的git隐藏特定行的方法.md`，可以在 `.gitattributes` 里单独指定它不使用 `filter=hide_sensitive` 规则。
+```
+* filter=hide_sensitive
+找GPT问的git隐藏特定行的方法.md -filter
+```
 
 ## 3. 在代码里标记要隐藏的内容
 
@@ -64,7 +71,7 @@ git config --unset filter.hide_sensitive.clean
 git config --unset filter.hide_sensitive.smudge
 ```
 
-然后删除 .gitattributes 里的 * filter=hide_sensitive 规则。
+然后删除 `.gitattributes` 里的 `* filter=hide_sensitive` 规则。
 
 ## 最终效果
 
