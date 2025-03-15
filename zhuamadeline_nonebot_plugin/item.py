@@ -1073,10 +1073,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         try:
                             num = int(arg2)
                         except:
-                            await daoju.finish(f"请输入正确的想要加工果酱的瓶数（1-10）哦！", at_sender=True)
+                            await daoju.finish(f"请输入正确的想要加工果酱的瓶数（1-12）哦！", at_sender=True)
                         #其次判定是不是1-4之间的
-                        if num<1 or num>100:
-                            await daoju.finish(f"请输入正确的想要加工果酱的瓶数（1-10）哦！", at_sender=True)
+                        if num<1 or num>12:
+                            await daoju.finish(f"请输入正确的想要加工果酱的瓶数（1-12）哦！", at_sender=True)
 
                         #依然是不可能的代码，但我还是写上了
                         if(not 'berry' in data[str(user_id)]):
