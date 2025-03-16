@@ -78,9 +78,6 @@ async def ticket_handle(event: GroupMessageEvent):
             elif rnd > 75 and rnd <= 100:
                 berry = 66
 
-            tax = berry * 25 // 100  # 计算 25%
-            berry_real = berry - tax  # 减去 25%
-
             #特别的对于藏品的判定
             if (rnd == 5):
                 #判断是否开辟藏品栏
@@ -98,12 +95,19 @@ async def ticket_handle(event: GroupMessageEvent):
                 #否则正常获得600草莓
                 else:
                     berry = 600
-            data[str(user_id)]['berry'] += (berry_real - 150)
+            
+            menpiao = 150
+            tax = berry * 25 // 100  # 计算 25%
+            berry_real = berry - tax  # 减去 25%
+            get_berry = berry_real - menpiao # 总共获得的草莓数量
+            
+            data[str(user_id)]['berry'] += get_berry
             # 初始化pots
             bar_data.setdefault("pots", 0)
+
             # 加入奖池
             bar_data["pots"] += tax
-            msg = f"本次刮刮乐你获得{berry}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+            msg = f"你交了{menpiao}颗草莓，进行了一次刮刮乐！本次刮刮乐你获得{berry}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你总共获得{berry_real}颗草莓，上交了{tax}颗草莓税！扣除门票费你最终获得了{get_berry}颗草莓！"
             if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
                 data[str(user_id)]['compulsion_count'] -= 1
                 if data[str(user_id)]['compulsion_count']!= 0:
