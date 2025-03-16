@@ -39,17 +39,17 @@ driver = get_driver()
 async def _():
     logger.info("抓madeline系统已经开启...")
     
-# 0:00 - 0:30 不进行事件的预处理钩子函数
-@run_preprocessor
-async def block_midnight_commands(event: Event, matcher: Matcher):
-    # 获取当前时间
-    current_time = datetime.datetime.now()
-    # logger.info("消息未拦截")
-    # 判断是否在 0:00 - 0:10 时间段内
-    if current_time.hour == 0 and current_time.minute < 10:
-        logger.info("消息已拦截")
-        # 如果是，抛出 IgnoredException 来阻止命令的进一步处理
-        raise IgnoredException("在 0:00 - 0:10 之间暂时禁止接收命令！")
+# # 0:00 - 0:30 不进行事件的预处理钩子函数
+# @run_preprocessor
+# async def block_midnight_commands(event: Event, matcher: Matcher):
+#     # 获取当前时间
+#     current_time = datetime.datetime.now()
+#     # logger.info("消息未拦截")
+#     # 判断是否在 0:00 - 0:10 时间段内
+#     if current_time.hour == 0 and current_time.minute < 10:
+#         logger.info("消息已拦截")
+#         # 如果是，抛出 IgnoredException 来阻止命令的进一步处理
+#         raise IgnoredException("在 0:00 - 0:10 之间暂时禁止接收命令！")
     
 # 运行前检查冷却时间
 @run_preprocessor
