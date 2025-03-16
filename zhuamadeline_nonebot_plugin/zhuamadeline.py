@@ -638,13 +638,13 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
         if collections.get('身份徽章', 0) > 0:
             # 根据 identity_status 显示对应的状态文本
             if identity_status == 0:
-                message += "\n- “身份”状态：欲速则不达（停用）"
+                message += "\n• “身份”状态：欲速则不达（停用）"
             elif identity_status == 1:
-                message += "\n- “身份”状态：2ed（身份模式）"
+                message += "\n• “身份”状态：2ed（身份模式）"
             elif identity_status == 2:
-                message += "\n- “身份”状态：膀胱（急速模式）"
+                message += "\n• “身份”状态：膀胱（急速模式）"
 
-        message += f"\n- 充能箱状态：{'撞开（启用）' if elect_status else '关闭（停用）'}" if collections.get('充能箱', 0) > 0 else ''
+        message += f"\n• 充能箱状态：{'撞开（启用）' if elect_status else '关闭（停用）'}" if collections.get('充能箱', 0) > 0 else ''
     
     # 显示下次抓取的时间（若有）
     message += (f"\n- 下次可抓取时间：\n{next_time}") if current_time < next_time else ''
@@ -652,19 +652,19 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     if all_judge == 'all':   
 
         # 显示事件（若有）
-        message += (f"\n- 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_bet1'] else ''
+        message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_bet1'] else ''
 
         # 显示幸运次数（若有）
-        message += (f"\n- 剩余幸运次数：{lucky_times - 1}次") if lucky_times > 1 else ''
+        message += (f"\n• 剩余幸运次数：{lucky_times - 1}次") if lucky_times > 1 else ''
 
         # 显示下次钓鱼的时间（若有）
-        message += (f"\n- 下次可钓鱼时间：\n{next_fishing_time}") if current_time < next_fishing_time else ''
+        message += (f"\n• 下次可钓鱼时间：\n{next_fishing_time}") if current_time < next_fishing_time else ''
 
         # 判断是否进入时间秒表冷却（若有）
-        message += (f"\n- 时间秒表冷却结束时间：\n{next_clock_time}") if current_time < next_clock_time else ''
+        message += (f"\n• 时间秒表冷却结束时间：\n{next_clock_time}") if current_time < next_clock_time else ''
 
         # 显示debuff时间（若有）
-        message += (f"\n- debuff {debuff_messages.get(debuff, '')} 的持续时间至：\n{next_recover_time}") if debuff != 'normal' else ''
+        message += (f"\n• debuff {debuff_messages.get(debuff, '')} 的持续时间至：\n{next_recover_time}") if debuff != 'normal' else ''
         
         # 显示竞猜（若有）
         if ifguess == 1:
@@ -688,7 +688,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
                     f"草莓税为[{tax}]颗草莓，税后草莓收益为[{final_berry_reward}]颗草莓！"
                 )
             else:
-                message += f"\n· 本次Madeline竞技场竞猜已结算"
+                message += f"\n• 本次Madeline竞技场竞猜已结算"
 
     await ck.finish(message, at_sender=True)
 
