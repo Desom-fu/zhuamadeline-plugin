@@ -1811,9 +1811,9 @@ async def double_ball_lottery():
 
             # 只猜中一个数字的玩家
             elif user_red == red_ball or user_blue == blue_ball:
-                bet_data["refund"] = ticket_cost  # 记录返还的门票费用
-                total_refund += ticket_cost
-                user_bar["bank"] += ticket_cost
+                bet_data["refund"] = int(ticket_cost * 0.8)  # 记录返还的门票费用
+                total_refund += int(ticket_cost * 0.8)
+                user_bar["bank"] += int(ticket_cost * 0.8)
                 single_match_users.append(int(user_id))
 
             # 开奖后，重置 ifplay
@@ -1822,31 +1822,33 @@ async def double_ball_lottery():
     # 计算奖金
     reward_percentage_val = reward_percentage(pots)
     total_reward = int(pots * reward_percentage_val / 100)
-    msg_list = [f"🎉 本次开奖号码：红 {red_ball}，蓝 {blue_ball} 🎉\n"]
+    msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball} 🎉\n"
 
     if winners:
         reward_per_winner = total_reward // len(winners)
-        msg_list.append(f"🏆 奖池总额：[{pots}]颗草莓\n")
-        msg_list.append(f"🎁 本次总奖金：[{total_reward}]颗草莓\n")
-        msg_list.append("🎊 恭喜 ")
+        msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
+        msg_text += f"🎁 本次总奖金：[{total_reward}]颗草莓\n"
+        msg_text += "🎊 恭喜 "
+        
         for winner in winners:
             bar_data[str(winner)]["bank"] += reward_per_winner
             bar_data[str(winner)]["double_ball"]["prize"] = reward_per_winner
-            msg_list.append(MessageSegment.at(winner))  # @中奖者
-        msg_list.append(f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all查看`")
+            msg_text += MessageSegment.at(winner)  # @中奖者
+
+        msg_text += f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all查看`\n"
 
     else:
-        msg_list.append("很遗憾，本次无人中奖！")
+        msg_text += "很遗憾，本次无人中奖！\n"
 
     # 额外信息：只猜中一个数字的玩家
     if single_match_users:
-        msg_list.append("\n猜中一位数字的玩家，已经返还了门票费用哦！请通过`.ck all查看`")
+        msg_text += "\n猜中一位数字的玩家，已经返还了门票费用哦！请通过`.ck all查看`\n"
 
     # 扣除奖池金额
     bar_data["pots"] -= total_refund
-    msg_list.append(f"\n当前奖池剩余{bar_data['pots']}颗草莓！")
+    msg_text += f"\n当前奖池剩余{bar_data['pots']}颗草莓！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 
     save_data(bar_path, bar_data)
 
-    await bot.send_group_msg(group_id=zhuama_group, message=msg_list)  # 替换群号
+    await bot.send_group_msg(group_id=zhuama_group, message=msg_text)
