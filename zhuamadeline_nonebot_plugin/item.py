@@ -1650,13 +1650,13 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             if liechang_number=='2' or nums[2] == "2":  
                                 if str(user_id) not in data2:
                                     await daoju.finish("你还未解锁通往异域茂林的道路，请先在第异域茂林抓到任意一个Madeline哦！", at_sender=True)
-                            elif liechang_number=='3' or nums[2] == "3":  
+                            if liechang_number=='3' or nums[2] == "3":  
                                 if data[str(user_id)].get("item").get('神秘碎片', 0) < 5:
                                     await daoju.finish("你还未解锁通往翡翠矿井的道路...", at_sender=True)
                                 if str(user_id) not in data3:
                                     await daoju.finish("请先在翡翠矿井抓到任意一个Madeline吧！", at_sender=True)
                             # 4猎必须要有黄球才能使用提取器
-                            elif liechang_number == "4" or nums[2] == "4":
+                            if liechang_number == "4" or nums[2] == "4":
                                 if(not '黄色球体' in data[str(user_id)]['collections']):
                                     await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用Madeline提取器……", at_sender = True)
                                 if str(user_id) not in data:
