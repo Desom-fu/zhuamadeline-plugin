@@ -57,7 +57,7 @@ async def add_interest():
                     interest -= half
                 # 大于1000，超出的全部投给奖池
                 elif interest > 1000:
-                    pots += interest - 1000
+                    pots += interest - 750
                     interest = 750
                 user_bar["interest_today"] = interest  # 记录今日利息
                 user_bar["interest"] += interest  # 记录总利息
