@@ -1649,7 +1649,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             data4 = open_data(user_list4)
                             # 检查返回值
                             if not nums or len(nums) < 3:
-                                await daoju.finish("未找到指定的madeline，请检查输入是否正确！", at_sender=True)
+                                await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)
                             # 判定猎场
                             if liechang_number=='2' or nums[2] == "2":  
                                 if str(user_id) not in data2:
