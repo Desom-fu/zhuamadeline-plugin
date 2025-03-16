@@ -65,6 +65,7 @@ async def ticket_handle(event: GroupMessageEvent):
             await ticket.finish(f"你现在受伤了，没有精力刮刮乐！", at_sender=True)
 
         if(data[str(user_id)]['berry'] >= 0):
+            menpiao = 150
             berry = 50
             rnd = random.randint(1,100)
             if rnd <= 4:
@@ -77,7 +78,6 @@ async def ticket_handle(event: GroupMessageEvent):
                 berry = 100
             elif rnd > 75 and rnd <= 100:
                 berry = 66
-
             #特别的对于藏品的判定
             if (rnd == 5):
                 #判断是否开辟藏品栏
@@ -91,12 +91,11 @@ async def ticket_handle(event: GroupMessageEvent):
                     #写入文件
                     with open(user_path / file_name, 'w', encoding='utf-8') as f:
                         json.dump(data, f, indent=4)
-                    await ticket.send("这是？？？\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
+                    await ticket.send(f"你交了{menpiao}颗草莓，进行了一个刮刮颗，获得一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
                 #否则正常获得600草莓
                 else:
-                    berry = 600
-            
-            menpiao = 150
+                    berry = 800
+
             tax = berry * 25 // 100  # 计算 25%
             berry_real = berry - tax  # 减去 25%
             get_berry = berry_real - menpiao # 总共获得的草莓数量
