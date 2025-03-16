@@ -517,6 +517,9 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     ball_prize = double_ball.get("prize", 0)
     refund = double_ball.get("refund", 0)
     ball_ifplay = double_ball.get("ifplay", 0)
+    ticket_cost = double_ball.get("ticket_cost", 0)
+    user_red = double_ball.get("red_points")
+    user_blue = double_ball.get("blue_points")
     
     # 获取时间数据
     next_recover_time = datetime.datetime.strptime(next_recover_time_r, "%Y-%m-%d %H:%M:%S")
@@ -604,6 +607,11 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
             
             elif refund > 0:
                 message += f"\n• 上次双球竞猜返还门票：{refund}颗"
+
+        if ball_ifplay == 1:
+            # 显示双色球以及本场门票
+            message += (f"\n• 本场门票费：{ticket_cost}颗草莓")
+            message += (f"\n• 红球蓝球分别为：{user_red} | {user_blue}")
     
     # 显示能量（若有）
     message += (f"\n- 剩余能量：{energy}点") if energy > 0 else ''

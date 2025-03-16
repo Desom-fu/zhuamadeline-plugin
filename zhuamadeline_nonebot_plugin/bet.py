@@ -84,7 +84,7 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     elif game_type == '4':
         await rule.finish(
             "“游戏”4：双球竞猜\n" +
-            "本“游戏”入场费为50-200草莓（随奖池变化），入场费计入奖池！\n" +
+            "本“游戏”入场费为50-300草莓（随奖池变化），入场费计入奖池！\n" +
             "本“游戏”开放时间为每天的6:00 - 22:00！\n" +
             "在开放时间内，使用 `.bet 4/红色球数字(1-10)/蓝色球数字(1-10)` 来进行押注哦！\n" +
             "每天的 22:30 将会开奖，若有人红色蓝色球对应号码均匹配，将直接获得奖池的若干份额哦！如果多人同时中奖，将平分当前份额的奖池哦！\n" +
@@ -426,7 +426,9 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         user_double_ball["ball_prize"] = 0
         user_double_ball["refund"] = 0
         user_double_ball["ifplay"] = 1
-    
+        
+        save_data(bar_path, bar_data)
+        save_data(full_path, data)
         await bet.finish(f"你已成功参与双球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}", at_sender=True)
     else:
         await bet.finish("请输入正确的游戏类型哦！", at_sender=True)
