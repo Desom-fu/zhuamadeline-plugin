@@ -50,9 +50,15 @@ async def add_interest():
             user_bar.setdefault("interest_today", 0)  # 初始化今日利息
             if user_bar["bank"] > 0:
                 interest = int(user_bar["bank"] * 0.01)  # 计算 1% 利息
+                # 大于500，超出的部分自己活获得50%，剩余的投入奖池
                 if interest > 500:
-                    pots += interest - 500
-                    interest = 500
+                    half = (interest - 500) // 2
+                    pots += half
+                    interest -= half
+                # 大于1000，超出的全部投给奖池
+                elif interest > 1000:
+                    pots += interest - 1000
+                    interest = 750
                 user_bar["interest_today"] = interest  # 记录今日利息
                 user_bar["interest"] += interest  # 记录总利息
                 user_bar["bank"] += interest  # 利息加到银行存款中
