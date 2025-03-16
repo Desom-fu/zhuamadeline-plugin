@@ -180,27 +180,27 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         else:
             #注册用户
             data[str(user_id)] = {}
-            collections = data[str(user_id)].get('collections', {})
-            items = data[str(user_id)].get('item', {})
+            collections = data[str(user_id)].setdefault('collections', {})
+            items = data[str(user_id)].setdefault('item', {})
             next_time = current_time + datetime.timedelta(minutes=30)
-            #检测回想之核
-            dream = data[str(user_id)]['collections'].get("回想之核", 0)
-            if dream >= 1:
-                next_time = current_time + datetime.timedelta(minutes=29)
+            # #检测回想之核
+            # dream = collections.get("回想之核", 0)
+            # if dream >= 1:
+            #     next_time = current_time + datetime.timedelta(minutes=29)
             data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
             answer = 1
     else:
         ##注册第一个用户
         user_id = event.get_user_id()
         data[str(user_id)] = {}
-        collections = data[str(user_id)].get('collections', {})
-        items = data[str(user_id)].get('item', {})
+        collections = data[str(user_id)].setdefault('collections', {})
+        items = data[str(user_id)].setdefault('item', {})
         current_time = datetime.datetime.now()
         next_time = current_time + datetime.timedelta(minutes=30)
-        #检测回想之核
-        dream = data[str(user_id)]['collections'].get("回想之核", 0)
-        if dream >= 1:
-            next_time = current_time + datetime.timedelta(minutes=29)
+        # #检测回想之核
+        # dream = collections.get("回想之核", 0)
+        # if dream >= 1:
+        #     next_time = current_time + datetime.timedelta(minutes=29)
         data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         answer = 1
 
@@ -396,7 +396,7 @@ async def dailyqd(event: GroupMessageEvent):
     # 获取日期信息
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
     
-    if user_data["date"] == current_date_str:
+    if user_data.get("date", "2000-01-01") == current_date_str:
         await qd.finish("一天只能签到一次吧......", at_sender=True)
 
     # 计算随机奖励
