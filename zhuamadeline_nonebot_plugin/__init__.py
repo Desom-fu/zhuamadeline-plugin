@@ -88,6 +88,8 @@ async def _():
 async def update_cooldown(event: Event):
     if isinstance(event, MessageEvent):  # 仅处理消息事件
         message_content = event.get_message().extract_plain_text()  # 提取纯文本内容
+        if message_content.startswith(("。/", "./", "。、", ".、")):
+            return
         if message_content.startswith('。') or message_content.startswith('.'):
             logger.info("这条消息添加冷却")
             user_id = str(event.get_user_id())
