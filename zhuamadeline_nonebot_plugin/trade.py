@@ -78,7 +78,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
             data2[str(user_id)][good] -= amount
             #这应该不会发生吧...但我还是加上了这个判断
             if(not 'berry' in data[str(user_id)]):
-                data[str(user_id)]['berry'] = 0
+                data[str(user_id)]['berry'] = 1000
             berry = amount * price
             data[user_id]['berry'] += berry
             data[str(user_id)]['event'] = 'nothing'

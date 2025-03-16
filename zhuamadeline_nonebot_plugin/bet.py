@@ -117,7 +117,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
         if(not 'berry' in data[str(user_id)]):
-            data[user_id]['berry'] = 0
+            data[user_id]['berry'] = 1000
         await bet.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
     # 如果该用户不在酒馆名单中，则先创建数据
     if user_id not in bar_data:
@@ -426,7 +426,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         user_double_ball["ball_prize"] = 0
         user_double_ball["refund"] = 0
         user_double_ball["ifplay"] = 1
-        
+
         save_data(bar_path, bar_data)
         save_data(full_path, data)
         await bet.finish(f"你已成功参与双球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}", at_sender=True)

@@ -1492,7 +1492,7 @@ async def dailyqd_simu(event: GroupMessageEvent, arg: Message = CommandArg()):
         if(str(user_id) in data):
             #若不存在berry，则开一个信息存储
             if(not 'berry' in data[str(user_id)]):
-                data[str(user_id)]['berry'] = 0
+                data[str(user_id)]['berry'] = 1000
             # 确保 'item' 键存在
             if 'item' not in data[str(user_id)]:
                 data[str(user_id)]['item'] = {}

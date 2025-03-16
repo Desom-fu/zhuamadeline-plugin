@@ -1080,7 +1080,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                         #依然是不可能的代码，但我还是写上了
                         if(not 'berry' in data[str(user_id)]):
-                            data[str(user_id)]['berry'] = 0
+                            data[str(user_id)]['berry'] = 1000
                         spend = 150
                         #检测草莓数量是否足够
                         if (data[str(user_id)].get('berry', 0) >= spend * num):
