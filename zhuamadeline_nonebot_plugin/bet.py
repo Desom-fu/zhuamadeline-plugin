@@ -508,18 +508,18 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
             berry = int(original_berry - tax)
             if card_value > 7:
                 data[user_id]['berry'] += berry
-                msg_text = f"你抽到的牌是{card_type}{card_name}，点数大于7，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
             else:
-                msg_text = f"你抽到的牌是{card_type}{card_name}，点数小于等于7，你的猜测失败了！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于等于7，你的猜测失败了！"
         elif guess_type == "小于7":
             original_berry = int(REWARD_MAPPING[guess_type])
             tax = int(original_berry*0.25)
             berry = int(original_berry - tax)
             if card_value < 7:
                 data[user_id]['berry'] += berry
-                msg_text = f"你抽到的牌是{card_type}{card_name}，点数小于7，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
             else:
-                msg_text = f"你抽到的牌是{card_type}{card_name}，点数大于等于7，你的猜测失败了！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于等于7，你的猜测失败了！"
         elif guess_type in ["梅花", "方片", "黑桃", "红桃"]:
             send_guess_type = "花色"
             original_berry = int(REWARD_MAPPING[send_guess_type])
@@ -527,9 +527,9 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
             berry = int(original_berry - tax)
             if card_type == guess_type:
                 data[user_id]['berry'] += berry
-                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
             else:
-                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
         else:
             await guess.finish(message="请输入一个正确的猜测值", at_sender=True)
     elif len(guess_type) == 2:
