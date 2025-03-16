@@ -436,7 +436,7 @@ def shop_list(item_list):
 
 #根据名字查找madeline的所在的猎场和等级和位置[等级，编号，几号猎场]
 def find_madeline(value):
-    # 遍历猎场编号1到3
+    # 遍历猎场编号1到4，开新猎场要改
     for lc in ['1', '2', '3', '4']:
         # 动态获取对应的 madeline_data
         data = globals().get(f"madeline_data{lc}")

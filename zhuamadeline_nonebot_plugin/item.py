@@ -1202,8 +1202,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         nums = find_madeline(arg2.lower())
                         #查不到这个madeline的档案，终止
                         if(nums==0): 
-                            logger.info("因为不存在该madeline献祭被中断")
-                            return
+                            await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)
                         #统计充能个数
                         try:
                             num_of_charge = int(arg3)
@@ -1607,6 +1606,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     if(item_name.lower()=="madeline提取器"):
                         success = 999
                         arg2 = command[1]   #madeline名字
+                        if not arg2:
+                             await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)
                         #若是解密相关不检查是否拥有提取器
                         """
                         隐藏madeline和一些隐藏线索
@@ -1640,6 +1641,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             """
                             # 开新猎场要改
                             nums = find_madeline(arg2.lower())
+                            # 没有对应的玛德琳
+                            if nums == 0:
+                                await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)
                             data2 = open_data(user_list2)
                             data3 = open_data(user_list3)
                             data4 = open_data(user_list4)
@@ -1662,41 +1666,37 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 if str(user_id) not in data:
                                     await daoju.finish("请先在地下终端抓到任意一个Madeline吧！", at_sender=True)
                                     
-                            if(nums!=0):
-                                rnd = random.randint(1,100)
-                                if(rnd <= 20+15*(5-int(nums[0]))):
-                                    success = 1
-                                    information = print_zhua(int(nums[0]), int(nums[1]), nums[2])
-                                else:
-                                    #受伤，更新下次抓的时间
-                                    hitNumber = random.randint(1,100)
-                                    noHitRate = 0
-                                    #判定道具的部分
-                                    wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
-                                    crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
-                                    #增加免伤率的部分
-                                    #天使之羽，增加2%
-                                    if (wing >= 1):
-                                        noHitRate += 2
-                                    #紫晶魄，增加3%
-                                    if (crystal >= 1):
-                                        noHitRate += 3
-
-                                    if hitNumber > noHitRate:
-                                        cd_time = random.randint(int(nums[0])*60, int(nums[0])*60+120)
-                                        current_time = datetime.datetime.now()
-                                        #检测回想之核
-                                        dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
-                                        next_time = current_time + datetime.timedelta(minutes=cd_time-dream)
-                                        data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                                        data[str(user_id)]["buff"] = "hurt"  #受伤
-                                        fail_text = f"提取失败！提取器爆炸了，你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
-                                    else:
-                                        fail_text = f"提取失败！提取器爆炸了，但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
-                                    success = 2
-                                data[str(user_id)]["item"][item_name] -= 1
+                            rnd = random.randint(1,100)
+                            if(rnd <= 20+15*(5-int(nums[0]))):
+                                success = 1
+                                information = print_zhua(int(nums[0]), int(nums[1]), nums[2])
                             else:
-                                return 
+                                #受伤，更新下次抓的时间
+                                hitNumber = random.randint(1,100)
+                                noHitRate = 0
+                                #判定道具的部分
+                                wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
+                                crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
+                                #增加免伤率的部分
+                                #天使之羽，增加2%
+                                if (wing >= 1):
+                                    noHitRate += 2
+                                #紫晶魄，增加3%
+                                if (crystal >= 1):
+                                    noHitRate += 3
+                                if hitNumber > noHitRate:
+                                    cd_time = random.randint(int(nums[0])*60, int(nums[0])*60+120)
+                                    current_time = datetime.datetime.now()
+                                    #检测回想之核
+                                    dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
+                                    next_time = current_time + datetime.timedelta(minutes=cd_time-dream)
+                                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                    data[str(user_id)]["buff"] = "hurt"  #受伤
+                                    fail_text = f"提取失败！提取器爆炸了，你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
+                                else:
+                                    fail_text = f"提取失败！提取器爆炸了，但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
+                                success = 2
+                            data[str(user_id)]["item"][item_name] -= 1
                         else:
                             await daoju.finish(f"你现在没有{item_name}", at_sender=True)
 
