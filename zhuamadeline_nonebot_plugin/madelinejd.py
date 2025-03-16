@@ -176,7 +176,7 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
         )
 
 # 统一处理mymadeline命令，支持查询单个猎场或所有猎场的库存，并保留0点的特殊事件
-mymadeline = on_command('mymadeline', aliases={"mymade","mymadline","my玛德琳","我的玛德琳","my"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+mymadeline = on_command('mymadeline', aliases={"mymade","mymadline","my玛德琳","我的玛德琳"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @mymadeline.handle()
 async def mymadeline_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     # 获取当前时间（小时、分钟、秒）
