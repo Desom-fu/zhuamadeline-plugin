@@ -562,7 +562,7 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
                 #如果没有，则添加
                 if(not '奇想扑克' in data[str(user_id)]['collections']):
                     data[str(user_id)]['collections']['奇想扑克'] = 1
-                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得奇想扑克！\n输入.cp 奇想扑克 以查看具体效果"
+                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！你在酒馆的桌子地下看到了一副奇怪的白色扑克，你将这副扑克捡了起来\n输入.cp 奇想扑克 以查看具体效果"
                 else:
                     data[user_id]['berry'] += berry
                     msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"    
