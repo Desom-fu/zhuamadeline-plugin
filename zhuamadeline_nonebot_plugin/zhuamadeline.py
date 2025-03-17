@@ -685,7 +685,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
                 if len(pvp_data['list']) < 10:
                     jisuan_turn = 10
                 # 计算目前为止的收益
-                berry_reward = int((120 - choose_rank) * (jisuan_turn - jisuan_choose_turn) * 0.2)
+                berry_reward = int((120 - choose_rank) * (turn - choose_turn) * (1 / 6))
                 tax = int(berry_reward * 0.1) # 计算草莓税
                 final_berry_reward = berry_reward - tax  # 计算税后收益
 
