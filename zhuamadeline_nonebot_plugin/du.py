@@ -92,7 +92,7 @@ async def ticket_handle(event: GroupMessageEvent):
                     #写入文件
                     with open(user_path / file_name, 'w', encoding='utf-8') as f:
                         json.dump(data, f, indent=4)
-                    await ticket.send(f"你交了{menpiao}颗草莓，进行了一次刮刮乐，获得一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
+                    await ticket.send(f"你花费{menpiao}颗草莓，购买了一张刮刮乐，但是刮出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
                 #否则正常获得600草莓
                 else:
                     berry = 666
@@ -107,7 +107,7 @@ async def ticket_handle(event: GroupMessageEvent):
 
             # 加入奖池
             bar_data["pots"] += tax
-            msg = f"- 你花了{menpiao}颗草莓，购买了一张刮刮乐！\n-本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+            msg = f"\n- 你花费{menpiao}颗草莓，购买了一张刮刮乐！\n-本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
             if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
                 data[str(user_id)]['compulsion_count'] -= 1
                 if data[str(user_id)]['compulsion_count']!= 0:
