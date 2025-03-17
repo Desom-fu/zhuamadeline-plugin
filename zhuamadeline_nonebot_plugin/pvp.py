@@ -219,10 +219,7 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
     #读取一下是否有圣十字架
     #有就加2点随机下限
     data = open_data(user_path)
-    try:
-        shengshi = data[qqb]['collections'].get("圣十字架", 0)
-    except:
-        shengshi = 0
+    shengshi = data[qqb]['collections'].get("圣十字架", 0)
 
     # 判定血刃和残片和机器人加对面固定战力上限
     blood = data[qqb]['collections'].get("鲜血之刃", 0)
@@ -245,10 +242,7 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
         hunt_bonusb += add_canpian_bonus
 
     #每1000安定之音加1随机上限
-    try:
-        music = data[qqb]['item'].get("安定之音", 0)
-    except:
-        music = 0  
+    music = data[qqb]['item'].get("安定之音", 0)
     if music >= 1:
         music_add = music // 1000
         add_rank_max += music_add
@@ -457,37 +451,25 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     final_rank = 0
     guding_rank = 0
     #血刃+2常驻，加3进攻
-    try:
-        blood = user_data[str(user_id)]['collections'].get("鲜血之刃", 0)
-    except:
-        blood = 0  
+    blood = user_data[str(user_id)]['collections'].get("鲜血之刃", 0)
     if blood >= 1:
         guding_rank += 2
         bonus_rank_max += 3
 
     #机器人+1属性
-    try:
-        robot = user_data[str(user_id)]['collections'].get("遥控机器人", 0)
-    except:
-        robot = 0  
+    robot = user_data[str(user_id)]['collections'].get("遥控机器人", 0)
     if robot >= 1:
         guding_rank += 1
         bonus_rank_max += 1
     
     #每9999残片加1属性
-    try:
-        canpian = user_data[str(user_id)]['item'].get("残片", 0)
-    except:
-        canpian = 0  
+    canpian = user_data[str(user_id)]['item'].get("残片", 0)
     if canpian >= 1:
         canpian_add = canpian // 9999
         guding_rank += canpian_add
 
     #每2500安定之音加2进攻战力
-    try:
-        music = user_data[str(user_id)]['item'].get("安定之音", 0)
-    except:
-        music = 0  
+    music = user_data[str(user_id)]['item'].get("安定之音", 0)
     if music >= 1:
         music_add = music // 2500
         bonus_rank_max += music_add
