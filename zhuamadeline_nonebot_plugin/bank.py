@@ -39,31 +39,32 @@ async def add_interest():
         return
     bot = list(bots.values())[0]  # 获取第一个 Bot 实例
     bar_data = open_data(bar_path)
-    pots = bar_data.setdefault("pots", 0)
+    bar_data.setdefault("pots", 0)
+    add_pots = 0
     interest_send = bar_data.setdefault("interest_send", False)
     if interest_send:
         return
     for user_id, user_bar in bar_data.items():
-        if user_id.isdigit() and isinstance(user_bar, dict):  # 跳过非用户数据（如 "pots"）
+        if user_id.isdigit() and isinstance(user_bar, dict):  # 跳过非用户数据
             user_bar.setdefault("bank",0)
             user_bar.setdefault("interest", 0)  # 初始化利息
             user_bar.setdefault("interest_today", 0)  # 初始化今日利息
             if user_bar["bank"] > 0:
                 interest = int(user_bar["bank"] * 0.01)  # 计算 1% 利息
-                # 大于500，超出的部分自己活获得50%，剩余的投入奖池
-                if interest > 500:
-                    half = (interest - 500) // 2
-                    pots += half
-                    interest -= half
                 # 大于1000，超出的全部投给奖池
-                elif interest > 1000:
-                    pots += interest - 750
+                if interest > 1000:
+                    add_pots += interest - 750
                     interest = 750
+                # 大于500，超出的部分自己获得50%，剩余的投入奖池
+                elif interest > 500:
+                    half = (interest - 500) // 2
+                    add_pots += half
+                    interest -= half
                 user_bar["interest_today"] = interest  # 记录今日利息
                 user_bar["interest"] += interest  # 记录总利息
                 user_bar["bank"] += interest  # 利息加到银行存款中
-    # 加上底池
-    bar_data["pots"] += pots
+    # 所有人的累计add_pots加上底池
+    bar_data["pots"] += add_pots
     bar_data["interest_send"] = True
     save_data(bar_path, bar_data)
     # 发送通知
