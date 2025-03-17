@@ -116,7 +116,7 @@ def pvp_guess(pos):
             
                 # 计算奖励
                 berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.2)
-                tax = (berry_reward * 25) // 100  # 计算 25%
+                tax = int(berry_reward * 0.1)  # 计算 10%
                 final_berry_reward = berry_reward - tax  # 确保最终值不变
 
                 # 加入奖池
@@ -160,7 +160,7 @@ def pvp_guess_end():
 
                 # 计算奖励
                 berry_reward = int((120 - choose_rank) * (turn - choose_turn) * 0.2)
-                tax = (berry_reward * 25) // 100  # 计算 25%
+                tax = (berry_reward * 10) // 100  # 计算 10%
                 final_berry_reward = berry_reward - tax  # 确保最终值不变
                 
                 # 加入奖池

@@ -492,10 +492,10 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     # 处理玩家猜测
     guess_type = str(arg).split("/")
     REWARD_MAPPING = {
-        "大于7": 260,
-        "小于7": 260,
-        "花色": 480,
-        "点数": 780
+        "大于7": 217,
+        "小于7": 217,
+        "花色": 400,
+        "点数": 650
     }
 
     if len(guess_type) != 1 and len(guess_type) != 2:
@@ -504,30 +504,30 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
         guess_type = guess_type[0]
         if guess_type == "大于7":
             original_berry = int(REWARD_MAPPING[guess_type])
-            tax = int(original_berry*0.25)
+            tax = int(original_berry*0.1)
             berry = int(original_berry - tax)
             if card_value > 7:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
             else:
                 msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于等于7，你的猜测失败了！"
         elif guess_type == "小于7":
             original_berry = int(REWARD_MAPPING[guess_type])
-            tax = int(original_berry*0.25)
+            tax = int(original_berry*0.1)
             berry = int(original_berry - tax)
             if card_value < 7:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
             else:
                 msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于等于7，你的猜测失败了！"
         elif guess_type in ["梅花", "方片", "黑桃", "红桃"]:
             send_guess_type = "花色"
             original_berry = int(REWARD_MAPPING[send_guess_type])
-            tax = int(original_berry*0.25)
+            tax = int(original_berry*0.1)
             berry = int(original_berry - tax)
             if card_type == guess_type:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
             else:
                 msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
         else:
@@ -535,7 +535,7 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     elif len(guess_type) == 2:
         send_guess_type = "点数"
         original_berry = int(REWARD_MAPPING[send_guess_type])
-        tax = int(original_berry*0.25)
+        tax = int(original_berry*0.1)
         berry = int(original_berry - tax)
         # 处理用户输入的牌值
         available_type = ["a", "2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "q", "k"]
@@ -565,10 +565,10 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
                     msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得奇想扑克！\n输入.cp 奇想扑克 以查看具体效果"
                 else:
                     data[user_id]['berry'] += berry
-                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"    
+                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"    
             else:                
                 data[user_id]['berry'] += berry
-                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
         else:
             msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
     if data[str(user_id)]['event']=='compulsion_bet1' and data[str(user_id)]['compulsion_count']!= 0:
@@ -704,8 +704,8 @@ help_msg = f"""
 输入 .使用道具 道具名 -|- 使用道具"""
 
 # 奖励设置
-jiangli = 466
-bet_tax = (jiangli * 25) // 100  # 向下取整计算 25%
+jiangli = 334
+bet_tax = int(jiangli * 0.1) # 向下取整计算 10%
 final_jiangli = jiangli - bet_tax
 
 # 全局变量——事件（单位s）
@@ -886,7 +886,7 @@ async def shoot(stp, group_id, message,args):
     if demon_data[group_id]['hp'][0] <= 0: 
         winner = demon_data[group_id]['pl'][1]
         user_data[winner]['berry'] += final_jiangli
-        msg += '- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
+        msg += '- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
         rndshenfen = random.randint(1,4)
         if rndshenfen == 1:
             #判断是否开辟藏品栏
@@ -920,7 +920,7 @@ async def shoot(stp, group_id, message,args):
     elif demon_data[group_id]['hp'][1] <= 0:
         winner = demon_data[group_id]['pl'][0]
         user_data[winner]['berry'] += final_jiangli
-        msg += '- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
+        msg += '- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
         rndshenfen = random.randint(1,4)
         if rndshenfen == 1:
             #判断是否开辟藏品栏
@@ -1379,7 +1379,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     if demon_data[group_id]['hp'][0] <= 0: 
         winner = demon_data[group_id]['pl'][1]
         user_data[winner]['berry'] += final_jiangli
-        msg += '\n- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
+        msg += '\n- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
         # 初始化pots
         bar_data.setdefault("pots", 0)
         # 加入奖池
@@ -1416,7 +1416,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     elif demon_data[group_id]['hp'][1] <= 0:
         winner = demon_data[group_id]['pl'][0]
         user_data[winner]['berry'] += final_jiangli
-        msg += '\n- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
+        msg += '\n- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
         # 初始化pots
         bar_data.setdefault("pots", 0)
         # 加入奖池
@@ -1553,7 +1553,7 @@ async def demon_surrender_handle(event: Event):
     # 奖励设置
     user_data[winner]['berry'] += final_jiangli  # 给获胜玩家奖励
 
-    msg = "玩家"+MessageSegment.at(loser)+"已投降。\n游戏结束，"+MessageSegment.at(winner)+f" 获胜！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！"
+    msg = "玩家"+MessageSegment.at(loser)+"已投降。\n游戏结束，"+MessageSegment.at(winner)+f" 获胜！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！"
 
     # 可能触发身份徽章的掉落
     rndshenfen = random.randint(1, 4)
@@ -1698,7 +1698,7 @@ async def check_timeout(group_id):
             # 发送通知
             await bot.send_group_msg(
                 group_id=group_id,
-                message=f"回合超时！当前回合玩家"+MessageSegment.at(player)+"自动判负，恭喜"+MessageSegment.at(non_current_player)+f"获胜！获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交25%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！" + msg
+                message=f"回合超时！当前回合玩家"+MessageSegment.at(player)+"自动判负，恭喜"+MessageSegment.at(non_current_player)+f"获胜！获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！" + msg
             )
             return True
         else:
@@ -1744,8 +1744,10 @@ def reward_percentage(pool: int) -> int:
         return int(30 + (50 - 30) * (15000 - pool) / (15000 - 7000))  # 50% -> 30%
     elif pool <= 30000:
         return int(20 + (30 - 20) * (30000 - pool) / (30000 - 15000))  # 30% -> 20%
+    elif pool <= 50000:
+        return int(10 + (20 - 10) * (50000 - pool) / (50000 - 30000))  # 20% -> 10%
     else:
-        return 10  # 10%
+        return 5  # 5%
     
 def reward_amount(pool: int) -> int:
     """门票费"""
@@ -1788,6 +1790,14 @@ async def double_ball_lottery():
     red_ball = random.randint(1, 10)
     blue_ball = random.randint(1, 10)
 
+    # 记录开奖历史
+    bar_data.setdefault("double_ball_history", [])
+    bar_data["double_ball_history"].append({
+        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "red": red_ball,
+        "blue": blue_ball
+    })
+
     winners = []
     single_match_users = []
     total_refund = 0
@@ -1811,9 +1821,9 @@ async def double_ball_lottery():
 
             # 只猜中一个数字的玩家
             elif user_red == red_ball or user_blue == blue_ball:
-                bet_data["refund"] = int(ticket_cost * 0.8)  # 记录返还的门票费用
-                total_refund += int(ticket_cost * 0.8)
-                user_bar["bank"] += int(ticket_cost * 0.8)
+                bet_data["refund"] = int(ticket_cost * 0.5)  # 记录返还的门票费用
+                total_refund += int(ticket_cost * 0.5)
+                user_bar["bank"] += int(ticket_cost * 0.5)
                 single_match_users.append(int(user_id))
 
             # 开奖后，重置 ifplay
@@ -1821,13 +1831,13 @@ async def double_ball_lottery():
 
     # 计算奖金
     reward_percentage_val = reward_percentage(pots)
-    total_reward = int(pots * reward_percentage_val / 100)
+    total_reward = pots * reward_percentage_val // 100
     msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball} 🎉\n"
+    msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
+    msg_text += f"🎁 本次总奖金：[{total_reward}]颗草莓\n"
 
     if winners:
         reward_per_winner = total_reward // len(winners)
-        msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
-        msg_text += f"🎁 本次总奖金：[{total_reward}]颗草莓\n"
         msg_text += "🎊 恭喜 "
         
         for winner in winners:
@@ -1845,7 +1855,7 @@ async def double_ball_lottery():
         msg_text += "\n猜中一位数字的玩家，已经返还了门票费用哦！请通过`.ck all查看`\n"
 
     # 扣除奖池金额
-    bar_data["pots"] -= total_refund
+    bar_data["pots"] -= total_refund + total_reward
     msg_text += f"\n当前奖池剩余{bar_data['pots']}颗草莓！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 

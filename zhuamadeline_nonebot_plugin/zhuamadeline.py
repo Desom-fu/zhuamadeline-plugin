@@ -521,7 +521,9 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     ticket_cost = double_ball.get("ticket_cost", 0)
     user_red = double_ball.get("red_points")
     user_blue = double_ball.get("blue_points")
-    
+    bar_data = open_data(bar_path)
+    history = bar_data.get("double_ball_history", [])
+
     # 获取时间数据
     next_recover_time = datetime.datetime.strptime(next_recover_time_r, "%Y-%m-%d %H:%M:%S")
     next_clock_time = datetime.datetime.strptime(next_clock_time_r, "%Y-%m-%d %H:%M:%S")
@@ -612,8 +614,14 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
         if ball_ifplay == 1:
             # 显示双色球以及本场门票
             message += (f"\n• 本场门票费：{ticket_cost}颗草莓")
-            message += (f"\n• 红球蓝球分别为：{user_red} | {user_blue}")
-    
+            message += (f"\n• 猜测号码：红 {user_red} | 蓝 {user_blue}")
+
+        if history:
+            latest_draw = history[-1]  # 取列表最后一个元素
+            latest_red = latest_draw["red"]
+            latest_blue = latest_draw["blue"]
+            latest_date = latest_draw["date"]
+            message += (f"最近一期 ({latest_date}) 开奖号码：红 {latest_red} | 蓝 {latest_blue}")
     # 显示能量（若有）
     message += (f"\n- 剩余能量：{energy}点") if energy > 0 else ''
     
@@ -678,7 +686,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
                     jisuan_turn = 10
                 # 计算目前为止的收益
                 berry_reward = int((120 - choose_rank) * (jisuan_turn - jisuan_choose_turn) * 0.2)
-                tax = (berry_reward * 25) // 100  # 计算草莓税
+                tax = int(berry_reward * 0.1) # 计算草莓税
                 final_berry_reward = berry_reward - tax  # 计算税后收益
 
                 message += (

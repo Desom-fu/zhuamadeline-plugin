@@ -69,15 +69,16 @@ async def ticket_handle(event: GroupMessageEvent):
             berry = 50
             rnd = random.randint(1,100)
             if rnd <= 4:
-                berry = 800
+                berry = 667
             elif rnd > 5 and rnd <= 15:
-                berry = 400
+                berry = 334
             elif rnd > 15 and rnd <= 35:
-                berry = 233
+                berry = 194
             elif rnd > 35 and rnd <= 75:
-                berry = 100
+                berry = 84
             elif rnd > 75 and rnd <= 100:
-                berry = 66
+                berry = 56
+
             #特别的对于藏品的判定
             if (rnd == 5):
                 #判断是否开辟藏品栏
@@ -91,13 +92,13 @@ async def ticket_handle(event: GroupMessageEvent):
                     #写入文件
                     with open(user_path / file_name, 'w', encoding='utf-8') as f:
                         json.dump(data, f, indent=4)
-                    await ticket.send(f"你交了{menpiao}颗草莓，进行了一个刮刮颗，获得一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
+                    await ticket.send(f"你交了{menpiao}颗草莓，进行了一次刮刮乐，获得一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
                 #否则正常获得600草莓
                 else:
                     berry = 800
 
-            tax = berry * 25 // 100  # 计算 25%
-            berry_real = berry - tax  # 减去 25%
+            tax = int(berry * 0.1)  # 计算 10%
+            berry_real = berry - tax  # 减去 10%
             get_berry = berry_real - menpiao # 总共获得的草莓数量
             
             data[str(user_id)]['berry'] += get_berry
@@ -106,7 +107,7 @@ async def ticket_handle(event: GroupMessageEvent):
 
             # 加入奖池
             bar_data["pots"] += tax
-            msg = f"- 你花了{menpiao}颗草莓，购买了一张刮刮乐！\n-本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交25%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+            msg = f"- 你花了{menpiao}颗草莓，购买了一张刮刮乐！\n-本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
             if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
                 data[str(user_id)]['compulsion_count'] -= 1
                 if data[str(user_id)]['compulsion_count']!= 0:
