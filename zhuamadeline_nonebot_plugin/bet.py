@@ -1746,8 +1746,11 @@ def reward_percentage(pool: int) -> int:
         return int(20 + (30 - 20) * (30000 - pool) / (30000 - 15000))  # 30% -> 20%
     elif pool <= 50000:
         return int(10 + (20 - 10) * (50000 - pool) / (50000 - 30000))  # 20% -> 10%
+    elif pool <= 100000:  
+        return int(5 + (10 - 5) * (100000 - pool) / (100000 - 50000))  # 10% -> 5%
     else:
         return 5  # 5%
+
     
 def reward_amount(pool: int) -> int:
     """门票费"""
