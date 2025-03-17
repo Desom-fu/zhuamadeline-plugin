@@ -118,15 +118,17 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     if user_id not in data:
         if(not 'berry' in data[str(user_id)]):
             data[user_id]['berry'] = 1000
+            # 写入数据
+            save_data(full_path, data)
         await bet.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
+    #debuff清除逻辑
+    debuff_clear(data,user_id)
     # 如果该用户不在酒馆名单中，则先创建数据
     if user_id not in bar_data:
         bar_data[user_id] = {}
         bar_data[user_id]['status'] = 'nothing'
     # 添加全局冷却
     all_cool_time(cd_path, user_id, group_id)
-    # 写入数据
-    save_data(full_path, data)
     #一些啥都干不了的buff
     #判断是否开辟event事件栏
     if(not 'event' in data[str(user_id)]):
