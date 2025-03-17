@@ -244,78 +244,100 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
 # 回收道具 50%价格回收
 recycle_item = on_command("recycle", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+
 @recycle_item.handle()
 async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandArg()):
     user_id = str(event.user_id)
     # 解析参数
     args = str(arg).strip().lower().split()
-    
-    if len(args) not in [1, 2]:
-        await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量)", at_sender=True)
-    
+
+    if len(args) < 1 or len(args) > 2:
+        await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量) 或 .recycle 道具名称 all", at_sender=True)
+
     # 获取道具名称
     item_name = args[0].strip()
     
-    if not item_name:  # 防止用户输入空格导致 item_name 为空
-        await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量)", at_sender=True)
-    
+    if not item_name:
+        await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量) 或 .recycle 道具名称 all", at_sender=True)
+
     # 进行别名转换
     standard_item = get_alias_name(item_name, item, item_aliases)
     standard_collection = get_alias_name(item_name, collections, collection_aliases)
     
-    # 如果匹配到道具或藏品的标准名称，就替换
     if standard_item:
         item_name = standard_item
     elif standard_collection:
         item_name = standard_collection
-    
-    # 获取数量（默认 1）
+
+    # 解析回收数量
+    is_all = False
     item_quantity = 1
     if len(args) == 2:
-        try:
-            item_quantity = int(args[1])
-            if item_quantity <= 0:
-                raise ValueError
-        except ValueError:
-            await recycle_item.finish("道具数量必须为正整数！", at_sender=True)
+        if args[1] == "all":  
+            is_all = True  # 标记为回收全部
+        else:
+            try:
+                item_quantity = int(args[1])
+                if item_quantity <= 0:
+                    raise ValueError
+            except ValueError:
+                await recycle_item.finish("道具数量必须为正整数！", at_sender=True)
+
     # 检测道具名称是否在商品列表中
     if item_name not in item:
         await recycle_item.finish(f"现在整个抓玛德琳都没有这个道具 [{item_name}]，你为什么会想回收呢？", at_sender=True)
+
     # 检测道具名称是否在黑名单中
     if item_name in forbid_recycle_item:
         await recycle_item.finish(f"[{item_name}] 在道具回收黑名单中，你不能回收该道具哦！", at_sender=True)
-    # 打开数据文件
-    data = {}
+
+    # 读取玩家数据
     if not (user_path / file_name).exists():
         await recycle_item.finish("玩家数据文件不存在！", at_sender=True)
+
     data = open_data(user_path / file_name)
+
     # 检查玩家是否存在
     if user_id not in data:
         await recycle_item.finish(f"你未注册zhuamadeline账号哦！", at_sender=True)
+
     # 检查玩家是否有该道具
     if "item" not in data[user_id]:
         data[user_id]['item'] = {}
     if item_name not in data[user_id]["item"]:
         await recycle_item.finish(f"你没有道具 [{item_name}] 哦！", at_sender=True)
+
+    # 如果是回收所有道具，获取当前持有数量
+    if is_all:
+        item_quantity = data[user_id]["item"][item_name]
+
     # 检查道具数量是否足够
     if data[user_id]["item"][item_name] < item_quantity:
         await recycle_item.finish(f"你的道具 [{item_name}] 数量不足哦！", at_sender=True)
-    recycle_per = int(item[item_name][0])  #查看物品单价
-    
-    # 鱼类全额回收
+
+    recycle_per = int(item[item_name][0])  # 查看物品单价
+
+    # 计算回收价格
     if item_name in fish_prices:
-        recycle_price = item_quantity * recycle_per
+        recycle_price = item_quantity * recycle_per  # 鱼类全额回收
     else:
-        recycle_price = (item_quantity * recycle_per) // 2 #本次回收价格（向下取整）
-    
+        recycle_price = (item_quantity * recycle_per) // 2  # 其他道具 50% 回收（向下取整）
+
     # 扣除道具
     data[user_id]["item"][item_name] -= item_quantity
+
     # 如果道具数量为 0，删除该道具
     if data[user_id]["item"][item_name] <= 0:
         del data[user_id]["item"][item_name]
-    #发放草莓
+
+    # 发放草莓
     data[user_id]['berry'] += recycle_price
+
     # 写入玩家数据文件
     save_data(user_path / file_name, data)
     owner_berry = data[user_id]['berry']
-    await recycle_item.finish(f"你成功回收了{item_quantity}个{item_name}！本次回收获得{recycle_price}颗草莓！你目前拥有{owner_berry}颗草莓！", at_sender=True)
+
+    if is_all:
+        await recycle_item.finish(f"你成功回收了你所有的{item_quantity}个{item_name}！本次回收获得{recycle_price}颗草莓！你目前拥有{owner_berry}颗草莓！", at_sender=True)
+    else:
+        await recycle_item.finish(f"你成功回收了{item_quantity}个{item_name}！本次回收获得{recycle_price}颗草莓！你目前拥有{owner_berry}颗草莓！", at_sender=True)
