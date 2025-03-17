@@ -704,7 +704,7 @@ help_msg = f"""
 输入 .使用道具 道具名 -|- 使用道具"""
 
 # 奖励设置
-jiangli = 333
+jiangli = 388
 bet_tax = int(jiangli * 0.1) # 向下取整计算 10%
 final_jiangli = jiangli - bet_tax
 
