@@ -611,7 +611,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
             elif refund > 0:
                 message += f"\n• 上次双球竞猜返还门票：{refund}颗"
 
-        if ball_ifplay == 1:
+        elif ball_ifplay == 1:
             # 显示双色球以及本场门票
             message += (f"\n• 本场门票费：{ticket_cost}颗草莓")
             message += (f"\n• 猜测号码：红 {user_red} | 蓝 {user_blue}")

@@ -69,15 +69,15 @@ async def ticket_handle(event: GroupMessageEvent):
             berry = 50
             rnd = random.randint(1,100)
             if rnd <= 4:
-                berry = 667
+                berry = 666
             elif rnd > 5 and rnd <= 15:
-                berry = 334
+                berry = 333
             elif rnd > 15 and rnd <= 35:
                 berry = 194
             elif rnd > 35 and rnd <= 75:
-                berry = 84
+                berry = 83
             elif rnd > 75 and rnd <= 100:
-                berry = 56
+                berry = 55
 
             #特别的对于藏品的判定
             if (rnd == 5):
@@ -95,7 +95,7 @@ async def ticket_handle(event: GroupMessageEvent):
                     await ticket.send(f"你交了{menpiao}颗草莓，进行了一次刮刮乐，获得一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
                 #否则正常获得600草莓
                 else:
-                    berry = 800
+                    berry = 666
 
             tax = int(berry * 0.1)  # 计算 10%
             berry_real = berry - tax  # 减去 10%

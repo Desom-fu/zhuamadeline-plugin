@@ -492,8 +492,8 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     # 处理玩家猜测
     guess_type = str(arg).split("/")
     REWARD_MAPPING = {
-        "大于7": 217,
-        "小于7": 217,
+        "大于7": 216,
+        "小于7": 216,
         "花色": 400,
         "点数": 650
     }
@@ -666,7 +666,7 @@ turn_limit = {
 }
 
 # 设定kp必定先手
-kp_pl = 1004643806
+kp_pl = 1234567890
 
 # 定义道具效果的字典
 item_effects = {
@@ -704,7 +704,7 @@ help_msg = f"""
 输入 .使用道具 道具名 -|- 使用道具"""
 
 # 奖励设置
-jiangli = 334
+jiangli = 333
 bet_tax = int(jiangli * 0.1) # 向下取整计算 10%
 final_jiangli = jiangli - bet_tax
 
