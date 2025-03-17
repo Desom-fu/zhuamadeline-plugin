@@ -88,7 +88,7 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 本“游戏”开放时间为每天的6:00 - 22:00！\n" +
             "- 在开放时间内，使用 `.bet 4/红色球数字(1-10)/蓝色球数字(1-10)` 来进行押注哦！\n" +
             "- 每天的 22:30 将会开奖，若有人红色蓝色球对应号码均匹配，将直接获得奖池的若干份额哦！如果多人同时中奖，将平分当前份额的奖池哦！\n" +
-            "- 如果只猜中一个也不用担心，会返还入场费的80%！\n"+
+            "- 如果只猜中一个也不用担心，也有小奖！小奖的金额是入场费的70%！\n"+
             "- 你在竞猜的时候同时也能玩其他“游戏”哦！"
         )
     else:
@@ -1756,15 +1756,15 @@ def reward_percentage(pool: int) -> int:
     
 def reward_amount(pool: int) -> int:
     """门票费"""
-    if pool < 1000:
+    if pool < 5000:
         return 50
-    elif pool <= 5000:
-        return 100
     elif pool <= 10000:
-        return 150
-    elif pool <= 15000:
-        return 200
+        return 100
     elif pool <= 20000:
+        return 150
+    elif pool <= 30000:
+        return 200
+    elif pool <= 40000:
         return 250
     else:
         return 300
@@ -1826,9 +1826,9 @@ async def double_ball_lottery():
 
             # 只猜中一个数字的玩家
             elif user_red == red_ball or user_blue == blue_ball:
-                bet_data["refund"] = int(ticket_cost * 0.5)  # 记录返还的门票费用
-                total_refund += int(ticket_cost * 0.5)
-                user_bar["bank"] += int(ticket_cost * 0.5)
+                bet_data["refund"] = int(ticket_cost * 0.7)  # 记录返还的门票费用
+                total_refund += int(ticket_cost * 0.7)
+                user_bar["bank"] += int(ticket_cost * 0.7)
                 single_match_users.append(int(user_id))
 
             # 开奖后，重置 ifplay
@@ -1853,11 +1853,11 @@ async def double_ball_lottery():
         msg_text += f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all查看`\n"
 
     else:
-        msg_text += "很遗憾，本次无人中奖！\n"
+        msg_text += "很遗憾，本次无人中大奖！\n"
 
     # 额外信息：只猜中一个数字的玩家
     if single_match_users:
-        msg_text += "\n猜中一位数字的玩家，已经返还了门票费用哦！请通过`.ck all查看`\n"
+        msg_text += "\n猜中一位数字的玩家成功中了小奖哦！将获得入场费用的70%的草莓！请通过`.ck all查看`\n"
 
     # 扣除奖池金额
     bar_data["pots"] -= total_refund + total_reward

@@ -1910,7 +1910,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 fail_text = f"你在布置充能陷阱的时候，突然间能量迸发，充能陷阱爆炸了！但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
                             success = 2
                         else:
-                            information = zhua_random(50, 350, 998, 999, liechang_number=liechang_number)
+                            information = zhua_random(50, 350, 1000, 1001, liechang_number=liechang_number)
                             #检测奇想魔盒
                             magicBox = data[str(user_id)]['collections'].get("奇想魔盒", 0) 
                             #检测奇想扑克
