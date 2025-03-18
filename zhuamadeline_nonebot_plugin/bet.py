@@ -823,7 +823,7 @@ async def shoot(stp, group_id, message,args):
         demon_data[group_id]['game_turn'] += 1
         # 判断是否开启死斗模式：根据不同的状态和轮数进行血量上限扣减
         if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
-            msg += f'- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
+            msg += f'\n- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
             if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
                 demon_data[group_id]["hp_max"] -= 1
                 new_hp_max = demon_data[group_id]["hp_max"]
@@ -836,13 +836,13 @@ async def shoot(stp, group_id, message,args):
             if identity_found == 2:
                 if demon_data[group_id]["item_max"] > 6:
                     demon_data[group_id]["item_max"] -= 1  # 扣 1 点道具上限（最低仍为 6）
-                    msg += f'- 道具上限减少 1，当前道具上限：{demon_data[group_id]["item_max"]}\n'
+                    msg += f'- {item_max}>6，扣1点道具上限，当前道具上限：{demon_data[group_id]["item_max"]}\n'
                 
-                remove_random = random.randint(1, 2)
+                remove_random = random.randint(1, 3)
 
-                # 计算要删除的道具数量
-                remove_count0 = remove_random if demon_data[group_id]['item_0'] else 0
-                remove_count1 = remove_random if demon_data[group_id]['item_1'] else 0
+                # 计算要删除的道具数量，但不能超过已有的道具数量
+                remove_count0 = min(remove_random, len(demon_data[group_id]['item_0'])) if demon_data[group_id]['item_0'] else 0
+                remove_count1 = min(remove_random, len(demon_data[group_id]['item_1'])) if demon_data[group_id]['item_1'] else 0
 
                 # 记录要删除的道具名称
                 removed_items_0 = random.sample(demon_data[group_id]['item_0'], remove_count0) if remove_count0 else []
@@ -859,7 +859,7 @@ async def shoot(stp, group_id, message,args):
                 if removed_names_0:
                     msg += '- '+ MessageSegment.at(player0) + f'失去了{remove_count0}个道具：{"、".join(removed_names_0)}！\n'
                 if removed_names_1:
-                    msg += '- '+ MessageSegment.at(player0) + f'失去了{remove_count1}个道具：{"、".join(removed_names_1)}！\n'
+                    msg += '- '+ MessageSegment.at(player1) + f'失去了{remove_count1}个道具：{"、".join(removed_names_1)}！\n'
                         
             # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
             elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
@@ -874,8 +874,9 @@ async def shoot(stp, group_id, message,args):
                     demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
 
         msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n\n'
-        # 重新获取hp_max
+        # 重新获取hp_max，item_max
         hp_max = demon_data.get(group_id, {}).get('hp_max')
+        item_max = demon_data.get(group_id, {}).get('item_max')
         clip = load()
         for i in range(random.randint(1+pangguang_add//2,3+add_max)):
             demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))
@@ -1204,13 +1205,11 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             demon_data[group_id]['game_turn'] += 1
             # 判断是否开启死斗模式：根据不同的状态和轮数进行血量上限扣减
             if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
-                msg += f'- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
-
+                msg += f'\n- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
                 if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
                     demon_data[group_id]["hp_max"] -= 1
                     new_hp_max = demon_data[group_id]["hp_max"]
                     msg += f'- {new_hp_max+1}>1，扣1点hp上限，当前hp上限：{new_hp_max}\n'
-
                     # 校准所有玩家血量不得超过hp上限
                     for i in range(len(demon_data[group_id]["hp"])):
                         demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
@@ -1219,13 +1218,13 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 if identity_found == 2:
                     if demon_data[group_id]["item_max"] > 6:
                         demon_data[group_id]["item_max"] -= 1  # 扣 1 点道具上限（最低仍为 6）
-                        msg += f'- 道具上限减少 1，当前道具上限：{demon_data[group_id]["item_max"]}\n'
+                        msg += f'- {item_max}>6，扣1点道具上限，当前道具上限：{demon_data[group_id]["item_max"]}\n'
 
-                    remove_random = random.randint(1, 2)
+                    remove_random = random.randint(1, 3)
 
-                    # 计算要删除的道具数量
-                    remove_count0 = remove_random if demon_data[group_id]['item_0'] else 0
-                    remove_count1 = remove_random if demon_data[group_id]['item_1'] else 0
+                    # 计算要删除的道具数量，但不能超过已有的道具数量
+                    remove_count0 = min(remove_random, len(demon_data[group_id]['item_0'])) if demon_data[group_id]['item_0'] else 0
+                    remove_count1 = min(remove_random, len(demon_data[group_id]['item_1'])) if demon_data[group_id]['item_1'] else 0
 
                     # 记录要删除的道具名称
                     removed_items_0 = random.sample(demon_data[group_id]['item_0'], remove_count0) if remove_count0 else []
@@ -1242,7 +1241,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                     if removed_names_0:
                         msg += '- '+ MessageSegment.at(player0) + f'失去了{remove_count0}个道具：{"、".join(removed_names_0)}！\n'
                     if removed_names_1:
-                        msg += '- '+ MessageSegment.at(player0) + f'失去了{remove_count1}个道具：{"、".join(removed_names_1)}！\n'
+                        msg += '- '+ MessageSegment.at(player1) + f'失去了{remove_count1}个道具：{"、".join(removed_names_1)}！\n'
                         
                 # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
                 elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
