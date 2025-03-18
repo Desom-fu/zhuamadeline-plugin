@@ -692,7 +692,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
                 final_berry_reward = berry_reward - tax  # 计算税后收益
 
                 message += (
-                    f"\n· 本次Madeline竞技场竞猜你所选的擂台为[{pos+1}]，"
+                    f"\n• 本次Madeline竞技场竞猜你所选的擂台为[{pos+1}]，"
                     f"该擂台擂主为[{choose_nickname}]，上台回合为[{choose_turn}]，"
                     f"所选占擂Madeline的战力为[{choose_rank}]！\n"
                     f"截至目前第[{turn}]轮的草莓收益为：[{berry_reward}]颗草莓，"
