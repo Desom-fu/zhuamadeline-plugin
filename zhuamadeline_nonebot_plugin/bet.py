@@ -1725,15 +1725,19 @@ async def prop_demon_query_handle(bot: Bot, event: Event, arg: Message = Command
         # 转发全部道具效果消息
         await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
         await prop_demon_query.finish()
-    else:  # 如果是查询指定道具
-        # 查询道具效果
-        effect = item_effects.get(prop_name)
+    else:  # 查询指定道具
+        # 创建一个忽略大小写的映射字典
+        lower_to_original = {key.lower(): key for key in item_effects.keys()}
 
-        if effect:
-            # 如果找到道具效果，发送效果
-            await prop_demon_query.finish(f"\n道具【{prop_name}】的效果是：\n{effect}", at_sender=True)
+        # 查找原始名称
+        original_name = lower_to_original.get(prop_name)
+
+        if original_name:
+            # 使用原始名称查询效果
+            effect = item_effects[original_name]
+            await prop_demon_query.finish(f"\n道具【{original_name}】的效果是：\n{effect}", at_sender=True)
         else:
-            # 如果没有找到道具，提示用户
+            # 没找到匹配项
             await prop_demon_query.finish(f"未找到名为【{prop_name}】的道具，请检查道具名称是否正确！", at_sender=True)
 
 # 恶魔帮助
