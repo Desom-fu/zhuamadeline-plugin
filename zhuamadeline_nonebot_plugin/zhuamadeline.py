@@ -668,14 +668,14 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
             # 显示双色球以及本场门票
             message += (f"\n• 本场入场费：{ticket_cost}颗草莓")
         
-        message += (f"\n• 本次双球猜测号码：红 {user_red} | 蓝 {user_blue}")
+            message += (f"\n• 本次双球猜测号码：红 {user_red} | 蓝 {user_blue}")
 
-        if history and ball_ifplay == 0:
-            latest_draw = history[-1]  # 取列表最后一个元素
-            latest_red = latest_draw["red"]
-            latest_blue = latest_draw["blue"]
-            latest_date = latest_draw["date"]
-            message += (f"\n• {latest_date}开奖号码：红 {latest_red} | 蓝 {latest_blue}")
+        # if history and ball_ifplay == 0:
+        #     latest_draw = history[-1]  # 取列表最后一个元素
+        #     latest_red = latest_draw["red"]
+        #     latest_blue = latest_draw["blue"]
+        #     latest_date = latest_draw["date"]
+        #     message += (f"\n• {latest_date}开奖号码：红 {latest_red} | 蓝 {latest_blue}")
         
         # 显示竞猜（若有）
         if ifguess == 1:

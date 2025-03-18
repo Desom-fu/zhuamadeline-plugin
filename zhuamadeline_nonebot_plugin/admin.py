@@ -8,6 +8,7 @@ import json
 import datetime
 import os
 import time
+from datetime import timedelta
 from pathlib import Path
 from .function import find_madeline, get_sorted_madelines, get_madeline_data, madelinejd, save_data, open_data, get_alias_name
 from .render import *
@@ -121,46 +122,23 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".增减pvp时间 分钟",
         ".qdmn 数量 0/1",
         ".结束游戏 (游戏编号)",
-        ".无视冷却 QQ号"
+        ".无视冷却 QQ号",
+        ".查询双球开奖 (日期)"
     ]
     text = "\n以下为管理员命令(带有括号的是可选项)：\n" + "\n".join(commands)
     await admin_command.send(text, at_sender=True)
 
-# 状态
-status = on_fullmatch(['.状态', '。状态'], priority=5, rule=whitelist_rule)
-@status.handle()
-async def handle_status(event: GroupMessageEvent):
-    #判断是不是主人
-    if str(event.user_id) not in bot_owner_id:
-        return
-
-    #获取系统信息
-    system_info = platform.system()
-    #获取系统版本
-    system_version = platform.version()
-    #获取系统CPU使用率
-    cpu_percent = psutil.cpu_percent(interval=1)
-    #获取系统内存使用率
-    memory_percent = psutil.virtual_memory().percent
-    #获取系统磁盘使用率
-    disk_percent = psutil.disk_usage('/').percent
-
-    #发送信息
-    await status.send(f"\n系统：{system_info}.{system_version}\nCPU使用率：{cpu_percent}%\n内存使用率：{memory_percent}%\n磁盘使用率：{disk_percent}%", at_sender=True)    
-
-#查看玩家数量
-len_user = on_command("玩家数", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
-@len_user.handle()
-async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
-
-    #打开文件
-    data = {}
-    data = open_data(user_path/file_name)
-
-    #统计数量
-    count = len(data)
-
-    await len_user.finish(f"zhuamadeline游戏目前共有{count}个玩家！", at_sender=True)
+#查看开放神权命令    
+notadmin_command = on_command("开放神权", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
+@notadmin_command.handle()
+async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    commands = [
+        ".状态",
+        ".玩家数",
+        ".查询双球开奖 (日期)"
+    ]
+    text = "\n以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
+    await notadmin_command.send(text, at_sender=True)
 
 #全服发放草莓
 fafang = on_command("全服发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -176,7 +154,6 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         return
     
     #打开文件
-    data = {}
     data = open_data(user_path/file_name)
 
     #给每个账户发草莓
@@ -1626,3 +1603,73 @@ async def fafang_buchang_handle(event: GroupMessageEvent, arg: Message = Command
     save_data(user_path / file_name, data)
     
     await fafang_buchang.finish(f"已向全服果酱加工结束时间于2025-03-14前发放了{jiangli}颗草莓。", at_sender=True)
+
+'''以下为开放神权'''
+
+# 状态
+status = on_fullmatch(['.状态', '。状态'], priority=5, rule=whitelist_rule)
+@status.handle()
+async def handle_status(event: GroupMessageEvent):
+    #获取系统信息
+    system_info = platform.system()
+    #获取系统版本
+    system_version = platform.version()
+    #获取系统CPU使用率
+    cpu_percent = psutil.cpu_percent(interval=1)
+    #获取系统内存使用率
+    memory_percent = psutil.virtual_memory().percent
+    #获取系统磁盘使用率
+    disk_percent = psutil.disk_usage('/').percent
+
+    #发送信息
+    await status.send(f"\n系统：{system_info}.{system_version}\nCPU使用率：{cpu_percent}%\n内存使用率：{memory_percent}%\n磁盘使用率：{disk_percent}%", at_sender=True)    
+
+#查看玩家数量
+len_user = on_command("玩家数", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@len_user.handle()
+async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    data = open_data(user_path/file_name)
+
+    #统计数量
+    count = len(data)
+
+    await len_user.finish(f"zhuamadeline游戏目前共有{count}个玩家！", at_sender=True)
+
+# 查询开奖号码
+ssq_query = on_command("查询双球开奖", priority=1, block=True)
+
+@ssq_query.handle()
+async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+    args = arg.extract_plain_text().strip()
+
+    # 读取开奖数据
+    bar_data = open_data(bar_path)
+    history = bar_data.get("double_ball_history", [])
+
+    if not history:
+        await ssq_query.finish("暂无双球竞猜开奖历史数据。", at_sender=True)
+        return
+
+    if args:  # 如果用户输入了日期
+        try:
+            query_date = datetime.datetime.strptime(args, "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError:
+            await ssq_query.finish("日期格式错误！请使用 YYYY-MM-DD 格式查询开奖日期。", at_sender=True)
+            return
+
+        # 查找指定日期的开奖信息
+        result = next((draw for draw in history if draw["date"] == query_date), None)
+
+        if result:
+            red_ball = result.get("red", "未知")
+            blue_ball = result.get("blue", "未知")
+            await ssq_query.finish(f"\n{query_date} 的双球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball}", at_sender=True)
+        else:
+            await ssq_query.finish(f"\n未找到 {query_date} 的双球竞猜开奖信息，请检查日期是否正确。", at_sender=True)
+
+    else:  # 如果用户没有输入日期，则返回最近一期开奖数据
+        latest_draw = history[-1]  # 取最新的一期
+        latest_date = latest_draw["date"]
+        red_ball = latest_draw.get("red", "未知")
+        blue_ball = latest_draw.get("blue", "未知")
+        await ssq_query.finish(f"\n最近一期 ({latest_date}) 双球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball}", at_sender=True)

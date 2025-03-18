@@ -1863,6 +1863,7 @@ async def double_ball_lottery():
     # 扣除奖池金额
     bar_data["pots"] -= total_refund
     msg_text += f"\n当前奖池剩余{bar_data['pots']}颗草莓！"
+    msg_text += f"\n\n若忘记开奖号码，可以通过命令 '.查询双球开奖 (日期)' 来查询哦！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 
     save_data(bar_path, bar_data)
