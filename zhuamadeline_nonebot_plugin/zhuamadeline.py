@@ -596,32 +596,21 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     
         # 显示总增加的利息（若有）
         message += (f"\n• 草莓银行总利息：{interest}颗") if interest > 0 else ''
-
-        # 显示上次竞猜获得的草莓（若有）
-        message += (f"\n• 上次竞猜获得草莓：{last_pvp_guess_berry}颗") if last_pvp_guess_berry > 0 else ''
     
         # 显示当前奖池积累（若有）
         message += (f"\n• 当前奖池积累草莓：{pots}颗") if pots > 0 else ''
         
+        # 显示上次竞猜获得的草莓（若有）
+        message += (f"\n• 上次bet3获得草莓：{last_pvp_guess_berry}颗") if last_pvp_guess_berry > 0 else ''
+
         if ball_ifplay == 0:
             # 优先显示中奖信息，然后显示门票信息
             if ball_prize > 0:
-                message += f"\n• 上次双球竞猜中奖草莓：{ball_prize}颗"
+                message += f"\n• 上次双球中奖草莓：{ball_prize}颗"
             
             elif refund > 0:
-                message += f"\n• 上次双球竞猜中奖草莓：{refund}颗"
+                message += f"\n• 上次双球中奖草莓：{refund}颗"
 
-        elif ball_ifplay == 1:
-            # 显示双色球以及本场门票
-            message += (f"\n• 本场门票费：{ticket_cost}颗草莓")
-            message += (f"\n• 猜测号码：红 {user_red} | 蓝 {user_blue}")
-
-        if history:
-            latest_draw = history[-1]  # 取列表最后一个元素
-            latest_red = latest_draw["red"]
-            latest_blue = latest_draw["blue"]
-            latest_date = latest_draw["date"]
-            message += (f"最近一期 ({latest_date}) 开奖号码：红 {latest_red} | 蓝 {latest_blue}")
     # 显示能量（若有）
     message += (f"\n- 剩余能量：{energy}点") if energy > 0 else ''
     
@@ -674,6 +663,19 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
 
         # 显示debuff时间（若有）
         message += (f"\n• debuff {debuff_messages.get(debuff, '')} 的持续时间至：\n{next_recover_time}") if debuff != 'normal' else ''
+
+        if ball_ifplay == 1:
+            # 显示双色球以及本场门票
+            message += (f"\n• 本场入场费：{ticket_cost}颗草莓")
+        
+        message += (f"\n• 本次双球猜测号码：红 {user_red} | 蓝 {user_blue}")
+
+        if history and ball_ifplay == 0:
+            latest_draw = history[-1]  # 取列表最后一个元素
+            latest_red = latest_draw["red"]
+            latest_blue = latest_draw["blue"]
+            latest_date = latest_draw["date"]
+            message += (f"\n• {latest_date}开奖号码：红 {latest_red} | 蓝 {latest_blue}")
         
         # 显示竞猜（若有）
         if ifguess == 1:

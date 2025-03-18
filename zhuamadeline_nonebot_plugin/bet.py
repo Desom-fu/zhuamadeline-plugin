@@ -1837,13 +1837,14 @@ async def double_ball_lottery():
     # 计算奖金
     reward_percentage_val = reward_percentage(pots)
     total_reward = pots * reward_percentage_val // 100
-    msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball} 🎉\n"
+    msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball}\n"
     msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
     msg_text += f"🎁 本次总奖金：[{total_reward}]颗草莓\n"
 
     if winners:
         reward_per_winner = total_reward // len(winners)
         msg_text += "🎊 恭喜 "
+        total_refund += total_reward
         
         for winner in winners:
             bar_data[str(winner)]["bank"] += reward_per_winner
@@ -1860,7 +1861,7 @@ async def double_ball_lottery():
         msg_text += "\n猜中一位数字的玩家成功中了小奖哦！将获得入场费用的70%的草莓！请通过`.ck all查看`\n"
 
     # 扣除奖池金额
-    bar_data["pots"] -= total_refund + total_reward
+    bar_data["pots"] -= total_refund
     msg_text += f"\n当前奖池剩余{bar_data['pots']}颗草莓！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 
