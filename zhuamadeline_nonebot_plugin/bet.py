@@ -1839,7 +1839,7 @@ async def double_ball_lottery():
     total_reward = pots * reward_percentage_val // 100
     msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball}\n"
     msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
-    msg_text += f"🎁 本次总奖金：[{total_reward}]颗草莓\n"
+    msg_text += f"🎁 本次奖金：[{total_reward}]颗草莓\n"
 
     if winners:
         reward_per_winner = total_reward // len(winners)
