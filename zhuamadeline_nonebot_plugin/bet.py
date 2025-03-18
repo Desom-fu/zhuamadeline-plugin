@@ -692,7 +692,7 @@ item_effects = {
     "墨镜": "观察第一颗和最后一颗子弹的种类，但顺序未知",
     "双转团": "（该道具为“身份”模式专属道具）把这个道具转移到对方道具栏里，若对方道具已达上限则丢弃本道具，无其他效果。但由于其富含identity，可能有其他的非bet2游戏内的效果？",
     "天秤": "（该道具为“身份”模式专属道具）如果你的道具数量≥对方道具数量，你对对方造成一点伤害；你的道具数量<对方道具数量，你回一点血",
-    "休养生息": "（该道具为“身份”模式专属道具）自己的hp恢复2，对方的hp恢复1，不跳回合",
+    "休养生息": "（该道具为“身份”模式专属道具）自己的hp恢复2，对方的hp恢复1，不跳回合；若对面为满血，则只回一点体力。",
     "玩具枪": "（该道具为“身份”模式专属道具）1/2的概率无事发生，1/2的概率对对面造成1点伤害",
     "烈弓": "（该道具为“身份”模式专属道具）使用烈弓后，下一发子弹伤害+1，且伤害类道具（小刀、酒、烈弓）的加伤效果可以无限叠加！",
     "血刃": "（该道具为“身份”模式专属道具）可以扣除自己1点hp，获得两个道具！并且获得的道具直到本轮实弹耗尽前可以超出上限（本轮实弹耗尽后超出上限的道具会消失）",
@@ -1333,13 +1333,22 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 msg += f"\n你在丢双转团的时候，意外从这个东西身上看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果\n"
     
     elif item_name == "休养生息":
-        demon_data[group_id]["hp"][player_turn] += 2
-        demon_data[group_id]["hp"][opponent_turn] += 1
-        if demon_data[group_id]["hp"][player_turn] >= hp_max:
-            demon_data[group_id]["hp"][player_turn] = hp_max
-        if demon_data[group_id]["hp"][opponent_turn] >= hp_max:
-            demon_data[group_id]["hp"][opponent_turn] = hp_max
-        msg += f"休养生息，备战待敌；止兵止战，休养生息。\n你恢复了2点体力，对方恢复了1点体力（最高恢复至上限）。\n\n你的体力为{demon_data[group_id]["hp"][player_turn]}/{hp_max}\n对方的体力为{demon_data[group_id]["hp"][opponent_turn]}/{hp_max}\n"
+        if demon_data[group_id]["hp"][opponent_turn] == hp_max:
+            demon_data[group_id]["hp"][player_turn] += 1  # 只回 1 点血
+            msg += f"休养生息，备战待敌；止兵止战，休养生息。\n对方体力已满，你仅恢复了1点体力。\n"
+        else:
+            demon_data[group_id]["hp"][player_turn] += 2
+            demon_data[group_id]["hp"][opponent_turn] += 1
+            msg += f"休养生息，备战待敌；止兵止战，休养生息。\n你恢复了2点体力，对方恢复了1点体力（最高恢复至上限）。\n"
+        
+        # 校准所有玩家血量不得超过hp上限
+        for i in range(len(demon_data[group_id]["hp"])):
+            demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
+
+        # 追加体力信息
+        msg += f"\n你的体力为 {demon_data[group_id]['hp'][player_turn]}/{hp_max}\n"
+        msg += f"对方的体力为 {demon_data[group_id]['hp'][opponent_turn]}/{hp_max}\n"
+
     
     elif item_name == "玩具枪":
         randchoice = random.randint(1, 2)
