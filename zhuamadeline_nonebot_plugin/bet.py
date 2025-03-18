@@ -153,7 +153,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         bar_data[user_id] = {}
         bar_data[user_id]['status'] = 'nothing'
 
-    if bar_data[user_id]['status'] != 'nothing':
+    if bar_data[user_id]['status'] != 'nothing' and game_type not in ['3','4']:
         await bet.finish("你已经在玩“游戏”了，请结束本局“游戏”再进行游玩新的“游戏”哦！", at_sender=True)
 
     if game_type == '1' and not '/' in args:
@@ -774,6 +774,63 @@ def load():
             clip[pos] = 1
     return clip
 
+def handle_game_end(
+    group_id: str,
+    winner: str,
+    prefix_msg: str,
+    bar_data: dict,
+    demon_data: dict
+):
+    """处理游戏结束的公共逻辑（使用全局变量）"""
+    user_data = open_data(full_path)
+    
+    players = demon_data[group_id]['pl']
+    player0 = str(players[0])
+    player1 = str(players[1])
+    
+    # 发放奖励
+    user_data[winner]['berry'] += final_jiangli
+    
+    # 构建基础消息
+    msg = prefix_msg + "恭喜" + MessageSegment.at(str(winner)) + (
+        f'胜利！恭喜获得{jiangli}颗草莓！但由于草莓税法的实行，需上交10%，'
+        f'最终获得{final_jiangli}颗，上交{bet_tax}颗税！'
+    )
+    
+    # 处理身份徽章掉落（1/4概率）
+    if random.randint(1, 4) == 1:
+        user_data.setdefault(str(winner), {}).setdefault('collections', {})
+        if '身份徽章' not in user_data[str(winner)]['collections']:
+            user_data[str(winner)]['collections']['身份徽章'] = 1
+            msg += "\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果"
+    
+    # 更新玩家状态
+    for player in [player0, player1]:
+        bar_data[player]['game'] = '1'
+        bar_data[player]['status'] = 'nothing'
+    
+    # 更新奖池
+    bar_data.setdefault('pots', 0)
+    bar_data['pots'] += bet_tax
+    
+    # 膀胱模式检测
+    game_turn = demon_data[group_id]['game_turn']
+    if game_turn > death_turn:
+        if any(user_data[p].get('pangguang', 0) == 0 for p in [player0, player1]):
+            msg += f"\n- 你们已经打了{demon_data[group_id]['game_turn']}轮，超过{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
+        for p in [player0, player1]:
+            user_data[p]['pangguang'] = 1
+    
+    # 重置游戏数据
+    demon_data[group_id] = demon_default.copy()
+    demon_data[group_id]['demon_coldtime'] = int(time.time()) + 1200
+    
+    # 统一保存数据
+    save_data(full_path, user_data)
+    
+    return msg, bar_data, demon_data
+
+# 死斗函数
 def death_mode(identity_found, group_id, demon_data):
     '''判断是否开启死斗模式：根据不同的状态和轮数进行血量上限扣减，保存状态后最后返回msg'''
     player0 = str(demon_data[group_id]['pl'][0])
@@ -796,7 +853,7 @@ def death_mode(identity_found, group_id, demon_data):
                 new_item_max = demon_data[group_id]["item_max"]
                 msg += f'- {new_item_max+1}>6，扣1点道具上限，当前道具上限：{demon_data[group_id]["item_max"]}\n'
 
-            remove_random = random.randint(1, 3)
+            remove_random = random.randint(1, 2)
             
             # 计算要删除的道具数量，但不能超过已有的道具数量
             remove_count0 = min(remove_random, len(demon_data[group_id]['item_0'])) if demon_data[group_id]['item_0'] else 0
@@ -832,6 +889,7 @@ def death_mode(identity_found, group_id, demon_data):
     
     return msg, demon_data
 
+# 刷新道具函数
 def refersh_item(identity_found, group_id, demon_data):
     idt_len = len(item_dic2)
     add_max = 0
@@ -850,7 +908,7 @@ def refersh_item(identity_found, group_id, demon_data):
     hp1 = demon_data[group_id]["hp"][1]
     # 重新获取hp_max
     hp_max = demon_data.get(group_id, {}).get('hp_max')
-    item_max = demon_data.get(group_id, {}).get('hp_max')
+    item_max = demon_data.get(group_id, {}).get('item_max')
     for i in range(random.randint(1+pangguang_add//2,3+add_max)):
         demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))
         demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))
@@ -921,12 +979,16 @@ async def shoot(stp, group_id, message,args):
         demon_data[group_id]['game_turn'] += 1
         # 获取死斗模式信息
         death_msg, demon_data = death_mode(identity_found, group_id, demon_data)
+        msg += f'\n- 当前轮数：{demon_data[group_id]['game_turn']}'
         msg += death_msg
-        msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n\n'
+        # 增加换行，优化排版
+        msg += "\n"
         clip = load()
         # 获取刷新道具
         item_msg, demon_data = refersh_item(identity_found, group_id, demon_data)
         msg += item_msg
+        # 增加换行，优化排版
+        msg += "\n"
     
     if demon_data[group_id]['hcf'] < 0 and stp != 0:
         demon_data[group_id]['hcf'] = 0
@@ -947,72 +1009,24 @@ async def shoot(stp, group_id, message,args):
     demon_data[group_id]['turn_start_time'] = int(time.time())
     if demon_data[group_id]['hp'][0] <= 0: 
         winner = demon_data[group_id]['pl'][1]
-        user_data[winner]['berry'] += final_jiangli
-        msg += '- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
-        rndshenfen = random.randint(1,4)
-        if rndshenfen == 1:
-            #判断是否开辟藏品栏
-            if(not 'collections' in user_data[str(winner)]):
-                user_data[str(winner)]['collections'] = {}
-            #是否已经持有藏品"身份徽章"
-            #如果没有，则添加
-            if(not '身份徽章' in user_data[str(winner)]['collections']):
-                user_data[str(winner)]['collections']['身份徽章'] = 1
-                msg += f"\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果"
-        # 移除两位玩家游戏状态
-        bar_data[player0]['game'] = '1'
-        bar_data[player0]['status'] = 'nothing'
-        bar_data[player1]['game'] = '1'
-        bar_data[player1]['status'] = 'nothing'
-        # 初始化pots
-        bar_data.setdefault("pots", 0)
-        # 加入奖池
-        bar_data["pots"] += bet_tax
-        if demon_data[group_id]['game_turn'] > death_turn:
-            if user_data[player0].get("pangguang", 0) == 0 or user_data[player1].get("pangguang", 0) == 0:
-                msg += f"\n- 你们已经打了{demon_data[group_id]['game_turn']}轮，超过{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
-            # 设置玩家的 pangguang 状态为 1
-            user_data[player0]["pangguang"] = 1
-            user_data[player1]["pangguang"] = 1
-        # 重置游戏
-        demon_data[group_id] = demon_default
-        demon_data[group_id]['demon_coldtime'] = int(int(time.time()) + 60*20) # 20min冷却
-        # 写入主数据
-        save_data(full_path, user_data)
+        end_msg, bar_data, demon_data = handle_game_end(
+            group_id=str(group_id),
+            winner=winner,
+            prefix_msg="游戏结束！",
+            bar_data=bar_data,
+            demon_data=demon_data
+        )
+        msg += end_msg
     elif demon_data[group_id]['hp'][1] <= 0:
         winner = demon_data[group_id]['pl'][0]
-        user_data[winner]['berry'] += final_jiangli
-        msg += '- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
-        rndshenfen = random.randint(1,4)
-        if rndshenfen == 1:
-            #判断是否开辟藏品栏
-            if(not 'collections' in user_data[str(winner)]):
-                user_data[str(winner)]['collections'] = {}
-            #是否已经持有藏品"身份徽章"
-            #如果没有，则添加
-            if(not '身份徽章' in user_data[str(winner)]['collections']):
-                user_data[str(winner)]['collections']['身份徽章'] = 1
-                msg += f"\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果"
-        # 移除两位玩家游戏状态
-        bar_data[player0]['game'] = '1'
-        bar_data[player0]['status'] = 'nothing'
-        bar_data[player1]['game'] = '1'
-        bar_data[player1]['status'] = 'nothing'
-        # 初始化pots
-        bar_data.setdefault("pots", 0)
-        # 加入奖池
-        bar_data["pots"] += bet_tax
-        if demon_data[group_id]['game_turn'] > death_turn:
-            if user_data[player0].get("pangguang", 0) == 0 or user_data[player1].get("pangguang", 0) == 0:
-                msg += f"\n- 你们已经打了{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
-            # 设置玩家的 pangguang 状态为 1
-            user_data[player0]["pangguang"] = 1
-            user_data[player1]["pangguang"] = 1
-        # 重置游戏
-        demon_data[group_id] = demon_default
-        demon_data[group_id]['demon_coldtime'] =  int(int(time.time()) + 60*20)# 20min冷却
-        # 写入主数据
-        save_data(full_path, user_data)
+        end_msg, bar_data, demon_data = handle_game_end(
+            group_id=str(group_id),
+            winner=winner,
+            prefix_msg="游戏结束！",
+            bar_data=bar_data,
+            demon_data=demon_data
+        )
+        msg += end_msg
     else:
         pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
         msg += '- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))+"\n" + "- 当前是"+ MessageSegment.at(pid) + "的回合"
@@ -1240,6 +1254,9 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             item_msg, demon_data = refersh_item(identity_found, group_id, demon_data)
             msg += item_msg
             
+            # 增加弹数消息，优化排版
+            msg += '- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))
+            
     elif item_name == "刷新票":
         num_items = len(player_items)
         player_items.clear()
@@ -1440,78 +1457,24 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     msg += "\n- 现在轮到" + MessageSegment.at(str(next_player_id)) + "行动！"
     if demon_data[group_id]['hp'][0] <= 0: 
         winner = demon_data[group_id]['pl'][1]
-        user_data[winner]['berry'] += final_jiangli
-        msg += '\n- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
-        # 初始化pots
-        bar_data.setdefault("pots", 0)
-        # 加入奖池
-        bar_data["pots"] += bet_tax
-        rndshenfen = random.randint(1,4)
-        if rndshenfen == 1:
-            #判断是否开辟藏品栏
-            if(not 'collections' in user_data[str(winner)]):
-                user_data[str(winner)]['collections'] = {}
-            #是否已经持有藏品"身份徽章"
-            #如果没有，则添加
-            if(not '身份徽章' in user_data[str(winner)]['collections']):
-                user_data[str(winner)]['collections']['身份徽章'] = 1
-                msg += f"\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果"
-        # 生成玩家信息
-        player0 = str(demon_data[group_id]['pl'][0])
-        player1 = str(demon_data[group_id]['pl'][1])
-        # 移除两位玩家游戏状态
-        bar_data[player0]['game'] = '1'
-        bar_data[player0]['status'] = 'nothing'
-        bar_data[player1]['game'] = '1'
-        bar_data[player1]['status'] = 'nothing'
-        if demon_data[group_id]['game_turn'] > death_turn:
-            if user_data[player0].get("pangguang", 0) == 0 or user_data[player1].get("pangguang", 0) == 0:
-                msg += f"\n- 你们已经打了{demon_data[group_id]['game_turn']}轮，超过{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
-            # 设置玩家的 pangguang 状态为 1
-            user_data[player0]["pangguang"] = 1
-            user_data[player1]["pangguang"] = 1
-        # 重置游戏
-        demon_data[group_id] = demon_default
-        demon_data[group_id]['demon_coldtime'] = int(int(time.time()) + 60*20) # 20min冷却
-        # 写入主数据
-        save_data(full_path, user_data)
+        end_msg, bar_data, demon_data = handle_game_end(
+            group_id=str(group_id),
+            winner=winner,
+            prefix_msg="游戏结束！",
+            bar_data=bar_data,
+            demon_data=demon_data
+        )
+        msg += end_msg
     elif demon_data[group_id]['hp'][1] <= 0:
         winner = demon_data[group_id]['pl'][0]
-        user_data[winner]['berry'] += final_jiangli
-        msg += '\n- 游戏结束！' + MessageSegment.at(str(winner))+ f'胜利！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！'
-        # 初始化pots
-        bar_data.setdefault("pots", 0)
-        # 加入奖池
-        bar_data["pots"] += bet_tax
-        rndshenfen = random.randint(1,4)
-        if rndshenfen == 1:
-            #判断是否开辟藏品栏
-            if(not 'collections' in user_data[str(winner)]):
-                user_data[str(winner)]['collections'] = {}
-            #是否已经持有藏品"身份徽章"
-            #如果没有，则添加
-            if(not '身份徽章' in user_data[str(winner)]['collections']):
-                user_data[str(winner)]['collections']['身份徽章'] = 1
-                msg += f"\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果"
-        # 生成玩家信息
-        player0 = str(demon_data[group_id]['pl'][0])
-        player1 = str(demon_data[group_id]['pl'][1])
-        if demon_data[group_id]['game_turn'] > death_turn:
-            if user_data[player0].get("pangguang", 0) == 0 or user_data[player1].get("pangguang", 0) == 0:
-                msg += f"\n- 你们已经打了{demon_data[group_id]['game_turn']}轮，超过{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
-            # 设置玩家的 pangguang 状态为 1
-            user_data[player0]["pangguang"] = 1
-            user_data[player1]["pangguang"] = 1
-        # 移除两位玩家游戏状态
-        bar_data[player0]['game'] = '1'
-        bar_data[player0]['status'] = 'nothing'
-        bar_data[player1]['game'] = '1'
-        bar_data[player1]['status'] = 'nothing'
-        # 重置游戏
-        demon_data[group_id] = demon_default
-        demon_data[group_id]['demon_coldtime'] =  int(int(time.time()) + 60*20)# 20min冷却
-        # 写入主数据
-        save_data(full_path, user_data)
+        end_msg, bar_data, demon_data = handle_game_end(
+            group_id=str(group_id),
+            winner=winner,
+            prefix_msg="游戏结束！",
+            bar_data=bar_data,
+            demon_data=demon_data
+        )
+        msg += end_msg
     save_data(demon_path, demon_data)
     save_data(bar_path, bar_data)
     await prop_demon.finish(msg)
@@ -1593,7 +1556,6 @@ async def demon_surrender_handle(event: Event):
     player_id = str(event.user_id)  # 获取发出投降指令的玩家ID
     
     demon_data = open_data(demon_path)  # 加载恶魔数据
-    user_data = open_data(full_path)  # 加载用户数据
     bar_data = open_data(bar_path)  # 加载bar数据
 
     # 判断玩家是否在游戏中
@@ -1605,54 +1567,21 @@ async def demon_surrender_handle(event: Event):
         await demon_surrender.finish("你当前不在游戏中，无法投降！", at_sender=True)
 
     # 确定投降的玩家和获胜的玩家
-    if player_id == players[0]:
-        winner = players[1]
-        loser = players[0]
-    else:
-        winner = players[0]
-        loser = players[1]
+    loser = player_id
+    winner = str(players[1] if loser == players[0] else players[0])
+    end_msg, bar_data, demon_data = handle_game_end(
+        group_id=str(group_id),
+        winner=winner,
+        prefix_msg=f"玩家"+MessageSegment.at(loser)+"已投降。\n游戏结束，",
+        bar_data=bar_data,
+        demon_data=demon_data
+    )
 
-    # 奖励设置
-    user_data[winner]['berry'] += final_jiangli  # 给获胜玩家奖励
-
-    msg = "玩家"+MessageSegment.at(loser)+"已投降。\n游戏结束，"+MessageSegment.at(winner)+f" 获胜！恭喜获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！"
-
-    # 可能触发身份徽章的掉落
-    rndshenfen = random.randint(1, 4)
-    if rndshenfen == 1:
-        if 'collections' not in user_data[winner]:
-            user_data[winner]['collections'] = {}
-        if '身份徽章' not in user_data[winner]['collections']:
-            user_data[winner]['collections']['身份徽章'] = 1
-            msg += f"\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入 .cp 身份徽章 以查看具体效果"
-
-    # 更新玩家的游戏状态
-    bar_data[loser]['game'] = '1'
-    bar_data[loser]['status'] = 'nothing'
-    bar_data[winner]['game'] = '1'
-    bar_data[winner]['status'] = 'nothing'
-    # 初始化pots
-    bar_data.setdefault("pots", 0)
-    # 加入奖池
-    bar_data["pots"] += bet_tax
-    if demon_data[group_id]['game_turn'] > death_turn:
-        if user_data[winner].get("pangguang", 0) == 0 or user_data[loser].get("pangguang", 0) == 0:
-            msg += f"\n- 你们已经打了{demon_data[group_id]['game_turn']}轮，超过{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
-        # 设置玩家的 pangguang 状态为 1
-        user_data[winner]["pangguang"] = 1
-        user_data[loser]["pangguang"] = 1
-
-    # 重置游戏状态
-    demon_data[group_id] = demon_default
-    demon_data[group_id]['demon_coldtime'] = int(time.time()) + 60 * 20  # 设置20分钟冷却
-
-    # 保存更新的数据
-    save_data(full_path, user_data)
     save_data(bar_path, bar_data)
     save_data(demon_path, demon_data)
 
     # 发送投降结果消息
-    await demon_surrender.finish(msg)
+    await demon_surrender.finish(end_msg)
 
 # 恶魔道具查询功能：展示指定道具的效果
 prop_demon_query = on_command("恶魔道具", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1706,7 +1635,6 @@ async def prop_demon_help_handle():
 async def check_timeout(group_id):
     demon_data = open_data(demon_path)
     bar_data = open_data(bar_path)
-    user_data = open_data(full_path)
     bots = get_bots()
     if not bots:
         logger.error("没有可用的Bot实例，无法检测bet2！")
@@ -1726,50 +1654,26 @@ async def check_timeout(group_id):
             player = demon_data[group_id]['pl'][player_turn]
             non_current_player = demon_data[group_id]['pl'][opponent_turn]
             
-            # 发草莓
-            user_data[str(non_current_player)]['berry'] += final_jiangli
-            rndshenfen = random.randint(1,4)
-            msg = ''
-            if rndshenfen == 1:
-                #判断是否开辟藏品栏
-                if(not 'collections' in user_data[str(non_current_player)]):
-                    user_data[str(non_current_player)]['collections'] = {}
-                #是否已经持有藏品"身份徽章"
-                #如果没有，则添加
-                if(not '身份徽章' in user_data[str(non_current_player)]['collections']):
-                    user_data[str(non_current_player)]['collections']['身份徽章'] = 1
-                    msg += f"\n\n游戏结束时，你意外从桌子底下看到了一个亮闪闪的徽章，上面写着“identity”，你感到十分疑惑，便捡了起来。输入.cp 身份徽章 以查看具体效果"
-            # 生成玩家信息
-            # 移除两位玩家游戏状态
-            bar_data[player]['game'] = '1'
-            bar_data[player]['status'] = 'nothing'
-            bar_data[non_current_player]['game'] = '1'
-            bar_data[non_current_player]['status'] = 'nothing'
-            if demon_data[group_id]['game_turn'] > death_turn:
-                if user_data[player].get("pangguang", 0) == 0 or user_data[non_current_player].get("pangguang", 0) == 0:
-                    msg += f"\n- 你们已经打了{demon_data[group_id]['game_turn']}轮，超过{death_turn}轮了……这股膀胱的怨念射入身份徽章里面！现在你们的身份徽章已解锁极速模式！就算暂时没有身份徽章以后也能直接切换！请使用 .use 身份徽章/2 切换！"
-                # 设置玩家的 pangguang 状态为 1
-                user_data[player]["pangguang"] = 1
-                user_data[non_current_player]["pangguang"] = 1
-            # 重置游戏
-            demon_data[group_id] = demon_default
-            demon_data[group_id]['demon_coldtime'] =int(int(time.time()) + 60*20) # 20min冷却作为惩罚
-            # 初始化pots
-            bar_data.setdefault("pots", 0)
-            # 加入奖池
-            bar_data["pots"] += bet_tax
+            end_msg, bar_data, demon_data = handle_game_end(
+                group_id=str(group_id),
+                winner=non_current_player,
+                prefix_msg="回合超时！当前回合玩家"+MessageSegment.at(player)+"自动判负！",
+                bar_data=bar_data,
+                demon_data=demon_data
+            )
+            msg = end_msg
             save_data(demon_path, demon_data)
-            save_data(full_path, user_data)
             save_data(bar_path, bar_data)
             # 发送通知
             await bot.send_group_msg(
                 group_id=group_id,
-                message=f"回合超时！当前回合玩家"+MessageSegment.at(player)+"自动判负，恭喜"+MessageSegment.at(non_current_player)+f"获胜！获得{jiangli}颗草莓！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{final_jiangli}颗草莓，上交了{bet_tax}颗草莓税！" + msg
+                message=msg
             )
             return True
         else:
             # 判断是否有人
             if len(demon_data[group_id]['pl']) == 1:
+                user_data = open_data(full_path)
                 player = demon_data[group_id]['pl'][0]
                 # 退还草莓
                 user_data[str(player)]['berry'] += 125 
@@ -1886,14 +1790,14 @@ async def double_ball_lottery():
 
             # 中奖处理
             if user_red == red_ball and user_blue == blue_ball:
-                winners.append(int(user_id))  # 记录中奖者
+                winners.append(user_id)  # 记录中奖者
 
             # 只猜中一个数字的玩家
             elif user_red == red_ball or user_blue == blue_ball:
                 bet_data["refund"] = int(ticket_cost * 0.7)  # 记录返还的门票费用
                 total_refund += int(ticket_cost * 0.7)
                 user_bar["bank"] += int(ticket_cost * 0.7)
-                single_match_users.append(int(user_id))
+                single_match_users.append(user_id)
 
             # 开奖后，重置 ifplay
             bet_data["ifplay"] = 0
