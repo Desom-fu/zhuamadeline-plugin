@@ -620,19 +620,21 @@ item_dic1 = {
     12: "手套",
     13: '骰子',
     14: "禁止卡",
+    15: '墨镜',
     }
 # 身份模式道具列表
 item_dic2 = { 
-    15: '双转团',
-    16: '天秤', 
-    17: '休养生息',
-    18: '玩具枪',
-    19: '烈弓',
-    20: '血刃',
-    21: '黑洞',
-    22: '金苹果',
-    23: '铂金草莓',
-    24: '肾上腺素',
+    16: '双转团',
+    17: '天秤', 
+    18: '休养生息',
+    19: '玩具枪',
+    20: '烈弓',
+    21: '血刃',
+    22: '黑洞',
+    23: '金苹果',
+    24: '铂金草莓',
+    25: '肾上腺素',
+    26: '烈性TNT',
     }
 
 item_dic = item_dic1 | item_dic2
@@ -686,6 +688,7 @@ item_effects = {
     "刷新票": "使用后，重新抽取和剩余道具数量相等的道具",
     "手套": "重新换弹，不进行道具刷新",
     "骰子": "你的hp变为1到4的随机值",
+    "墨镜": "观察第一颗和最后一颗子弹的种类，但顺序未知",
     "双转团": "（该道具为“身份”模式专属道具）把这个道具转移到对方道具栏里，若对方道具已达上限则丢弃本道具，无其他效果。但由于其富含identity，可能有其他的非bet2游戏内的效果？",
     "天秤": "（该道具为“身份”模式专属道具）如果你的道具数量≥对方道具数量，你对对方造成一点伤害；你的道具数量<对方道具数量，你回一点血",
     "休养生息": "（该道具为“身份”模式专属道具）自己的hp恢复2，对方的hp恢复1，不跳回合",
@@ -695,7 +698,8 @@ item_effects = {
     "黑洞": "（该道具为“身份”模式专属道具）召唤出黑洞，随机夺取对方的任意一个道具！\n如果对方没有道具，黑洞将在沉寂中回到你的身边。",
     "金苹果": "（该道具为“身份”模式专属道具）金苹果可以让你回复3点hp！但是作为代价你会跳过接下来的两个回合！不过对面的手铐和禁止卡也似乎不能使用了……",
     "铂金草莓": "（该道具为“身份”模式专属道具）因为是铂金草莓，所以能做到！自己回复1点hp，并且双方各加1点hp上限！",
-    "肾上腺素": "（该道具为“身份”模式专属道具）双方的hp上限-1，道具上限+1，并且使用者获得一个新道具！如果你的血量大于hp上限，血量会被强制调整到hp上限！并且如果你们的hp上限为1，无法使用该道具！",
+    "肾上腺素": "（该道具为“身份”模式专属道具）双方的hp上限-1，道具上限+1，并且使用者获得一个新道具！如果你们的hp上限为1，无法使用该道具！",
+    "烈性TNT": "（该道具为“身份”模式专属道具）双方的hp上限-1，hp各-1！注意，是先扣hp上限，然后再扣hp！另外，如果使用后会自杀，则无法使用该道具！",
 }
 
 help_msg = f"""
@@ -725,7 +729,7 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
     
     item_count = len(item_dic)  # 道具总数
     normal_mode_items = [] # 普通模式需要增加权重的道具（暂无）
-    identity_mode_items = [3, 4, 8, 18] # 身份模式需要增加权重的道具（放大镜，眼镜，小刀，玩具枪）
+    identity_mode_items = [3, 18] # 身份模式需要增加权重的道具（放大镜，玩具枪）
     
     # 动态生成权重表
     weights = {i: 0 for i in range(1, item_count + 1)}  # 初始化所有道具权重为0
@@ -824,10 +828,8 @@ async def shoot(stp, group_id, message,args):
                 new_hp_max = demon_data[group_id]["hp_max"]
                 msg += f'- {new_hp_max+1}>1，扣1点hp上限，当前hp上限：{new_hp_max}\n'
                 # 校准所有玩家血量不得超过hp上限
-                for player_index, player_id in enumerate(demon_data[group_id]['pl']):
-                    current_hp = demon_data[group_id]["hp"][player_index]
-                    if current_hp > new_hp_max:
-                        demon_data[group_id]["hp"][player_index] = new_hp_max
+                for i in range(len(demon_data[group_id]["hp"])):
+                    demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
                         
             # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
             elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
@@ -838,10 +840,8 @@ async def shoot(stp, group_id, message,args):
                 new_hp_max = demon_data[group_id]["hp_max"]
                 msg += f'- {old_hp_max}>1，扣2点hp上限，当前hp上限：{new_hp_max}\n'
                 # 校准所有玩家血量不得超过hp上限
-                for player_index, player_id in enumerate(demon_data[group_id]['pl']):
-                    current_hp = demon_data[group_id]["hp"][player_index]
-                    if current_hp > new_hp_max:
-                        demon_data[group_id]["hp"][player_index] = new_hp_max
+                for i in range(len(demon_data[group_id]["hp"])):
+                    demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
 
         msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n\n'
         # 重新获取hp_max
@@ -1030,20 +1030,27 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         idt_len = 0
         add_max += 1
         pangguang_add += 2
+    
+    # 提取数据
     player_items = demon_data[group_id][f"item_{player_turn}"]
     opponent_turn = (player_turn + 1) % len(demon_data[group_id]['pl'])
     opponent_items = demon_data[group_id][f"item_{opponent_turn}"]
-    # 道具名称匹配
-    if args not in item_dic.values():  # 检查输入的名称是否存在于 item_dic
+
+    # 道具名称匹配（忽略大小写）
+    args_lower = args.lower()
+    item_dic_lower = {key: value.lower() for key, value in item_dic.items()}  # 生成一个忽略大小写的字典
+
+    if args_lower not in item_dic_lower.values():  # 检查输入的名称是否存在于 item_dic（忽略大小写）
         await prop_demon.finish("你输入的道具不存在，请确认后再使用！")
 
     # 查找玩家的道具中是否存在该道具
     try:
-        # 遍历玩家的道具ID，找到第一个匹配的道具名称
-        item_idx = next(i for i, item_id in enumerate(player_items) if item_dic[item_id] == args)
+        # 遍历玩家的道具ID，找到第一个匹配的道具名称（忽略大小写）
+        item_idx = next(i for i, item_id in enumerate(player_items) if item_dic[item_id].lower() == args_lower)
     except StopIteration:
-        await prop_demon.finish("你并没有这个道具，请确认后再使用！", at_sender = True)
+        await prop_demon.finish("你并没有这个道具，请确认后再使用！", at_sender=True)
 
+    # 提取数据
     item_id = player_items[item_idx]
     item_name = item_dic[item_id]
     hp_max = demon_data.get(group_id, {}).get('hp_max')
@@ -1075,14 +1082,14 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             count_real_bullets = demon_data[group_id]['clip'][-2:].count(1)
             msg += f"前两颗子弹中有 {count_real_bullets} 颗实弹。\n"
         else:
-            msg += f"只剩最后一颗子弹：{'实弹' if demon_data[group_id]['clip'][-1] == 1 else '空弹'}\n"
+            msg += f"枪膛里只剩最后一颗子弹了，是{'实弹' if demon_data[group_id]['clip'][-1] == 1 else '空弹'}！\n"
 
     elif item_name == "手铐":
         if demon_data[group_id]['hcf'] == 0:
             demon_data[group_id]['hcf'] = 1
             msg += "你成功拷住了对方！\n"
         else:
-            player_items.append(5)
+            player_items.append(item_id)
             msg += "不可使用！对方仍处于束缚状态！\n"
 
     elif item_name == "禁止卡":
@@ -1095,12 +1102,12 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 skip_turn = 2
             demon_data[group_id]['hcf'] = 1 + add_turn
             if len(opponent_items) < item_max:
-                opponent_items.append(14)  # 只有在对方道具少于 max_item 个时才增加禁止卡
+                opponent_items.append(item_id)  # 只有在对方道具少于 max_item 个时才增加禁止卡
                 msg += f"你成功禁止住了对方！禁止了{skip_turn}个回合，但同时对方也获得了一张禁止卡！\n"
             else:
                 msg += f"你成功禁止住了对方！禁止了{skip_turn}个回合，但对方道具已满，并未获得这张禁止卡！\n"
         else:
-            player_items.append(14)
+            player_items.append(item_id)
             msg += "不可使用！对方仍处于束缚状态！\n"
 
     elif item_name == "欲望之盒":
@@ -1175,10 +1182,9 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                     msg += f'- {new_hp_max+1}>1，扣1点hp上限，当前hp上限：{new_hp_max}\n'
 
                     # 校准所有玩家血量不得超过hp上限
-                    for player_index, player_id in enumerate(demon_data[group_id]['pl']):
-                        current_hp = demon_data[group_id]["hp"][player_index]
-                        if current_hp > new_hp_max:
-                            demon_data[group_id]["hp"][player_index] = new_hp_max
+                    for i in range(len(demon_data[group_id]["hp"])):
+                        demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
+                        
                 # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
                 elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
                     old_hp_max = demon_data[group_id]["hp_max"]
@@ -1189,10 +1195,8 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                     msg += f'- {old_hp_max}>1，扣2点hp上限，当前hp上限：{new_hp_max}\n'
 
                     # 校准所有玩家血量不得超过hp上限
-                    for player_index, player_id in enumerate(demon_data[group_id]['pl']):
-                        current_hp = demon_data[group_id]["hp"][player_index]
-                        if current_hp > new_hp_max:
-                            demon_data[group_id]["hp"][player_index] = new_hp_max
+                    for i in range(len(demon_data[group_id]["hp"])):
+                        demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
                             
             msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n\n'
             msg += f"- 新弹夹总数：{len(demon_data[group_id]['clip'])} 实弹数：{demon_data[group_id]['clip'].count(1)}\n\n"
@@ -1254,7 +1258,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     
     elif item_name == "双转团":
         if len(opponent_items) < item_max:
-            opponent_items.append(15)  # 只有在对方道具少于 max_item 个时才获得双转团
+            opponent_items.append(item_id)  # 只有在对方道具少于 max_item 个时才获得双转团
             msg += f"这件物品太“IDENTITY”了，对方十分感兴趣，所以拿走了这件物品！\n"
         else:
             msg += f"这件物品太“IDENTITY”了，对方十分感兴趣，但是由于道具已满，没办法拿走这件物品，所以把双转团丢了！\n"
@@ -1288,7 +1292,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     
     elif item_name == "血刃":
         if demon_data[group_id]["hp"][player_turn] == 1:
-            player_items.append(20)
+            player_items.append(item_id)
             msg +=f'你的血量无法支持你使用血刃！\n'
         else:
             randchoice = random.randint(1, 5)
@@ -1320,7 +1324,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                     f"对方的【{stolen_item_name}】被黑洞吞噬，送进你的背包！\n")
         else:
             # 如果对方没有道具，黑洞会重新回到玩家背包
-            player_items.append(21)
+            player_items.append(item_id)
             msg += "你召唤出黑洞！然而对方空无一物，黑洞在无尽的沉寂中回到了你的手中。\n"
 
     elif item_name == "金苹果":
@@ -1343,7 +1347,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     elif item_name == "肾上腺素":
         # 检查血量上限是否为1
         if demon_data[group_id]["hp_max"] <= 1:
-            player_items.append(24) 
+            player_items.append(item_id) 
             msg += "你想使用肾上腺素，但是血量上限已经过低，你无法承受这种后果！\n"
         else:
             # 增加使用者的道具
@@ -1358,20 +1362,52 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             demon_data[group_id]["hp_max"] = hp_max
             new_hp_max = demon_data[group_id]["hp_max"]
             # 校准所有玩家血量不得超过hp上限
-            for player_id in demon_data[group_id]['pl']:
-                player_index = demon_data[group_id]['pl'].index(player_id)
-                current_hp = demon_data[group_id]["hp"][player_index]
-                if current_hp > new_hp_max:
-                    demon_data[group_id]["hp"][player_index] = new_hp_max
+            for i in range(len(demon_data[group_id]["hp"])):
+                demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
+                    
             msg += (
                 f"你注射了肾上腺素！心跳如雷，时间仿佛放慢，力量在血管中沸腾！\n"
-                f"- 双方道具上限+1！\n"
+                f"- 双方道具上限 +1！\n"
                 f"- 你获得了新道具：{new_item_name}\n"
                 f"- 当前道具上限：{item_max}\n\n"
                 f"然而，一丝生命力被悄然抽离……对手也感到一阵莫名的心悸。\n"
                 f"- 双方HP上限 -1！\n"
                 f"- 当前HP上限：{hp_max}\n"
             )
+    elif item_name == "烈性TNT":
+        # 获取当前 HP 和 HP 上限
+        current_hp = demon_data[group_id]["hp"][player_turn]
+        current_hp_max = demon_data[group_id]["hp_max"]
+        # 判定是否禁止使用 TNT
+        if current_hp_max <= 1 or current_hp <= 1 or (current_hp_max == 2 and current_hp == 2):
+            player_items.append(item_id)
+            msg += "你想引爆烈性TNT，但你的血量/血量上限已经过低，这样做无异于自杀！\n"
+        else:
+            demon_data[group_id]["hp_max"] -= 1
+            demon_data[group_id]["hp_max"] = max(1, demon_data[group_id]["hp_max"])  # 确保体力上限不会降到 0，虽然前面有判断了
+
+            # 校准所有玩家血量不得超过hp上限
+            for i in range(len(demon_data[group_id]["hp"])):
+                demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
+            
+            # 扣完上限调整血量后再扣血
+            demon_data[group_id]["hp"][player_turn] -= 1
+            demon_data[group_id]["hp"][opponent_turn] -= 1
+
+            msg += (
+                "你点燃了烈性TNT，产生了巨大的爆炸！\n"
+                f"- 双方HP上限 -1！\n- 当前HP上限：{demon_data[group_id]['hp_max']}\n"
+                f"- 双方HP -1！\n- 你的HP：{demon_data[group_id]['hp'][player_turn]}/{demon_data[group_id]['hp_max']}\n- 对方HP：{demon_data[group_id]['hp'][opponent_turn]}/{demon_data[group_id]['hp_max']}\n"
+            )
+            
+    elif item_name == "墨镜":
+        if len(demon_data[group_id]['clip']) > 1:
+            first_bullet = demon_data[group_id]['clip'][0]
+            last_bullet = demon_data[group_id]['clip'][-1]
+            real_bullet_count = (first_bullet + last_bullet)  # 计算两个位置的实弹数量
+            msg += f"你戴上了墨镜，观察枪膛……\n第一颗和最后一颗子弹加起来，有{real_bullet_count}颗实弹！\n"
+        else:
+            msg += f"枪膛里只剩最后一颗子弹了，是{'实弹' if demon_data[group_id]['clip'][-1] == 1 else '空弹'}！\n"
     else:
         msg += "道具不存在或无法使用！\n"
 
