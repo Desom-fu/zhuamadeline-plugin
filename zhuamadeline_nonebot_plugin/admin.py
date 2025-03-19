@@ -1686,5 +1686,5 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
         latest_date = latest_draw["date"]
         red_ball = latest_draw.get("red", "未知")
         blue_ball = latest_draw.get("blue", "未知")
-        yellow_ball = result.get("yellow", "未知")
+        yellow_ball = latest_draw.get("yellow", "未知")
         await ssq_query.finish(f"\n最近一期 ({latest_date}) 三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}", at_sender=True)
