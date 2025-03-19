@@ -12,7 +12,7 @@ import datetime
 import random
 import time
 #加载商店信息和商店交互
-from .collection import collections
+from .collection import collections, collection_aliases
 from .function import *
 from .event import *
 from .pvp import *
@@ -24,8 +24,9 @@ ckcp = on_command('藏品', aliases={"cp"}, permission=GROUP, priority=1, block=
 @ckcp.handle()
 async def ckcp_handle(arg: Message = CommandArg()):
     cp_name = str(arg)
-    if(cp_name in collections):
-        await ckcp.finish(cp_name+":\n"+collections[cp_name][3])
+    standard_collection = get_alias_name(cp_name, collections, collection_aliases)
+    if(standard_collection in collections):
+        await ckcp.finish(standard_collection+":\n"+collections[standard_collection][3])
     else:
         await ckcp.finish("请输入正确的藏品名称哦！", at_sender=True)
 

@@ -2062,7 +2062,8 @@ ckdj = on_command('item', permission=GROUP, priority=1, block=True, rule=whiteli
 @ckdj.handle()
 async def ckdj_handle(arg: Message = CommandArg()):
     dj_name = str(arg)
-    if(dj_name in item):
-        await ckdj.finish(dj_name+":\n"+item[dj_name][2])
+    standard_item = get_alias_name(dj_name, item, item_aliases)
+    if(standard_item in item):
+        await ckdj.finish(standard_item+":\n"+item[standard_item][2])
     else:
         await ckdj.finish("请输入正确的道具名称哦！", at_sender=True)
