@@ -421,7 +421,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 success = 999
             if(data[str(user_id)].get("item").get(panding_item, 0) <= 0):
                 success = 999
-            if use_item_name == '时间提取器' and pan_current_time < pan_next_time_r:
+            if use_item_name == '时间献祭器' and pan_current_time < pan_next_time_r:
                 success = 999
             fail_text = "失败！"   #失败文本
         #--------------------这些道具不限制所在猎场的使用--------------------
@@ -1571,32 +1571,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 #     await daoju.finish("madeline竞技场目前无法使用这件道具哦~") 
             else:          
             #--------------------以下道具0号猎场不能使用--------------------                           
-                #道具功能列表
-                # if(use_item_name.lower()=="madeline献祭器"):
-                #     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
-                #         data[user_id]['berry'] += 300
-                #         data[str(user_id)]["item"][use_item_name] -= 1
-                #         success = 1
-                #         if(data[str(user_id)]["item"].get(use_item_name)<=0): del data[str(user_id)]["item"][use_item_name]
-                #         #写入文件
-                #         with open(user_path / file_name, 'w', encoding='utf-8') as f:
-                #             json.dump(data, f, indent=4)
-                #         await daoju.finish("使用成功，你获得了300个草莓", at_sender=True)
-                #     else:
-                #         await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
-
-                # if(use_item_name.lower()=="时间献祭器"):
-                #     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
-                #         data[user_id]['berry'] += 200
-                #         data[str(user_id)]["item"][use_item_name] -= 1
-                #         success = 1
-                #         if(data[str(user_id)]["item"].get(use_item_name)<=0): del data[str(user_id)]["item"][use_item_name]
-                #         #写入文件
-                #         with open(user_path / file_name, 'w', encoding='utf-8') as f:
-                #             json.dump(data, f, indent=4)
-                #         await daoju.finish("使用成功，你获得了200个草莓", at_sender=True)
-                #     else:
-                #         await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
 
             #--------------------这些道具需要限制所在猎场的使用--------------------
                 #两个参数的指令 提取器放猎场判定之前
@@ -1921,17 +1895,17 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     else:
                         await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
 
-                if(use_item_name=="时间提取器"):
-                    if(data.get(user_id).get('item').get('时间提取器',0) > 0):
+                if(use_item_name=="时间献祭器"):
+                    if(data.get(user_id).get('item').get('时间献祭器',0) > 0):
                         next_time = get_time_from_data(data[str(user_id)])
                         current_time = datetime.datetime.now()
                         if (not 'buff' in data[str(user_id)]):
                             data[str(user_id)].get('buff')=='normal'
                         #一些啥都干不了的buff
                         if(data[str(user_id)].get('buff')=='lost'): 
-                            await daoju.finish(f"你现在正在迷路中，连路都找不到，怎么使用时间提取器呢？", at_sender=True)
+                            await daoju.finish(f"你现在正在迷路中，连路都找不到，怎么使用时间献祭器呢？", at_sender=True)
                         if(data[str(user_id)].get('buff')=='confuse'): 
-                            await daoju.finish(f"你现在正在找到了个碎片，疑惑着呢，不能使用时间提取器。", at_sender=True)
+                            await daoju.finish(f"你现在正在找到了个碎片，疑惑着呢，不能使用时间献祭器。", at_sender=True)
                         #如果受伤了则无法使用道具(时间秒表除外)
                         if(data[str(user_id)].get("buff")=="hurt"): 
                             #一些额外操作：如果还没过下次时间，计算与下次的时间间隔，如果过了，可以使用道具

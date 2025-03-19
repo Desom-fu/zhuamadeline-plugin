@@ -187,7 +187,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
         # 定义道具限购
         item_limits = {
-            '指南针': 1, 'madeline充能器': 1, '时间提取器': 1, '草莓加工器': 1,
+            '指南针': 1, 'madeline充能器': 1, '时间献祭器': 1, '草莓加工器': 1,
             '招财猫': 20, '音矿': 2000, '残片': 29997, '安定之音': 5000,
             '神秘碎片': 5, '草莓鱼竿': 1,
         }
