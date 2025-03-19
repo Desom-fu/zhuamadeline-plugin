@@ -1018,7 +1018,7 @@ async def shoot(stp, group_id, message,args):
         end_msg, bar_data, demon_data = handle_game_end(
             group_id=str(group_id),
             winner=winner,
-            prefix_msg="游戏结束！",
+            prefix_msg="- 游戏结束！",
             bar_data=bar_data,
             demon_data=demon_data
         )
@@ -1028,7 +1028,7 @@ async def shoot(stp, group_id, message,args):
         end_msg, bar_data, demon_data = handle_game_end(
             group_id=str(group_id),
             winner=winner,
-            prefix_msg="游戏结束！",
+            prefix_msg="- 游戏结束！",
             bar_data=bar_data,
             demon_data=demon_data
         )
@@ -1466,7 +1466,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         end_msg, bar_data, demon_data = handle_game_end(
             group_id=str(group_id),
             winner=winner,
-            prefix_msg="游戏结束！",
+            prefix_msg="- 游戏结束！",
             bar_data=bar_data,
             demon_data=demon_data
         )
@@ -1476,7 +1476,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         end_msg, bar_data, demon_data = handle_game_end(
             group_id=str(group_id),
             winner=winner,
-            prefix_msg="游戏结束！",
+            prefix_msg="- 游戏结束！",
             bar_data=bar_data,
             demon_data=demon_data
         )
