@@ -669,7 +669,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
             # 显示双色球以及本场门票
             message += (f"\n• 本场三球入场费：{ticket_cost}颗草莓")
         
-            message += (f"\n• 本场三球猜测号码：红 {user_red} | 蓝 {user_blue}| 黄 {user_yellow}")
+            message += (f"\n• 本场三球猜测号码：红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}")
 
         # if history and ball_ifplay == 0:
         #     latest_draw = history[-1]  # 取列表最后一个元素
