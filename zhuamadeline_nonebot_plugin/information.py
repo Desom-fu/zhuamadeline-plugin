@@ -2,7 +2,7 @@ from nonebot import on_command, on_fullmatch
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import GROUP, Message
 from .config import update_text
-from .story import npc_da
+from .npc import npc_da
 from .whitelist import whitelist_rule
 
 __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
