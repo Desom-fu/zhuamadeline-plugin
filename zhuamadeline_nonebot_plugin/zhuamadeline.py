@@ -521,8 +521,9 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     ticket_cost = double_ball.get("ticket_cost", 0)
     user_red = double_ball.get("red_points")
     user_blue = double_ball.get("blue_points")
+    user_yellow = double_ball.get("yellow_points")
     bar_data = open_data(bar_path)
-    history = bar_data.get("double_ball_history", [])
+    # history = bar_data.get("double_ball_history", [])
 
     # 获取时间数据
     next_recover_time = datetime.datetime.strptime(next_recover_time_r, "%Y-%m-%d %H:%M:%S")
@@ -666,9 +667,9 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
 
         if ball_ifplay == 1:
             # 显示双色球以及本场门票
-            message += (f"\n• 本场双球入场费：{ticket_cost}颗草莓")
+            message += (f"\n• 本场三球入场费：{ticket_cost}颗草莓")
         
-            message += (f"\n• 本场双球猜测号码：红 {user_red} | 蓝 {user_blue}")
+            message += (f"\n• 本场三球猜测号码：红 {user_red} | 蓝 {user_blue}| 黄 {user_yellow}")
 
         # if history and ball_ifplay == 0:
         #     latest_draw = history[-1]  # 取列表最后一个元素

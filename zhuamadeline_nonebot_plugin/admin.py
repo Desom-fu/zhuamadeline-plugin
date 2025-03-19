@@ -135,7 +135,7 @@ async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = Comma
     commands = [
         ".状态",
         ".玩家数",
-        ".查询双球开奖 (日期)"
+        ".查询三球开奖 (日期)"
     ]
     text = "\n以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
     await notadmin_command.send(text, at_sender=True)
@@ -1523,7 +1523,7 @@ async def clear_bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
         demon_data[group_id]['demon_coldtime'] = 0
         text = "本局恶魔轮盘du已强制结束，对应的门票费已返还"
     elif game_type == '3':
-        #把所有玩2号游戏的状态变更为nothing
+        #把所有玩4号游戏的状态变更为nothing
         for key, value in bar_data.items():
             if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess",{}).get("ifguess",0) == 1:
                 value["pvp_guess"]["ifguess"] = 0
@@ -1533,6 +1533,19 @@ async def clear_bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
                 value["pvp_guess"]["choose_nickname"] = "暂无数据"
                 user_data[str(key)]["berry"] += 150
         text = "本局pvp竞技场竞猜已强制结束，对应的门票费已返还"
+    elif game_type == '4':
+        #把所有玩4号游戏的状态变更为nothing
+        for key, value in bar_data.items():
+            if key.isdigit() and isinstance(value, dict) and value.get("double_ball",{}).get("ifplay",0) == 1:
+                user_data[str(key)]["berry"] += value["double_ball"].get("ticket_cost", 300)
+                value["double_ball"]["ifplay"] = 0
+                value["double_ball"]["red_points"] = 0
+                value["double_ball"]["blue_points"] = 0
+                value["double_ball"]["yellow_points"] = 0
+                value["double_ball"]["ball_prize"] = 0
+                value["double_ball"]["refund"] = 0
+                value["double_ball"]["ticket_cost"] = 0
+        text = "本场三球竞猜已强制结束，对应的门票费已返还。"
     # 保存数据
     save_data(full_path, user_data)
     save_data(bar_path, bar_data)
@@ -1636,7 +1649,7 @@ async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg())
     await len_user.finish(f"zhuamadeline游戏目前共有{count}个玩家！", at_sender=True)
 
 # 查询开奖号码
-ssq_query = on_command("查询双球开奖", aliases = {"ball", "doubleball", "twoball", "查询bet4"}, priority=1, block=True)
+ssq_query = on_command("查询三球开奖", aliases = {'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询bet4"}, priority=1, block=True)
 
 @ssq_query.handle()
 async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -1647,7 +1660,7 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
     history = bar_data.get("double_ball_history", [])
 
     if not history:
-        await ssq_query.finish("暂无双球竞猜开奖历史数据。", at_sender=True)
+        await ssq_query.finish("暂无三球竞猜开奖历史数据。", at_sender=True)
         return
 
     if args:  # 如果用户输入了日期
@@ -1663,13 +1676,15 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
         if result:
             red_ball = result.get("red", "未知")
             blue_ball = result.get("blue", "未知")
-            await ssq_query.finish(f"\n{query_date} 的双球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball}", at_sender=True)
+            yellow_ball = result.get("yellow", "未知")
+            await ssq_query.finish(f"\n{query_date} 的三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}", at_sender=True)
         else:
-            await ssq_query.finish(f"\n未找到 {query_date} 的双球竞猜开奖信息，请检查日期是否正确。", at_sender=True)
+            await ssq_query.finish(f"\n未找到 {query_date} 的三球竞猜开奖信息，请检查日期是否正确。", at_sender=True)
 
     else:  # 如果用户没有输入日期，则返回最近一期开奖数据
         latest_draw = history[-1]  # 取最新的一期
         latest_date = latest_draw["date"]
         red_ball = latest_draw.get("red", "未知")
         blue_ball = latest_draw.get("blue", "未知")
-        await ssq_query.finish(f"\n最近一期 ({latest_date}) 双球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball}", at_sender=True)
+        yellow_ball = result.get("yellow", "未知")
+        await ssq_query.finish(f"\n最近一期 ({latest_date}) 三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}", at_sender=True)

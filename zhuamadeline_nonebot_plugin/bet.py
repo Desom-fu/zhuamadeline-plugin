@@ -83,12 +83,12 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         )
     elif game_type == '4':
         await rule.finish(
-            "“游戏”4：双球竞猜\n" +
+            "“游戏”4：三球竞猜\n" +
             "- 本“游戏”入场费为50-300草莓（随奖池变化），入场费计入奖池！\n" +
             "- 本“游戏”开放时间为每天的6:00 - 22:00！\n" +
-            "- 在开放时间内，使用 `.bet 4/红色球数字(1-10)/蓝色球数字(1-10)` 来进行押注哦！\n" +
-            "- 每天的 22:30 将会开奖，若有人红色蓝色球对应号码均匹配，将直接获得奖池的若干份额哦！如果多人同时中奖，将平分当前份额的奖池哦！\n" +
-            "- 如果只猜中一个也不用担心，也有小奖！小奖的金额是入场费的70%！\n"+
+            "- 在开放时间内，使用 `.bet 4/红色球数字(1-10)/蓝色球数字(1-10)/黄色球数字(1-10)` 来进行押注哦！\n" +
+            "- 每天的 22:30 将会开奖，若有人三球对应号码均匹配，将直接获得奖池的最少50%的份额哦！若双球匹配，将获得最少10%的份额哦！如果多人同时中奖，将平分当前份额的奖池哦！\n" +
+            "- 如果只猜中一个也不用担心，也有小奖！小奖的金额是入场费的150%！\n"+
             "- 你在竞猜的时候同时也能玩其他“游戏”哦！"
         )
     else:
@@ -113,6 +113,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     game_type = game_type_split[0] if len(game_type_split) > 0 else args
     second_game_type = game_type_split[1] if len(game_type_split) > 1 else False
     third_game_type = game_type_split[2] if len(game_type_split) > 2 else False
+    forth_game_type = game_type_split[3] if len(game_type_split) > 3 else False
 
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
@@ -379,16 +380,20 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         save_data(full_path, data)
         # 上台回合只能写pvp_choose[5]以防显示错误
         await bet.finish(f"你已经消耗{kouchu_berry}颗草莓成功进行竞技场猜测！你所选的擂台为[{pos+1}]，该擂台擂主为[{choose_nickname}]，上台回合为[{pvp_choose[5]}]，所选占擂Madeline的战力为[{choose_rank}]！", at_sender=True)
-    # “游戏”4逻辑：双球竞猜
+    # “游戏”4逻辑：三球竞猜
     elif game_type == '4':
+        if len(game_type_split) != 4:
+            await bet.finish("请输入正确的红蓝黄三球的号码哦！", at_sender=True)
+            
         try:
             red_points = int(second_game_type)
             blue_points = int(third_game_type)
+            yellow_points = int(forth_game_type)
         except ValueError:
-            await bet.finish("请输入正确的红蓝双球的号码哦！", at_sender=True)
+            await bet.finish("请输入正确的红蓝黄三球的号码哦！", at_sender=True)
         
         if not (1 <= red_points <= 10) or not (1 <= blue_points <= 10):
-            await bet.finish("红蓝双球的号码只能是1-10之间哦！", at_sender=True)
+            await bet.finish("红蓝黄三球的号码只能是1-10之间哦！", at_sender=True)
         
         # 获取当前时间
         current_time = datetime.datetime.now()
@@ -396,7 +401,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         
         # 不在开放时间内，不开放
         if not (6 <= current_hour < 22):
-             await bet.finish("当前不在双球竞猜开放时间（6:00 - 22:00）内，无法进行双球竞猜哦！", at_sender=True)
+             await bet.finish("当前不在三球竞猜开放时间（6:00 - 22:00）内，无法进行三球竞猜哦！", at_sender=True)
     
         # 获取用户数据
         user_bar = bar_data.setdefault(user_id, {})
@@ -425,13 +430,14 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         user_double_ball["ticket_cost"] = ticket_cost
         user_double_ball["red_points"] = int(red_points)
         user_double_ball["blue_points"] = int(blue_points)
+        user_double_ball["yellow_points"] = int(yellow_points)
         user_double_ball["ball_prize"] = 0
         user_double_ball["refund"] = 0
         user_double_ball["ifplay"] = 1
 
         save_data(bar_path, bar_data)
         save_data(full_path, data)
-        await bet.finish(f"你已成功参与双球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}", at_sender=True)
+        await bet.finish(f"你已成功参与三球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}，黄色球点数：{yellow_points}", at_sender=True)
     else:
         await bet.finish("请输入正确的游戏类型哦！", at_sender=True)
 
@@ -1701,9 +1707,9 @@ async def check_all_games():
         if isinstance(group_id, str) and group_id.isdigit():
             await check_timeout(group_id)
 
-# 游戏4，双球竞猜
+# 游戏4，三球竞猜
 def reward_percentage(pool: int) -> int:
-    """根据奖池金额计算中奖奖励比例（整数百分比）"""
+    """根据奖池金额计算中奖奖励比例（双球）"""
     if pool <= 1000:
         return 100  # 100%
     elif pool <= 3000:
@@ -1716,10 +1722,19 @@ def reward_percentage(pool: int) -> int:
         return int(20 + (30 - 20) * (30000 - pool) / (30000 - 15000))  # 30% -> 20%
     elif pool <= 50000:
         return int(10 + (20 - 10) * (50000 - pool) / (50000 - 30000))  # 20% -> 10%
-    elif pool <= 100000:  
-        return int(5 + (10 - 5) * (100000 - pool) / (100000 - 50000))  # 10% -> 5%
     else:
-        return 5  # 5%
+        return 10  # 5%
+
+def reward_percentage_triple(pool: int) -> int:
+    """根据奖池金额计算中奖奖励比例（三球）"""
+    if pool <= 25000:
+        return 100
+    elif pool <= 50000:
+        return int(75 + (100 - 75) * (50000 - pool) / (50000 - 25000))  # 100% -> 75%
+    elif pool <= 100000:  
+        return int(50 + (75 - 50) * (100000 - pool) / (100000 - 50000))  # 75% -> 50%
+    else:
+        return 50  # 50%
 
     
 def reward_amount(pool: int) -> int:
@@ -1762,21 +1777,24 @@ async def double_ball_lottery():
 
     red_ball = random.randint(1, 10)
     blue_ball = random.randint(1, 10)
+    yellow_ball = random.randint(1, 10)
 
     # 记录开奖历史
     bar_data.setdefault("double_ball_history", [])
     bar_data["double_ball_history"].append({
         "date": datetime.datetime.now().strftime("%Y-%m-%d"),
         "red": red_ball,
-        "blue": blue_ball
+        "blue": blue_ball,
+        "yellow": yellow_ball
     })
 
+    big_winners = []
     winners = []
     single_match_users = []
     total_refund = 0
 
     for user_id, user_bar in bar_data.items():
-        if user_id.isdigit() and isinstance(user_bar, dict):
+        if user_id.isdigit() and isinstance(user_bar, dict) and user_id.get("double_ball",{}).get("ifplay",0) == 1:
             user_bar.setdefault("bank", 0)
             user_bar.setdefault("double_ball", {})
 
@@ -1785,53 +1803,80 @@ async def double_ball_lottery():
                 continue  # 用户没有下注
 
             ticket_cost = bet_data.get("ticket_cost", 0)
-            user_red = bet_data.get("red_points")
-            user_blue = bet_data.get("blue_points")
+            user_red = bet_data.get("red_points", 0)
+            user_blue = bet_data.get("blue_points", 0)
+            user_yellow = bet_data.get("yellow_points", 0)
 
-            # 中奖处理
-            if user_red == red_ball and user_blue == blue_ball:
-                winners.append(user_id)  # 记录中奖者
+            # 先检查三球中奖
+            if user_red == red_ball and user_blue == blue_ball and user_yellow == yellow_ball:
+                big_winners.append(user_id)
+                
+            # 再检查双球中奖
+            elif user_red == red_ball and user_blue == blue_ball:
+                winners.append(user_id)
 
             # 只猜中一个数字的玩家
-            elif user_red == red_ball or user_blue == blue_ball:
-                bet_data["refund"] = int(ticket_cost * 0.7)  # 记录返还的门票费用
-                total_refund += int(ticket_cost * 0.7)
-                user_bar["bank"] += int(ticket_cost * 0.7)
+            elif user_red == red_ball or user_blue == blue_ball or user_yellow == yellow_ball:
+                bet_data["refund"] = int(ticket_cost * 1.5)  # 记录返还的门票费用
+                total_refund += int(ticket_cost * 1.5)
+                user_bar["bank"] += int(ticket_cost * 1.5)
                 single_match_users.append(user_id)
 
             # 开奖后，重置 ifplay
             bet_data["ifplay"] = 0
 
     # 计算奖金
+    # 百分比
+    triple_reward_percentage_val = reward_percentage_triple(pots)
     reward_percentage_val = reward_percentage(pots)
+    # 奖金
     total_reward = pots * reward_percentage_val // 100
-    msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball}\n"
+    triple_total_reward = pots * triple_reward_percentage_val // 100
+    msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball} | 黄 {yellow_ball}\n"
     msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
-    msg_text += f"🎁 本次奖金：[{total_reward}]颗草莓\n"
+    msg_text += f"🎁 本次一等奖奖金：[{triple_total_reward}]颗草莓\n"
+    msg_text += f"🎁 本次二等奖奖金：[{total_reward}]颗草莓\n"
+
+    if big_winners:
+        big_reward_per_winner = triple_total_reward // len(big_winners)
+        msg_text += "🎊 恭喜 "
+        total_refund += big_reward_per_winner * len(big_winners)
+        
+        for big_winner in big_winners:
+            bar_data[str(big_winner)]["bank"] += big_reward_per_winner
+            bar_data[str(big_winner)]["double_ball"]["prize"] = big_reward_per_winner
+            msg_text += MessageSegment.at(big_winner)  # @中奖者
+
+        msg_text += f" 中了一等奖！每人获得[{big_reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n"
+    else:
+        msg_text += "很遗憾，本次无人中一等奖！\n"
 
     if winners:
         reward_per_winner = total_reward // len(winners)
         msg_text += "🎊 恭喜 "
-        total_refund += total_reward
+        total_refund += reward_per_winner * len(winners)
         
         for winner in winners:
             bar_data[str(winner)]["bank"] += reward_per_winner
             bar_data[str(winner)]["double_ball"]["prize"] = reward_per_winner
             msg_text += MessageSegment.at(winner)  # @中奖者
 
-        msg_text += f" 中奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all查看`\n"
+        msg_text += f" 中了二等奖！每人获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n"
 
     else:
-        msg_text += "很遗憾，本次无人中大奖！\n"
+        msg_text += "很遗憾，本次无人中二等奖！\n"
 
     # 额外信息：只猜中一个数字的玩家
     if single_match_users:
-        msg_text += "\n猜中一位数字的玩家成功中了小奖哦！将获得入场费用的70%的草莓！请通过`.ck all查看`\n"
+        msg_text += '🎊 恭喜 '
+        for user_id in single_match_users:
+            msg_text += MessageSegment.at(user_id)
+        msg_text += "猜中了单球，成功中了小奖哦！将获得入场费用的150%的草莓！请通过`.ck all`查看\n"
 
     # 扣除奖池金额
     bar_data["pots"] -= total_refund
     msg_text += f"\n当前奖池剩余{bar_data['pots']}颗草莓！"
-    msg_text += f"\n\n若忘记开奖号码，可以通过命令 '.twoball (日期)' 来查询哦！"
+    msg_text += f"\n\n若忘记开奖号码，可以通过命令 '.threeball (日期)' 来查询哦！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 
     save_data(bar_path, bar_data)
