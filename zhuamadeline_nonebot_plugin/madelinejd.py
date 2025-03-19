@@ -371,7 +371,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
     # **总进度排名**
     if arg == '':  
         title_msg = '全服总进度排名'
-        rank_msg = "📜 全服总进度排名 📊\n"
+        rank_msg = "📜 全服总进度排名 📊\n\n"
         sorted_rank = sorted(progress_data, key=lambda x: x['total_progress'], reverse=True)
 
         top_10 = sorted_rank[:10]
@@ -410,7 +410,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
     # 开新猎场要改
     elif 0 < arg <= liechang_count:
         title_msg = f'全服{arg}号猎场进度排名'
-        rank_msg = f"📜 全服 {arg} 号猎场进度排名 📊\n"
+        rank_msg = f"📜 全服 {arg} 号猎场进度排名 📊\n\n"
         sorted_rank = sorted(progress_data, key=lambda x: x['progress'], reverse=True)
 
         top_10 = sorted_rank[:10]
