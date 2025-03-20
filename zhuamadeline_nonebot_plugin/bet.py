@@ -1306,9 +1306,9 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
 
         if len(opponent_items) < item_max:
             opponent_items.append(item_id)  # 只有在对方道具少于 max_item 个时才获得双转团
-            msg += f"- 这件物品太“IDENTITY”了，对方十分感兴趣，所以拿走了这件物品！\n"
+            msg += f"这件物品太“IDENTITY”了，对方十分感兴趣，所以拿走了这件物品！\n"
         else:
-            msg += f"- 这件物品太“IDENTITY”了，对方十分感兴趣，但是由于道具已满，没办法拿走这件物品，所以把双转团丢了！\n"
+            msg += f"这件物品太“IDENTITY”了，对方十分感兴趣，但是由于道具已满，没办法拿走这件物品，所以把双转团丢了！\n"
 
         # 获取新的道具列表（双转团转移后的状态）
         now_player_items = demon_data[group_id][f"item_{player_turn}"]
@@ -1322,16 +1322,16 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             # 检查转移后的道具栏状态
             if len(now_opponent_items) < item_max:
                 opponent_items.append(random_item_id)
-                msg += f"- 对方还顺手拿走了你的【{random_item_name}】！\n"
+                msg += f"对方还顺手拿走了你的【{random_item_name}】！\n"
             else:
-                msg += f"- 对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
+                msg += f"对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
 
         # 功能2：1/3概率扣自己1点血
         if random.randint(1, 3) == 1:
             demon_data[group_id]["hp"][player_turn] -= 1
             current_hp = max(demon_data[group_id]["hp"][player_turn], 0)
             demon_data[group_id]["hp"][player_turn] = current_hp
-            msg += f"- 你在丢双转团的时候太急了！人一旦急，就会更急，神就不会定，所以你一不小心把血条往左滑了一下，损失了1点hp！\n- 当前hp：{current_hp}/{hp_max}\n"
+            msg += f"你在丢双转团的时候太急了！人一旦急，就会更急，神就不会定，所以你一不小心把血条往左滑了一下，损失了1点hp！\n- 当前hp：{current_hp}/{hp_max}\n"
         
         # 功能3：对方初始已满时获得徽章
         if original_opponent_count >= item_max:
