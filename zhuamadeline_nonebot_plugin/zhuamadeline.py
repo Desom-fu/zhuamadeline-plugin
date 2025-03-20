@@ -522,7 +522,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     user_red = double_ball.get("red_points", 0)
     user_blue = double_ball.get("blue_points", 0)
     user_yellow = double_ball.get("yellow_points", 0)
-    user_date = double_ball.get("guess_date", "未知日期")
+    user_date = double_ball.get("guess_date", "未知日")
     bar_data = open_data(bar_path)
     # history = bar_data.get("double_ball_history", [])
 
