@@ -998,7 +998,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     player_data.setdefault('collections', {})
                     collections = player_data['collections']
                     if collections.get('脉冲雷达', 0) > 0:
-                        berry_bonus = 10
+                        berry_bonus = 20
                     for _ in range(num_of_sell):
                         berry = random.randint(230,265)
                         berry_bonus_all += berry_bonus
