@@ -71,4 +71,3 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
     else:
         await ckcplist.finish("你还没尝试抓过madeline......", at_sender=True)
-
