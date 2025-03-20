@@ -540,7 +540,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 if next_fishing_time > current_time:
                     fishing_text = time_text(str(next_fishing_time - current_time))
-                    await daoju.finish(f"你刚刚才钓过鱼，水里的鱼都跑光啦！还需要{fishing_text}后鱼才会回来！", at_sender=True)
+                    await daoju.finish(f"你刚刚才钓过鱼，水里的鱼都跑光啦！还需要{fishing_text}鱼才会游回来！", at_sender=True)
 
                 # 扣除 10 草莓作为饵料
                 erliao = 10
