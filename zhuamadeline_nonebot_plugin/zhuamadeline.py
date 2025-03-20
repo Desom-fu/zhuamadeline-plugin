@@ -625,11 +625,11 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     # 显示4猎当前目标（要在4猎才显示）
     if liechang_number == "4":
         if collections.get('红色球体', 0) == 0:
-            message += f"\n- 当前目标：红色球体\n- 已积累次数：{get_ball_value}/10"
+            message += f"\n- 当前目标：红色球体\n- 已积累次数：{get_ball_value}/8"
         elif collections.get('绿色球体', 0) == 0:
-            message += f"\n- 当前目标：绿色球体\n- 已积累次数：{get_ball_value}/7"
+            message += f"\n- 当前目标：绿色球体\n- 已积累次数：{get_ball_value}/5"
         elif collections.get('黄色球体', 0) == 0:
-            message += f"\n- 当前目标：黄色球体\n- 已积累次数：{get_ball_value}/4"
+            message += f"\n- 当前目标：黄色球体\n- 已积累次数：{get_ball_value}/3"
         else:
             message += f"\n- 当前目标：无，地下终端已完全开放"
             
