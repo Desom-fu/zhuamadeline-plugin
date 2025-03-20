@@ -701,7 +701,7 @@ item_effects = {
     "手套": "重新换弹，不进行道具刷新",
     "骰子": "你的hp变为1到4的随机值",
     "墨镜": "观察第一颗和最后一颗子弹的种类，但顺序未知",
-    "双转团": "（该道具为“身份”模式专属道具）把这个道具转移到对方道具栏里，若对方道具已达上限则丢弃本道具，无其他效果。但由于其富含identity，可能有其他的非bet2游戏内的效果？",
+    "双转团": "（该道具为“身份”模式专属道具）把这个道具转移到对方道具栏里，若对方道具已达上限则丢弃本道具；另外还有概率触发特殊效果？可能会掉血，可能会送给对方道具……但由于其富含identity，可能有其他的非bet2游戏内的效果？",
     "天秤": "（该道具为“身份”模式专属道具）如果你的道具数量≥对方道具数量，你对对方造成一点伤害；你的道具数量<对方道具数量，你回一点血",
     "休养生息": "（该道具为“身份”模式专属道具）自己的hp恢复2，对方的hp恢复1，不跳回合；若对面为满血，则只回一点体力。",
     "玩具枪": "（该道具为“身份”模式专属道具）1/2的概率无事发生，1/2的概率对对面造成1点伤害",
@@ -1143,6 +1143,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     msg = MessageSegment.at(str(demon_data[group_id]["pl"][player_turn])) + f"使用了道具：{item_name}\n\n"
     player_items.pop(item_idx)
     demon_data[group_id]['turn_start_time'] = int(time.time()) # 更新回合时间
+    
     if item_name == "桃":
         demon_data[group_id]["hp"][player_turn] += 1
         if demon_data[group_id]["hp"][player_turn] >= hp_max:
@@ -1300,11 +1301,40 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += f"天秤的指针开始转动…… 检测到你的道具数量为：{len_player_items}，对面的道具数量为：{len_opponent_items}；\n由于{len_player_items}<{len_opponent_items}，你回复一点体力（最高恢复至上限！）！\n你目前的hp为：{demon_data[group_id]['hp'][player_turn]}\n"  
     
     elif item_name == "双转团":
+        # 获取原始道具长度
+        original_opponent_count = len(opponent_items)
+
         if len(opponent_items) < item_max:
             opponent_items.append(item_id)  # 只有在对方道具少于 max_item 个时才获得双转团
-            msg += f"这件物品太“IDENTITY”了，对方十分感兴趣，所以拿走了这件物品！\n"
+            msg += f"- 这件物品太“IDENTITY”了，对方十分感兴趣，所以拿走了这件物品！\n"
         else:
-            msg += f"这件物品太“IDENTITY”了，对方十分感兴趣，但是由于道具已满，没办法拿走这件物品，所以把双转团丢了！\n"
+            msg += f"- 这件物品太“IDENTITY”了，对方十分感兴趣，但是由于道具已满，没办法拿走这件物品，所以把双转团丢了！\n"
+
+        # 获取新的道具列表（双转团转移后的状态）
+        now_player_items = demon_data[group_id][f"item_{player_turn}"]
+        now_opponent_items = demon_data[group_id][f"item_{opponent_turn}"]
+
+        # 功能1：1/2概率转移随机道具
+        if random.randint(1, 2) == 1 and len(now_player_items) > 0:  # 确保玩家还有道具
+            random_idx = random.randint(0, len(now_player_items)-1)
+            random_item_id = player_items.pop(random_idx)
+            random_item_name = item_dic[random_item_id]
+            # 检查转移后的道具栏状态
+            if len(now_opponent_items) < item_max:
+                opponent_items.append(random_item_id)
+                msg += f"- 对方还顺手拿走了你的【{random_item_name}】！\n"
+            else:
+                msg += f"- 对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
+
+        # 功能2：1/3概率扣自己1点血
+        if random.randint(1, 3) == 1:
+            demon_data[group_id]["hp"][player_turn] -= 1
+            current_hp = max(demon_data[group_id]["hp"][player_turn], 0)
+            demon_data[group_id]["hp"][player_turn] = current_hp
+            msg += f"- 你在丢双转团的时候太急了！人一旦急，就会更急，神就不会定，所以你一不小心把血条往左滑了一下，损失了1点hp！\n- 当前hp：{current_hp}/{hp_max}\n"
+        
+        # 功能3：对方初始已满时获得徽章
+        if original_opponent_count >= item_max:
             #判断是否开辟藏品栏
             if(not 'collections' in user_data[str(user_id)]):
                 user_data[str(user_id)]['collections'] = {}
@@ -1319,11 +1349,11 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     elif item_name == "休养生息":
         if demon_data[group_id]["hp"][opponent_turn] == hp_max:
             demon_data[group_id]["hp"][player_turn] += 1  # 只回 1 点血
-            msg += f"休养生息，备战待敌；止兵止战，休养生息。\n对方体力已满，你仅恢复了1点体力。\n"
+            msg += f"休养生息，备战待敌；止兵止战，休养生息。\n对方hp已满，你仅恢复了1点hp。\n"
         else:
             demon_data[group_id]["hp"][player_turn] += 2
             demon_data[group_id]["hp"][opponent_turn] += 1
-            msg += f"休养生息，备战待敌；止兵止战，休养生息。\n你恢复了2点体力，对方恢复了1点体力（最高恢复至上限）。\n"
+            msg += f"休养生息，备战待敌；止兵止战，休养生息。\n你恢复了2点hp，对方恢复了1点hp（最高恢复至上限）。\n"
         
         # 校准所有玩家血量不得超过hp上限
         for i in range(len(demon_data[group_id]["hp"])):
