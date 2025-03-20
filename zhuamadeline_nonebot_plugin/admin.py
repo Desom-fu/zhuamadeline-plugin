@@ -32,7 +32,7 @@ __all__ = [
     'fafang',
     'transfer_berry',
     'ck_admin_single',
-    'fafang_single',
+    'grant_single',
     'set_single',
     'deduct_single',
     'ck_admin_single',
@@ -219,7 +219,7 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
 
     #没有这个玩家
     if(not user_id in data):
-        await fafang_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+        await grant_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
 
     #有这个玩家
     berry = data[user_id]['berry']
@@ -228,8 +228,8 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
     await ck_admin_single.finish(f"\n{nickname}目前拥有{berry}颗草莓，银行里存有{bank_berry}颗草莓！", at_sender=True)
 
 #给某个玩家发放草莓
-fafang_single = on_command("发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
-@fafang_single.handle()
+grant_single = on_command("发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@grant_single.handle()
 async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     #判断是不是管理员账号
     if str(event.user_id) not in bot_owner_id:
@@ -245,13 +245,13 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
     #没有这个玩家
     if(not user_id in data):
-        await fafang_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+        await grant_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
 
     #有这个玩家
     try:
         jiangli = int(arg[1])
     except:
-        await fafang_single.finish("命令格式错误！正确格式：.发放草莓 玩家QQ号 数量", at_sender=True)
+        await grant_single.finish("命令格式错误！正确格式：.发放草莓 玩家QQ号 数量", at_sender=True)
     else:
         if(jiangli <= 0):
             return
@@ -260,7 +260,7 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         #写入文件
         save_data(user_path / file_name, data)
 
-        await fafang_single.finish(f"给"+MessageSegment.at(user_id)+f"发放{jiangli}草莓成功！", at_sender=True)
+        await grant_single.finish(f"给"+MessageSegment.at(user_id)+f"发放{jiangli}草莓成功！", at_sender=True)
 
 #给某个玩家设定指定草莓
 set_single = on_command("设定草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -593,7 +593,7 @@ async def timeClear_Admin(event: GroupMessageEvent, arg: Message = CommandArg())
     
     #没有这个玩家
     if(not user_id in data):
-        await fafang_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+        await admin_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
     
     current_time = datetime.datetime.now()
     next_time_r = current_time + datetime.timedelta(seconds=1)
