@@ -51,11 +51,6 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     
     if number_arg == "999":
         number_arg = "随便一个任何东西反正不能是999直接报错提示请输入正确的猎场号"
-        
-    # 彩蛋:饼
-    if number_arg in ['?','？']:
-        number_arg = "999"
-        
     if user_id not in data:
         await qhlc.finish("你还没尝试抓过madeline.....", at_sender=True)
         
@@ -86,8 +81,6 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
         await qhlc.finish(f"已经成功切换到{number}号猎场！", at_sender=True)
-    elif number_int == 999:
-        await qhlc.finish(f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", at_sender=True)
     # 处理错误输入
     else:
         await qhlc.finish(f"请输入正确的猎场号！现在只开放了1~{liechang_count}猎哦！", at_sender=True)
@@ -526,9 +519,10 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     refund = double_ball.get("refund", 0)
     ball_ifplay = double_ball.get("ifplay", 0)
     ticket_cost = double_ball.get("ticket_cost", 0)
-    user_red = double_ball.get("red_points")
-    user_blue = double_ball.get("blue_points")
-    user_yellow = double_ball.get("yellow_points")
+    user_red = double_ball.get("red_points", 0)
+    user_blue = double_ball.get("blue_points", 0)
+    user_yellow = double_ball.get("yellow_points", 0)
+    user_date = double_ball.get("guess_date", "未知日期")
     bar_data = open_data(bar_path)
     # history = bar_data.get("double_ball_history", [])
 
@@ -676,8 +670,11 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
             # 显示双色球以及本场门票
             message += (f"\n• 本场三球入场费：{ticket_cost}颗草莓")
         
-            message += (f"\n• 本场三球猜测号码：\n红 {user_red} | 蓝 {user_blue}  | 黄 {user_yellow}")
-
+            message += (f"\n• 本场三球猜测号码（{user_date}期）：红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}")
+            
+        elif ball_ifplay == 0:
+            # 显示常态双色球
+            message += (f"\n• 上次三球猜测号码（{user_date}期）：红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}") if user_red>0 and user_blue>0 and user_yellow>0 else ''
         # if history and ball_ifplay == 0:
         #     latest_draw = history[-1]  # 取列表最后一个元素
         #     latest_red = latest_draw["red"]

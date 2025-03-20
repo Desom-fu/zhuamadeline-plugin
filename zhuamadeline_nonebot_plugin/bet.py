@@ -434,6 +434,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         user_double_ball["ball_prize"] = 0
         user_double_ball["refund"] = 0
         user_double_ball["ifplay"] = 1
+        user_double_ball['guess_date'] = datetime.datetime.now().strftime("%Y-%m-%d")
 
         save_data(bar_path, bar_data)
         save_data(full_path, data)
@@ -1729,10 +1730,8 @@ def reward_percentage_triple(pool: int) -> int:
     """根据奖池金额计算中奖奖励比例（三球）"""
     if pool <= 25000:
         return 100
-    elif pool <= 50000:
-        return int(75 + (100 - 75) * (50000 - pool) / (50000 - 25000))  # 100% -> 75%
-    elif pool <= 100000:  
-        return int(50 + (75 - 50) * (100000 - pool) / (100000 - 50000))  # 75% -> 50%
+    elif pool <= 50000:  
+        return int(50 + (100 - 50) * (50000 - pool) / (50000 - 25000))  # 100% -> 50%
     else:
         return 50  # 50%
 
@@ -1794,7 +1793,7 @@ async def double_ball_lottery():
     total_refund = 0
 
     for user_id, user_bar in bar_data.items():
-        if user_id.isdigit() and isinstance(user_bar, dict) and user_id.get("double_ball",{}).get("ifplay",0) == 1:
+        if user_id.isdigit() and isinstance(user_bar, dict) and user_bar.get("double_ball",{}).get("ifplay",0) == 1:
             user_bar.setdefault("bank", 0)
             user_bar.setdefault("double_ball", {})
 
@@ -1832,10 +1831,10 @@ async def double_ball_lottery():
     # 奖金
     total_reward = pots * reward_percentage_val // 100
     triple_total_reward = pots * triple_reward_percentage_val // 100
-    msg_text = f"🎉 本次开奖号码：红 {red_ball} | 蓝 {blue_ball} | 黄 {yellow_ball}\n"
+    msg_text = f"🎉 本期开奖号码：\n红 {red_ball} | 蓝 {blue_ball} | 黄 {yellow_ball}\n"
     msg_text += f"🏆 奖池总额：[{pots}]颗草莓\n"
-    msg_text += f"🎁 本次一等奖奖金：[{triple_total_reward}]颗草莓\n"
-    msg_text += f"🎁 本次二等奖奖金：[{total_reward}]颗草莓\n"
+    msg_text += f"🎁 本期一等奖奖金：[{triple_total_reward}]颗草莓\n"
+    msg_text += f"🎁 本期二等奖奖金：[{total_reward}]颗草莓\n\n"
 
     if big_winners:
         big_reward_per_winner = triple_total_reward // len(big_winners)
@@ -1847,9 +1846,9 @@ async def double_ball_lottery():
             bar_data[str(big_winner)]["double_ball"]["prize"] = big_reward_per_winner
             msg_text += MessageSegment.at(big_winner)  # @中奖者
 
-        msg_text += f" 中了一等奖！每人获得[{big_reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n"
+        msg_text += f" 中了一等奖！每人获得[{big_reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n\n"
     else:
-        msg_text += "很遗憾，本次无人中一等奖！\n"
+        msg_text += "很遗憾，本次无人中一等奖！\n\n"
 
     if winners:
         reward_per_winner = total_reward // len(winners)
