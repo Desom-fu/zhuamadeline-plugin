@@ -219,7 +219,7 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
 
     #没有这个玩家
     if(not user_id in data):
-        await grant_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+        await ck_admin_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
 
     #有这个玩家
     berry = data[user_id]['berry']
