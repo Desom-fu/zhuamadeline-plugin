@@ -172,7 +172,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             else:
                 next_time = current_time + datetime.timedelta(minutes=30)
                 #检测回想之核
-                dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                dream = collections.get("回想之核", 0)
                 if dream >= 1:
                     next_time = current_time + datetime.timedelta(minutes=29)                
                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
