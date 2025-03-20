@@ -540,7 +540,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 if next_fishing_time > current_time:
                     fishing_text = time_text(str(next_fishing_time - current_time))
-                    await daoju.finish(f"你刚刚才钓过鱼，非常累，还需要休息{fishing_text}！", at_sender=True)
+                    await daoju.finish(f"你刚刚才钓过鱼，水里的鱼都跑光啦！还需要{fishing_text}后鱼才会回来！", at_sender=True)
 
                 # 扣除 10 草莓作为饵料
                 erliao = 10
@@ -582,6 +582,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         '钓上来美人鱼！但她开口就是男高音，吓得你主动要求被消除记忆！\n',
                         '钓上来WIFI路由器！显示『信号强度-10086』，你愤怒地把它砸成电子珊瑚！\n',
                         '钓上来一颗长有翅膀的金草莓！它突然开始发光闪烁，你本能地按C键冲刺——结果草莓飞走了！\n',
+                        '钓上来一个弹球！结果弹球叮叮叮把你弹到水里去了！\n',
+                        '钓上来一只蓝鸟！结果蓝鸟“嘎”的一声就飞走了，顺便教了你凌波微步！\n',
                     ]
                     
                     message += random.choice(kongjun_text)
