@@ -214,8 +214,8 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
         await ck_admin_single.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
 
     #打开文件
-    data = {}
     data = open_data(user_path/file_name)
+    bar_data = open_data(bar_path)
 
     #没有这个玩家
     if(not user_id in data):
@@ -223,7 +223,9 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
 
     #有这个玩家
     berry = data[user_id]['berry']
-    await ck_admin_single.finish(f"玩家 [{nickname}] 目前拥有{berry}草莓！", at_sender=True)
+    #银行里没有就是0颗
+    bank_berry = bar_data.get(user_id, {}).get("bank", 0)
+    await ck_admin_single.finish(f"\n{nickname}目前拥有{berry}颗草莓，银行里存有{bank_berry}颗草莓！", at_sender=True)
 
 #给某个玩家发放草莓
 fafang_single = on_command("发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
