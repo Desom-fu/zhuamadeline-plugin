@@ -1909,10 +1909,10 @@ async def double_ball_lottery():
         else:
             msg_text += "你"
 
-        msg_text += f"获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n"
+        msg_text += f"获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n\n"
 
     else:
-        msg_text += "很遗憾，本次无人中二等奖！\n"
+        msg_text += "很遗憾，本次无人中二等奖！\n\n"
 
     # 额外信息：只猜中一个数字的玩家
     if single_match_users:
