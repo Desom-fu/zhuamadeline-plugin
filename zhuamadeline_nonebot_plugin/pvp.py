@@ -45,26 +45,7 @@ __all__ = [
     "process_results"
 ]
 
-# # 时间奖励
-# def calculate_time_reward(time_diff):
-#     if time_diff <= 30:
-#         return 0
-#     elif time_diff <= 60:
-#         return 25
-#     elif time_diff <= 90:
-#         return 50
-#     elif time_diff <= 120:
-#         return 75
-#     elif time_diff <= 150:
-#         return 100
-#     elif time_diff <= 180:
-#         return 125
-#     else:
-#         # 180 分钟之后的奖励计算，每 30 分钟增加 30
-#         additional_time = time_diff - 180
-#         additional_intervals = additional_time // 30  # 计算完整的 30 分钟间隔数
-#         return 125 + (additional_intervals * 30)
-
+# 时间奖励
 def calculate_time_reward(time_diff):
     if time_diff <= 120:  # 前两个小时
         additional_intervals = time_diff  // 30  # 计算完整的 30 分钟间隔
@@ -74,17 +55,7 @@ def calculate_time_reward(time_diff):
         additional_intervals = (time_diff - 90) // 30  # 计算超过 120 分钟的 30 分钟间隔
         return first_part + additional_intervals * 30
     
-# #回合奖励
-# def calculate_base_reward(total_count):
-#     if total_count < 40:
-#         return 50
-#     elif total_count < 60:
-#         return 100
-#     elif total_count < 80:
-#         return 150
-#     elif total_count < 100:
-#         return 200
-#     return 250
+# 回合奖励
 
 def calculate_base_reward(total_count):
     if total_count < 30:
