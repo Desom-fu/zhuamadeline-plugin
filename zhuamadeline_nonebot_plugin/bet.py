@@ -842,7 +842,7 @@ def handle_game_end(
     return msg, bar_data, demon_data
 
 # 死斗函数
-def death_mode(identity_found, group_id, demon_data, item_dic):
+def death_mode(identity_found, group_id, demon_data):
     '''判断是否开启死斗模式：根据不同的状态和轮数进行血量上限扣减，保存状态后最后返回msg'''
     player0 = str(demon_data[group_id]['pl'][0])
     player1 = str(demon_data[group_id]['pl'][1])
