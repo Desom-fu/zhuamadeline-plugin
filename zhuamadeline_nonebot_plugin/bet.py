@@ -701,7 +701,7 @@ item_effects = {
     "手套": "重新换弹，不进行道具刷新",
     "骰子": "你的hp变为1到4的随机值",
     "墨镜": "观察第一颗和最后一颗子弹的种类，但顺序未知",
-    "双转团": "（该道具为“身份”模式专属道具）把这个道具转移到对方道具栏里，若对方道具已达上限则丢弃本道具；另外还有概率触发特殊效果？可能会掉血，可能会送给对方道具……但由于其富含identity，可能有其他的非bet2游戏内的效果？",
+    "双转团": "（该道具为“身份”模式专属道具）把这个道具转移到对方道具栏里，若对方道具已达上限则丢弃本道具；另外还有概率触发特殊效果？可能会掉血，可能会回血，可能会送给对方道具……但由于其富含identity，可能有其他的非bet2游戏内的效果？",
     "天秤": "（该道具为“身份”模式专属道具）如果你的道具数量≥对方道具数量，你对对方造成一点伤害；你的道具数量<对方道具数量，你回一点血",
     "休养生息": "（该道具为“身份”模式专属道具）自己的hp恢复2，对方的hp恢复1，不跳回合；若对面为满血，则只回一点体力。",
     "玩具枪": "（该道具为“身份”模式专属道具）1/2的概率无事发生，1/2的概率对对面造成1点伤害",
@@ -1299,7 +1299,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             if demon_data[group_id]["hp"][player_turn] >= hp_max:
                 demon_data[group_id]["hp"][player_turn] = hp_max
             msg += f"天秤的指针开始转动…… 检测到你的道具数量为：{len_player_items}，对面的道具数量为：{len_opponent_items}；\n由于{len_player_items}<{len_opponent_items}，你回复一点体力（最高恢复至上限！）！\n你目前的hp为：{demon_data[group_id]['hp'][player_turn]}\n"  
-    
+
     elif item_name == "双转团":
         # 获取原始道具长度
         original_opponent_count = len(opponent_items)
@@ -1313,9 +1313,12 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         # 获取新的道具列表（双转团转移后的状态）
         now_player_items = demon_data[group_id][f"item_{player_turn}"]
         now_opponent_items = demon_data[group_id][f"item_{opponent_turn}"]
-
-        # 功能1：1/5概率转移随机道具
-        if random.randint(1, 5) == 1 and len(now_player_items) > 0:  # 确保玩家还有道具
+        # 首先 1/4 触发事件
+        kou_first = random.randint(1, 4)
+        if kou_first == 1:
+            kou_second = random.randint(1, 3)
+        # 功能1：1/3概率转移随机道具
+        if kou_second == 1 and len(now_player_items) > 0:  # 确保玩家还有道具
             random_idx = random.randint(0, len(now_player_items)-1)
             random_item_id = player_items.pop(random_idx)
             random_item_name = item_dic[random_item_id]
@@ -1323,15 +1326,25 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             if len(now_opponent_items) < item_max:
                 opponent_items.append(random_item_id)
                 msg += f"- 对方还顺手拿走了你的【{random_item_name}】！\n"
+                # 1/2扣对面一点血
+                if random.randint(1, 2) == 1:
+                    demon_data[group_id]["hp"][opponent_turn] -= 1
+                    demon_data[group_id]["hp"][player_turn] = current_hp
+                    msg += f"但是一不小心刷了一跤，hp-1！\n- 当前对方hp：{demon_data[group_id]["hp"][opponent_turn]}/{hp_max}\n"
             else:
                 msg += f"- 对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
 
-        # 功能2：1/5概率扣自己1点血
-        if random.randint(1, 5) == 1:
+        # 功能2：1/3概率扣自己1点血，1/3加一点血
+        elif kou_second == 2:
             demon_data[group_id]["hp"][player_turn] -= 1
-            current_hp = max(demon_data[group_id]["hp"][player_turn], 0)
-            demon_data[group_id]["hp"][player_turn] = current_hp
-            msg += f"你在丢双转团的时候太急了！人一旦急，就会更急，神就不会定，所以你一不小心把血条往左滑了一下，损失了1点hp！\n- 当前hp：{current_hp}/{hp_max}\n"
+            msg += f"你在丢双转团的时候太急了！人一旦急，就会更急，神就不会定，所以你一不小心把血条往左滑了一下，损失了1点hp！\n- 当前自己hp：{demon_data[group_id]["hp"][player_turn]}/{hp_max}\n"
+        
+        elif kou_second == 3:
+            demon_data[group_id]["hp"][player_turn] += 1
+            # 无法超过上限
+            if demon_data[group_id]["hp"][player_turn] >= hp_max:
+                demon_data[group_id]["hp"][player_turn] = hp_max
+            msg += f"你在丢双转团的时候太急了！人一旦急，就会更急，神就不会定，所以你一不小心把血条往右滑了一下，增加了1点hp！\n- 当前自己hp：{demon_data[group_id]["hp"][player_turn]}/{hp_max}\n"
         
         # 功能3：对方初始已满时获得徽章
         if original_opponent_count >= item_max:
