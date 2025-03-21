@@ -534,6 +534,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     #随机选择十个位置中一个(提前预设)
     pos = random.randint(0,9)
     rana += random.randint(levela*10, levela*10+50)  #战力系统，1级madeline10-60，2级20-70以此类推
+    rana += random.randint(levela*10, levela*10+50)  #战力系统，1级madeline10-60，2级20-70以此类推
     # 设置随机进攻战力，进攻战力可由猎场和道具增加
     if bonus_rank_max != 0:
         bonus_rank = random.randint(0, bonus_rank_max)
