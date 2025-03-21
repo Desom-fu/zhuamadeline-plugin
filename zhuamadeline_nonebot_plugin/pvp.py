@@ -505,7 +505,6 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     rana += guding_rank
     
     #打开竞技场文件
-    pvp_data = {}
     pvp_data = open_data(pvp_path)
     #若本次竞技场还没有任何信息，先初始化一下
     if not pvp_data:
