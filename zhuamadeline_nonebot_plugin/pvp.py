@@ -45,6 +45,32 @@ __all__ = [
     "process_results"
 ]
 
+# 开新要改
+# 使用字典映射 hunt_bonusb 和 oppo_liechang 的关系
+# 左边的是战力增加，右边的是int猎场号
+hunt_bonusb_to_oppo_liechang = {
+    3: 4,  # 如果 hunt_bonusb 是 3，则设置 oppo_liechang 为 4
+    2: 3,  # 如果 hunt_bonusb 是 2，则设置 oppo_liechang 为 3
+    1: 2,  # 如果 hunt_bonusb 是 1，则设置 oppo_liechang 为 2
+    0: 1,  # 如果 hunt_bonusb 是 0，则设置 oppo_liechang 为 1
+}
+# 定义猎场编号与奖励的映射关系
+liechang_bonus_rewards = {
+    # 开新猎场要改
+    "2": (1, 1, 1),  # 对应 2 猎，(guding_rank 增加 1, hunt_bonus 增加 1, bonus_rank_max 增加 1)
+    "3": (2, 2, 2),  # 对应 3 猎，(guding_rank 增加 2, hunt_bonus 增加 2, bonus_rank_max 增加 2)
+    "4": (3, 3, 3),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 3, bonus_rank_max 增加 3)
+}
+
+# 定义不同猎场的概率分布，键是解锁的最高猎场，值是各个猎场的概率
+liechang_probabilities = {
+    # 开新猎场要改
+    2: {1: 50, 2: 100},  # 只解锁了 1 猎和 2 猎时，概率均等
+    3: {1: 45, 2: 75, 3: 100},  # 解锁 3 猎后，1猎45%，2猎30%，3猎25%
+    4: {1: 30, 2: 60, 3: 90, 4: 100},  # 解锁 4 猎后
+    # 5: {1: 35, 2: 25, 3: 20, 4: 10, 5: 10}  # 解锁 5 猎后
+}
+
 # 时间奖励
 def calculate_time_reward(time_diff):
     if time_diff <= 120:  # 前两个小时
@@ -174,13 +200,8 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
 
     # logger.info(f"qqb的数值为：{qqb}")
 
-    # 根据 hunt_bonus 和 hunt_bonusb 计算 oppo_liechang
-    if hunt_bonusb == 2:
-        oppo_liechang = 3  # 如果 hunt_bonusb 是 2，则设置 oppo_liechang 为 3
-    elif hunt_bonusb == 1:
-        oppo_liechang = 2  # 如果 hunt_bonusb 是 1，则设置 oppo_liechang 为 2
-    else:
-        oppo_liechang = 1  # 否则设置 oppo_liechang 为 1
+    # 根据 hunt_bonusb 计算 oppo_liechang
+    oppo_liechang = hunt_bonusb_to_oppo_liechang.get(hunt_bonusb, 1)  # 默认值为 1
 
     minrankb = levelb * 10
     maxrankb = levelb * 10 + 50
@@ -252,14 +273,10 @@ def pvp_logic(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
             levelb, numb = int(madelineb[0]), int(madelineb[1])
             ranb, hunt_bonusb = list_current[pos][3], list_current[pos][4]
 
-            # 根据 hunt_bonus 和 hunt_bonusb 计算 oppo_liechang
             # 开新要改
-            if hunt_bonusb == 2:
-                oppo_liechang = 3  # 如果 hunt_bonusb 是 2，则设置 oppo_liechang 为 3
-            elif hunt_bonusb == 1:
-                oppo_liechang = 2  # 如果 hunt_bonusb 是 1，则设置 oppo_liechang 为 2
-            else:
-                oppo_liechang = 1  # 否则设置 oppo_liechang 为 1
+            # 根据 hunt_bonusb 计算 oppo_liechang
+            oppo_liechang = hunt_bonusb_to_oppo_liechang.get(hunt_bonusb, 1)  # 默认值为 1
+            
             data = open_data(user_path)
             # 判定血刃、残片、遥控机器人加固定战力上限
             blood = data[user_id]['collections'].get("鲜血之刃", 0)
@@ -283,7 +300,7 @@ def pvp_logic(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
 
             # 计算期望
             expect_a, expect_b = (maxa + mina) / 2, (maxb + minb) / 2
-
+            
             # 若战力中位数（期望）更高则直接替换
             if expect_a > expect_b:
                 pvp_guess_text = pvp_guess(pos)
@@ -293,9 +310,11 @@ def pvp_logic(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
             # 若期望相等，比较战力和等级
             elif expect_a == expect_b:
                 if rana > ranb or (rana == ranb and levela >= levelb):
-                    pvp_guess_text = pvp_guess(pos)
-                    list_current[pos] = [user_id, madeline, nickname, rana, hunt_bonus, join_round]
-                    return 1, nickname, ranb, None, None, oppo_liechang, levelb, numb, pos, bonus_rank, final_rank, pvp_guess_text
+                    # 比较猎场，猎场高的替换
+                    if hunt_bonus >= oppo_liechang:
+                        pvp_guess_text = pvp_guess(pos)
+                        list_current[pos] = [user_id, madeline, nickname, rana, hunt_bonus, join_round]
+                        return 1, nickname, ranb, None, None, oppo_liechang, levelb, numb, pos, bonus_rank, final_rank, pvp_guess_text
 
             # 其余情况不替换
             return 2, nickname, ranb, None, None, oppo_liechang, levelb, numb, pos, bonus_rank, final_rank, None
@@ -413,6 +432,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         "3": kc_data3,
         "4": kc_data4,
     }
+    
     #提前设置rana、hunt_bonus和oppo_liechang
     rana = 0
     hunt_bonus = 0
@@ -444,15 +464,6 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     if music >= 1:
         music_add = music // 2500
         bonus_rank_max += music_add
-        
-    # 定义不同猎场的概率分布，键是解锁的最高猎场，值是各个猎场的概率
-    liechang_probabilities = {
-        # 开新猎场要改
-        2: {1: 50, 2: 100},  # 只解锁了 1 猎和 2 猎时，概率均等
-        3: {1: 45, 2: 75, 3: 100},  # 解锁 3 猎后，1猎45%，2猎30%，3猎25%
-        4: {1: 30, 2: 60, 3: 90, 4: 100},  # 解锁 4 猎后
-        # 5: {1: 35, 2: 25, 3: 20, 4: 10, 5: 10}  # 解锁 5 猎后
-    }
 
     # 计算用户解锁的最高猎场
     max_liechang = 1 # 默认最基础的是 1 猎
@@ -481,17 +492,9 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
                 liechang_number = str(lc)
                 break
 
-    # 定义猎场编号与奖励的映射关系
-    rewards = {
-        # 开新猎场要改
-        "2": (1, 1, 1),  # 对应 2 猎，(guding_rank 增加 1, hunt_bonus 增加 1, bonus_rank_max 增加 1)
-        "3": (2, 2, 2),  # 对应 3 猎，(guding_rank 增加 2, hunt_bonus 增加 2, bonus_rank_max 增加 2)
-        "4": (3, 3, 3),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 3, bonus_rank_max 增加 3)
-    }
-
-    # 如果 liechang_number 存在于 rewards 中，更新奖励
-    if liechang_number in rewards:
-        guding_rank_increment, hunt_bonus_increment, bonus_rank_increment = rewards[liechang_number]
+    # 如果 liechang_number 存在于 liechang_bonus_rewards 中，更新奖励
+    if liechang_number in liechang_bonus_rewards:
+        guding_rank_increment, hunt_bonus_increment, bonus_rank_increment = liechang_bonus_rewards[liechang_number]
         guding_rank += guding_rank_increment
         hunt_bonus += hunt_bonus_increment
         bonus_rank_max += bonus_rank_increment
