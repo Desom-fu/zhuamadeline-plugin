@@ -591,6 +591,8 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     if ranb and ranbrank: # 有这两个的前提下再计算
         if ranb > ranbrank:
             zhanli_text = f"[{ranb}]-[{ranb-ranbrank}]=[{ranbrank}]"
+        elif ranb == ranbrank:
+            zhanli_text = f"[{ranbrank}]"
         else:
             zhanli_text = f"[{ranb}]+[{ranbrank-ranb}]=[{ranbrank}]"
     # 各种回复
