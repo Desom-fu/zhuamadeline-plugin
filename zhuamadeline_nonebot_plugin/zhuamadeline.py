@@ -51,6 +51,9 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     
     if number_arg == "999":
         number_arg = "随便一个任何东西反正不能是999直接报错提示请输入正确的猎场号"
+    # 彩蛋:饼
+    if number_arg in ['?','？']:
+        number_arg = "999"
     if user_id not in data:
         await qhlc.finish("你还没尝试抓过madeline.....", at_sender=True)
         
@@ -81,6 +84,8 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
         await qhlc.finish(f"已经成功切换到{number}号猎场！", at_sender=True)
+    elif number_int == 999:
+        await qhlc.finish(f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", at_sender=True)
     # 处理错误输入
     else:
         await qhlc.finish(f"请输入正确的猎场号！现在只开放了1~{liechang_count}猎哦！", at_sender=True)
@@ -625,14 +630,14 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     # 显示4猎当前目标（要在4猎才显示）
     if liechang_number == "4":
         if collections.get('红色球体', 0) == 0:
-            message += f"\n- 当前目标：红色球体\n- 已积累次数：{get_ball_value}/8"
+            message += f"\n- 当前目标：红色球体\n- 已飞升次数：{get_ball_value}/8"
         elif collections.get('绿色球体', 0) == 0:
-            message += f"\n- 当前目标：绿色球体\n- 已积累次数：{get_ball_value}/5"
+            message += f"\n- 当前目标：绿色球体\n- 已飞升次数：{get_ball_value}/5"
         elif collections.get('黄色球体', 0) == 0:
-            message += f"\n- 当前目标：黄色球体\n- 已积累次数：{get_ball_value}/3"
+            message += f"\n- 当前目标：黄色球体\n- 已飞升次数：{get_ball_value}/3"
         else:
             message += f"\n- 当前目标：无，地下终端已完全开放"
-            
+
     if all_judge == 'all':
         # 处理“身份徽章”和“充能箱”状态
         if collections.get('身份徽章', 0) > 0:
