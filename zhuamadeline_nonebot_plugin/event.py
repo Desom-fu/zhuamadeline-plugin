@@ -508,7 +508,7 @@ async def CrystalStuck(user_data, user_id, message):
             if user_id in ban:
                 if not '尘封的秘宝' in collections:
                     collections['尘封的秘宝'] = 1
-                    mibao = "\n此外，在溶洞的一处昏暗角落，你意外发现了一件布满灰尘的秘宝。\n"
+                    mibao = "\n此外，在溶洞的一处昏暗角落，你意外发现了一件布满灰尘的秘宝。\n输入.cp 尘封的秘宝 以查看具体效果"
                 
                 items['madeline提取器'] += 1
                 items['时间秒表'] += 1
@@ -530,7 +530,7 @@ async def CrystalStuck(user_data, user_id, message):
                     "洞内一片寂静，昏暗中你看到鲜血之刃静静地插在一块满是裂痕的石台上，"
                     "刀身被干涸的暗红血迹覆盖，仿佛在述说它的血腥过往。"
                     "洞内的空气冰冷刺骨，死寂中隐约传来低沉的嗡鸣，如同它在呼唤，渴求鲜血的滋养。\n",
-                    "输入.cp 回想之核 以查看具体效果",
+                    "输入.cp 鲜血之刃 以查看具体效果",
                     at_sender=True
                 )
         

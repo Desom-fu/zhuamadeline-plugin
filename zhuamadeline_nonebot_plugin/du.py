@@ -107,7 +107,7 @@ async def ticket_handle(event: GroupMessageEvent):
 
             # 加入奖池
             bar_data["pots"] += tax
-            msg = f"\n- 你花费{menpiao}颗草莓，购买了一张刮刮乐！\n-本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+            msg = f"\n- 你花费{menpiao}颗草莓，购买了一张刮刮乐！\n- 本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
             if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
                 data[str(user_id)]['compulsion_count'] -= 1
                 if data[str(user_id)]['compulsion_count']!= 0:
