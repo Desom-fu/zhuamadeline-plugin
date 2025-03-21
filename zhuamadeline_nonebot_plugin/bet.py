@@ -1868,8 +1868,12 @@ async def double_ball_lottery():
             if user_red == red_ball and user_blue == blue_ball and user_yellow == yellow_ball:
                 big_winners.append(user_id)
                 
-            # 再检查双球中奖
-            elif user_red == red_ball and user_blue == blue_ball:
+            # 再检查双球中奖（任意两个）
+            elif (
+                (user_red == red_ball and user_blue == blue_ball) or
+                (user_red == red_ball and user_yellow == yellow_ball) or
+                (user_blue == blue_ball and user_yellow == yellow_ball)
+            ):
                 winners.append(user_id)
 
             # 只猜中一个数字的玩家
