@@ -1912,8 +1912,8 @@ async def double_ball_lottery():
         # 按人数分文案
         if len(big_winners) > 1:
             msg_text += f"每人"
-        else:
-            msg_text += f"你"
+        # else:
+        #     msg_text += f"你"
 
         msg_text += f"获得[{big_reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n\n"
         
@@ -1934,8 +1934,8 @@ async def double_ball_lottery():
         # 按人数分文案
         if len(winners) > 1:
             msg_text += "每人"
-        else:
-            msg_text += "你"
+        # else:
+        #     msg_text += "你"
 
         msg_text += f"获得[{reward_per_winner}]颗草莓！草莓已经发放至你的银行账户里面了哦！请通过`.ck all`查看\n\n"
 
