@@ -842,22 +842,26 @@ def handle_game_end(
     return msg, bar_data, demon_data
 
 # 死斗函数
-def death_mode(identity_found, group_id, demon_data):
+def death_mode(identity_found, group_id, demon_data, item_dic):
     '''判断是否开启死斗模式：根据不同的状态和轮数进行血量上限扣减，保存状态后最后返回msg'''
     player0 = str(demon_data[group_id]['pl'][0])
     player1 = str(demon_data[group_id]['pl'][1])
     msg = ''
+    
     if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
         msg += f'\n- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
+        
+        # HP 上限减少
         if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
             demon_data[group_id]["hp_max"] -= 1
             new_hp_max = demon_data[group_id]["hp_max"]
             msg += f'- {new_hp_max+1}>1，扣1点hp上限，当前hp上限：{new_hp_max}\n'
-            # 校准所有玩家血量不得超过hp上限
+            
+            # 校准所有玩家血量不得超过 hp 上限
             for i in range(len(demon_data[group_id]["hp"])):
                 demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
 
-        # 如果 identity_found == 2，额外扣除 1 点道具上限，并随机删除 1-2 个道具
+        # 额外扣除 1 点道具上限，并随机删除 1-2 个道具
         if identity_found == 2:
             if demon_data[group_id]["item_max"] > 6:
                 demon_data[group_id]["item_max"] -= 1  # 扣 1 点道具上限（最低仍为 6）
@@ -866,27 +870,32 @@ def death_mode(identity_found, group_id, demon_data):
 
             remove_random = random.randint(1, 2)
             
-            # 计算要删除的道具数量，但不能超过已有的道具数量
+            # 计算可删除的道具数量
             remove_count0 = min(remove_random, len(demon_data[group_id]['item_0'])) if demon_data[group_id]['item_0'] else 0
             remove_count1 = min(remove_random, len(demon_data[group_id]['item_1'])) if demon_data[group_id]['item_1'] else 0
-            
-            # 记录要删除的道具名称
+
+            # 随机选择要删除的道具
             removed_items_0 = random.sample(demon_data[group_id]['item_0'], remove_count0) if remove_count0 else []
             removed_items_1 = random.sample(demon_data[group_id]['item_1'], remove_count1) if remove_count1 else []
+
+            # 逐个删除选定的道具实例
+            for item in removed_items_0:
+                demon_data[group_id]['item_0'].remove(item)
+
+            for item in removed_items_1:
+                demon_data[group_id]['item_1'].remove(item) 
+
+            # 记录被删除的道具名称
             removed_names_0 = [item_dic.get(i, "未知道具") for i in removed_items_0]
             removed_names_1 = [item_dic.get(i, "未知道具") for i in removed_items_1]
-            
-            # 执行道具删除
-            demon_data[group_id]['item_0'] = [i for i in demon_data[group_id]['item_0'] if i not in removed_items_0]
-            demon_data[group_id]['item_1'] = [i for i in demon_data[group_id]['item_1'] if i not in removed_items_1]
-            
+
             # 记录删除的信息
             if removed_names_0:
                 msg += '- '+ MessageSegment.at(player0) + f'失去了{remove_count0}个道具：{"、".join(removed_names_0)}！\n'
             if removed_names_1:
                 msg += '- '+ MessageSegment.at(player1) + f'失去了{remove_count1}个道具：{"、".join(removed_names_1)}！\n'
 
-        # 跑团专用999模式，就是极速模式的基础上加了一个hpmax-2
+        # 跑团专用999模式，额外扣2点HP上限
         elif identity_found == 999 and demon_data[group_id]["hp_max"] > 1:
             old_hp_max = demon_data[group_id]["hp_max"]
             demon_data[group_id]["hp_max"] -= 2
@@ -894,6 +903,7 @@ def death_mode(identity_found, group_id, demon_data):
                 demon_data[group_id]["hp_max"] = 1
             new_hp_max = demon_data[group_id]["hp_max"]
             msg += f'- {old_hp_max}>1，扣2点hp上限，当前hp上限：{new_hp_max}\n'
+
             # 校准所有玩家血量不得超过hp上限
             for i in range(len(demon_data[group_id]["hp"])):
                 demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
