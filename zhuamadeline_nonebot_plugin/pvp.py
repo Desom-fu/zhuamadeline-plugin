@@ -585,13 +585,21 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         madelinenameb = print_zhua(levelb, numb, str(oppo_liechang))
     except:
         madelinenameb = "none"
-        
+    
+    #防守战力加成计算
+    zhanli_text = '' # 初始化，防止error
+    if ranb and ranbrank: # 有这两个的前提下再计算
+        if ranb > ranbrank:
+            zhanli_text = f"[{ranb}]-[{ranb-ranbrank}]=[{ranbrank}]"
+        else:
+            zhanli_text = f"[{ranb}]+[{ranbrank-ranb}]=[{ranbrank}]"
+    # 各种回复
     if stat == 5:
         pk_text = (
             f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 [{ranbrank}] (win)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (win)\n"
             f"- 你的madeline被打败了！\n(｡•́︿•̀｡)"
         )
     elif stat == 4:
@@ -599,7 +607,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 [{ranbrank}] (draw/lose)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (draw/lose)\n"
             f"- 你的madeline的进攻战力和擂主的madeline的防守战力相等，但由于你是挑战者，所以你赢了！\nヽ(o^ ^o)ﾉ"
         )
     elif stat == 3:
@@ -607,7 +615,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 [{ranbrank}] (lose)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (lose)\n"
             f"- 你的madeline获胜了！\nヽ(o^ ^o)ﾉ"
         )
     elif stat == 2:
