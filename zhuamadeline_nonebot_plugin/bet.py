@@ -1315,6 +1315,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         now_opponent_items = demon_data[group_id][f"item_{opponent_turn}"]
         # 首先 1/4 触发事件
         kou_first = random.randint(1, 4)
+        kou_second = 0
         if kou_first == 1:
             kou_second = random.randint(1, 3)
         # 功能1：1/3概率转移随机道具
