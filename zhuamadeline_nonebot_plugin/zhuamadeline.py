@@ -608,10 +608,10 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
         if ball_ifplay == 0:
             # 优先显示中奖信息，然后显示门票信息
             if ball_prize > 0:
-                message += f"\n• 上次双球中奖草莓：{ball_prize}颗"
+                message += f"\n• 上次三球中奖草莓：{ball_prize}颗"
             
             elif refund > 0:
-                message += f"\n• 上次双球中奖草莓：{refund}颗"
+                message += f"\n• 上次三球中奖草莓：{refund}颗"
 
     # 显示能量（若有）
     message += (f"\n- 剩余能量：{energy}点") if energy > 0 else ''
