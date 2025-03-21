@@ -741,7 +741,7 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
     
     item_count = len(item_dic)  # 道具总数
     normal_mode_items = [] # 普通模式需要增加权重的道具（暂无）
-    identity_mode_items = [3, 18] # 身份模式需要增加权重的道具（放大镜，玩具枪）
+    identity_mode_items = [3] # 身份模式需要增加权重的道具（放大镜）
     
     # 动态生成权重表
     weights = {i: 0 for i in range(1, item_count + 1)}  # 初始化所有道具权重为0
@@ -1314,20 +1314,20 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         now_player_items = demon_data[group_id][f"item_{player_turn}"]
         now_opponent_items = demon_data[group_id][f"item_{opponent_turn}"]
 
-        # 功能1：1/2概率转移随机道具
-        if random.randint(1, 2) == 1 and len(now_player_items) > 0:  # 确保玩家还有道具
+        # 功能1：1/5概率转移随机道具
+        if random.randint(1, 5) == 1 and len(now_player_items) > 0:  # 确保玩家还有道具
             random_idx = random.randint(0, len(now_player_items)-1)
             random_item_id = player_items.pop(random_idx)
             random_item_name = item_dic[random_item_id]
             # 检查转移后的道具栏状态
             if len(now_opponent_items) < item_max:
                 opponent_items.append(random_item_id)
-                msg += f"对方还顺手拿走了你的【{random_item_name}】！\n"
+                msg += f"- 对方还顺手拿走了你的【{random_item_name}】！\n"
             else:
-                msg += f"对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
+                msg += f"- 对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
 
-        # 功能2：1/3概率扣自己1点血
-        if random.randint(1, 3) == 1:
+        # 功能2：1/5概率扣自己1点血
+        if random.randint(1, 5) == 1:
             demon_data[group_id]["hp"][player_turn] -= 1
             current_hp = max(demon_data[group_id]["hp"][player_turn], 0)
             demon_data[group_id]["hp"][player_turn] = current_hp
