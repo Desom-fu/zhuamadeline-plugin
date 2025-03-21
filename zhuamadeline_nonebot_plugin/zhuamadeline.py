@@ -118,6 +118,22 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             #确保collections存在
             collections = data[str(user_id)].get('collections', {})
             items = data[str(user_id)].get('item', {})
+            # 定义 event 和 lc 对应的奖励及提示文本
+            event_rewards = {
+                "getspider": ("3", "磁力吸附手套", "你根据纸条的指示，成功的在矿洞里的一个小道发现了这副手套。"),
+                "getbomb": ("1", "炸弹包", "你根据文字的指示，成功的在古代遗迹中庇护所的上方发现一个小洞。你把手伸进去，摸到了一个炸弹包。")
+            }
+
+            # 检查用户的event和lc是否匹配
+            reward_info = event_rewards.get(data[str(user_id)]['event'])
+            if reward_info and data[str(user_id)].get('lc', '1') == reward_info[0]:
+                collection_name, message = reward_info[1], reward_info[2]
+                # 如果用户尚未获得藏品，则添加
+                if collection_name not in data[str(user_id)]['collections']:
+                    data[str(user_id)]['collections'][collection_name] = 1
+                    data[str(user_id)]['event'] = "nothing"
+                    save_data(user_path/file_name, data)
+                    await catch.finish(f"{message}\n输入.cp {collection_name} 以查看具体效果", at_sender=True)
                 
             #读取信息
             next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
@@ -279,6 +295,21 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             probabilities['b'] = math.floor(probabilities['b'] * factor)
             probabilities['c'] = probabilities['b'] + 150
             probabilities['d'] = probabilities['c'] + 300
+        # 猎场4专属
+        if liechang_number == "4":
+            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 400 + star_add}  # 初始设定
+
+            if red_ball >= 1:
+                probabilities.update({'c': 100, 'd': 400 + star_add})
+            if green_ball >= 1:
+                probabilities.update({'b': 20, 'c': 150, 'd': 500 + star_add})
+            if yellow_ball >= 1:
+                probabilities = {
+                    'a': 10 + increment,
+                    'b': 50 + increment,
+                    'c': 200 + increment,
+                    'd': 500 + increment + star_add
+                }
                 
         # 虚弱debuff全局生效
         if debuff == 'weaken':

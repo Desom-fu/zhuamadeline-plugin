@@ -1578,6 +1578,131 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
             #--------------------这些道具需要限制所在猎场的使用--------------------
                 #两个参数的指令 提取器放猎场判定之前
+                if use_item_name.startswith("madeline飞升器"):
+                    cmd = use_item_name.split("/")
+                    # 获取命令中的参数
+                    if len(cmd) == 2:
+                        item_name = cmd[0]
+                        user_info = data.setdefault(user_id, {})
+                        user_info.setdefault("get_ball_value", 0)
+                        collections = user_info.setdefault("collections", {})
+                        if collections.get(item_name, 0) > 0:
+                            # 判断飞升器是否仅限于4猎使用
+                            if user_info.get("lc") != "4":
+                                await daoju.finish("只有在4猎才能使用madeline飞升器！", at_sender=True)
+                            try:
+                                level = int(cmd[1])  # 解析飞升的等级
+                            except:
+                                await daoju.finish("等级参数无效，请输入1至5之间的等级", at_sender=True)
+                            # 判断等级是否有效
+                            if level < 1 or level > 5:
+                                await daoju.finish("等级参数无效，请输入1至5之间的等级", at_sender=True)
+
+                            # 获取用户的库存数据
+                            try:
+                                data4 = open_data(user_list4)
+                            except:
+                                await daoju.finish(f"请先在地下终端猎场里面抓一次玛德琳再使用{item_name}哦！", at_sender=True)
+                            
+                            # 没到等级不让融合
+                            if collections.get('红色球体', 0) == 0 and level >= 4:
+                                await daoju.finish(f"你还未解锁飞升{level}级玛德琳的权限，请在达到条件后再飞升哦！", at_sender=True)
+                            
+                            if collections.get('绿色球体', 0) == 0 and level >= 5:
+                                await daoju.finish(f"你还未解锁飞升{level}级玛德琳的权限，请在达到条件后再飞升哦！", at_sender=True)
+
+                            # 获取该等级下所有可用的玛德琳编号
+                            available_madelines = []
+                            for k1, count in data4.get(user_id, {}).items():
+                                k = k1.split('_')
+                                current_level = int(k[0])  # 当前的玛德琳等级
+                                num = k[1]  # 玛德琳编号
+
+                                # 如果是目标等级，且数量大于0，添加到可选列表
+                                if current_level == level and count > 0:
+                                    available_madelines.append((num, count))  # 记录编号和数量
+
+                            # 先把 available_madelines 转换成字典，方便直接修改数量
+                            madeline_dict = {num: count for num, count in available_madelines}
+                            selected_madelines = []
+                            while len(selected_madelines) < 3:
+                                # 过滤掉数量为0的玛德琳
+                                available_choices = [(num, count) for num, count in madeline_dict.items() if count > 0]
+                                if not available_choices:
+                                    await daoju.finish(f"目前你等级{level}的Madeline数量不足3个，无法进行飞升！", at_sender=True)
+
+                                # 随机选择一个玛德琳
+                                num, count = random.choice(available_choices)
+
+                                # 获取玛德琳的详细信息
+                                madeline_info = print_zhua(level, num, liechang_number)
+                                madeline_name = madeline_info[1]
+                                selected_madelines.append(madeline_name)
+
+                                # 直接更新原始数据（减少1）
+                                madeline_dict[num] = max(0, count - 1)
+
+                            # 还原成原来的列表结构
+                            available_madelines = [(num, count) for num, count in madeline_dict.items()]
+                    
+                            # 完成飞升后更新数据
+                            for num, count in available_madelines:
+                                # 更新库存中对应的玛德琳数量
+                                data4[user_id][f"{level}_{num}"] = count
+                            # 保存用户的库存数据
+                            save_data(user_list4, data4)
+
+                            # 球体信息配置
+                            ball_data = {
+                                3: {"name": "红色球体", "chance": 8, "requirement": None},
+                                4: {"name": "绿色球体", "chance": 5, "requirement": "红色球体"},
+                                5: {"name": "黄色球体", "chance": 3, "requirement": "绿色球体"},
+                            }
+                            # 检查当前等级是否有对应球体设定
+                            if level in ball_data:
+                                ball_info = ball_data[level]
+                                ball_name = ball_info["name"]
+                                user_info["get_ball_value"] += 1
+                                # 检查是否满足获取条件
+                                if user_info["get_ball_value"] >= ball_info["chance"] and ball_name not in collections:
+                                    if not ball_info["requirement"] or ball_info["requirement"] in collections:
+                                        collections[ball_name] = 1
+                                        user_info["get_ball_value"] = 0
+                                        # 根据 level 动态生成第三句话
+                                        if level == 3 or level == 4:
+                                            third_sentence = f"现在你可以在地下终端抓到{level}级的玛德琳了，并且解锁了飞升{level+1}级玛德琳的权限！\n"
+                                        elif level == 5:
+                                            third_sentence = f"现在你完全解锁地下终端了，能抓到{level}级的玛德琳了，同时道具、道具加成、祈愿解封！\n"
+                                        else:
+                                            third_sentence = ""  # 默认情况，避免未定义
+
+                                        # 生成完整文本
+                                        item_text = (
+                                            f"你在使用Madeline飞升器的时候发现了一个{ball_name}，似乎是可以插进哪里的？\n"
+                                            f"你把{ball_name}放进了Madeline飞升器里的{ball_name[:-2]}凹槽，顿时感觉压制力小了点。\n"
+                                            f"{third_sentence}"
+                                            f"输入.cp {ball_name} 以查看具体效果\n\n"
+                                        )
+                                        
+                            # 解锁了黄球就不需要积累值了，直接清空
+                            if collections.get('黄色球体', 0) > 0:
+                                user_info["get_ball_value"] = 0
+                            
+                            # 以下是获取新madeline
+                            if level == 1:
+                                information = zhua_random(0, 0, 0, 700, "4")
+                            elif level == 2:
+                                information = zhua_random(0, 0, 500, 800, "4")
+                            elif level == 3:
+                                information = zhua_random(0, 500, 800, 1000, "4")
+                            elif level == 4:
+                                information = zhua_random(300, 750, 1000, 1001, "4")
+                            elif level == 5:
+                                information = zhua_random(500, 1000, 1001, 1002, "4")
+                            
+                            success = 1
+                            # 返回飞升后的结果
+                            item_text += f"你随机选择了以下这三位{level}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n飞升的结果是……\n"
                 # madeline提取器
                 if(len(command)==2):
                     item_name = command[0]   #参数1
@@ -1760,6 +1885,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             text = "你在使用道具的过程中，没有任何madeline被道具吸引，结果一不小心你就撞到了山洞上！不过幸好道具没消耗……"
                             #发送消息
                             await daoju.finish(text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
+                # 4猎必须要有黄球才能使用消耗类道具
+                if liechang_number == "4":
+                    if not use_item_name.startswith("madeline飞升器"):
+                        if(not '黄色球体' in data[str(user_id)]['collections']):
+                            await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用抓捕Madeline的道具……", at_sender = True)                            
 
                 #debuff清除逻辑(使用其他抓madeline道具前判定)
                 debuff_clear(data,user_id)
@@ -1862,6 +1992,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             #紫晶魄，增加3%
                             if (crystal >= 1):
                                 noHitRate += 3
+                            #炸弹包，增加5%
+                            if (bombbag >= 1):
+                                noHitRate += 5
                             #充能箱100%爆炸
                             if elect_status == True:
                                 noHitRate = 0
