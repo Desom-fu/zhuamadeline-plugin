@@ -1263,10 +1263,10 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         if demon_data[group_id]['clip']:
             removed_bullet = demon_data[group_id]['clip'].pop()
             bullet_type = "实弹" if removed_bullet == 1 else "空弹"
-            msg += f"你退掉了一颗子弹，这颗子弹是：{bullet_type}\n"
+            msg += f"- 你退掉了一颗子弹，这颗子弹是：{bullet_type}\n"
         if not demon_data[group_id]['clip'] or all(b == 0 for b in demon_data[group_id]['clip']):
             demon_data[group_id]['clip'] = load()
-            msg += "- 子弹已耗尽，重新装填！\n"
+            msg += "- 子弹已耗尽，重新装填！\n\n"
             # 游戏轮数+1
             demon_data[group_id]['game_turn'] += 1
             # 获取死斗模式信息
@@ -1278,7 +1278,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += item_msg
             
             # 增加弹数消息，优化排版
-            msg += '- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))
+            msg += '\n- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))
             
     elif item_name == "刷新票":
         num_items = len(player_items)
