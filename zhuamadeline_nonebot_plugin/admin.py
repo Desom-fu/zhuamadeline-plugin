@@ -86,7 +86,6 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
     if str(event.user_id) not in bot_owner_id:
         return
     commands = [
-        ".状态",
         ".全服发放草莓 草莓数量",
         ".全服扣除草莓 草莓数量",
         ".查询草莓 QQ号",
@@ -1621,23 +1620,88 @@ async def fafang_buchang_handle(event: GroupMessageEvent, arg: Message = Command
 
 '''以下为开放神权'''
 
-# 状态
-status = on_fullmatch(['.状态', '。状态'], priority=5, rule=whitelist_rule)
-@status.handle()
-async def handle_status(event: GroupMessageEvent):
-    #获取系统信息
-    system_info = platform.system()
-    #获取系统版本
-    system_version = platform.version()
-    #获取系统CPU使用率
-    cpu_percent = psutil.cpu_percent(interval=1)
-    #获取系统内存使用率
-    memory_percent = psutil.virtual_memory().percent
-    #获取系统磁盘使用率
-    disk_percent = psutil.disk_usage('/').percent
+# 定义状态命令
+# 原插件作者：昨夜惊梦
+# 原插件地址：https://forum.olivos.run/d/397 服务器运行状态查看(文字版）
+# 原插件平台：Olivos
+status = on_fullmatch(['.状态', '。状态', '.status', '。status', '.运行状态', '。运行状态'], priority=5)
 
-    #发送信息
-    await status.send(f"\n系统：{system_info}.{system_version}\nCPU使用率：{cpu_percent}%\n内存使用率：{memory_percent}%\n磁盘使用率：{disk_percent}%", at_sender=True)    
+def format_timedelta(t: timedelta):
+    mm, ss = divmod(t.seconds, 60)
+    hh, mm = divmod(mm, 60)
+    s = "%d:%02d:%02d" % (hh, mm, ss)
+    if t.days:
+        s = ("%d天 " % t.days) + s
+    return s
+
+def get_usage(usage: float):
+    usage = round(usage)
+    if usage >= 90:
+        return "■■■■■"
+    elif usage >= 70:
+        return "■■■■□"
+    elif usage >= 50:
+        return "■■■□□"
+    elif usage >= 30:
+        return "■■□□□"
+    elif usage >= 10:
+        return "■□□□□"
+    else:
+        return "□□□□□"
+
+def getNet():
+    sent_before = psutil.net_io_counters().bytes_sent  # 已发送的流量
+    recv_before = psutil.net_io_counters().bytes_recv  # 已接收的流量
+    time.sleep(1)
+    sent_now = psutil.net_io_counters().bytes_sent
+    recv_now = psutil.net_io_counters().bytes_recv
+    sent = (sent_now - sent_before) / 1024  # 算出1秒后的差值
+    recv = (recv_now - recv_before) / 1024
+    up = "上传：{0}KB/s".format("%.2f" % sent)
+    down = "下载：{0}KB/s".format("%.2f" % recv)
+    return up, down
+
+def get_system_data():
+    cpu_percent = psutil.cpu_percent(interval=0.1)
+    ram_percent = psutil.virtual_memory().percent
+    swap_stat = psutil.swap_memory()
+    swap_percent = swap_stat.percent
+    return cpu_percent, ram_percent, swap_percent, swap_stat
+
+@status.handle()
+async def handle_status():
+    # 获取系统信息
+    system_info = platform.system()
+    system_version = platform.version()
+
+    # 获取系统运行时间
+    booted = format_timedelta(datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time()))
+
+    # 获取 CPU、内存、Swap 使用率
+    cpu_percent, ram_percent, swap_percent, swap_stat = get_system_data()
+
+    # 获取 Swap 状态
+    swap = f"{swap_percent:.0f}%" if swap_stat.total > 0 else "未部署"
+
+    # 获取网络速度
+    up, down = getNet()
+
+    # 获取使用率图形化表示
+    cp = get_usage(cpu_percent)
+    rp = get_usage(ram_percent)
+    sp = get_usage(swap_percent)
+
+    # 发送信息
+    await status.send(
+        f"运行时间：{booted}\n"
+        f"系统：{system_info} {system_version}\n"
+        f"---------\n"
+        f"{cp}|{cpu_percent}%|CPU\n"
+        f"{rp}|{ram_percent}%|RAM\n"
+        f"{sp}|{swap}|SWAP\n"
+        f"---------\n"
+        f"实时网速：\n{up}\n{down}"
+    )
 
 #查看玩家数量
 len_user = on_command("玩家数", permission=GROUP, priority=1, block=True, rule=whitelist_rule)

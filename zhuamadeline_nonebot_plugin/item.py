@@ -699,7 +699,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             await daoju.finish("使用成功，冷却被全部清除了！", at_sender=True)
                         else:
                             text = time_text(str(next_clock_time-current_time))
-                            await daoju.finish(f"不久前使用的时间秒表似乎使你所有的秒表都停止运转了。请{text}后再尝试使用", at_sender=True)
+                            await daoju.finish(f"不久前使用的时间秒表似乎使你所有的秒表都停止运转了。请{text}后再尝试使用。", at_sender=True)
                     else:
                         await daoju.finish("你现在没有冷却呀，无需使用此道具", at_sender=True)
                 else:
