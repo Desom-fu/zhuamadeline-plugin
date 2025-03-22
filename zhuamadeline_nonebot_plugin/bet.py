@@ -273,7 +273,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
                 pangguang_add = 2
                 idt_len = 0
             # 设置玩家血量，随机生成血量值(放在上面后面好改)
-            hp = random.randint(3 + int(add_max*2-1) + pangguang_add, 6+add_max*2 + pangguang_add)
+            hp = random.randint(3 + max(int(add_max*2-1), 0) + pangguang_add, 6+add_max*2 + pangguang_add)
             demon_data[group_id]['hp'] = [hp, hp]
             # 设定轮数
             demon_data[group_id]['game_turn'] = 1
