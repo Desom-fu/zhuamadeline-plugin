@@ -100,6 +100,10 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     data = open_data(full_path)
     user_id = str(event.get_user_id())
     group_id = str(event.group_id)
+    if user_id not in data:
+        await pray.finish(f"请先抓一次Madeline后在进行祈愿哦！", at_sender=True)
+    #debuff清除逻辑(使用道具前判定)
+    debuff_clear(data,user_id)
     # 添加全局冷却
     all_cool_time(cd_path, user_id, group_id)
     # 负债检测
@@ -380,6 +384,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
         group_id = str(event.group_id)
         # 添加全局冷却
         all_cool_time(cd_path, user_id, group_id)
+        #debuff清除逻辑(使用道具前判定)
+        debuff_clear(data,user_id)
         # 检测是否有藏品栏
         data[str(user_id)].setdefault('collections', {})
         if("item" in data[str(user_id)]):
@@ -1895,8 +1901,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         if(not '黄色球体' in data[str(user_id)]['collections']):
                             await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用抓捕Madeline的道具……", at_sender = True)                            
 
-                #debuff清除逻辑(使用其他抓madeline道具前判定)
-                debuff_clear(data,user_id)
                 if(use_item_name=="胡萝卜"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
 
