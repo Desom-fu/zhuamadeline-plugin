@@ -1797,15 +1797,15 @@ def reward_percentage_triple(pool: int) -> int:
     
 def reward_amount(pool: int) -> int:
     """门票费"""
-    if pool < 5000:
+    if pool < 10000:
         return 50
-    elif pool <= 10000:
-        return 100
     elif pool <= 20000:
-        return 150
+        return 100
     elif pool <= 30000:
-        return 200
+        return 150
     elif pool <= 40000:
+        return 200
+    elif pool <= 50000:
         return 250
     else:
         return 300
