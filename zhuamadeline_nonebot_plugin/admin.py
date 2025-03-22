@@ -1840,4 +1840,4 @@ def build_winner_message(winner_type: str, nicknames: list, date: str) -> str:
     if datetime.datetime.strptime(date, "%Y-%m-%d") <= datetime.datetime.strptime("2025-03-21", "%Y-%m-%d"):
         return f"\n\n{winner_type}中奖者：未记录"
     else:
-        return f"\n\n{winner_type}中奖者：{', '.join(nicknames)}\n" if nicknames else f"{winner_type}中奖者：无"
+        return f"\n\n{winner_type}中奖者：\n{', '.join(nicknames)}" if nicknames else f"\n\n{winner_type}中奖者：无"
