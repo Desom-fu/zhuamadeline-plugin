@@ -1342,7 +1342,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 if random.randint(1, 2) == 1:
                     demon_data[group_id]["hp"][opponent_turn] -= 1
                     demon_data[group_id]["hp"][player_turn] = current_hp
-                    msg += f"但是一不小心刷了一跤，hp-1！\n- 当前对方hp：{demon_data[group_id]["hp"][opponent_turn]}/{hp_max}\n"
+                    msg += f"但是一不小心摔了一跤，hp-1！\n- 当前对方hp：{demon_data[group_id]["hp"][opponent_turn]}/{hp_max}\n"
             else:
                 msg += f"- 对方还顺手拿走了你的【{random_item_name}】，但是由于物品栏已满，他遗憾的把这件道具丢了！\n"
 
