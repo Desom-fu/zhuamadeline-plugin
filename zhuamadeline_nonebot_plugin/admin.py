@@ -1808,7 +1808,7 @@ async def get_nicknames(bot: Bot, group_id: int, user_ids: list) -> list:
 def build_winner_message(winner_type: str, nicknames: list, date: str) -> str:
     """构建中奖者信息，根据日期判断显示内容"""
     # 判断日期是否小于等于 2025-3-21
-    if datetime.strptime(date, "%Y-%m-%d") <= datetime.strptime("2025-03-21", "%Y-%m-%d"):
+    if datetime.strptime(date, "%Y-%m-%d") <= datetime.datetime.strptime("2025-03-21", "%Y-%m-%d"):
         return f"\n{winner_type}中奖者：未记录\n"
     else:
         return f"\n{winner_type}中奖者：{', '.join(nicknames)}\n" if nicknames else f"{winner_type}中奖者：无\n"
