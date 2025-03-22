@@ -573,12 +573,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         "钓上来一个岩浆块！海里有岩浆块很合理吧，但是由于过于烫手你把它丢了！\n",
                         "钓上来一只小飞机！但是这只小飞机花溜溜的飞走了！\n",
                         '钓上来一个UFO！外星人举着『禁止非法垂钓』的牌子抗议，你尴尬地把飞碟塞回海里！\n',
-                        '钓上来Desom的狐狸尾巴毛！这搓毛突然BOOM了，转眼间就404 NOT FOUND了！\n',
+                        '钓上来Desom的狐狸尾巴毛！这搓毛突然BOOM了，转眼间抓玛也突然爆炸了！\n',
                         '钓上来kevin房彩蛋房间！但里面塞满500个金草莓，焦虑值爆表的你直接剪断了鱼线！\n',
-                        '钓上来官方速通计时器！眼看要破纪录时，鱼钩被判定为『非法捷径』强制重置！\n',
+                        '钓上来速通计时器！眼看要破纪录时，鱼钩被判定为『非法捷径』强制重置！\n',
                         '钓上来像素平台！你试图攀爬时触发滑落机制，结果把整个钓鱼平台砸塌了！\n',
                         '钓上来自拍手机！你突然摆出胜利姿势，鱼群趁机集体大逃亡！\n',
-                        '钓上来次元裂缝！另一个世界的钓鱼佬从里面钓走了你，你俩在空中交换了懵逼眼神！\n',
+                        '钓上来次元裂缝！另一个世界的钓鱼佬从里面钓走了你，你俩在空中交换了懵逼的眼神！\n',
                         '钓上来美人鱼！但她开口就是男高音，吓得你主动要求被消除记忆！\n',
                         '钓上来WIFI路由器！显示『信号强度-10086』，你愤怒地把它砸成电子珊瑚！\n',
                         '钓上来一颗长有翅膀的金草莓！它突然开始发光闪烁，你本能地按C键冲刺——结果草莓飞走了！\n',
@@ -1780,6 +1780,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #判定道具的部分
                                 wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
                                 crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
+                                bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
                                 #增加免伤率的部分
                                 #天使之羽，增加2%
                                 if (wing >= 1):
@@ -1787,6 +1788,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #紫晶魄，增加3%
                                 if (crystal >= 1):
                                     noHitRate += 3
+                                #炸弹包，增加5%
+                                if (bombbag >= 1):
+                                    noHitRate += 5
                                 if hitNumber > noHitRate:
                                     cd_time = random.randint(int(nums[0])*60, int(nums[0])*60+120)
                                     current_time = datetime.datetime.now()
@@ -1985,6 +1989,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             #判定道具的部分
                             wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
                             crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
+                            bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
                             #增加免伤率的部分
                             #天使之羽，增加2%
                             if (wing >= 1):
