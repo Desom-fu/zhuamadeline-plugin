@@ -1627,12 +1627,23 @@ async def fafang_buchang_handle(event: GroupMessageEvent, arg: Message = Command
 status = on_fullmatch(['.状态', '。状态', '.status', '。status', '.运行状态', '。运行状态'], priority=5)
 
 def format_timedelta(t: timedelta):
-    mm, ss = divmod(t.seconds, 60)
-    hh, mm = divmod(mm, 60)
-    s = "%d:%02d:%02d" % (hh, mm, ss)
-    if t.days:
-        s = ("%d天 " % t.days) + s
-    return s
+    # 计算天数、小时、分钟和秒
+    days = t.days
+    hours, remainder = divmod(t.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    # 拼接为 xdxhxminxs 的形式
+    result = []
+    if days > 0:
+        result.append(f"{days}d")
+    if hours > 0:
+        result.append(f"{hours}h")
+    if minutes > 0:
+        result.append(f"{minutes}min")
+    if seconds > 0 or not result:  # 如果没有其他部分，至少显示秒
+        result.append(f"{seconds}s")
+    
+    return " ".join(result)
 
 def get_usage(usage: float):
     usage = round(usage)
