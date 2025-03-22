@@ -1736,7 +1736,7 @@ async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg())
     await len_user.finish(f"zhuamadeline游戏目前共有{count}个玩家！", at_sender=True)
 
 # 查询开奖号码
-ssq_query = on_command("查询三球开奖", aliases = {'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询bet4"}, priority=1, block=True)
+ssq_query = on_command("查询三球开奖", aliases={'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询bet4"}, priority=1, block=True)
 
 @ssq_query.handle()
 async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -1759,19 +1759,56 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
 
         # 查找指定日期的开奖信息
         result = next((draw for draw in history if draw["date"] == query_date), None)
-
-        if result:
-            red_ball = result.get("red", "未知")
-            blue_ball = result.get("blue", "未知")
-            yellow_ball = result.get("yellow", "未知")
-            await ssq_query.finish(f"\n{query_date} 的三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}", at_sender=True)
-        else:
+        if not result:
             await ssq_query.finish(f"\n未找到 {query_date} 的三球竞猜开奖信息，请检查日期是否正确。", at_sender=True)
+            return
 
     else:  # 如果用户没有输入日期，则返回最近一期开奖数据
-        latest_draw = history[-1]  # 取最新的一期
-        latest_date = latest_draw["date"]
-        red_ball = latest_draw.get("red", "未知")
-        blue_ball = latest_draw.get("blue", "未知")
-        yellow_ball = latest_draw.get("yellow", "未知")
-        await ssq_query.finish(f"\n最近一期 ({latest_date}) 三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}", at_sender=True)
+        result = history[-1]  # 取最新的一期
+
+    # 构建消息
+    msg = await build_result_message(bot, event.group_id, result)
+    await ssq_query.finish(msg, at_sender=True)
+
+async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
+    """构建开奖结果消息"""
+    date = result["date"]
+    red_ball = result.get("red", "未知")
+    blue_ball = result.get("blue", "未知")
+    yellow_ball = result.get("yellow", "未知")
+    big_winners = result.get("big_winners", [])  # 一等奖中奖者
+    winners = result.get("winners", [])         # 二等奖中奖者
+    single_match_users = result.get("single_match_users", [])  # 单球中奖者
+
+    # 获取中奖者昵称
+    big_winners_nicknames = await get_nicknames(bot, group_id, big_winners)
+    winners_nicknames = await get_nicknames(bot, group_id, winners)
+    single_match_users_nicknames = await get_nicknames(bot, group_id, single_match_users)
+
+    # 构建消息
+    msg = f"\n{date} 的三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}\n"
+    msg += build_winner_message("一等奖", big_winners_nicknames, date)
+    msg += build_winner_message("二等奖", winners_nicknames, date)
+    msg += build_winner_message("单球", single_match_users_nicknames, date)
+
+    return msg
+
+async def get_nicknames(bot: Bot, group_id: int, user_ids: list) -> list:
+    """根据 QQ 号获取群成员的昵称"""
+    nicknames = []
+    for user_id in user_ids:
+        try:
+            user_info = await bot.get_group_member_info(group_id=group_id, user_id=int(user_id))
+            nicknames.append(user_info.get("nickname", "未知用户"))
+        except Exception as e:
+            logger.warning(f"获取用户 {user_id} 的昵称失败：{e}")
+            nicknames.append("未知用户")
+    return nicknames
+
+def build_winner_message(winner_type: str, nicknames: list, date: str) -> str:
+    """构建中奖者信息，根据日期判断显示内容"""
+    # 判断日期是否小于等于 2025-3-21
+    if datetime.strptime(date, "%Y-%m-%d") <= datetime.strptime("2025-03-21", "%Y-%m-%d"):
+        return f"\n{winner_type}中奖者：未记录\n"
+    else:
+        return f"\n{winner_type}中奖者：{', '.join(nicknames)}\n" if nicknames else f"{winner_type}中奖者：无\n"

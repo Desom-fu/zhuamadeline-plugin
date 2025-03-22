@@ -1837,15 +1837,6 @@ async def double_ball_lottery():
     blue_ball = random.randint(1, 10)
     yellow_ball = random.randint(1, 10)
 
-    # 记录开奖历史
-    bar_data.setdefault("double_ball_history", [])
-    bar_data["double_ball_history"].append({
-        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-        "red": red_ball,
-        "blue": blue_ball,
-        "yellow": yellow_ball
-    })
-
     big_winners = []
     winners = []
     single_match_users = []
@@ -1949,6 +1940,18 @@ async def double_ball_lottery():
         for user_id in single_match_users:
             msg_text += MessageSegment.at(user_id)
         msg_text += "猜中了单球，成功中了小奖哦！将获得入场费用的150%的草莓！请通过`.ck all`查看\n"
+
+    # 记录开奖历史
+    bar_data.setdefault("double_ball_history", [])
+    bar_data["double_ball_history"].append({
+        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "red": red_ball,
+        "blue": blue_ball,
+        "yellow": yellow_ball,
+        "big_winners": big_winners,  # 一等奖中奖者
+        "winners": winners,          # 二等奖中奖者
+        "single_match_users": single_match_users  # 单球中奖者
+    })
 
     # 扣除奖池金额
     bar_data["pots"] -= total_refund
