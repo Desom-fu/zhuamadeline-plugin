@@ -1679,15 +1679,24 @@ def get_system_data():
     swap_percent = swap_stat.percent
     return cpu_percent, ram_percent, swap_percent, swap_stat
 
+# 定义当前时间
+OFFIST = datetime.timedelta(hours = 0)
+
 @status.handle()
 async def handle_status():
+    # 获取当前时间
+    now_time = datetime.datetime.now()
+    
     # 获取系统信息
     system_info = platform.system()
     system_version = platform.version()
 
     # 获取系统运行时间
-    booted = format_timedelta(datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time()))
+    booted = format_timedelta(now_time - datetime.datetime.fromtimestamp(psutil.boot_time()))
 
+    # 获取当前时间
+    now_time_computer = str(now_time + OFFIST).split(".")[0]
+    
     # 获取 CPU、内存、Swap 使用率
     cpu_percent, ram_percent, swap_percent, swap_stat = get_system_data()
 
@@ -1703,7 +1712,8 @@ async def handle_status():
     sp = get_usage(swap_percent)
 
     # 发送信息
-    await status.send(
+    await status.finish(
+        f"当前时间：{now_time_computer}\n"
         f"运行时间：{booted}\n"
         f"系统：{system_info} {system_version}\n"
         f"---------\n"
