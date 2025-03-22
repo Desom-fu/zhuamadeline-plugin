@@ -60,7 +60,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     try:
         number_int = int(number_arg)
     except:
-        await qhlc.finish(f"请输入正确的猎场号！现在只开放了1~{liechang_count}猎哦！", at_sender=True)
+        await qhlc.finish(f"请输入正确的猎场号！现在只开放了0~{liechang_count}猎哦！", at_sender=True)
         
     number = str(number_int)
     

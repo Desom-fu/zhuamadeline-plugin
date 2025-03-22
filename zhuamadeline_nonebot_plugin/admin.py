@@ -100,6 +100,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".设定能量 QQ号 能量数量",
         ".账单 (日期)",
         ".清除冷却 QQ号",
+        ".清除钓鱼冷却 QQ号",
         ".全服清除冷却",
         ".补货",
         ".发放道具 QQ号 道具名称 数量",
@@ -595,7 +596,7 @@ async def timeClear_Admin(event: GroupMessageEvent, arg: Message = CommandArg())
         await admin_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
     
     current_time = datetime.datetime.now()
-    next_time_r = current_time + datetime.timedelta(seconds=1)
+    next_time_r = current_time + datetime.timedelta(seconds=0)
     data[str(user_id)]['next_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
     data[str(user_id)]['next_clock_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
     data[str(user_id)]['work_end_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -605,6 +606,34 @@ async def timeClear_Admin(event: GroupMessageEvent, arg: Message = CommandArg())
     #写入文件
     save_data(user_path / file_name, data)
     await admin_timeClear.finish(MessageSegment.at(user_id)+f"的冷却已清除", at_sender=True)
+
+#神权！清除zhuamadeline的cd
+admin_fish_timeClear = on_command("清除钓鱼冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@admin_fish_timeClear.handle()
+async def admin_fish_timeClear_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    
+    #判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+    
+    arg = str(arg).split(" ")
+    #清除冷却目标的qq号
+    user_id = arg[0]
+
+    data = {}
+    if(os.path.exists(user_path / file_name)):
+        data = open_data(user_path / file_name)
+    
+    #没有这个玩家
+    if(not user_id in data):
+        await admin_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+    
+    current_time = datetime.datetime.now()
+    data[str(user_id)]['next_fishing_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    #写入文件
+    save_data(user_path / file_name, data)
+    await admin_fish_timeClear.finish(MessageSegment.at(user_id)+f"的钓鱼冷却已清除", at_sender=True)
 
 # 全服清除冷却
 clear_all_cd = on_command("全服清除冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1786,7 +1815,7 @@ async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
     single_match_users_nicknames = await get_nicknames(bot, group_id, single_match_users)
 
     # 构建消息
-    msg = f"\n{date} 的三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}\n"
+    msg = f"\n{date} 的三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}"
     msg += build_winner_message("一等奖", big_winners_nicknames, date)
     msg += build_winner_message("二等奖", winners_nicknames, date)
     msg += build_winner_message("单球", single_match_users_nicknames, date)
@@ -1809,6 +1838,6 @@ def build_winner_message(winner_type: str, nicknames: list, date: str) -> str:
     """构建中奖者信息，根据日期判断显示内容"""
     # 判断日期是否小于等于 2025-3-21
     if datetime.datetime.strptime(date, "%Y-%m-%d") <= datetime.datetime.strptime("2025-03-21", "%Y-%m-%d"):
-        return f"\n{winner_type}中奖者：未记录\n"
+        return f"\n\n{winner_type}中奖者：未记录"
     else:
-        return f"\n{winner_type}中奖者：{', '.join(nicknames)}\n" if nicknames else f"{winner_type}中奖者：无\n"
+        return f"\n\n{winner_type}中奖者：{', '.join(nicknames)}\n" if nicknames else f"{winner_type}中奖者：无"

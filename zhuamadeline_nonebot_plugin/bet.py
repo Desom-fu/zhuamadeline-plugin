@@ -307,14 +307,14 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             msg = "恶魔轮盘du，开局!\n"
             msg += "- 本局模式："
             if identity_found == 1:
-                msg += "身份模式\n\n"
+                msg += "身份模式\n"
             elif identity_found in [2,999]:
-                msg += "急速模式\n\n"
+                msg += "急速模式\n"
             else:
-                msg += "正常模式\n\n"
+                msg += "正常模式\n"
+            msg += f"- 双方hp:{str(hp)}/{demon_data[group_id]['hp_max']}\n\n"
             msg += MessageSegment.at(player0) + f"\n道具({len(items_0)}/{demon_data[group_id]['item_max']})：" +f"\n{item_0}\n\n"
             msg += MessageSegment.at(player1) + f"\n道具({len(items_1)}/{demon_data[group_id]['item_max']})：" +f"\n{item_1}\n\n"
-            msg += f"- 双方hp:{str(hp)}/{demon_data[group_id]['hp_max']}\n"
             msg += f"- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
             pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
             msg += "- 当前是"+ MessageSegment.at(pid) + "的回合"
