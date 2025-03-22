@@ -785,6 +785,7 @@ def load():
             clip[pos] = 1
     return clip
 
+# 游戏结束函数
 def handle_game_end(
     group_id: str,
     winner: str,
