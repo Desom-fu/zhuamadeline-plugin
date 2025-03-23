@@ -294,28 +294,19 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             # 跑团状态指定第一个玩家先手，全局变量可随便改
             if int(player0) == kp_pl:
                 demon_data[group_id]['turn'] = 0
-            for i in range(random.randint(1 + add_max//2 + pangguang_add//2, 4 + add_max//2)):
-                demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))  # 玩家1的道具
-                demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))  # 玩家2的道具
-            # 生成道具信息
-            item_0 = ", ".join(item_dic.get(i, "未知道具") for i in demon_data[group_id]['item_0'])
-            item_1 = ", ".join(item_dic.get(i, "未知道具") for i in demon_data[group_id]['item_1'])
-            # 获取玩家道具信息
-            items_0 = demon_data[group_id]['item_0']  # 玩家0道具列表
-            items_1 = demon_data[group_id]['item_1']  # 玩家1道具列表
+            item_msg, demon_data = refersh_item(identity_found, group_id, demon_data)
             # 发送初始化消息
             msg = "恶魔轮盘du，开局!\n"
             msg += "- 本局模式："
             if identity_found == 1:
-                msg += "身份模式\n"
+                msg += "身份模式"
             elif identity_found in [2,999]:
-                msg += "急速模式\n"
+                msg += "急速模式"
             else:
-                msg += "正常模式\n"
-            msg += f"- 双方hp:{str(hp)}/{demon_data[group_id]['hp_max']}\n\n"
-            msg += MessageSegment.at(player0) + f"\n道具({len(items_0)}/{demon_data[group_id]['item_max']})：" +f"\n{item_0}\n\n"
-            msg += MessageSegment.at(player1) + f"\n道具({len(items_1)}/{demon_data[group_id]['item_max']})：" +f"\n{item_1}\n\n"
-            msg += f"- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
+                msg += "正常模式"
+            msg += "\n\n"
+            msg += item_msg
+            msg += f"\n- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
             pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
             msg += "- 当前是"+ MessageSegment.at(pid) + "的回合"
             save_data(full_path, data)
@@ -911,19 +902,41 @@ def death_mode(identity_found, group_id, demon_data):
     
     return msg, demon_data
 
+# 计算随机函数
+def calculate_interval(game_turn_add, add_max, pangguang_add):
+    # 计算下限
+    lower_bound = 1 + (add_max // 2) + (game_turn_add * (pangguang_add // 3))
+    
+    # 计算上限
+    upper_bound = 3 + (add_max // 2) + (game_turn_add * (pangguang_add // 2))
+    
+    # 确保下限不超过上限
+    if lower_bound > upper_bound:
+        lower_bound = upper_bound
+    
+    return lower_bound, upper_bound
+
 # 刷新道具函数
 def refersh_item(identity_found, group_id, demon_data):
     idt_len = len(item_dic2)
     add_max = 0
     pangguang_add = 0
+    game_turn_add = 0
     msg = ''
     if identity_found == 1:
         idt_len = 0
-        add_max += 1
+        add_max = 2
+        pangguang_add = 5
     elif identity_found in [2,999]:
         idt_len = 0
-        add_max += 1
-        pangguang_add += 2
+        add_max = 2
+        pangguang_add = 2
+    game_turn_cal = demon_data[group_id]["game_turn"]
+
+    if game_turn_cal == 1:
+        game_turn_add = 1
+
+    lower, upper = calculate_interval(game_turn_add, add_max, pangguang_add)
     player0 = str(demon_data[group_id]['pl'][0])
     player1 = str(demon_data[group_id]['pl'][1])
     hp0 = demon_data[group_id]["hp"][0]
@@ -931,7 +944,7 @@ def refersh_item(identity_found, group_id, demon_data):
     # 重新获取hp_max
     hp_max = demon_data.get(group_id, {}).get('hp_max')
     item_max = demon_data.get(group_id, {}).get('item_max')
-    for i in range(random.randint(1+pangguang_add//2,3+add_max)):
+    for i in range(random.randint(lower, upper)):
         demon_data[group_id]['item_0'].append(get_random_item(identity_found, len(item_dic) - idt_len, player0))
         demon_data[group_id]['item_1'].append(get_random_item(identity_found, len(item_dic) - idt_len, player1))
     # 检查并限制道具数量上限为max
