@@ -344,9 +344,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             berry_give_map = {1: 10, 2: 20, 3: 30, 4: 40, 5: 50}
             berry_give = berry_give_map.get(level, 0)  # 默认为 0，避免 level 不在范围内时报错
             
-            # 4猎裸抓加成 +10，宝藏加成 +5
+            # 4猎裸抓加成 +5，宝藏加成 +5
             if data[str(user_id)]['lc'] == '4':
-                berry_give += 10
+                berry_give += 5
 
             if treasure >= 1:
                 berry_give += 5
