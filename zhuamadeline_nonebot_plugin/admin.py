@@ -1765,7 +1765,7 @@ async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg())
     await len_user.finish(f"zhuamadeline游戏目前共有{count}个玩家！", at_sender=True)
 
 # 查询开奖号码
-ssq_query = on_command("查询三球开奖", aliases={'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询bet4"}, priority=1, block=True)
+ssq_query = on_command("查询三球开奖", aliases={'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询bet4", "threeballs", "balls", "tripleballs", "doubleballs", "twoballs"}, priority=1, block=True)
 
 @ssq_query.handle()
 async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):

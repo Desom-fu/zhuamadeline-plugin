@@ -1972,7 +1972,7 @@ async def double_ball_lottery():
     if bar_data["pots"] < 0:
         bar_data["pots"] = 0
     msg_text += f"\n当前奖池剩余{bar_data['pots']}颗草莓！"
-    msg_text += f"\n\n若忘记开奖号码，可以通过命令 '.threeball (日期)' 来查询哦！"
+    msg_text += f"\n\n若忘记开奖号码，可以通过命令 '.threeballs (日期)' 来查询哦！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 
     save_data(bar_path, bar_data)
