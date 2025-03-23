@@ -1014,7 +1014,7 @@ async def shoot(stp, group_id, message,args):
         demon_data[group_id]['game_turn'] += 1
         # 获取死斗模式信息
         death_msg, demon_data = death_mode(identity_found, group_id, demon_data)
-        msg += f'\n- 当前轮数：{demon_data[group_id]['game_turn']}'
+        msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n'
         msg += death_msg
         # 增加换行，优化排版
         msg += "\n"
