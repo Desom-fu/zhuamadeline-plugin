@@ -207,6 +207,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             collections = data[str(user_id)].setdefault('collections', {})
             items = data[str(user_id)].setdefault('item', {})
             next_time = current_time + datetime.timedelta(minutes=30)
+            # 新人送1000草莓
+            if(not 'berry' in data[str(user_id)]):
+                data[str(user_id)]['berry'] = 1000
             # #检测回想之核
             # dream = collections.get("回想之核", 0)
             # if dream >= 1:
@@ -221,6 +224,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         items = data[str(user_id)].setdefault('item', {})
         current_time = datetime.datetime.now()
         next_time = current_time + datetime.timedelta(minutes=30)
+        # 新人送1000草莓
+        if(not 'berry' in data[str(user_id)]):
+            data[str(user_id)]['berry'] = 1000
         # #检测回想之核
         # dream = collections.get("回想之核", 0)
         # if dream >= 1:
@@ -362,10 +368,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 if berry_give > 0:
                     berry_give *= 2
                     sheet_text = "\n\n在悠扬的乐曲声中，草莓似乎被唤醒了，焕发出勃勃生机，迅速分裂出更多的果实！"
-
-        # 新人送1000草莓
-        if(not 'berry' in data[str(user_id)]):
-            data[str(user_id)]['berry'] = 1000
         
         if data[str(user_id)]["lucky_times"] > 0 and berry_give > 0:
             lucky_give = 15

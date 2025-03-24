@@ -24,6 +24,7 @@ from .list2 import *
 from .list3 import *
 from .bet import demon_default
 from .whitelist import whitelist_rule
+from .config import *
 
 
 __all__ = [
@@ -69,14 +70,14 @@ file_names = {
     '3': "UserList3.json",
     '4': "UserList4.json",
 }
+full_path = Path() / "data" / "UserList" / "UserData.json"
+bar_path = Path() / "data" / "UserList" / "bar.json"
+demon_path = Path() / "data" / "UserList" / "demon.json"
 # user_list1 = Path() / "data" / "UserList" / "UserList1.json"
 # user_list2 = Path() / "data" / "UserList" / "UserList2.json"
 # user_list3 = Path() / "data" / "UserList" / "UserList3.json"
 # user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 # 用户数据文件路径
-full_path = Path() / "data" / "UserList" / "UserData.json"
-bar_path = Path() / "data" / "UserList" / "bar.json"
-demon_path = Path() / "data" / "UserList" / "demon.json"
 
 #查看神权命令    
 admin_command = on_command("神权", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
@@ -86,6 +87,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
     if str(event.user_id) not in bot_owner_id:
         return
     commands = [
+        ".删除账号 QQ号",
         ".全服发放草莓 草莓数量",
         ".全服扣除草莓 草莓数量",
         ".查询草莓 QQ号",
@@ -140,6 +142,55 @@ async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = Comma
     text = "\n以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
     await notadmin_command.send(text, at_sender=True)
 
+# 删除账号
+delete_account = on_command("删除账号", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@delete_account.handle()
+async def delete_account_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+    # 判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    # 解析参数，获取要删除的账号的QQ号
+    target_qq = str(arg).strip()
+    if not target_qq:
+        await delete_account.finish("命令格式错误！正确格式：.删除账号 QQ号", at_sender=True)
+        return
+
+    # 获取目标用户的昵称
+    try:
+        user_info = await bot.get_stranger_info(user_id=int(target_qq))
+        nickname = user_info.get("nickname", "未知昵称")
+    except Exception as e:
+        await delete_account.finish(f"无法获取 [{target_qq}] 的昵称：{e}", at_sender=True)
+        return
+
+    # 删除 UserData.json 中的账号数据
+    user_data = open_data(user_path / file_name)
+    if target_qq in user_data:
+        del user_data[target_qq]
+        save_data(user_path / file_name, user_data)
+    else:
+        await delete_account.finish(f"未找到 [{nickname}]({target_qq}) 在 UserData.json 中的信息。", at_sender=True)
+        return
+
+    # 删除 bar.json 中的账号数据
+    bar_data = open_data(bar_path)
+    if target_qq in bar_data:
+        del bar_data[target_qq]
+        save_data(bar_path, bar_data)
+
+    # 删除 UserList1.json, UserList2.json, ..., UserListN.json 中的账号数据
+    for i in range(1, liechang_count + 1):  # liechang_count 是猎场总数
+        user_list_file = user_path / f"UserList{i}.json"
+        if user_list_file.exists():
+            user_list_data = open_data(user_list_file)
+            if target_qq in user_list_data:
+                del user_list_data[target_qq]
+                save_data(user_list_file, user_list_data)
+
+    # 完成删除操作
+    await delete_account.finish(f"已成功删除账号 [{nickname}]({target_qq}) 在抓Madeline的所有数据。", at_sender=True)
+
 #全服发放草莓
 fafang = on_command("全服发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @fafang.handle()
@@ -181,7 +232,6 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         return
     
     #打开文件
-    data = {}
     data = open_data(user_path/file_name)
 
     #给每个账户扣草莓
