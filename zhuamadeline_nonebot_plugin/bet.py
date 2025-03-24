@@ -392,7 +392,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         except ValueError:
             await bet.finish("请输入正确的红蓝黄三球的号码哦！", at_sender=True)
         
-        if not (1 <= red_points <= 10) or not (1 <= blue_points <= 10):
+        if not (1 <= red_points <= 10) or not (1 <= blue_points <= 10) or not (1 <= yellow_points <= 10):
             await bet.finish("红蓝黄三球的号码只能是1-10之间哦！", at_sender=True)
         
         # 获取当前时间
