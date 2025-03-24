@@ -137,7 +137,8 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     #判断是否有强制次数随机
     if(not 'compulsion_count' in data[str(user_id)]):
         data[str(user_id)]['compulsion_count'] = 0
-        
+    
+    # 一堆事件的判定
     if(data[str(user_id)]['event']!='nothing' and game_type != "2"):
         if data[str(user_id)]['event']!='compulsion_bet1':
             await bet.finish("你还有正在进行中的事件", at_sender=True)
@@ -147,12 +148,16 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         
     if(data[str(user_id)].get('buff','normal')=='confuse' ) and game_type not in ["2","4"]: 
         await bet.finish(f"你现在正在找到了个碎片，疑惑着呢，不能玩“游戏”。", at_sender=True)
+
+    if(data[str(user_id)].get('debuff','normal')=='tentacle' ): 
+        await bet.finish(f"你刚被触手玩弄到失神，没有精力玩“游戏”！", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='hurt') and game_type != "2": 
         await bet.finish(f"你现在受伤了，没有精力玩“游戏”！", at_sender=True)
         
     if(data[str(user_id)].get('status','nornal')=='working' and game_type not in ["2","4"]): 
         await bet.finish(f"你正在维护草莓加工器中，没有精力玩大部分“游戏”！", at_sender=True)
+        
     # 如果该用户不在酒馆名单中，则先创建数据
     if user_id not in bar_data:
         bar_data[user_id] = {}

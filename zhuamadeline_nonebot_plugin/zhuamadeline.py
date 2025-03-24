@@ -69,6 +69,9 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         if data[user_id]['berry'] < 0:
             await qhlc.finish(f"你现在仍在负债中……不允许进入竞技场！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
 
+        if(data[user_id].get('debuff','normal')=='tentacle' ): 
+            await qhlc.finish(f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", at_sender=True)
+
         if data[user_id].get('lc') == number:
             await qhlc.finish("你现在就在这个猎场呀~", at_sender=True)
 
@@ -247,6 +250,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             # 负债检测
             if data[user_id]['berry'] < 0:
                 await catch.finish(f"你现在仍在负债中……不允许进入竞技场！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
+            # 失神检测
+            if(data[user_id].get('debuff','normal')=='tentacle' ): 
+                await catch.finish(f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", at_sender=True)
             nickname = event.sender.nickname
             # next_time = current_time + datetime.timedelta(minutes=10)
             # #检测回想之核
@@ -591,7 +597,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     }
     # debuff
     debuff_messages = {
-        "illusory": "缺氧", "poisoned": "中毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙"
+        "illusory": "缺氧", "poisoned": "中毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神"
     }
     # buff
     buff_messages = {"hurt": "受伤", "lost": "迷路"}

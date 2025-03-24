@@ -63,6 +63,8 @@ async def ticket_handle(event: GroupMessageEvent):
             await ticket.finish(f"你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。", at_sender=True)
         if(data[str(user_id)].get('buff')=='hurt'): 
             await ticket.finish(f"你现在受伤了，没有精力刮刮乐！", at_sender=True)
+        if(data[str(user_id)].get('debuff','normal')=='tentacle' ): 
+            await ticket.finish(f"你刚被触手玩弄到失神，没有精力刮刮乐！", at_sender=True)
 
         if(data[str(user_id)]['berry'] >= 0):
             menpiao = 150
