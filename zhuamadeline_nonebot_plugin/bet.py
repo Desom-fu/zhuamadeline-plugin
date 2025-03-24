@@ -404,7 +404,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     
         # 检查是否已经玩过
         if user_double_ball.get("ifplay") == 1:
-             await bet.finish("你今天已经已经猜测过了，无法重复进行哦！", at_sender=True)
+             await bet.finish("你今天已经进行过三球竞猜了，请耐心等待开奖哦！", at_sender=True)
     
         # 读取奖池
         pots = bar_data.setdefault("pots", 0)
