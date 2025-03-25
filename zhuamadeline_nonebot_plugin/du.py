@@ -31,111 +31,100 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 
 #买刮刮乐
 ticket = on_fullmatch(['.ggl', '。ggl'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+
 @ticket.handle()
 async def ticket_handle(event: GroupMessageEvent):
-
-    current_time = datetime.datetime.now().time()
-    hour = current_time.hour
-    #if(hour > 5 and hour < 18): await ticket.finish("棋牌室的门已经关了")
-
-    #打开文件
+    # 常量定义
+    MENPIAO_COST = 150
+    TAX_RATE = 0.1
+    BUFF_MESSAGES = {
+        'lost': "你现在正在迷路中，连路都找不到，怎么刮刮乐呢？",
+        'confuse': "你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。",
+        'hurt': "你现在受伤了，没有精力刮刮乐！",
+        'tentacle': "你刚被触手玩弄到失神，没有精力刮刮乐！"
+    }
+    BERRY_PROBABILITY = [
+        (4, 666),
+        (14, 333),
+        (34, 194),
+        (74, 83),
+        (99, 55)
+    ]
+    # 初始化数据访问
+    user_id = str(event.user_id)
+    group_id = str(event.group_id)
+    
     data = open_data(full_path)
     bar_data = open_data(bar_path)
+    
+    # 用户数据初始化
+    user_data = data.setdefault(user_id, {'berry': 0})
+    user_data.setdefault('event', 'nothing')
+    user_data.setdefault('compulsion_count', 0)
+    user_data.setdefault('collections', {})
 
-    user_id = str(event.get_user_id())
-    group_id = str(event.group_id)
-    # 添加全局冷却
+    # 全局冷却检查
     all_cool_time(cd_path, user_id, group_id)
-    #判断是否开辟event事件栏
-    if(not 'event' in data[str(user_id)]):
-        data[str(user_id)]['event'] = 'nothing'
-    #判断是否有强制次数随机
-    if(not 'compulsion_count' in data[str(user_id)]):
-        data[str(user_id)]['compulsion_count'] = 0
-    if(str(user_id) in data):
-        if(data[str(user_id)]['event']!='nothing'):
-            if data[str(user_id)]['event']!='compulsion_ggl':
-                await ticket.finish("你还有正在进行中的事件", at_sender=True)
-        #一些啥都干不了的buff
-        if(data[str(user_id)].get('buff')=='lost'): 
-            await ticket.finish(f"你现在正在迷路中，连路都找不到，怎么刮刮乐呢？", at_sender=True)
-        if(data[str(user_id)].get('buff')=='confuse'): 
-            await ticket.finish(f"你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。", at_sender=True)
-        if(data[str(user_id)].get('buff')=='hurt'): 
-            await ticket.finish(f"你现在受伤了，没有精力刮刮乐！", at_sender=True)
-        if(data[str(user_id)].get('debuff','normal')=='tentacle' ): 
-            await ticket.finish(f"你刚被触手玩弄到失神，没有精力刮刮乐！", at_sender=True)
 
-        if(data[str(user_id)]['berry'] >= 0):
-            menpiao = 150
-            berry = 50
-            rnd = random.randint(1,100)
-            if rnd <= 4:
-                berry = 666
-            elif rnd > 5 and rnd <= 15:
-                berry = 333
-            elif rnd > 15 and rnd <= 35:
-                berry = 194
-            elif rnd > 35 and rnd <= 75:
-                berry = 83
-            elif rnd > 75 and rnd <= 100:
-                berry = 55
+    # 事件状态检查
+    if user_data['event'] not in ['nothing', 'compulsion_ggl']:
+        await ticket.finish("你还有正在进行中的事件", at_sender=True)
 
-            #特别的对于藏品的判定
-            if (rnd == 5):
-                #判断是否开辟藏品栏
-                if(not 'collections' in data[str(user_id)]):
-                    data[str(user_id)]['collections'] = {}
-                
-                #是否已经持有藏品"奇想魔盒"
-                #如果没有，则添加
-                if(not '奇想魔盒' in data[str(user_id)]['collections']):
-                    data[str(user_id)]['collections']['奇想魔盒'] = 1
-                    #写入文件
-                    with open(user_path / file_name, 'w', encoding='utf-8') as f:
-                        json.dump(data, f, indent=4)
-                    await ticket.send(f"你花费{menpiao}颗草莓，购买了一张刮刮乐，但是刮出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
-                #否则正常获得600草莓
-                else:
-                    berry = 666
+    # Buff状态检查
+    current_buff = user_data.get('buff') or user_data.get('debuff', 'normal')
+    if message := BUFF_MESSAGES.get(current_buff):
+        await ticket.finish(message, at_sender=True)
 
-            tax = int(berry * 0.1)  # 计算 10%
-            berry_real = berry - tax  # 减去 10%
-            get_berry = berry_real - menpiao # 总共获得的草莓数量
-            
-            data[str(user_id)]['berry'] += get_berry
-            # 初始化pots
-            bar_data.setdefault("pots", 0)
+    # 草莓余额检查
+    if user_data['berry'] < 0:
+        await ticket.finish(f"你现在仍在负债中......还想继续刮刮乐？你只有{user_data['berry']}颗草莓！", at_sender=True)
 
-            # 加入奖池
-            bar_data["pots"] += tax
-            msg = f"\n- 你花费{menpiao}颗草莓，购买了一张刮刮乐！\n- 本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
-            if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
-                data[str(user_id)]['compulsion_count'] -= 1
-                if data[str(user_id)]['compulsion_count']!= 0:
-                    msg += f"\n你现在仍需强制刮刮乐{data[str(user_id)]['compulsion_count']}次。"
-                else:
-                    # 清除状态
-                    data[str(user_id)]['event'] = "nothing"
-                    data[str(user_id)]['compulsion_count'] = 0
-                    msg += '\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
-            if data[user_id]['berry'] < 0:
-                data[user_id]['berry'] -= 250
-                msg += f"\n\n哎呀，你负债进行了刮刮乐，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
-                if data[str(user_id)]['event']=='compulsion_ggl' and data[str(user_id)]['compulsion_count']!= 0:
-                    data[str(user_id)]['event']=='nothing'
-                    data[str(user_id)]['compulsion_count']= 0
-                    data[user_id]['berry'] -= 300
-                    msg += f"\n\n哇！你似乎在负债过程中还得强制刮刮乐啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
-            #写入文件
-            save_data(user_path / file_name, data)
-            save_data(bar_path, bar_data)
+    # 生成随机奖励
+    rnd = random.randint(1, 100)
+    berry = next((v for max_p, v in BERRY_PROBABILITY if rnd <= max_p), 666)
 
-            await ticket.finish(msg, at_sender=True)
+    # 特殊藏品处理
+    if rnd == 100:
+        if '奇想魔盒' not in user_data['collections']:
+            user_data['collections']['奇想魔盒'] = 1
+            await ticket.send(f"你花费{MENPIAO_COST}颗草莓，购买了一张刮刮乐，但是刮出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
         else:
-            await ticket.finish(f"你现在仍在负债中……还想继续刮刮乐？你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
-    else:
-        await ticket.finish("你还没尝试抓过madeline......", at_sender=True)
+            berry = 666
+
+    # 计算税收和收益
+    tax = int(berry * TAX_RATE)
+    berry_real = berry - tax
+    get_berry = berry_real - MENPIAO_COST
+    
+    user_data['berry'] += get_berry
+    bar_data["pots"] = bar_data.get("pots", 0) + tax
+
+    # 强制刮刮乐处理
+    msg = f"\n- 你花费{MENPIAO_COST}颗草莓，购买了一张刮刮乐！\n- 本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+    
+    if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
+        user_data['compulsion_count'] -= 1
+        if user_data['compulsion_count'] > 0:
+            msg += f"\n你现在仍需强制刮刮乐{user_data['compulsion_count']}次。"
+        else:
+            user_data.update({'event': "nothing", 'compulsion_count': 0})
+            msg += '\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
+
+    # 负债处理
+    if user_data['berry'] < 0:
+        user_data['berry'] -= 250
+        msg += f"\n\n哎呀，你负债进行了刮刮乐，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！\n\n你现在拥有的草莓数量为：{user_data['berry']}颗！"
+        
+        if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
+            user_data.update({'event': 'nothing', 'compulsion_count': 0})
+            user_data['berry'] -= 300
+            msg += f"\n\n哇！你似乎在负债过程中还得强制刮刮乐啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+
+    # 数据保存
+    save_data(user_path / file_name, data)
+    save_data(bar_path, bar_data)
+    
+    await ticket.finish(msg, at_sender=True)
 
 #5人场赌博
 dubo = on_command('du', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
