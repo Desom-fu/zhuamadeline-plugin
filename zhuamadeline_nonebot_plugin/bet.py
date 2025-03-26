@@ -859,7 +859,7 @@ def death_mode(identity_found, group_id, demon_data):
                 demon_data[group_id]["hp"][i] = min(demon_data[group_id]["hp"][i], demon_data[group_id]["hp_max"])
 
         # 额外扣除 1 点道具上限，并随机删除 1-2 个道具
-        if identity_found == 2:
+        if identity_found in [1,2]:
             if demon_data[group_id]["item_max"] > 6:
                 demon_data[group_id]["item_max"] -= 1  # 扣 1 点道具上限（最低仍为 6）
                 new_item_max = demon_data[group_id]["item_max"]

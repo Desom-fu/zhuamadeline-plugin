@@ -177,8 +177,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         pay = n * pay_per  # 总价格
 
         if user_data[user_id]['berry'] < pay:
-            await buy.send(f"本次你需要花费 {pay} 颗草莓，你只有 {user_data[user_id]['berry']} 颗草莓", at_sender=True)
-            return
+            await buy.finish(f"本次你需要花费 {pay} 颗草莓，你只有 {user_data[user_id]['berry']} 颗草莓", at_sender=True)
 
         # 扣除草莓并更新用户道具
         user_data[user_id]['berry'] -= pay
@@ -212,13 +211,24 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
         pay_per = collections[buy_item_name][0]
         pay = n * pay_per
-        if user_data[user_id]['energy'] < pay:
-            await buy.send(f"本次你需要花费 {pay} 点能量，你只有 {user_data[user_id]['energy']} 点能量", at_sender=True)
-            return
+        
+        # 藏品类型。7为能量藏品，8为草莓藏品
+        category = collections[buy_item_name][1]
+        if category == 7:
+            if user_data[user_id]['energy'] < pay:
+                await buy.finish(f"本次你需要花费 {pay} 点能量，你只有 {user_data[user_id]['energy']} 点能量", at_sender=True)
 
-        user_data[user_id]['energy'] -= pay
-        user_data[user_id]['collections'][buy_item_name] = n
-        answer = 1
+            user_data[user_id]['energy'] -= pay
+            user_data[user_id]['collections'][buy_item_name] = n
+            answer = 1
+        elif category == 8:
+            if user_data[user_id]['berry'] < pay:
+                await buy.finish(f"本次你需要花费 {pay} 颗草莓，你只有 {user_data[user_id]['berry']} 颗草莓", at_sender=True)
+
+            # 扣除草莓并更新用户道具
+            user_data[user_id]['berry'] -= pay
+            user_data[user_id]['collections'][buy_item_name] = n
+            answer = 0
 
     # 更新商店库存
     shop_data["item"][buy_item_name] -= n

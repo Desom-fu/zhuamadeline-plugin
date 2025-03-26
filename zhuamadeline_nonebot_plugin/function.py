@@ -388,25 +388,58 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
 
 ######打印商品信息######
 def shop_list(item_list):
-    level_to_str = {0:"一级", 1:"二级", 2:"三级", 3:"四级", 4:"永久", 5:"特殊", 6:"藏品"}
-    text = "今日商品"
-    text += "\n——————————————"
-    level_str = ["", "", "", "", "", "", ""]
-    for i in range(6, -1, -1):
-        if i == 6:
-            for k, v in collections.items():
-                if(v[1]==i+1 and k in item_list):
-                    if(level_str[i]==""): level_str[i] = f"\n{level_to_str[i]}："
-                    level_str[i] += f"\n- {k} x {str(item_list[k])}\n   单价：{str(v[0])}点能量"
-        else:
-            for k, v in item.items():
-                if(v[1]==i+1 and k in item_list):
-                    if(level_str[i]==""): level_str[i] = f"\n{level_to_str[i]}道具："
-                    level_str[i] += f"\n- {k} x {str(item_list[k])}\n   单价：{str(v[0])}颗草莓"
-        text += level_str[i]
-        if(level_str[i]!="" and i > 0): text += "\n——————————————"
+    # 配置映射表（数据源、价格单位、名称后缀）
+    LEVEL_CONFIG = {
+        6: {"source": collections, "unit": "点能量", "suffix": ""},
+        7: {"source": collections, "unit": "颗草莓", "suffix": ""},
+    }
+    # 默认配置：0-5级道具
+    for level in range(6):
+        LEVEL_CONFIG[level] = {"source": item, "unit": "颗草莓", "suffix": "道具"}
     
-    return text
+    # 等级名称映射
+    LEVEL_NAME = {
+        0: "一级", 1: "二级", 2: "三级", 3: "四级",
+        4: "永久", 5: "特殊", 6: "能量藏品", 7: "草莓藏品"
+    }
+    
+    parts = []
+    # 倒序处理所有等级
+    for level in range(7, -1, -1):
+        config = LEVEL_CONFIG[level]
+        items = []
+        # 遍历数据源收集商品
+        for name, details in config["source"].items():
+            # 兼容不同长度的数据结构
+            price = details[0]
+            lv = details[1]
+            
+            if lv == level + 1 and name in item_list:
+                items.append((name, price, item_list[name]))
+        
+        if not items:
+            continue
+        
+        # 构建该等级文本
+        title = f"\n{LEVEL_NAME[level]}{config['suffix']}："
+        item_lines = []
+        for name, price, qty in items:
+            item_lines.append(
+                f"- {name} x {qty}\n   单价：{price}{config['unit']}"
+            )
+        parts.append(title + "\n" + "\n".join(item_lines))
+    
+    # 拼接最终文本
+    if not parts:
+        return "今日商品\n——————————————\n暂无商品"
+    
+    divider = "\n——————————————"
+    return (
+        "今日商品" + 
+        divider + 
+        divider.join(parts) + 
+        ("\n——————————————" if len(parts) > 1 else "")
+    )
 
 # def decode_buy_text(item_name_list, text):
 #     a = text.split(" ")
