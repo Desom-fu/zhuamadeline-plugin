@@ -35,6 +35,7 @@ jiemi29_1_image_path = Path() / "data" / "Image" / "jiemi291.png"
 jiemi30_1_image_path = Path() / "data" / "Image" / "jiemi301.jpg"
 jiemi32_1_image_path = Path() / "data" / "Image" / "jiemi321.png"
 jiemi33_1_image_path = Path() / "data" / "Image" / "jiemi331.png"
+jiemi35_1_image_path = Path() / "data" / "Image" / "jiemi341.png"
 math1_image_path = Path() / "data" / "Image" / "math1.png"
 math1_1_image_path = Path() / "data" / "Image" / "math1-1.jpg"
 math2_image_path = Path() / "data" / "Image" / "math2.png"
@@ -69,63 +70,7 @@ async def handle_link(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     # 建立密码到对应处理函数的映射
     mapping = {
-        "3333": lambda: decrypt_new_2(user_id, berry_data, "3625966252", 300, args), 
-        "死光光": lambda: decrypt_new_2(user_id, berry_data, "3936927989", 200, args), 
-        "←1_": lambda: decrypt_new_2(user_id, berry_data, "3625966252", 290, args), 
-        "lantern": lambda: decrypt_new_2(user_id, berry_data, "2190635289", 333, args), 
-        "sendmeberry413": lambda: decrypt_new_2(user_id, berry_data, "3393181445", 413, args), 
-        "forest": lambda: decrypt_new_2(user_id, berry_data, "2539562201", 350, args), 
-        "eclat": lambda: decrypt_new_2(user_id, berry_data, "1547625815", 400, args), 
-        "stellax": lambda: decrypt_new_2(user_id, berry_data, "1804122909", 520, args),
-        "ADVENTURE": lambda: decrypt_new_2(user_id, berry_data, "2539562201", 400, 'adventure'),
-        "adventure": lambda: decrypt_new_2(user_id, berry_data, "2539562201", 400, 'adventure'),
-        "plains": lambda: decrypt_new_2(user_id, berry_data, "2539562201", 500, args),
-        "testify": lambda: decrypt_new_2(user_id, berry_data, "2190635289", 500, args),
-        "worldabyss": lambda: decrypt_new_2(user_id, berry_data, "3887046514", 200, args),
-        "maimaimaster": lambda: decrypt_new_2(user_id, berry_data, "1453201896", 300, args),
-        "celesteempire": lambda: decrypt_new_2(user_id, berry_data, "3936927989", 500, args),
-        "solitude": lambda: decrypt_new_2(user_id, berry_data, "1547625815", 200, args),
-        "Ferocious": lambda: decrypt_new_2(user_id, berry_data, "3644057060", 800, args),
-        "polybius": lambda: decrypt_new_2(user_id, berry_data, "2682786816", 800, args),
-        "SACRIFICE": lambda: decrypt_new_2(user_id, berry_data, "2539562201", 400, "sacrifice"),
-        "sacrifice": lambda: decrypt_new_2(user_id, berry_data, "2539562201", 400, "sacrifice"),
-        "ThisIsThePassword": lambda: decrypt_3_1(),
-        "test2": lambda: decrypt_new_2(user_id, berry_data, "3520767439", 600, args),
-        "test": lambda: decrypt_new_2(user_id, berry_data, "3520767439", 600, args),
-        "Vertigo": lambda: decrypt_new(user_id, berry_data, user_data, "3644057060", 600, 400, args),
-        "62795": lambda: decrypt_new(user_id, berry_data, user_data, "2539562201", 100, 100, args),
-        "hayo": lambda: decrypt_all(user_id, berry_data, user_data, "2389630409", 400, args),
-        "voyage": lambda: decrypt_all(user_id, berry_data, user_data, "1547625815", 400, args),
-        "8463": lambda: decrypt_all(user_id, berry_data, user_data, "2539562201", 300, args),
-        "196883": lambda: decrypt_all(user_id, berry_data, user_data, "1920308665", 600, args),
-        "monarchy": lambda: decrypt_all(user_id, berry_data, user_data, "2539562201", 800, args),
-        "nanobii": lambda: decrypt_all(user_id, berry_data, user_data, "1453201896", 800, args),
-        "particle": lambda: decrypt_all(user_id, berry_data, user_data, "2682786816", 1000, args),
-        "1998": lambda: decrypt_9(user_id, berry_data, user_data),
-        "车水马龙": lambda: decrypt_10(user_id, berry_data, user_data),
-        "车水马龙2": lambda: decrypt_10_1(user_id, berry_data, user_data),
-        "NoSilence": lambda: decrypt_all(user_id, berry_data, user_data, "2293135223", 300, args),
-        "cholinesterase": lambda: decrypt_all(user_id, berry_data, user_data, "2682786816", 700, args),
-        "angriffaufcayork": lambda: decrypt_all(user_id, berry_data, user_data, "3936927989", 700, args),
-        "那堪鹣鲽无空阔滚滚行星宇宙宽": lambda: decrypt_all(user_id, berry_data, user_data, "1547625815", 450, args),
-        "SOLAR": lambda: decrypt_all(user_id, berry_data, user_data, "3232089413", 1000, args),
-        "IWANTTOPLAYSILKSONG": lambda: decrypt_all(user_id, berry_data, user_data, "3393181445", 800, args),
-        "6135": lambda: decrypt_all(user_id, berry_data, user_data, "1920308665", 250, args),
-        "18514": lambda: decrypt_all(user_id, berry_data, user_data, "1920308665", 50, args),
-        "faceahead": lambda: decrypt_all(user_id, berry_data, user_data, "1920308665", 100, args),
-        "apotheosis": lambda: decrypt_all(user_id, berry_data, user_data, "2682786816", 600, args),
-        "PINK": lambda: decrypt_all(user_id, berry_data, user_data, "3232089413", 800, args),
-        "10*8^(1/4)": lambda: decrypt_all(user_id, berry_data, user_data, "2293135223", 400, "10*8^(1/4)"),
-        "8^(1/4)*10": lambda: decrypt_all(user_id, berry_data, user_data, "2293135223", 400, "10*8^(1/4)"),
-        "fluff": lambda: decrypt_all(user_id, berry_data, user_data, "1547625815", 400, args),
-        "freeflying": lambda: decrypt_all(user_id, berry_data, user_data, "1547625815", 400, args),
-        "desom又boom了": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
-        "暮QLXVIgwhen": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
-        "Confringo又在丢新谜题了": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
-        "恭喜你获得了0.001ms的神权": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
-        "爆炸！爆炸！爆炸！": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
-        "不要再.cp和bet了！": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
-        "/jrrp，~jrrp，jrrp，/map，/entity": lambda: decrypt_all(user_id, berry_data, user_data, "121096913", 400, args),
+        # 密码进行隐藏处理
     }
 
     # 优先通过映射字典处理已知密码
@@ -156,6 +101,8 @@ puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=G
 @puzzle_command.handle()
 async def puzzle_command_handle(event: Event, bot: Bot):
     puzzle_message = (
+        "---------------------------------------\n"
+        "由于题目包含图片，请输入 .where 来进行查看具体内容\n"
         "---------------------------------------\n"
         "由于题目字数较多，请输入 .confecti 来进行查看具体内容\n"
         "---------------------------------------\n"
@@ -801,6 +748,16 @@ def math_3(user_id, berry_data, user_data):
 
 
 # 以下为题面
+# 解密35 题面
+where_command = on_fullmatch(['.where', '。where'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@where_command.handle()
+async def handle_where():
+    jiemi35_1_image_segment = MessageSegment.image(jiemi35_1_image_path)
+    text = ("出题者：疯子\n"
+            "难度草莓：300")
+    await where_command.finish(jiemi35_1_image_segment + text)
+
+
 # 解密34 题面
 kft_command = on_fullmatch(['.confecti', '。confecti'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @kft_command.handle()
@@ -914,8 +871,6 @@ async def handle_xibanya(arg: Message = CommandArg()):
         await clock_command.finish(jiemi28_1_image_segment + text)
     else:
         await clock_command.finish("请输入正确的序号（1-2）")
-    
-    
     
 # 解密25 题面
 csk_command = on_fullmatch(['.曹晟康之路', '。曹晟康之路'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
