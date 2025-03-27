@@ -31,6 +31,7 @@ from .trade import *
 from .bot_connect import *
 from .bet import *
 from .news import *
+from .berry_garden import *
 from .whitelist import allowed_groups, allowed_groups2
 
 # 初始化

@@ -425,7 +425,7 @@ def shop_list(item_list):
         item_lines = []
         for name, price, qty in items:
             item_lines.append(
-                f"- {name} x {qty}\n   单价：{price}{config['unit']}"
+                f"- {name} x {qty}\n   单价：[{price}]{config['unit']}"
             )
         parts.append(title + "\n" + "\n".join(item_lines))
     

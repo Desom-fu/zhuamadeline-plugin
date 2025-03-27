@@ -495,15 +495,15 @@ async def dailyjrrp(event: GroupMessageEvent):
     
     # 检测是否翻倍
     double = collections.get("鱼之契约", 0)
-    double_jrrp = (jrrp_int + extra_berry) * (double+ 1)
+    double_jrrp = (jrrp_int + extra_berry) * (double + 1)
 
     # 获取图片、文案
     picture_str, text, luck_text = draw_qd(nickname, jrrp_int, extra_berry, double)
     
-    reply_text = f"\n你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
-    reply_text += f"\n检测到你拥有鱼之契约，你今日签到获得的草莓翻倍，为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
+    reply_text = f"\n- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
+    reply_text += f"\n- 检测到你拥有鱼之契约，你今日签到获得的草莓翻倍，为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
     # 发送信息
-    await jrrp.finish(f"\n你今日的人品（签到）值为：{jrrp_int}\n{luck_text}", at_sender=True)
+    await jrrp.finish(reply_text, at_sender=True)
 
 
 # 查看状态

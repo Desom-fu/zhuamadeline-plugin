@@ -23,10 +23,6 @@ __all__ = [
     "dubo",
 ]
 
-# 用户数据文件路径
-full_path = Path() / "data" / "UserList" / "UserData.json"
-bar_path = Path() / "data" / "UserList" / "bar.json"
-
 ########赌场系统#######
 
 #买刮刮乐
@@ -56,9 +52,13 @@ async def ticket_handle(event: GroupMessageEvent):
     
     data = open_data(full_path)
     bar_data = open_data(bar_path)
+
+    # 如果该用户不在用户名单中，则先抓
+    if user_id not in data:
+        await ticket.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
     
     # 用户数据初始化
-    user_data = data.setdefault(user_id, {'berry': 0})
+    user_data = data.setdefault(user_id, {'berry': 1000})
     user_data.setdefault('event', 'nothing')
     user_data.setdefault('compulsion_count', 0)
     user_data.setdefault('collections', {})

@@ -19,7 +19,9 @@ __all__ = [
     "cd_path",
     "ban",
     "liechang_count",
-    "zhuama_group"
+    "zhuama_group",
+    'bar_path',
+    'garden_path'
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -53,7 +55,7 @@ shop_open_img = Path() / "data" / "Shop" / "开张图.png"
 shop_work_img = Path() / "data" / "Shop" / "营业图.png"
 
 #更新日志
-update_text = "目前已经将所有命令更改为 '.' 或 '。' 开头\n\n详细信息请前往抓kid wiki\n https://docs.qq.com/smartsheet/DVUZtQWlNTG1zZVhN \n进行查看\n由于我懒了，并且基本是fork过来的，里面的指令把kid改成madeline就能通用\n并且这个抓kid wiki也是我编写的（（（"
+update_text = "游戏玩法及全部命令请前往抓kid/madeline wiki\n https://docs.qq.com/smartsheet/DVUZtQWlNTG1zZVhN \n进行查看"
 #管理员ID
 #封禁人员名单
 # 定义猎场数 全局变量 开新猎场要改
@@ -64,6 +66,8 @@ user_path = Path() / "Data" / "UserList"
 file_name = "UserData.json"
 full_path = user_path / file_name
 cd_path = Path() / "Data" / "UserList" / "allcooldown.json"
+bar_path = Path() / "data" / "UserList" / "bar.json"
+garden_path = Path() / "data" / "UserList" / "garden.json"
 
 #赌场信息
 duchang_list = Path() / "data" / "DuChang" / "duchang.json"
