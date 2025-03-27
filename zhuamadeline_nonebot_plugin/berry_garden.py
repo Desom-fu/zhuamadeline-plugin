@@ -266,7 +266,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         targets = [
             uid for uid in garden_data 
             if uid != user_id 
-            and garden_data[uid]["isseed"] == 1 
+            and garden_data[uid]["isseed"] == 0
             and garden_data[uid]["garden_berry"] > 0  # 只选择有草莓的果园
         ]
         
