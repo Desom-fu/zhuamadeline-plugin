@@ -14,7 +14,7 @@ from .whitelist import whitelist_rule
 
 # 常量定义
 SEED_COST = 10
-STEAL_COST = 20
+STEAL_COST = 15
 FERT_ENERGY = 1000
 BASIC_REWARD = 15
 BUFF_MESSAGES = {
