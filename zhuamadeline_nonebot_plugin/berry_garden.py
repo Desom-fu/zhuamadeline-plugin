@@ -266,13 +266,14 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         targets = [
             uid for uid in garden_data 
             if uid != user_id 
-            and garden_data[uid]["isseed"] == 0
+            and garden_data[uid]["isseed"] == 0 # 只偷没偷过的
             and garden_data[uid]["garden_berry"] > 0  # 只选择有草莓的果园
         ]
         
         if not targets:
             await berry_garden.finish("现在没有可以偷的地，请早点过来或者晚点过来偷哦！", at_sender=True)
         
+        # 随机选择
         target_id = random.choice(targets)
         target_garden = garden_data[target_id]
         steal_amount = random.randint(1, min(50, target_garden["garden_berry"]))
