@@ -12,6 +12,19 @@ from .config import *
 from .function import *
 from .whitelist import whitelist_rule
 
+# 常量定义
+SEED_COST = 10
+STEAL_COST = 20
+FERT_ENERGY = 1000
+BASIC_REWARD = 15
+BUFF_MESSAGES = {
+    'lost': "你现在正在迷路中，连路都找不到，怎么进入果园呢？",
+    'confuse': "你现在正在找到了个碎片，疑惑着呢，不能进入果园。",
+    'hurt': "你现在受伤了，没有精力进入果园！",
+    'tentacle': "你刚被触手玩弄到失神，没有精力进入果园！"
+}
+
+
 # 全局更新所有果园的状态
 async def update_all_gardens(garden_data: dict):
     current_time = int(time.time())
@@ -23,7 +36,7 @@ async def update_all_gardens(garden_data: dict):
             # 基础生长时间计算（不超过24小时）
             seed_duration = current_time - garden["seed_time"]
             total_hours = min(seed_duration // 3600, 24)
-            base_harvest = total_hours * 10
+            base_harvest = total_hours * BASIC_REWARD
             
             # 有效施肥时间窗口判断
             if garden["isfert"] == 1:
@@ -41,7 +54,7 @@ async def update_all_gardens(garden_data: dict):
                 
                 if overlap_start < overlap_end:
                     fert_hours = (overlap_end - overlap_start) // 3600
-                    base_harvest += fert_hours * 10  # 翻倍部分
+                    base_harvest += fert_hours * BASIC_REWARD  # 翻倍部分
             
             # 累积草莓产量
             garden["garden_berry"] += base_harvest
@@ -58,17 +71,6 @@ berry_garden = on_command("garden", aliases={"berrygarden", 'berry_garden'}, per
 
 @berry_garden.handle()
 async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg()):
-    # 常量定义
-    SEED_COST = 10
-    STEAL_COST = 20
-    FERT_ENERGY = 5000
-    BUFF_MESSAGES = {
-        'lost': "你现在正在迷路中，连路都找不到，怎么进入果园呢？",
-        'confuse': "你现在正在找到了个碎片，疑惑着呢，不能进入果园。",
-        'hurt': "你现在受伤了，没有精力进入果园！",
-        'tentacle': "你刚被触手玩弄到失神，没有精力进入果园！"
-    }
-
     # 初始化数据
     user_id = str(event.user_id)
     group_id = str(event.group_id)
@@ -216,7 +218,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish("播种成功！24小时内每小时草莓果园都会为你带来10草莓的收益哦！", at_sender=True)
+        await berry_garden.finish(f"播种成功！24小时内每小时草莓果园都会为你带来{BASIC_REWARD}颗草莓的收益哦！", at_sender=True)
         
     else:
         await berry_garden.finish("请输入正确的指令哦！现在草莓果园可用指令：.garden 收菜/施肥/偷菜/播种")
