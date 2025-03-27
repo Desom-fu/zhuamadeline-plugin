@@ -243,7 +243,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
         # 构建回复消息
         message = (
-            f"🍓 收获报告 🍓\n"
+            f"\n🍓 收获报告 🍓\n"
             f"基础产量: {base_harvest}颗 ({total_hours}小时×{BASIC_REWARD}/h)\n"
         )
 
