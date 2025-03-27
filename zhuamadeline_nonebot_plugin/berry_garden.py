@@ -24,7 +24,6 @@ BUFF_MESSAGES = {
     'tentacle': "你刚被触手玩弄到失神，没有精力进入果园！"
 }
 
-
 # 全局更新所有果园的状态
 async def update_all_gardens(garden_data: dict):
     current_time = int(time.time())

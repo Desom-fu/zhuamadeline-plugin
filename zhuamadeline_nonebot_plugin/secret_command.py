@@ -102,6 +102,10 @@ puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=G
 async def puzzle_command_handle(event: Event, bot: Bot):
     puzzle_message = (
         "---------------------------------------\n"
+        "出题人：硝基胍\n"
+        '难度草莓：300\n'
+        '玛德琳的草莓厨房（请看群文件）\n'
+        "---------------------------------------\n"
         "由于题目包含图片，请输入 .where 来进行查看具体内容\n"
         "---------------------------------------\n"
         "由于题目字数较多，请输入 .confecti 来进行查看具体内容\n"
