@@ -210,28 +210,28 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if harvest <= 0:
             await berry_garden.finish("当前没有可收获的草莓！", at_sender=True)
 
-        # 计算基础产量和施肥加成
-        seed_time = user_garden["seed_time"]
-        fert_time = user_garden.get("fert_time", 0)
-        isfert = user_garden.get("isfert", 0)
+        # # 计算基础产量和施肥加成
+        # seed_time = user_garden["seed_time"]
+        # fert_time = user_garden.get("fert_time", 0)
+        # isfert = user_garden.get("isfert", 0)
 
-        current_time = int(time.time())
-        total_hours = min(24, (current_time - seed_time) // 3600)  # 总生长小时数（不超过24h）
+        # current_time = int(time.time())
+        # total_hours = min(24, (current_time - seed_time) // 3600)  # 总生长小时数（不超过24h）
 
-        # 基础产量 = 总小时数 × 15
-        base_harvest = total_hours * BASIC_REWARD
+        # # 基础产量 = 总小时数 × 15
+        # base_harvest = total_hours * BASIC_REWARD
 
-        # 施肥加成 = 施肥有效时间 × 15
-        if isfert == 1:
-            fert_hours = min(12, (current_time - fert_time) // 3600)  # 施肥有效时间（不超过12h）
-            bonus_harvest = min(fert_hours, total_hours) * BASIC_REWARD  # 不能超过总生长时间
-        else:
-            bonus_harvest = 0
+        # # 施肥加成 = 施肥有效时间 × 15
+        # if isfert == 1:
+        #     fert_hours = min(12, (current_time - fert_time) // 3600)  # 施肥有效时间（不超过12h）
+        #     bonus_harvest = min(fert_hours, total_hours) * BASIC_REWARD  # 不能超过总生长时间
+        # else:
+        #     bonus_harvest = 0
 
-        # 理论上 harvest = base_harvest + bonus_harvest，但可能有误差（比如手动修改数据）
-        # 所以取最小值，防止显示错误
-        base_harvest = min(base_harvest, harvest)
-        bonus_harvest = min(bonus_harvest, harvest - base_harvest)
+        # # 理论上 harvest = base_harvest + bonus_harvest，但可能有误差（比如手动修改数据）
+        # # 所以取最小值，防止显示错误
+        # base_harvest = min(base_harvest, harvest)
+        # bonus_harvest = min(bonus_harvest, harvest - base_harvest)
 
         # 更新银行数据
         user_bar["bank"] += harvest
@@ -244,13 +244,13 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         # 构建回复消息
         message = (
             f"\n🍓 收获报告 🍓\n"
-            f"基础产量: {base_harvest}颗 ({total_hours}小时×{BASIC_REWARD}/h)\n"
+            # f"基础产量: {base_harvest}颗 ({total_hours}小时×{BASIC_REWARD}/h)\n"
         )
 
-        if bonus_harvest > 0:
-            message += f"施肥加成: +{bonus_harvest}颗 (施肥有效时间: {fert_hours}小时)\n"
+        # if bonus_harvest > 0:
+        #     message += f"施肥加成: +{bonus_harvest}颗 (施肥有效时间: {fert_hours}小时)\n"
 
-        message += f"总计收获: {harvest}颗\n"
+        message += f"本次收获: {harvest}颗草莓\n"
         message += "草莓已经存进银行里了哦！"
     
         await berry_garden.finish(message, at_sender=True)
