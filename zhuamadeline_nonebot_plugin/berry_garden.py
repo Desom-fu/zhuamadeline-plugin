@@ -97,7 +97,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
     # 基础校验
     if user_id not in data:
-        await berry_garden.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
+        await berry_garden.finish("请先抓一次madeline再来草莓果园吧！", at_sender=True)
 
     # 初始化三个部分数据
     user_data = data.setdefault(user_id, {})
