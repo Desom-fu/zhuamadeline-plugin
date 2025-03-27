@@ -25,7 +25,7 @@ BASIC_REWARD = 15
 # }
 
 # 命令别名表
-command_aliases = {
+garden_aliases = {
     '收菜': ['take', '收获', '收割'],
     '施肥': ['fert', '肥料', '施肥'],
     '偷菜': ['steal', '偷取', '窃取'],
@@ -145,7 +145,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     
     # 查找匹配的命令
     operation = None
-    for main_cmd, aliases in command_aliases.items():
+    for main_cmd, aliases in garden_aliases.items():
         if command == main_cmd or command in aliases:
             operation = main_cmd
             break
@@ -153,7 +153,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     if not operation:
         # 构建帮助信息
         help_msg = "请输入正确的指令哦！可用指令：\n"
-        for main_cmd, aliases in command_aliases.items():
+        for main_cmd, aliases in garden_aliases.items():
             help_msg += f".garden {main_cmd}({'/'.join(aliases)})\n"
         await berry_garden.finish(help_msg, at_sender=True)
 
@@ -319,6 +319,6 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     else:
         # 构建帮助信息
         help_msg = "请输入正确的指令哦！可用指令：\n"
-        for main_cmd, aliases in command_aliases.items():
+        for main_cmd, aliases in garden_aliases.items():
             help_msg += f".garden {main_cmd}({'/'.join(aliases)})\n"
         await berry_garden.finish(help_msg, at_sender=True)
