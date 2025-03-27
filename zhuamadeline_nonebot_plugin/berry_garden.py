@@ -30,7 +30,7 @@ command_aliases = {
     '施肥': ['fert', '肥料', '施肥'],
     '偷菜': ['steal', '偷取', '窃取'],
     '播种': ['seed', '种植', '种菜'],
-    '查询': ['query', '状态', '查看', 'ck', 'check']
+    '查询': ['ck', '状态', '查看', 'query', 'check']
 }
 # 全局更新所有果园的状态
 async def update_all_gardens(garden_data: dict):
@@ -154,7 +154,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         # 构建帮助信息
         help_msg = "请输入正确的指令哦！可用指令：\n"
         for main_cmd, aliases in command_aliases.items():
-            help_msg += f".garden {main_cmd}({'/'.join(aliases[:2])})\n"
+            help_msg += f".garden {main_cmd}({'/'.join(aliases)})\n"
         await berry_garden.finish(help_msg, at_sender=True)
 
     # 查询操作
@@ -317,4 +317,8 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         await berry_garden.finish(f"播种成功！24小时内每小时草莓果园都会为你带来{BASIC_REWARD}颗草莓的收益哦！", at_sender=True)
         
     else:
-        await berry_garden.finish("请输入正确的指令哦！现在草莓果园可用指令：.garden 收菜/施肥/偷菜/播种")
+        # 构建帮助信息
+        help_msg = "请输入正确的指令哦！可用指令：\n"
+        for main_cmd, aliases in command_aliases.items():
+            help_msg += f".garden {main_cmd}({'/'.join(aliases)})\n"
+        await berry_garden.finish(help_msg, at_sender=True)
