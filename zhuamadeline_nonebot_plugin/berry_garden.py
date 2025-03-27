@@ -32,7 +32,8 @@ garden_aliases = {
     '播种': ['seed', '种植', '种菜'],
     '查询': ['ck', '状态', '查看', 'query', 'check']
 }
-# 全局更新所有果园的状态
+
+# 全局更新
 async def update_all_gardens(garden_data: dict):
     current_time = int(time.time())
     
@@ -40,35 +41,36 @@ async def update_all_gardens(garden_data: dict):
         garden = garden_data[user_id]
         
         if garden["isseed"] == 1:
-            # 计算自上次更新后的增量时间（关键改进点）
-            last_update = garden.get("last_update", garden["seed_time"])
-            elapsed_seconds = current_time - last_update
+            # 初始化最后更新时间（使用播种时间）
+            last_update_time = garden.get("last_update_time", garden["seed_time"])
             
-            # 计算剩余有效生长时间（不超过24小时）
-            seed_age = current_time - garden["seed_time"]
-            remaining_seconds = max(0, 24 * 3600 - seed_age)
+            # 计算完整的小时数差（不足1小时舍弃）
+            elapsed_hours = (current_time - last_update_time) // 3600
             
-            # 实际可计算的增量时间
-            effective_seconds = min(elapsed_seconds, remaining_seconds)
-            delta_hours = effective_seconds // 3600
-            
-            if delta_hours > 0:
-                # 基础产量计算
-                new_harvest = delta_hours * BASIC_REWARD
+            if elapsed_hours > 0:
+                total_new = 0
+                remaining_hours = 24 - (current_time - garden["seed_time"]) // 3600
+                effective_hours = min(elapsed_hours, remaining_hours)
                 
-                # 施肥加成计算（独立时间窗口）
-                if garden["isfert"] == 1:
-                    fert_elapsed = current_time - garden["fert_time"]
-                    fert_remaining = max(0, 12 * 3600 - fert_elapsed)
-                    fert_hours = min(delta_hours, fert_remaining // 3600)
-                    new_harvest += fert_hours * BASIC_REWARD  # 翻倍部分
+                # 计算施肥有效小时数
+                fert_hours = 0
+                if garden.get("isfert") == 1:
+                    fert_end_time = garden["fert_time"] + 12 * 3600
+                    # 计算施肥有效期内的小时数
+                    for hour in range(effective_hours):
+                        hour_time = last_update_time + (hour + 1) * 3600
+                        if garden["fert_time"] <= hour_time <= fert_end_time:
+                            fert_hours += 1
                 
-                # 保留原有草莓，只增加新产量（关键改进点）
-                garden["garden_berry"] = garden.get("garden_berry", 0) + new_harvest
-                garden["last_update"] = current_time  # 更新计时器
+                # 总产量 = 基础产量 + 施肥加成
+                total_new = effective_hours * BASIC_REWARD + fert_hours * BASIC_REWARD
+                
+                # 更新数据（严格整数运算）
+                garden["garden_berry"] = garden.get("garden_berry", 0) + total_new
+                garden["last_update_time"] = last_update_time + effective_hours * 3600
             
-            # 24小时到期自动停止生长（不清除草莓）
-            if seed_age >= 24 * 3600:
+            # 24小时生长周期检测
+            if (current_time - garden["seed_time"]) // 3600 >= 24:
                 garden["isseed"] = 0
     
     save_data(garden_path, garden_data)
@@ -115,7 +117,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     user_bar.setdefault("bank",0)
 
     # 初始化果园数据
-    for key in ["garden_berry", "isseed", "seed_time", "isfert", "fert_time", "steal_date"]:
+    for key in ["garden_berry", "isseed", "seed_time", "isfert", "fert_time", "steal_date", "last_update_time"]:
         user_garden.setdefault(key, 0 if "time" not in key else timestamp) if key != "steal_date" else user_garden.setdefault(key, "2000-01-01")
 
     # 获取日期信息
@@ -311,6 +313,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         data[user_id]["berry"] -= SEED_COST
         user_garden["isseed"] = 1
         user_garden["seed_time"] = timestamp
+        user_garden["last_update_time"] = timestamp
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
