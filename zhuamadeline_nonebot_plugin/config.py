@@ -9,7 +9,6 @@ __all__ = [
     "shop_database",
     "shop_open_img",
     "shop_work_img",
-    "update_text",
     "bot_owner_id",
     "user_path",
     "file_name",
@@ -54,8 +53,6 @@ shop_database = Path() / "data" / "Shop" / "Shop.json"
 shop_open_img = Path() / "data" / "Shop" / "开张图.png"
 shop_work_img = Path() / "data" / "Shop" / "营业图.png"
 
-#更新日志
-update_text = "游戏玩法及全部命令请前往抓kid/madeline wiki\n https://docs.qq.com/smartsheet/DVUZtQWlNTG1zZVhN \n进行查看"
 #管理员ID
 #封禁人员名单
 # 定义猎场数 全局变量 开新猎场要改

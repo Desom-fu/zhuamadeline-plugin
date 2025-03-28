@@ -18,19 +18,21 @@ help = on_fullmatch(
 @help.handle()
 async def zhua_help():
     text = (
-        f"更新：{update_text}\n\n"
-        "仅列出常用指令，其它指令请看wiki：\n"
-        ".zhua: 抓一个madeline\n"
-        ".qd: 每日签到\n"
-        ".show (madeline名字): 展示抓过的madeline\n"
-        ".count (madeline名字): 查看该madeline数量\n"
-        ".ck (all): 查看草莓余额及一些其他状态\n"
-        ".mymadeline (猎场号): 查询对应猎场拥有的madeline及数量\n"
-        ".myitem: 查询自己拥有的道具\n"
-        ".jd (1,2,3): 查看自己抓madeline进度\n"
-        ".shop: 查看今日商品\n"
-        ".buy (数量)（道具名): 购买道具\n"
-        ".use (道具名): 使用道具"
+        "游戏玩法及全部命令请前往抓kid/madeline wiki\n"
+        "https://docs.qq.com/smartsheet/DVUZtQWlNTG1zZVhN\n"
+        "进行查看\n"
+        "此处仅列出常用指令，其它指令请看wiki：\n"
+        "- .zhua: 抓一个madeline\n"
+        "- .qd: 每日签到\n"
+        "- .show (madeline名字): 展示抓过的madeline\n"
+        "- .count (madeline名字): 查看该madeline数量\n"
+        "- .ck (all): 查看草莓余额及一些其他状态\n"
+        "- .mymadeline (猎场号): 查询对应猎场拥有的madeline及数量\n"
+        "- .myitem/mycp: 查询自己拥有的道具/藏品\n"
+        "- .jd (1,2,3): 查看自己抓madeline进度\n"
+        "- .shop: 查看今日商品\n"
+        "- .buy (数量)（道具名): 购买道具/藏品\n"
+        "- .use (道具名): 使用道具/藏品"
     )
     await help.finish(text)
 
