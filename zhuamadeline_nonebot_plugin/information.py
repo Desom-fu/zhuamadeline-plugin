@@ -1,7 +1,6 @@
 from nonebot import on_command, on_fullmatch
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import GROUP, Message
-from .config import update_text
 from .npc import npc_da
 from .whitelist import whitelist_rule
 
