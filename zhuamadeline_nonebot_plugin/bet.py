@@ -846,7 +846,7 @@ def death_mode(identity_found, group_id, demon_data):
     msg = ''
     
     if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
-        msg += f'\n- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
+        msg += f'- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
         
         # HP 上限减少
         if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
