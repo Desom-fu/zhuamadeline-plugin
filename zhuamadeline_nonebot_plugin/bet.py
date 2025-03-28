@@ -846,7 +846,7 @@ def death_mode(identity_found, group_id, demon_data):
     msg = ''
     
     if identity_found in turn_limit and demon_data[group_id]['game_turn'] > turn_limit[identity_found]:
-        msg += f'- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
+        msg += f'\n- 轮数大于{turn_limit[identity_found]}，死斗模式开启！\n'
         
         # HP 上限减少
         if identity_found in [1,2] and demon_data[group_id]["hp_max"] > 1:
@@ -1284,7 +1284,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += f"- 你退掉了一颗子弹，这颗子弹是：{bullet_type}\n"
         if not demon_data[group_id]['clip'] or all(b == 0 for b in demon_data[group_id]['clip']):
             demon_data[group_id]['clip'] = load()
-            msg += "- 子弹已耗尽，重新装填！\n\n"
+            msg += "- 子弹已耗尽，重新装填！\n"
             # 游戏轮数+1
             demon_data[group_id]['game_turn'] += 1
             # 获取死斗模式信息
