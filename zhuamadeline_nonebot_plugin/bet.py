@@ -320,7 +320,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             await bet.finish(msg)
         else:
             await bet.finish("游戏已开始，无法再次加入！")
-    elif game_type == '3':
+    elif game_type == '3' and len(game_type_split) == 2:
         # 初始化必要字段
         pvp_guess = bar_data[user_id].setdefault('pvp_guess', {})
         bar_data[user_id].setdefault('last_pvp_guess_berry', 0)
@@ -381,7 +381,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         # 上台回合只能写pvp_choose[5]以防显示错误
         await bet.finish(f"你已经消耗{kouchu_berry}颗草莓成功进行竞技场猜测！你所选的擂台为[{pos+1}]，该擂台擂主为[{choose_nickname}]，上台回合为[{pvp_choose[5]}]，所选占擂Madeline的战力为[{choose_rank}]！", at_sender=True)
     # “游戏”4逻辑：三球竞猜
-    elif game_type == '4':
+    elif game_type == '4' and len(game_type_split) == 4:
         if len(game_type_split) != 4:
             await bet.finish("请输入正确的红蓝黄三球的号码哦！", at_sender=True)
             
@@ -440,7 +440,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         save_data(full_path, data)
         await bet.finish(f"你已成功参与三球竞猜！本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色球点数：{red_points}，蓝色球点数：{blue_points}，黄色球点数：{yellow_points}", at_sender=True)
     else:
-        await bet.finish("请输入正确的游戏类型哦！", at_sender=True)
+        await bet.finish("请输入正确的游戏类型或者检查输入参数是否正确哦！", at_sender=True)
 
 # “游戏”1逻辑 - 猜测
 guess = on_command('猜测', permission=GROUP, priority=1, block=True, rule=whitelist_rule)

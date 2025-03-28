@@ -28,18 +28,22 @@ BASIC_REWARD = 15
 garden_aliases = {
     '收菜': ['take', '收获', '收割'],
     '施肥': ['fert', '肥料', '施肥'],
-    '偷菜': ['steal', '偷取', '窃取'],
+    '偷菜': ['steal', '偷取', '窃取', '偷草莓'],
     '播种': ['seed', '种植', '种菜'],
     '查询': ['ck', 'query', 'check', '状态', '查看']
 }
 
-# 全局更新
+# 全局更新 
 async def update_all_gardens(garden_data: dict):
     current_time = int(time.time())
+    current_date_str = datetime.date.today().strftime("%Y-%m-%d")
     
     for user_id in garden_data:
         garden = garden_data[user_id]
-        
+        if garden.get("be_steal_date",'2000-01-01') != current_date_str:
+            garden["be_steal_date"] = current_date_str
+            garden["issteal"] = 0
+    
         if garden["isseed"] == 1:
             # 初始化最后更新时间（使用播种时间）
             last_update_time = garden.get("last_update_time", garden["seed_time"])
@@ -72,6 +76,9 @@ async def update_all_gardens(garden_data: dict):
             # 24小时生长周期检测
             if (current_time - garden["seed_time"]) // 3600 >= 24:
                 garden["isseed"] = 0
+            # 施肥失效检测
+            if (current_time - garden["fert_time"]) // 3600 >= 12:
+                garden["isfert"] = 0
     
     save_data(garden_path, garden_data)
     return garden_data
@@ -117,8 +124,8 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     user_bar.setdefault("bank",0)
 
     # 初始化果园数据
-    for key in ["garden_berry", "isseed", "seed_time", "isfert", "fert_time", "steal_date", "last_update_time"]:
-        user_garden.setdefault(key, 0 if "time" not in key else timestamp) if key != "steal_date" else user_garden.setdefault(key, "2000-01-01")
+    for key in ["garden_berry", "isseed", "seed_time", "isfert", "issteal", "fert_time", "steal_date", "last_update_time", 'be_steal_date']:
+        user_garden.setdefault(key, 0 if "time" not in key else timestamp) if key not in ["steal_date", 'be_steal_date'] else user_garden.setdefault(key, "2000-01-01")
 
     # 获取日期信息
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
@@ -154,9 +161,9 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     
     if not operation:
         # 构建帮助信息
-        help_msg = "请输入正确的指令哦！可用指令：\n"
+        help_msg = "请输入正确的指令哦！可用指令："
         for main_cmd, aliases in garden_aliases.items():
-            help_msg += f".garden {main_cmd}({'/'.join(aliases)})\n"
+            help_msg += f"\n.garden {main_cmd}({'/'.join(aliases)})"
         await berry_garden.finish(help_msg, at_sender=True)
 
     # 查询操作
@@ -183,18 +190,18 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         # 偷菜状态
         if user_garden["steal_date"] == current_date_str:
-            steal_status = "今日已偷菜"
+            steal_status = "今日已偷草莓"
         else:
-            steal_status = "今日未偷菜"
+            steal_status = "今日未偷草莓"
         
-        if user_garden["isseed"] == 1:
-            besteal_status = "今日被偷菜过"
+        if user_garden["issteal"] == 1:
+            besteal_status = "今日已被偷草莓"
         else:
-            besteal_status = "今日没被偷菜过，要小心了"
+            besteal_status = "今日没被偷草莓，要小心了"
         
         # 构建回复消息
         reply_msg = (
-            f"【草莓果园状态查询】\n"
+            f"\n【草莓果园状态查询】\n"
             f"当前果园草莓数量: {user_garden['garden_berry']}\n"
             f"播种状态: {seed_status}\n"
             f"施肥状态: {fert_status}\n"
@@ -252,21 +259,26 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
         message += f"本次收获: {harvest}颗草莓\n"
         message += "草莓已经存进银行里了哦！"
-    
+        if user_garden["isseed"] == 0:
+            message += "\n你的草莓已经全部收获完毕啦，需要再次播种哦！"
+        
+        if user_garden["isfert"] == 0:
+            message += "\n施肥时间已到，如需要可以重新施肥哦！"
+        
         await berry_garden.finish(message, at_sender=True)
         
     elif operation == "偷菜":
         if user_garden["steal_date"] == current_date_str:
-            await berry_garden.finish("今天已经偷过菜了，请明天再来吧！", at_sender=True)
+            await berry_garden.finish("今天你已经偷过草莓了，请明天再来吧！", at_sender=True)
         
         if data[user_id]["berry"] < STEAL_COST:
-            await berry_garden.finish(f"偷菜需要{STEAL_COST}颗草莓，你的草莓数量不足！", at_sender=True)
+            await berry_garden.finish(f"偷草莓需要{STEAL_COST}颗草莓，你的草莓数量不足！", at_sender=True)
         
-        # 随机选择目标（有种子且草莓数量>0的果园）
+        # 随机选择目标（未被偷过且草莓数量>0的果园）
         targets = [
             uid for uid in garden_data 
             if uid != user_id 
-            and garden_data[uid]["isseed"] == 0 # 只偷没偷过的
+            and garden_data[uid]["issteal"] == 0 # 只偷没偷过的
             and garden_data[uid]["garden_berry"] > 0  # 只选择有草莓的果园
         ]
         
@@ -282,16 +294,20 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         data[user_id]["berry"] -= STEAL_COST
         user_garden["garden_berry"] += steal_amount
         target_garden["garden_berry"] -= steal_amount
-        target_garden["isseed"] = 1
+        target_garden["issteal"] = 1
         user_garden["steal_date"] = current_date_str
+        target_garden["be_steal_date"] = current_date_str
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(f"你花费了{STEAL_COST}颗草莓，成功偷取了"+ MessageSegment.at(target_id) +f" 的草莓地里的{steal_amount}颗草莓！偷取的草莓已放在你自己的果园里了哦！", at_sender=True)
+        await berry_garden.finish(f"你花费了{STEAL_COST}颗草莓，成功偷取了"+ MessageSegment.at(target_id) +f" 的草莓地里的{steal_amount}颗草莓！偷取的草莓已放在你自己地里了哦！", at_sender=True)
         
     elif operation == "施肥":
         if user_garden["isseed"] != 1:
             await berry_garden.finish("请先播种后再进行施肥哦！", at_sender=True)
+            
+        if user_garden["isfert"] == 1:
+            await berry_garden.finish("你已经施肥过了，没必要重新施肥哦！", at_sender=True)
             
         if energy < FERT_ENERGY:
             await berry_garden.finish(f"施肥需要{FERT_ENERGY}点能量，你目前只有{energy}点！", at_sender=True)
@@ -302,7 +318,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish("施肥成功！你的草莓地12小时内收获将会翻倍", at_sender=True)
+        await berry_garden.finish(f"你使用了{FERT_ENERGY}点能量对土地施肥成功！接下来的12h内你的草莓地收获将会翻倍！", at_sender=True)
         
     elif operation == "播种":
         if user_garden["isseed"] == 1:
@@ -318,7 +334,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(f"播种成功！24小时内每小时草莓果园都会为你带来{BASIC_REWARD}颗草莓的收益哦！", at_sender=True)
+        await berry_garden.finish(f"播种成功！24小时内每小时草莓地都会为你带来{BASIC_REWARD}颗草莓的收益哦！", at_sender=True)
         
     else:
         # 构建帮助信息
