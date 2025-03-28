@@ -540,7 +540,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     berry = user_data.get('berry', 0)
     liechang_number = user_data.get('lc', '1')
     energy = user_data.get("energy", 0)
-    last_pvp_guess_berry = bar_data.get("last_pvp_guess_berry", 0)
+    last_pvp_guess_berry = bar_data.get("last_pvp_guess_berry", -1)
     identity_status = user_data.get("identity_status", 0)
     elect_status = user_data.get("elect_status", False)
     kongjun = user_data.get("kongjun", 0)
@@ -647,7 +647,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
         message += (f"\n• 当前奖池积累草莓：{pots}颗") if pots > 0 else ''
         
         # 显示上次竞猜获得的草莓（若有）
-        message += (f"\n• 上次bet3获得草莓：{last_pvp_guess_berry}颗") if last_pvp_guess_berry > 0 else ''
+        message += (f"\n• 上次bet3获得草莓：{last_pvp_guess_berry}颗") if last_pvp_guess_berry > -1 else ''
 
         if ball_ifplay == 0:
             # 优先显示中奖信息，然后显示门票信息

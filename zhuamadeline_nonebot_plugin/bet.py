@@ -323,7 +323,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     elif game_type == '3' and len(game_type_split) == 2:
         # 初始化必要字段
         pvp_guess = bar_data[user_id].setdefault('pvp_guess', {})
-        bar_data[user_id].setdefault('last_pvp_guess_berry', 0)
+        bar_data[user_id].setdefault('last_pvp_guess_berry', -1)
         bar_data[user_id].setdefault('bank', 0)
         # 判断本轮是否猜测
         if pvp_guess.get('ifguess', 0) == 1:
@@ -369,7 +369,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         pvp_guess['choose_turn'] = pvp_choose[5] # 不能用choose_turn
         pvp_guess['choose_nickname'] = choose_nickname
         # 上轮猜测清零
-        bar_data[user_id]['last_pvp_guess_berry'] = 0
+        bar_data[user_id]['last_pvp_guess_berry'] = -1
         # 扣除草莓
         kouchu_berry = 150
         if data[user_id]['berry'] < kouchu_berry:

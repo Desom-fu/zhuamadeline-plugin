@@ -114,7 +114,7 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     user_bar = bar_data.setdefault(user_id, {})
     user_bar.setdefault("status","nothing")
     user_bar.setdefault("game","1")
-    user_bar.setdefault("last_pvp_guess_berry",0)
+    user_bar.setdefault("last_pvp_guess_berry", -1)
     user_bar.setdefault("bank",0)
     try:
         if access == "save":
