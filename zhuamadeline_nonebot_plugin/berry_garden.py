@@ -284,7 +284,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         ]
         
         if not targets:
-            await berry_garden.finish("现在没有可以偷的地，请早点过来或者晚点过来偷哦！", at_sender=True)
+            await berry_garden.finish("现在没有可以偷的土地，请早点过来或者晚点过来偷哦！", at_sender=True)
         
         # 随机选择
         target_id = random.choice(targets)
