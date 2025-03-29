@@ -131,7 +131,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     user_garden = garden_data.setdefault(user_id, {})
     
     # 用户数据初始化
-    berry = data.setdefault('berry', 1000)
+    berry = user_data.setdefault('berry', 1000)
     user_data.setdefault('event', 'nothing')
     energy = user_data.setdefault('energy', 0)
     user_collections = user_data.setdefault('collections', {})
@@ -264,7 +264,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if user_garden["steal_date"] == current_date_str:
             await berry_garden.finish("今天你已经偷过草莓了，请明天再来吧！", at_sender=True)
         
-        if data[user_id]["berry"] < STEAL_COST:
+        if berry < STEAL_COST:
             await berry_garden.finish(f"偷草莓需要{STEAL_COST}颗草莓，你的草莓数量不足！", at_sender=True)
         
         # 随机选择目标（未被偷过且草莓数量>0的果园）
