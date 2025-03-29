@@ -217,27 +217,21 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
     blood = data[qqb]['collections'].get("鲜血之刃", 0)
     robot = data[qqb]['collections'].get("遥控机器人", 0)
     canpian = data[qqb]['item'].get("残片", 0)
-    
-    # logger.info(f"shengshi的数值为：{shengshi}")
-        
-    if shengshi >= 1:
-        add_rank_min += 3
-    
-    if blood >= 1:
-        hunt_bonusb += 2
-        
-    if robot >= 1:
-        hunt_bonusb += 1
-    
-    if canpian >= 1:
-        add_canpian_bonus = canpian // 9999
-        hunt_bonusb += add_canpian_bonus
-
     #每1000安定之音加1随机上限
     music = data[qqb]['item'].get("安定之音", 0)
-    if music >= 1:
-        music_add = music // 1000
-        add_rank_max += music_add
+    
+    # logger.info(f"shengshi的数值为：{shengshi}")
+    
+    # 加战力下限
+    add_rank_min += 3 if shengshi >= 1 else 0
+    
+    # 计算战力加成
+    hunt_bonusb += 2 if blood >= 1 else 0
+    hunt_bonusb += 1 if robot >= 1 else 0
+    hunt_bonusb += canpian // 9999 if canpian >= 9999 else 0
+
+    # 加战力上限
+    add_rank_max += music // 1000 if music >= 1 else 0
     
     # logger.info(f"min_ranb的数值为：{min_ranb}，max_ranb的数值为：{max_ranb}")
 
