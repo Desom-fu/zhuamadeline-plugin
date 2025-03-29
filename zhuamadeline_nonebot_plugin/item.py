@@ -1813,6 +1813,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     data[str(user_id)]["buff"] = "hurt"  #受伤
                                     fail_text = f"提取失败！提取器爆炸了，你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
                                 else:
+                                    next_time = current_time
+                                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     fail_text = f"提取失败！提取器爆炸了，但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
                                 success = 2
                             data[str(user_id)]["item"][item_name] -= 1
@@ -2023,16 +2025,15 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 current_time = datetime.datetime.now()
                                 next_time = current_time + datetime.timedelta(minutes=cd_time)
                                 #检测回想之核
-                                try:
-                                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
-                                except:
-                                    dream = 0
+                                dream = data[str(user_id)]['collections'].get("回想之核", 0)
                                 if dream >= 1:
                                     next_time = current_time + datetime.timedelta(minutes=cd_time-1)
                                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                 data[str(user_id)]["buff"] = "hurt"  #受伤
                                 fail_text = elect_text + f"你在布置充能陷阱的时候，突然间能量迸发，充能陷阱爆炸了！你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
                             else:
+                                next_time = current_time
+                                data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                 fail_text = f"你在布置充能陷阱的时候，突然间能量迸发，充能陷阱爆炸了！但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
                             success = 2
                         else:
