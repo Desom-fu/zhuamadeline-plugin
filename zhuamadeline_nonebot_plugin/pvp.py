@@ -373,7 +373,6 @@ def check_liechang(user_id, data):
     else:
         return False
 
-
 #madeline竞技场有关机制
 async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     # 获取当前时间
