@@ -215,7 +215,7 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
 
     # 判定血刃和残片和机器人加对面固定战力上限
     blood = data[qqb]['collections'].get("鲜血之刃", 0)
-    robot = data[qqb]['collections'].get("遥控机器人", 0)
+    robot = data[qqb]['collections'].get("灵魂机器人", 0)
     canpian = data[qqb]['item'].get("残片", 0)
     #每1000安定之音加1随机上限
     music = data[qqb]['item'].get("安定之音", 0)
@@ -272,10 +272,10 @@ def pvp_logic(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
             oppo_liechang = hunt_bonusb_to_oppo_liechang.get(hunt_bonusb, 1)  # 默认值为 1
             
             data = open_data(user_path)
-            # 判定血刃、残片、遥控机器人加固定战力上限
+            # 判定血刃、残片、灵魂机器人加固定战力上限
             blood = data[user_id]['collections'].get("鲜血之刃", 0)
             canpian = data[user_id]['item'].get("残片", 0)
-            robot = data[user_id]['collections'].get("遥控机器人", 0)
+            robot = data[user_id]['collections'].get("灵魂机器人", 0)
 
             # 计算战力加成
             hunt_bonusb += 2 if blood >= 1 else 0
@@ -442,7 +442,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         bonus_rank_max += 3
 
     #机器人+1属性
-    robot = user_data[str(user_id)]['collections'].get("遥控机器人", 0)
+    robot = user_data[str(user_id)]['collections'].get("灵魂机器人", 0)
     if robot >= 1:
         guding_rank += 1
         bonus_rank_max += 1

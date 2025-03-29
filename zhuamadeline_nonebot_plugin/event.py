@@ -1155,11 +1155,11 @@ async def LabStuck(user_data, user_id, message):
         
     elif(rnd<=495):
         #如果没有，则开辟这一栏并添加
-        if(not '遥控机器人' in collections):
-            collections['遥控机器人'] = 1
+        if(not '灵魂机器人' in collections):
+            collections['灵魂机器人'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("熬夜没头发~ 熬夜没~头~发~\n输入.cp 遥控机器人 以查看具体效果", at_sender=True)
+            await message.finish("熬夜没头发~ 熬夜没~头~发~\n输入.cp 灵魂机器人 以查看具体效果", at_sender=True)
         
         #否则就是正常抓
         else:
