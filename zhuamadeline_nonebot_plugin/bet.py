@@ -351,7 +351,8 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         turn = pvp_data.get('count', 100)
         choose_user = int(pvp_data['list'][pos][0])
         choose_user_name = await bot.get_group_member_info(group_id=int(group_id), user_id=choose_user)
-        choose_nickname = choose_user_name["card"] or choose_user_name["nickname"]  # 先取群昵称（card），没有则取QQ昵称
+        # choose_nickname = choose_user_name["card"] or choose_user_name["nickname"]  # 先取群昵称（card），没有则取QQ昵称
+        choose_nickname = choose_user_name["nickname"]  # 取QQ昵称
         # 目标战力和目标轮数    
         choose_rank = pvp_choose[3]
         choose_turn = pvp_choose[5]
