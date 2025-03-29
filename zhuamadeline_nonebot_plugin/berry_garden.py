@@ -15,7 +15,7 @@ from .whitelist import whitelist_rule
 # 常量定义
 SEED_COST = 10
 STEAL_COST = 15
-FERT_ENERGY = 1000
+FERT_ENERGY = 1200
 BASIC_REWARD = 15
 # BUFF_MESSAGES = {
 #     'lost': "你现在正在迷路中，连路都找不到，怎么进入果园呢？",
