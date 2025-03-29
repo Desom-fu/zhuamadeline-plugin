@@ -106,6 +106,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         user_id = str(event.user_id)  #qq号
         group_id = str(event.group_id)
         current_time = datetime.datetime.now()  #读取当前系统时间
+        diamond_text = "" # 初始化，由于狮山代码写这里
         if (str(user_id) in data):
             # 添加全局冷却
 
@@ -198,7 +199,12 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 #检测回想之核
                 dream = collections.get("回想之核", 0)
                 if dream >= 1:
-                    next_time = current_time + datetime.timedelta(minutes=29)                
+                    next_time = current_time + datetime.timedelta(minutes=29)
+                #检测星钻
+                if collections.get("星钻", 0) > 0 and random.random() < 0.1:
+                    diamond_text = "\n\n星钻闪烁，你包里的星钻突然绽放光芒，瞬间你的伤势和疲惫感如星尘般消散！"
+                    next_time = current_time  # 立即重置冷却时间
+                        
                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                 answer = 1
         else:
@@ -271,7 +277,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             return
 
         #触发事件
-        await event_happen(data,str(user_id),catch)
+        await event_happen(data,str(user_id),catch,diamond_text)
 
         #写入副表
         data2 = open_data(user_path / f"UserList{data[str(user_id)]['lc']}.json")
@@ -400,7 +406,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                             f'{description}'+
                             f"{sheet_text}" +
                             '\n\n本次奖励'+f'{berry_give}+{lucky_give}={berry_give+lucky_give}颗草莓\n'+
-                            f'幸运加成剩余{text}次'+
+                            f'幸运加成剩余{text}次'+ diamond_text +
                             exp_msg + grade_msg,
                             at_sender = True)
             else:
@@ -410,7 +416,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                                 MessageSegment.image(img)+
                                 f'{description}'+
                                 f"{sheet_text}" +
-                                '\n\n本次奖励'+f'{berry_give}颗草莓' +
+                                '\n\n本次奖励'+f'{berry_give}颗草莓' + diamond_text +
                                 exp_msg + grade_msg,
                                 at_sender = True)
         else:
@@ -418,7 +424,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                             f'\n等级: {level}\n'+
                             f'{name}'+
                             MessageSegment.image(img)+
-                            f'{description}' +
+                            f'{description}' + diamond_text +
                             exp_msg + grade_msg,
                             at_sender = True)
 

@@ -72,6 +72,7 @@ file_names = {
 }
 full_path = Path() / "data" / "UserList" / "UserData.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
+garden_path = Path() / "data" / "UserList" / "garden.json"
 demon_path = Path() / "data" / "UserList" / "demon.json"
 # user_list1 = Path() / "data" / "UserList" / "UserList1.json"
 # user_list2 = Path() / "data" / "UserList" / "UserList2.json"
@@ -178,6 +179,12 @@ async def delete_account_handle(bot: Bot, event: GroupMessageEvent, arg: Message
     if target_qq in bar_data:
         del bar_data[target_qq]
         save_data(bar_path, bar_data)
+    
+    # 删除 garden.json 中的账号数据
+    garden_data = open_data(garden_path)
+    if target_qq in garden_data:
+        del garden_data[target_qq]
+        save_data(garden_path, garden_data)
 
     # 删除 UserList1.json, UserList2.json, ..., UserListN.json 中的账号数据
     for i in range(1, liechang_count + 1):  # liechang_count 是猎场总数
