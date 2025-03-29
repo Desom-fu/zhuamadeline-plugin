@@ -350,7 +350,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         lucky_give = 0
         sheet_text = ""
         #判定秘宝
-        treasure = data[str(user_id)]['collections'].get('尘封的秘宝',0)
+        treasure = data[str(user_id)]['collections'].get('尘封的宝藏',0)
 
         #判定乐谱
         sheet_music = data[str(user_id)]['collections'].get('星光乐谱',0)

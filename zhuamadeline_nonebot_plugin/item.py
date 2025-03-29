@@ -746,7 +746,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     ("幸运药水", 3),
                     ("madeline提取器+时间秒表礼包组合", 0.5),
                     ("鲜血之刃", 0.25),
-                    ("尘封的秘宝", 0.25),
+                    ("尘封的宝藏", 0.25),
                 ]
                 # 礼包组合拆分映射（库存更新时拆分成单个道具）
                 COMBO_MAP = {
@@ -768,7 +768,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 def get_special_message(prize, is_duplicate=False):
                     """返回指定奖品的特殊文案"""
-                    if is_duplicate and prize in ["鲜血之刃", "尘封的秘宝"]:
+                    if is_duplicate and prize in ["鲜血之刃", "尘封的宝藏"]:
                         return (
                             "你打开了道具盲盒，误打误撞间触发了一股神秘的力量，眼前的场景骤然变换。"
                             "你仿佛置身于一处幽暗的溶洞，四周一片寂静，隐约传来低沉的嗡鸣声。\n"
@@ -786,11 +786,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             "当你靠近它时，刀身突然散发出猩红的光芒，整个洞穴随之震颤，尖锐的嗡鸣声中似乎蕴含着无尽的愤怒与渴望！\n"
                             "输入.cp 鲜血之刃 以查看具体效果"
                         ),
-                        "尘封的秘宝": (
+                        "尘封的宝藏": (
                             "你打开了道具盲盒，误打误撞间触发了一股神秘的力量，眼前的场景骤然变换。"
                             "你仿佛置身于一处幽暗的溶洞，四周一片寂静，隐约传来低沉的嗡鸣声。\n"
                             "在溶洞的一处昏暗角落，你意外发现了一件布满灰尘的秘宝。它静静地躺在那里，尘封已久，散发着神秘的气息，但你一时无法找出打开它的方法。\n"
-                            "输入.cp 尘封的秘宝 以查看具体效果"
+                            "输入.cp 尘封的宝藏 以查看具体效果"
                         ),
                     }
                     return messages.get(prize)
@@ -799,7 +799,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     """
                     处理单次抽奖：
                       - 若为礼包组合，则更新库存时拆分成单品，但显示文案仍为礼包组合
-                      - 对于鲜血之刃和尘封的秘宝，首次加入库存，重复则奖励超级大礼包
+                      - 对于鲜血之刃和尘封的宝藏，首次加入库存，重复则奖励超级大礼包
                       - 普通奖品直接加入库存
                     返回 (显示文案, 对应特殊文案)
                     """
@@ -814,7 +814,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         special_msg = get_special_message(prize)
                         return prize, special_msg
 
-                    if prize in ["鲜血之刃", "尘封的秘宝"]:
+                    if prize in ["鲜血之刃", "尘封的宝藏"]:
                         user_data.setdefault("collections", {})
                         if prize in user_data["collections"]:
                             # 重复获得：奖励超级大礼包（拆分库存更新）
@@ -1159,7 +1159,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 """
                 if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
                     #确保自身没有幸运状态
-                    if data[str(user_id)].get('buff2')!='lucky':
+                    if data[str(user_id)].get('buff2')!='lucky' or data[str(user_id)].get('lucky_times', 0)<=0:
                         data[str(user_id)]["buff2"]='lucky'
                         data[str(user_id)]["lucky_times"] = 21
                         data[str(user_id)]["item"][use_item_name] -= 1
@@ -1194,7 +1194,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     if current_potions < use_count:
                         await daoju.finish(f"你的{item_name}数量不足！你只有{current_potions}瓶{item_name}！", at_sender=True)
                     # 确保自身没有幸运状态
-                    if data[str(user_id)].get('buff2', "normal") != 'lucky' or data[str(user_id)].get('lucky_times', 0) == 0:
+                    if data[str(user_id)].get('buff2', "normal") != 'lucky' or data[str(user_id)].get('lucky_times', 0) <= 0:
                         data[str(user_id)]["buff2"] = 'lucky'
                         data[str(user_id)]["lucky_times"] = 1  # 初始设定
                     # 增加幸运次数
