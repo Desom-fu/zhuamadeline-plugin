@@ -668,6 +668,11 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     
     #添加状态（若有）
     message += (f"\n- 状态：{msg_status}") if msg_status else ''
+
+    if all_judge == 'all':   
+
+        # 显示幸运次数（若有）
+        message += (f"\n• 剩余幸运次数：{lucky_times - 1}次") if lucky_times > 1 else ''
     
     # 显示钓鱼次数（若有）
     message += (f"\n- 钓鱼次数：{fishing} | 空军次数：{kongjun}") if fishing > 0 else ''
@@ -703,9 +708,6 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
 
         # 显示事件（若有）
         message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_bet1'] else ''
-
-        # 显示幸运次数（若有）
-        message += (f"\n• 剩余幸运次数：{lucky_times - 1}次") if lucky_times > 1 else ''
 
         # 显示下次钓鱼的时间（若有）
         message += (f"\n• 下次可钓鱼时间：\n{next_fishing_time}") if current_time < next_fishing_time else ''
