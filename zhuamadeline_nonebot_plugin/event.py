@@ -684,7 +684,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
         # debuff不加时间
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-        rnd_debuff = random.randint(1,4)
+        rnd_debuff = random.randint(1,3)
         recover_hour = random.randint(2,4)
         if rnd_debuff==1:
             #设定恢复时长为4小时后
@@ -710,13 +710,6 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             user_info['debuff'] = 'unlucky'
             save_data(user_path, user_data)
             await message.finish(f"你不知道怎么回事，感觉像是被矿洞内的脏东西附身了，似乎有点不幸，接下来{recover_hour}小时内你不会再挖到翡翠矿了了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
-        elif rnd_debuff==4:
-            #设定恢复时长为4小时后
-            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
-            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
-            user_info['debuff'] = 'clumsy'
-            save_data(user_path, user_data)
-            await message.finish(f"你突然被矿洞的一股魔力袭击了，除了万能解药以外的几乎全部能够主动使用的道具/藏品都失效了！接下来{recover_hour}小时内你无法使用任何道具了！。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
     #遇到被困人员
     elif(rnd <= 600+rnd_regu): #60
         if(len(stuck_data) >= 1):
