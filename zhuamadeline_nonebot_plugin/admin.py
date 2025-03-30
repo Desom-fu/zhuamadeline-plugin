@@ -1059,99 +1059,6 @@ async def handle_change_user_item(bot: Bot, event: GroupMessageEvent, arg: Messa
     else:
         await change_user_item.finish(f"用户 [{nickname}] 没有道具 [{old_item}]，无法更改！", at_sender=True)
 
-# 全服更改藏品命令
-change_all_collections = on_command("全服更改藏品", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
-
-@change_all_collections.handle()
-async def handle_change_all_collections(event: GroupMessageEvent, arg: Message = CommandArg()):
-    # 判断是否是管理员
-    if str(event.user_id) not in bot_owner_id:
-        return
-    
-    # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 2:
-        await change_all_collections.finish("格式错误！请输入：.全服更改藏品 旧藏品名称 新藏品名称", at_sender=True)
-        return
-    
-    old_collections, new_collections = args
-    
-    # 检测别名
-    standard_collections = get_alias_name(new_collections, collections, collection_aliases)
-    if standard_collections:
-        new_collections = standard_collections
-        
-    # 检查新藏品是否存在
-    if new_collections not in collections:
-        await change_all_collections.finish(f"藏品 [{new_collections}] 不存在，请检查后重新输入！", at_sender=True)
-        return
-    
-    # 读取玩家数据文件
-    data = open_data(user_path / file_name)
-    
-    # 遍历所有玩家，进行藏品更改
-    for user_id, user_data in data.collections():
-        if "collections" in user_data and old_collections in user_data["collections"]:
-            collections_quantity = user_data["collections"].pop(old_collections)
-            user_data["collections"][new_collections] = user_data["collections"].get(new_collections, 0) + collections_quantity
-    
-    # 保存文件
-    save_data(user_path / file_name, data)
-    
-    await change_all_collections.finish(f"已成功将所有玩家的 [{old_collections}] 更改为 [{new_collections}]！", at_sender=True)
-
-# 更改指定用户藏品命令
-change_user_collections = on_command("更改藏品", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
-
-@change_user_collections.handle()
-async def handle_change_user_collections(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
-    # 判断是否是管理员
-    if str(event.user_id) not in bot_owner_id:
-        return
-    
-    # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 3:
-        await change_user_collections.finish("格式错误！请输入：.更改藏品 qq号 旧藏品名称 新藏品名称", at_sender=True)
-        return
-    
-    user_id, old_collections, new_collections = args
-
-    try:
-        user_info = await bot.get_stranger_info(user_id=int(user_id))
-        nickname = user_info.get("nickname", "未知昵称")
-    except Exception:
-        await change_user_collections.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
-    
-    # 检测别名
-    standard_collections = get_alias_name(new_collections, collections, collection_aliases)
-    if standard_collections:
-        new_collections = standard_collections
-        
-    # 检查新藏品是否存在
-    if new_collections not in collections:
-        await change_user_collections.finish(f"藏品 [{new_collections}] 不存在，请检查后重新输入！", at_sender=True)
-        return
-    
-    # 读取玩家数据文件
-    data = open_data(user_path / file_name)
-    
-    # 检查该 QQ 号用户是否存在
-    if user_id not in data:
-        await change_user_collections.finish(f"用户 [{nickname}] 不存在！", at_sender=True)
-        return
-
-    user_data = data[user_id]
-    
-    # 进行藏品更改
-    if "collections" in user_data and old_collections in user_data["collections"]:
-        collections_quantity = user_data["collections"].pop(old_collections)
-        user_data["collections"][new_collections] = user_data["collections"].get(new_collections, 0) + collections_quantity
-        save_data(user_path / file_name, data)
-        await change_user_collections.finish(f"已成功将 [{nickname}] 的 [{old_collections}] 更改为 [{new_collections}]！", at_sender=True)
-    else:
-        await change_user_collections.finish(f"用户 [{nickname}] 没有藏品 [{old_collections}]，无法更改！", at_sender=True)
-
 # 查询玩家道具
 query_items = on_command("查询道具", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
@@ -1366,6 +1273,98 @@ async def query_cangpins_handle(bot: Bot, event: GroupMessageEvent, arg: Message
         messages=forward_message,
     )
 
+# 全服更改藏品命令
+change_all_collections = on_command("全服更改藏品", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+
+@change_all_collections.handle()
+async def handle_change_all_collections(event: GroupMessageEvent, arg: Message = CommandArg()):
+    # 判断是否是管理员
+    if str(event.user_id) not in bot_owner_id:
+        return
+    
+    # 解析参数
+    args = str(arg).split(" ")
+    if len(args) != 2:
+        await change_all_collections.finish("格式错误！请输入：.全服更改藏品 旧藏品名称 新藏品名称", at_sender=True)
+        return
+    
+    old_collections, new_collections = args
+    
+    # 检测别名
+    standard_collections = get_alias_name(new_collections, collections, collection_aliases)
+    if standard_collections:
+        new_collections = standard_collections
+        
+    # 检查新藏品是否存在
+    if new_collections not in collections:
+        await change_all_collections.finish(f"藏品 [{new_collections}] 不存在，请检查后重新输入！", at_sender=True)
+        return
+    
+    # 读取玩家数据文件
+    data = open_data(user_path / file_name)
+    
+    # 遍历所有玩家，进行藏品更改
+    for user_id, user_data in data.items():
+        if "collections" in user_data and old_collections in user_data["collections"]:
+            collections_quantity = user_data["collections"].pop(old_collections)
+            user_data["collections"][new_collections] = user_data["collections"].get(new_collections, 0) + collections_quantity
+    
+    # 保存文件
+    save_data(user_path / file_name, data)
+    
+    await change_all_collections.finish(f"已成功将所有玩家的 [{old_collections}] 更改为 [{new_collections}]！", at_sender=True)
+
+# 更改指定用户藏品命令
+change_user_collections = on_command("更改藏品", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+
+@change_user_collections.handle()
+async def handle_change_user_collections(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+    # 判断是否是管理员
+    if str(event.user_id) not in bot_owner_id:
+        return
+    
+    # 解析参数
+    args = str(arg).split(" ")
+    if len(args) != 3:
+        await change_user_collections.finish("格式错误！请输入：.更改藏品 qq号 旧藏品名称 新藏品名称", at_sender=True)
+        return
+    
+    user_id, old_collections, new_collections = args
+
+    try:
+        user_info = await bot.get_stranger_info(user_id=int(user_id))
+        nickname = user_info.get("nickname", "未知昵称")
+    except Exception:
+        await change_user_collections.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
+    
+    # 检测别名
+    standard_collections = get_alias_name(new_collections, collections, collection_aliases)
+    if standard_collections:
+        new_collections = standard_collections
+        
+    # 检查新藏品是否存在
+    if new_collections not in collections:
+        await change_user_collections.finish(f"藏品 [{new_collections}] 不存在，请检查后重新输入！", at_sender=True)
+        return
+    
+    # 读取玩家数据文件
+    data = open_data(user_path / file_name)
+    
+    # 检查该 QQ 号用户是否存在
+    if user_id not in data:
+        await change_user_collections.finish(f"用户 [{nickname}] 不存在！", at_sender=True)
+        return
+
+    user_data = data[user_id]
+    
+    # 进行藏品更改
+    if "collections" in user_data and old_collections in user_data["collections"]:
+        collections_quantity = user_data["collections"].pop(old_collections)
+        user_data["collections"][new_collections] = user_data["collections"].get(new_collections, 0) + collections_quantity
+        save_data(user_path / file_name, data)
+        await change_user_collections.finish(f"已成功将 [{nickname}] 的 [{old_collections}] 更改为 [{new_collections}]！", at_sender=True)
+    else:
+        await change_user_collections.finish(f"用户 [{nickname}] 没有藏品 [{old_collections}]，无法更改！", at_sender=True)
 
 # 查询他人madeline进度
 madelinejd_query = on_command("查询madelinejd", aliases={"查询jd"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
