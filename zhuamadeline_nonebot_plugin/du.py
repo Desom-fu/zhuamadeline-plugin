@@ -26,7 +26,7 @@ __all__ = [
 ########赌场系统#######
 
 #买刮刮乐
-ticket = on_fullmatch(['.ggl', '。ggl'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+ticket = on_fullmatch(['.ggl', '。ggl', '.刮刮乐', '。刮刮乐'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @ticket.handle()
 async def ticket_handle(event: GroupMessageEvent):
