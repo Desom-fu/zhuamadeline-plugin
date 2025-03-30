@@ -1038,17 +1038,17 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         # # 测试
         # if user_id in bot_owner_id:
         #     rnd_debuff = 4
-        #设定恢复时长为4-6小时后
-        recover_hour = random.randint(4,6)
+        #设定恢复时长为3-6小时后
+        recover_hour = random.randint(3,6)
         if rnd_debuff==1:
-            #设定恢复时长为4-6小时后
+            #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'weaken'
             save_data(user_path, user_data)
             await message.finish(f"你在摧毁机器人进行灵魂转移的时候，一不小心灵魂进入虚弱状态了，接下来{recover_hour}小时内你只能抓到1级的Madeline了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==2:
-            #设定恢复时长为4-6小时后
+            #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'notjam'
@@ -1058,21 +1058,21 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             save_data(user_path, user_data)
             await message.finish(f"你在帮助研究所里的人做实验的时候逃跑了，接下里的{recover_hour}h内他们对你进行通缉，你似乎没办法从本猎场拿到果酱了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==3:
-            #设定恢复时长为4-6小时后
+            #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'poisoned'
             save_data(user_path, user_data)
             await message.finish(f"你在路过毒水池的时候，一不小心有毒气体吸入过多，你中毒了，接下来{recover_hour}h内抓Madeline获得不了任何草莓了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==4:
-            #设定恢复时长为4-6小时后
+            #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'clumsy'
             save_data(user_path, user_data)
             await message.finish(f"突然，一股神秘的力量侵入了你的身体，除了万能解药以外的几乎全部能够主动使用的道具/藏品都失效了！接下来{recover_hour}小时内你无法使用任何道具了！。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==5:
-            #设定恢复时长为4-6小时后
+            #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'tentacle'
