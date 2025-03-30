@@ -36,6 +36,7 @@ jiemi30_1_image_path = Path() / "data" / "Image" / "jiemi301.jpg"
 jiemi32_1_image_path = Path() / "data" / "Image" / "jiemi321.png"
 jiemi33_1_image_path = Path() / "data" / "Image" / "jiemi331.png"
 jiemi35_1_image_path = Path() / "data" / "Image" / "jiemi351.png"
+jiemi36_1_image_path = Path() / "data" / "Image" / "jiemi361.png"
 math1_image_path = Path() / "data" / "Image" / "math1.png"
 math1_1_image_path = Path() / "data" / "Image" / "math1-1.jpg"
 math2_image_path = Path() / "data" / "Image" / "math2.png"
@@ -101,6 +102,8 @@ puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=G
 @puzzle_command.handle()
 async def puzzle_command_handle(event: Event, bot: Bot):
     puzzle_message = (
+        "---------------------------------------\n"
+        "由于题目包含图片，请输入 .彩票刮刮乐（注意是中文！） 来进行查看具体内容\n"
         "---------------------------------------\n"
         "出题人：硝基胍\n"
         '难度草莓：300\n'
@@ -752,6 +755,16 @@ def math_3(user_id, berry_data, user_data):
 
 
 # 以下为题面
+# 解密36 题面
+cpggl_command = on_fullmatch(['.彩票刮刮乐', '。彩票刮刮乐'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@cpggl_command.handle()
+async def handle_where():
+    jiemi36_1_image_segment = MessageSegment.image(jiemi36_1_image_path)
+    text = ("出题者：tgdr\n"
+            "难度草莓：600\n"
+            "你的玛德琳今天又来.ggl了，但是fhloy并没有结算草莓，反而对玛德琳说她得到了一份神秘奖励，是一张玛彩的刮刮乐，这张刮刮乐与彩票站里售卖的完全不一样，你的玛德琳百思不得其解。")
+    await cpggl_command.finish(jiemi36_1_image_segment + text)
+
 # 解密35 题面
 where_command = on_fullmatch(['.where', '。where'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @where_command.handle()
@@ -760,7 +773,6 @@ async def handle_where():
     text = ("出题者：疯子\n"
             "难度草莓：300")
     await where_command.finish(jiemi35_1_image_segment + text)
-
 
 # 解密34 题面
 kft_command = on_fullmatch(['.confecti', '。confecti'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
