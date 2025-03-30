@@ -692,7 +692,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'illusory'
             save_data(user_path, user_data)
-            await message.finish(f"你不小心走到了矿洞中氧气稀薄的地方，你感觉很难受，似乎{recover_hour}小时内无法再在本猎场抓到道具了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+            await message.finish(f"你不小心走到了矿洞中氧气稀薄的地方，你感觉很难受，似乎{recover_hour}小时内无法再抓到道具了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==2:
             #设定恢复时长为4小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
@@ -709,7 +709,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'unlucky'
             save_data(user_path, user_data)
-            await message.finish(f"你不知道怎么回事，感觉像是被矿洞内的脏东西附身了，似乎有点不幸，接下来{recover_hour}小时内你不会再在此猎场内挖到宝石矿了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+            await message.finish(f"你不知道怎么回事，感觉像是被矿洞内的脏东西附身了，似乎有点不幸，接下来{recover_hour}小时内你不会再挖到翡翠矿了了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==4:
             #设定恢复时长为4小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
