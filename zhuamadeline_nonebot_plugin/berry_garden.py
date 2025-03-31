@@ -193,7 +193,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             remaining_time = max(0, 24 * 3600 - seed_age)
             hours, remainder = divmod(remaining_time, 3600)
             minutes, seconds = divmod(remainder, 60)
-            seed_status = f"已播种，剩余时间: {hours}小时{minutes}分钟"
+            seed_status = f"已播种，剩余时间: {hours}h{minutes}min{seconds}s"
         else:
             seed_status = "未播种"
         
@@ -203,7 +203,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             remaining_time = max(0, 12 * 3600 - fert_age)
             hours, remainder = divmod(remaining_time, 3600)
             minutes, seconds = divmod(remainder, 60)
-            fert_status = f"已施肥，剩余时间: {hours}小时{minutes}分钟"
+            fert_status = f"已施肥，剩余时间: {hours}h{minutes}min{seconds}s"
         else:
             fert_status = "未施肥"
         
