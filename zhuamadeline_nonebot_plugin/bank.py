@@ -84,7 +84,7 @@ scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)
 scheduler.scheduled_job("cron", hour=1, minute=0)(cancel_interest_send)
 
 # 提取草莓命令
-bank = on_command('bank', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+bank = on_command('bank', aliases = {"berrybank"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @bank.handle()
 async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
