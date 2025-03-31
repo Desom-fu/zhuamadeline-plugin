@@ -253,10 +253,10 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             message += "草莓已经存进银行里了哦！"
             
         if user_garden["isseed"] == 0:
-            message += "\n你的草莓已经全部收获完毕啦，需要再次播种哦！"
+            message += "\n- 你的草莓已经全部收获完毕啦，需要再次播种哦！"
             
         if user_garden["isfert"] == 0:
-            message += "\n施肥时间已到，如需要可以重新施肥哦！"
+            message += "\n- 施肥时间已到，如需要可以重新施肥哦！"
         
         await berry_garden.finish(message, at_sender=True)
         
