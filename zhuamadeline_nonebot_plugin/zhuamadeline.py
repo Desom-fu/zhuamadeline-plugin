@@ -77,7 +77,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
-        await qhlc.finish(f"已经成功切换到madeline竞技场！\n有关madeline竞技场的规则请输入`.0场细则`查询！\n可以通过命令`.cklc {liechang_count}`来查询PVP竞技场的具体信息和准入条件哦！", at_sender=True)
+        await qhlc.finish(f"已经成功切换到madeline竞技场！\n有关madeline竞技场的规则请输入`.0场细则`查询！\n可以通过命令`.cklc {liechang_count}`来查询PVP竞技场的具体信息和准入需求哦！", at_sender=True)
 
     # 普通收集型猎场
     elif 0 < number_int <= liechang_count:
@@ -86,7 +86,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
-        await qhlc.finish(f"已经成功切换到{number}号猎场！\n可以通过命令`.cklc {liechang_count}`来查询本猎场的具体信息和准入条件哦！", at_sender=True)
+        await qhlc.finish(f"已经成功切换到{number}号猎场！\n可以通过命令`.cklc {liechang_count}`来查询本猎场的具体信息和准入需求哦！", at_sender=True)
     elif number_int == 999:
         await qhlc.finish(f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", at_sender=True)
     # 处理错误输入
