@@ -627,22 +627,22 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 发送消息
                 await daoju.finish(message.strip(), at_sender=True)
 
-            if(use_item_name=="充能箱"):
-                if(data.get(user_id).get('collections').get('充能箱',0) > 0):
-                    #身份命令检测逻辑
-                    #没有就先加上
-                    if(not 'elect_status' in data[str(user_id)]):
-                        data[str(user_id)]['elect_status'] = False
+            # if(use_item_name=="充能箱"):
+            #     if(data.get(user_id).get('collections').get('充能箱',0) > 0):
+            #         #身份命令检测逻辑
+            #         #没有就先加上
+            #         if(not 'elect_status' in data[str(user_id)]):
+            #             data[str(user_id)]['elect_status'] = False
                         
-                    current_status = data[str(user_id)]['elect_status']
-                    new_status = not current_status
-                    status_text = "撞开（启用）" if new_status else "关闭（停用）"
+            #         current_status = data[str(user_id)]['elect_status']
+            #         new_status = not current_status
+            #         status_text = "撞开（启用）" if new_status else "关闭（停用）"
                     
-                    data[str(user_id)]['elect_status'] = new_status
-                    save_data(full_path,data)
-                    await daoju.finish(f"你已经成功切换至{status_text}状态。", at_sender=True)
-                else:
-                    await daoju.finish(f"你的藏品中没有充能箱，无法切换状态。", at_sender=True)
+            #         data[str(user_id)]['elect_status'] = new_status
+            #         save_data(full_path,data)
+            #         await daoju.finish(f"你已经成功切换至{status_text}状态。", at_sender=True)
+            #     else:
+            #         await daoju.finish(f"你的藏品中没有充能箱，无法切换状态。", at_sender=True)
 
             if(use_item_name=="时间秒表"):
                 if(data.get(user_id).get('item').get('时间秒表',0) > 0):
@@ -1988,6 +1988,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         """
                         50%概率受伤2h，50%抓345级madeline
                         """
+                        current_time = datetime.datetime.now()
+                        trap_next_time_r = datetime.datetime.strptime(data.get(user_id).get('trap_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+                        if current_time < trap_next_time_r:
+                            text = time_text(str(trap_next_time_r-current_time))
+                            await daoju.finish(f"刚刚{use_item_name}才爆炸过哦！现在{use_item_name}的能量十分不稳定，请{text}后再使用哦！", at_sender=True)
                         #获取充能箱状态
                         elect_status = data[user_id].get("elect_status", False)
                         boom = random.randint(1,100)
@@ -2022,18 +2027,23 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 if elect_status == True:
                                     cd_time = 60
                                     elect_text = '由于你把充能箱撞开了，你使用的这个充能陷阱必定爆炸，但是只会炸伤你60min！\n'
-                                current_time = datetime.datetime.now()
                                 next_time = current_time + datetime.timedelta(minutes=cd_time)
+                                # 限制充能陷阱10min内只能用一次
+                                trap_next_time = current_time + datetime.timedelta(minutes=10)
                                 #检测回想之核
                                 dream = data[str(user_id)]['collections'].get("回想之核", 0)
                                 if dream >= 1:
                                     next_time = current_time + datetime.timedelta(minutes=cd_time-1)
                                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                 data[str(user_id)]["buff"] = "hurt"  #受伤
                                 fail_text = elect_text + f"你在布置充能陷阱的时候，突然间能量迸发，充能陷阱爆炸了！你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
                             else:
                                 next_time = current_time
+                                # 限制充能陷阱10min内只能用一次
+                                trap_next_time = current_time + datetime.timedelta(minutes=10)
                                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                 fail_text = f"你在布置充能陷阱的时候，突然间能量迸发，充能陷阱爆炸了！但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
                             success = 2
                         else:

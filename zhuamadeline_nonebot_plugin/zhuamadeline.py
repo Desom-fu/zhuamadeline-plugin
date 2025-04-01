@@ -699,7 +699,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
             elif identity_status == 2:
                 message += "\n• “身份”状态：膀胱（急速模式）"
 
-        message += f"\n• 充能箱状态：{'撞开（启用）' if elect_status else '关闭（停用）'}" if collections.get('充能箱', 0) > 0 else ''
+        # message += f"\n• 充能箱状态：{'撞开（启用）' if elect_status else '关闭（停用）'}" if collections.get('充能箱', 0) > 0 else ''
     
     # 显示下次抓取的时间（若有）
     message += (f"\n- 下次可抓取时间：\n{next_time}") if current_time < next_time else ''

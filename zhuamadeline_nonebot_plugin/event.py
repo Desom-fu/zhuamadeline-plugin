@@ -1123,18 +1123,18 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         save_data(user_path, user_data)
         await message.finish(f"糟糕，一群黑衣人把你强制拉进了一个黑色酒馆，似乎你不满足他们的目标是出不来了！他们现在让你强制进行{bad_event_text}{complusion_count}次！", at_sender=True)
         
-    elif(rnd<=470):
-        #如果没有，则开辟这一栏并添加
-        if(not '充能箱' in collections):
-            collections['充能箱'] = 1
-            #写入主数据表
-            save_data(user_path, user_data)
-            await message.finish("你在备用发电厂的仓库里面发现了一个充能箱，似乎可以给什么东西充能？\n输入.cp 充能箱 以查看具体效果" + diamond_text, at_sender=True)
+    # elif(rnd<=470):
+    #     #如果没有，则开辟这一栏并添加
+    #     if(not '充能箱' in collections):
+    #         collections['充能箱'] = 1
+    #         #写入主数据表
+    #         save_data(user_path, user_data)
+    #         await message.finish("你在备用发电厂的仓库里面发现了一个充能箱，似乎可以给什么东西充能？\n输入.cp 充能箱 以查看具体效果" + diamond_text, at_sender=True)
         
-        #否则就是正常抓
-        else:
-            return
-    elif(rnd<=475):
+    #     #否则就是正常抓
+    #     else:
+    #         return
+    elif(rnd<=470):
         #如果没有，则开辟这一栏并添加
         if(not '脉冲雷达' in collections):
             collections['脉冲雷达'] = 1
@@ -1145,7 +1145,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         #否则就是正常抓
         else:
             return
-    elif(rnd<=480):
+    elif(rnd<=475):
         if(not '磁力吸附手套' in collections):
             user_info['event'] = "getspider"
             #写入主数据表
@@ -1155,7 +1155,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         else:
             return
 
-    elif(rnd<=490):
+    elif(rnd<=485):
         #如果没有，则开辟这一栏并添加
         if(not '炸弹包' in collections):
             user_info['event'] = "getbomb"
@@ -1166,7 +1166,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         else:
             return
         
-    elif(rnd<=495):
+    elif(rnd<=490):
         #如果没有，则开辟这一栏并添加
         if(not '灵魂机器人' in collections):
             collections['灵魂机器人'] = 1
@@ -1178,7 +1178,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         else:
             return
     #星钻
-    elif(rnd<=496):  # 更低的概率体现其稀有性
+    elif(rnd<=491):  # 更低的概率体现其稀有性
         #是否已经持有藏品"星钻"
         if(not '星钻' in collections):
             collections['星钻'] = 1
@@ -1199,7 +1199,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             return
     
     # 获得解药
-    elif(rnd<=595):
+    elif(rnd<=591):
         water_rnd = random.randint(2,4)
         items['万能解药'] = items.get('万能解药', 0) + water_rnd
         save_data(user_path, user_data)
