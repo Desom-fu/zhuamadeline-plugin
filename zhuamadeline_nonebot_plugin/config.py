@@ -56,7 +56,7 @@ shop_work_img = Path() / "data" / "Shop" / "营业图.png"
 #管理员ID
 #封禁人员名单
 # 定义猎场数 全局变量 开新猎场要改
-liechang_count = 3
+liechang_count = 4
 #定义通信群id
 #用户信息
 user_path = Path() / "Data" / "UserList"
