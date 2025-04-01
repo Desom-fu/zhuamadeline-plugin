@@ -15,6 +15,7 @@ from .config import *
 from .list1 import *
 from .list2 import *
 from .list3 import *
+from .list4 import *
 from .function import *
 from .whitelist import whitelist_rule
 from .shop import fish_prices
@@ -482,7 +483,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
     unique_madelines = [set() for _ in range(liechang_count)]  # 每个猎场独立的 madeline 唯一集
 
     # 计算每个猎场的最大数量
-    for lc, madeline_data in enumerate([madeline_data1, madeline_data2, madeline_data3]):  # 添加新猎场时更新
+    for lc, madeline_data in enumerate([madeline_data1, madeline_data2, madeline_data3, madeline_data4]):  # 添加新猎场时更新
         for k, v in madeline_data.items():
             hunt_max_count[lc][int(k) - 1] = len(set(v))  # 确保唯一性
 
