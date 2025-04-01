@@ -156,6 +156,13 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         await bet.finish(f"你现在受伤了，没有精力玩“游戏”！", at_sender=True)
         
     if(data[str(user_id)].get('status','nornal')=='working' and game_type not in ["2","4"]): 
+        if(not 'work_end_time' in data[str(user_id)]):
+            data[str(user_id)]['work_end_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        work_current_time = datetime.datetime.now()
+        work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
+        if work_current_time > work_end_time:
+            data[str(user_id)]['status'] = 'normal'
+            save_data(full_path, data)
         await bet.finish(f"你正在维护草莓加工器中，没有精力玩大部分“游戏”！", at_sender=True)
         
     # 如果该用户不在酒馆名单中，则先创建数据
