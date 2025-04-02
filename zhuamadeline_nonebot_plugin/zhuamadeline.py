@@ -195,13 +195,10 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 delta_time = next_time_r - current_time
                 answer = 0
             else:
-                next_time = current_time + datetime.timedelta(minutes=30)
-                #检测回想之核
                 dream = collections.get("回想之核", 0)
-                if dream >= 1:
-                    next_time = current_time + datetime.timedelta(minutes=29)
+                next_time = current_time + datetime.timedelta(minutes=30-dream)
                 #检测星钻
-                if collections.get("星钻", 0) > 0 and random.random() < 0.1:
+                if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
                     diamond_text = "\n\n星钻闪烁，你包里的星钻突然绽放光芒，瞬间你的伤势和疲惫感如星尘般消散！"
                     next_time = current_time  # 立即重置冷却时间
                         
@@ -286,7 +283,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         # 确定抓到哪个madeline
         # 默认概率设置
         star = collections.get("星辰碎屑", 0)
-        star_add = 50 if star >= 1 else 0
+        star_add = 100 if star >= 1 else 0
         probabilities = {'a': 10, 'b': 50, 'c': 200, 'd': 500 + star_add}
         liechang_number = data[str(user_id)]['lc']
 
