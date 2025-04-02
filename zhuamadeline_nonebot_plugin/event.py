@@ -1227,6 +1227,8 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         await message.finish(f"你在探险的时候，偶然发现地上有{water_rnd}瓶万能解药，会是谁留下来的呢，小小卒吗？" + diamond_text, at_sender=True)
         
     elif(rnd<=650):
+        if(not '黄色球体' in collections):
+            return
         data4 = open_data(user_list4)
         if user_id not in data4 :
             return

@@ -1589,7 +1589,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             #--------------------以下道具0号猎场不能使用--------------------                           
 
             #--------------------这些道具需要限制所在猎场的使用--------------------
-                #两个参数的指令 提取器放猎场判定之前
+                # 两个参数的指令 提取器放猎场判定之前
                 if use_item_name.startswith("madeline飞升器"):
                     cmd = use_item_name.split("/")
                     # 获取命令中的参数
@@ -1597,15 +1597,28 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         item_name = cmd[0]
                         user_info = data.setdefault(user_id, {})
                         user_info.setdefault("get_ball_value", 0)
+
+                        # 初始化每个等级的独立保底计数器
+                        user_info.setdefault("ascend_guarantee", {
+                            '1': {"fail_count": 0, "guaranteed": False},
+                            '2': {"fail_count": 0, "guaranteed": False},
+                            '3': {"fail_count": 0, "guaranteed": False},
+                            '4': {"fail_count": 0, "guaranteed": False},
+                            '5': {"fail_count": 0, "guaranteed": False}
+                        })
+
                         collections = user_info.setdefault("collections", {})
+
                         if collections.get(item_name, 0) > 0:
                             # 判断飞升器是否仅限于4猎使用
                             if user_info.get("lc") != "4":
                                 await daoju.finish("只有在4猎才能使用madeline飞升器！", at_sender=True)
+
                             try:
                                 level = int(cmd[1])  # 解析飞升的等级
                             except:
                                 await daoju.finish("等级参数无效，请输入1至5之间的等级", at_sender=True)
+
                             # 判断等级是否有效
                             if level < 1 or level > 5:
                                 await daoju.finish("等级参数无效，请输入1至5之间的等级", at_sender=True)
@@ -1615,11 +1628,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 data4 = open_data(user_list4)
                             except:
                                 await daoju.finish(f"请先在地下终端猎场里面抓一次玛德琳再使用{item_name}哦！", at_sender=True)
-                            
+
                             # 没到等级不让融合
                             if collections.get('红色球体', 0) == 0 and level >= 4:
                                 await daoju.finish(f"你还未解锁飞升{level}级玛德琳的权限，请在达到条件后再飞升哦！", at_sender=True)
-                            
+
                             if collections.get('绿色球体', 0) == 0 and level >= 5:
                                 await daoju.finish(f"你还未解锁飞升{level}级玛德琳的权限，请在达到条件后再飞升哦！", at_sender=True)
 
@@ -1656,7 +1669,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                             # 还原成原来的列表结构
                             available_madelines = [(num, count) for num, count in madeline_dict.items()]
-                    
+
                             # 完成飞升后更新数据
                             for num, count in available_madelines:
                                 # 更新库存中对应的玛德琳数量
@@ -1670,6 +1683,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 4: {"name": "绿色球体", "chance": 5, "requirement": "红色球体"},
                                 5: {"name": "黄色球体", "chance": 3, "requirement": "绿色球体"},
                             }
+
+                            item_text = ""
                             # 检查当前等级是否有对应球体设定
                             if level in ball_data:
                                 ball_info = ball_data[level]
@@ -1695,26 +1710,67 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                             f"{third_sentence}"
                                             f"输入.cp {ball_name} 以查看具体效果\n\n"
                                         )
-                                        
+
                             # 解锁了黄球就不需要积累值了，直接清空
                             if collections.get('黄色球体', 0) > 0:
                                 user_info["get_ball_value"] = 0
-                            
-                            # 以下是获取新madeline
+                                
+                            # 确保当前等级的数据存在
+                            if level not in user_info["ascend_guarantee"]:
+                                user_info["ascend_guarantee"][level] = {"fail_count": 0, "guaranteed": False}
+                                
+                            # 获取当前等级的保底状态
+                            current_guarantee = user_info["ascend_guarantee"][str(level)]
+
+                            # 展示的level
+                            level_show = level
+
+                            # 检查是否触发保底
+                            if current_guarantee["guaranteed"]:
+                                success_fly = 1  # 保底强制成功
+                                current_guarantee["guaranteed"] = False  # 重置保底状态
+                                current_guarantee["fail_count"] = 0  # 重置计数器
+                                item_text += "【保底触发】本次飞升必定成功！\n"
+                                level = level_show + 1
+                            else:
+                                success_fly = 0
+                                
+                            # 更新失败计数器
+                            if success_fly == 0:
+                                if level_show == 5:
+                                    if level == 4:
+                                        current_guarantee["fail_count"] += 1
+                                else:
+                                    if level <= level_show:
+                                        current_guarantee["fail_count"] += 1
+                                # 检查是否达到保底条件（每个等级独立计算）
+                                if current_guarantee["fail_count"] >= 3:
+                                    current_guarantee["guaranteed"] = True
+                                    item_text += f"连续3次飞升{level_show}级失败，下次必定成功！\n"
+                            else:
+                                current_guarantee["fail_count"] = 0  # 成功则重置计数器
+                                
+                            # 正常随机飞升逻辑
                             if level == 1:
                                 information = zhua_random(0, 0, 0, 700, "4")
                             elif level == 2:
-                                information = zhua_random(0, 0, 500, 800, "4")
+                                information = zhua_random(0, 0, 550, 900, "4")
                             elif level == 3:
-                                information = zhua_random(0, 500, 800, 1000, "4")
+                                information = zhua_random(0, 550, 900, 1000, "4")
                             elif level == 4:
-                                information = zhua_random(300, 750, 1000, 1001, "4")
-                            elif level == 5:
+                                information = zhua_random(300, 850, 1000, 1001, "4")
+                            elif level == 5 or level == 6:
                                 information = zhua_random(500, 1000, 1001, 1002, "4")
                             
                             success = 1
+
                             # 返回飞升后的结果
-                            item_text += f"你随机选择了以下这三位{level}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n飞升的结果是……\n"
+                            item_text += f"你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n飞升的结果是……\n"
+                            if success_fly:
+                                item_text += "飞升成功！"
+                            else:
+                                item_text += f"飞升失败（当前等级累计失败：{current_guarantee['fail_count']}/3）"
+
                 # madeline提取器
                 if(len(command)==2):
                     item_name = command[0]   #参数1
