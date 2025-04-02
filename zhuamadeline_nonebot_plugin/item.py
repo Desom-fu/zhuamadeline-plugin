@@ -1715,57 +1715,61 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             if collections.get('黄色球体', 0) > 0:
                                 user_info["get_ball_value"] = 0
                                 
-                            # 确保当前等级的数据存在
-                            if level not in user_info["ascend_guarantee"]:
-                                user_info["ascend_guarantee"][level] = {"fail_count": 0, "guaranteed": False}
-                                
                             # 获取当前等级的保底状态
                             current_guarantee = user_info["ascend_guarantee"][str(level)]
+                            level_show = level  # 用于显示的等级
+                            target_level = level  # 实际操作的等级
+                            success = 1  # 固定为1，不可更改
+                            success_fly = 1  # 飞升状态，默认为成功
 
-                            # 展示的level
-                            level_show = level
-                            
-                            success_fly = 1  # 默认成功
-                            
                             # 检查是否触发保底
                             if current_guarantee["guaranteed"]:
                                 current_guarantee["guaranteed"] = False  # 重置保底状态
                                 current_guarantee["fail_count"] = 0  # 重置计数器
                                 item_text += "【保底触发】本次飞升必定成功！\n"
-                                level = level_show + 1
-                                
-                            # 更新失败计数器
-                            if level_show == 5:
-                                if level == 4:
-                                    current_guarantee["fail_count"] += 1
-                                    success_fly = 0
-                            elif level <= level_show:
-                                    current_guarantee["fail_count"] += 1
-                                    success_fly = 0
-                                
-                            # 正常随机飞升逻辑
-                            if level == 1:
-                                information = zhua_random(0, 0, 0, 700, "4")
-                            elif level == 2:
-                                information = zhua_random(0, 0, 550, 900, "4")
-                            elif level == 3:
-                                information = zhua_random(0, 550, 900, 1000, "4")
-                            elif level == 4:
-                                information = zhua_random(300, 850, 1000, 1001, "4")
-                            elif level == 5 or level == 6:
-                                information = zhua_random(500, 1000, 1001, 1002, "4")
-                            
-                            success = 1
-
-                            # 返回飞升后的结果
-                            item_text += f"你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n飞升的结果是……\n"
-                            if success_fly:
-                                item_text += "飞升成功！\n"
+                                target_level = level_show + 1 if level_show < 5 else 5  # 5级保底时保持5级
                             else:
-                                item_text += f"飞升失败（当前等级累计失败：{current_guarantee['fail_count']}/3）\n"
-                            # 检查是否达到保底条件（每个等级独立计算）
-                            if current_guarantee["fail_count"] >= 3:
-                                current_guarantee["guaranteed"] = True
+                                success_fly = 0  # 默认设为失败，等待后续判断
+
+                            # 执行随机飞升逻辑（无论是否保底都执行）
+                            if level_show == 1:
+                                information = zhua_random(0, 0, 0, 700, "4")
+                            elif level_show == 2:
+                                information = zhua_random(0, 0, 550, 900, "4")
+                            elif level_show == 3:
+                                information = zhua_random(0, 550, 900, 1000, "4")
+                            elif level_show == 4:
+                                information = zhua_random(300, 850, 1000, 1001, "4")
+                            elif level_show == 5:
+                                information = zhua_random(500, 1000, 1001, 1002, "4")
+
+                            # 如果不是保底触发，则根据随机结果判断飞升状态
+                            if not current_guarantee["guaranteed"]:
+                                if level_show == 5:
+                                    # 5级特殊逻辑：只有保持5级才算成功
+                                    success_fly = 1 if information[0] else 0
+                                else:
+                                    # 1-4级：升级才算成功
+                                    success_fly = 1 if information[0] else 0
+
+                                # 更新失败计数器
+                                if success_fly == 0:  # 如果飞升失败
+                                    if level_show == 5:
+                                        if target_level == 4:  # 5级降级到4级
+                                            current_guarantee["fail_count"] += 1
+                                    elif target_level <= level_show:  # 1-4级平级或降级
+                                        current_guarantee["fail_count"] += 1
+
+                                    # 检查是否触发下次保底
+                                    if current_guarantee["fail_count"] >= 3:
+                                        current_guarantee["guaranteed"] = True
+
+                            # 返回结果
+                            item_text += f"你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n"
+                            item_text += f"飞升的结果是：{'成功！\n' if success_fly else '失败！\n'}"
+                            if not success_fly:
+                                item_text += f"当前等级累计失败：{current_guarantee['fail_count']}/3\n"
+                            if current_guarantee.get("guaranteed", False):
                                 item_text += f"连续3次飞升{level_show}级失败，下次必定成功！\n"
 
                 # madeline提取器
