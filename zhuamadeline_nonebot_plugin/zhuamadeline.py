@@ -602,7 +602,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     }
     # debuff
     debuff_messages = {
-        "illusory": "缺氧", "poisoned": "中毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神"
+        "illusory": "缺氧", "poisoned": "中毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神/生气的小小卒"
     }
     # buff
     buff_messages = {"hurt": "受伤", "lost": "迷路"}

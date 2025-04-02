@@ -1071,13 +1071,13 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             user_info['debuff'] = 'clumsy'
             save_data(user_path, user_data)
             await message.finish(f"突然，一股神秘的力量侵入了你的身体，除了万能解药以外的几乎全部能够主动使用的道具/藏品都失效了！接下来{recover_hour}小时内你无法使用任何道具了！。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
-        elif rnd_debuff==5:
-            #设定恢复时长为3-6小时后
-            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
-            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
-            user_info['debuff'] = 'tentacle'
-            save_data(user_path, user_data)
-            await message.finish(f"你一不小心失足被机械触手绑走了！你被触手玩弄的浑身疲软，毫无精力！接下来{recover_hour}小时内你无法进行任何bet/ggl/竞技场等行动了！\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+        # elif rnd_debuff==5:
+        #     #设定恢复时长为3-6小时后
+        #     next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+        #     user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+        #     user_info['debuff'] = 'tentacle'
+        #     save_data(user_path, user_data)
+        #     await message.finish(f"你一不小心失足被机械触手绑走了！你被触手玩弄的浑身疲软，毫无精力！接下来{recover_hour}小时内你无法进行任何bet/ggl/竞技场等行动了！\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         # elif rnd_debuff==6:
         #     next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
         #     user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -1087,6 +1087,27 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         #     text_rec = f"*forbid_guess {user_id} {recover_hour}"
         #     await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
         #     await message.finish(f"你一不小心把小小卒推到橙色激光上了，她很生气，惩罚你在接下来{recover_hour}h内无法进行guess/roulette。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+        elif rnd_debuff == 5:  # 合并5和6的效果
+            # 设定恢复时长为3-6小时后
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'tentacle'
+
+            # 给小小卒发消息通信
+            text_rec = f"*forbid_guess {user_id} {recover_hour}"
+            await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
+
+            save_data(user_path, user_data)
+            await message.finish(
+                f"你遭遇了双重不幸！先是被机械触手绑走玩弄到浑身疲软，"
+                f"又不小心把小小卒推到橙色激光上惹她生气了！\n"
+                f"接下来{recover_hour}小时内你将：\n"
+                f"1. 无法进行任何bet/ggl/竞技场等行动\n"
+                f"2. 无法进行guess/roulette\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。",
+                at_sender=True
+            )
+    
     elif(rnd<=465):#61
         # 负债遇不到这个事件
         if user_info['berry'] < 0:
