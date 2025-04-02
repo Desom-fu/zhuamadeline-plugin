@@ -1746,10 +1746,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             if not current_guarantee["guaranteed"]:
                                 if level_show == 5:
                                     # 5级特殊逻辑：只有保持5级才算成功
-                                    success_fly = 0 if target_level < level_show else 1
+                                    success_fly = 0 if information[0] < level_show else 1
                                 else:
                                     # 1-4级：升级才算成功
-                                    success_fly = 0 if target_level <= level_show else 1
+                                    success_fly = 0 if information[0] <= level_show else 1
 
                                 # 更新失败计数器
                                 if success_fly == 0:  # 如果飞升失败
