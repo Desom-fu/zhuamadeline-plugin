@@ -1724,7 +1724,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                             # 检查是否触发保底
                             if current_guarantee["guaranteed"]:
-                                current_guarantee["guaranteed"] = False  # 重置保底状态
                                 current_guarantee["fail_count"] = 0  # 重置计数器
                                 item_text += "【保底触发】本次飞升必定成功！\n"
                                 target_level = level_show + 1 if level_show < 5 else 5  # 5级保底时保持5级
@@ -1732,25 +1731,25 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 success_fly = 0  # 默认设为失败，等待后续判断
 
                             # 执行随机飞升逻辑（无论是否保底都执行）
-                            if level_show == 1:
+                            if target_level == 1:
                                 information = zhua_random(0, 0, 0, 700, "4")
-                            elif level_show == 2:
+                            elif target_level == 2:
                                 information = zhua_random(0, 0, 550, 900, "4")
-                            elif level_show == 3:
+                            elif target_level == 3:
                                 information = zhua_random(0, 550, 900, 1000, "4")
-                            elif level_show == 4:
+                            elif target_level == 4:
                                 information = zhua_random(300, 850, 1000, 1001, "4")
-                            elif level_show == 5:
+                            elif target_level == 5:
                                 information = zhua_random(500, 1000, 1001, 1002, "4")
 
                             # 如果不是保底触发，则根据随机结果判断飞升状态
                             if not current_guarantee["guaranteed"]:
                                 if level_show == 5:
                                     # 5级特殊逻辑：只有保持5级才算成功
-                                    success_fly = 0 if information[0] < level_show else 1
+                                    success_fly = 0 if target_level < level_show else 1
                                 else:
                                     # 1-4级：升级才算成功
-                                    success_fly = 0 if information[0] <= level_show else 1
+                                    success_fly = 0 if target_level <= level_show else 1
 
                                 # 更新失败计数器
                                 if success_fly == 0:  # 如果飞升失败
@@ -1763,6 +1762,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     # 检查是否触发下次保底
                                     if current_guarantee["fail_count"] >= 3:
                                         current_guarantee["guaranteed"] = True
+                                        
+                            else:
+                                current_guarantee["guaranteed"] = False  # 重置保底状态
 
                             # 返回结果
                             item_text += f"- 你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n"
