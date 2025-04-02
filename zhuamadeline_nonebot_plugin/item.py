@@ -506,7 +506,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     await daoju.finish(f"你的{use_item_name}数量不足，无法解除，需要至少{required_amount}瓶{use_item_name}才能解除这个debuff，你目前只有{antidote_count}瓶！", at_sender=True)
 
                 # 解除 debuff
-                if user_debuff == "forbidguess":
+                if user_debuff == "tentacle":
                     text_rec = f"*forbid_guess_recover {user_id}"
                     await bot.send_group_msg(group_id=1020661785, message=text_rec)
 
