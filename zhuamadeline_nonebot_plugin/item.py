@@ -1023,7 +1023,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     #写入文件
                     save_data(user_path / file_name, data)
                     if berry_bonus_all != 0:
-                        await daoju.finish(f"恭喜！{str(num_of_sell)}瓶草莓果酱卖出了{str(price_total)-str(berry_bonus_all)}+{str(berry_bonus_all)}={str(price_total)}草莓！", at_sender=True)
+                        await daoju.finish(f"恭喜！{str(num_of_sell)}瓶草莓果酱卖出了{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}草莓！", at_sender=True)
                     else:
                         await daoju.finish(f"恭喜！{str(num_of_sell)}瓶草莓果酱卖出了{str(price_total)}草莓！", at_sender=True)
                 else:
@@ -1641,7 +1641,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 # 过滤掉数量为0的玛德琳
                                 available_choices = [(num, count) for num, count in madeline_dict.items() if count > 0]
                                 if not available_choices:
-                                    await daoju.finish(f"目前你等级{level}的Madeline数量不足3个，无法进行飞升！", at_sender=True)
+                                    await daoju.finish(f"目前你拥有的等级{level}的Madeline数量只有{len(selected_madelines)}个，不足3个，无法进行飞升！", at_sender=True)
 
                                 # 随机选择一个玛德琳
                                 num, count = random.choice(available_choices)

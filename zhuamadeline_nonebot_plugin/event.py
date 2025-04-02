@@ -1087,7 +1087,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         #     text_rec = f"*forbid_guess {user_id} {recover_hour}"
         #     await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
         #     await message.finish(f"你一不小心把小小卒推到橙色激光上了，她很生气，惩罚你在接下来{recover_hour}h内无法进行guess/roulette。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
-    elif(rnd<=450):#61
+    elif(rnd<=465):#61
         # 负债遇不到这个事件
         if user_info['berry'] < 0:
             return
