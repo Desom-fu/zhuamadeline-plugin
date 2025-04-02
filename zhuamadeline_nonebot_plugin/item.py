@@ -1747,17 +1747,17 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             if not current_guarantee["guaranteed"]:
                                 if level_show == 5:
                                     # 5级特殊逻辑：只有保持5级才算成功
-                                    success_fly = 1 if information[0] else 0
+                                    success_fly = 0 if information[0] < level_show else 1
                                 else:
                                     # 1-4级：升级才算成功
-                                    success_fly = 1 if information[0] else 0
+                                    success_fly = 0 if information[0] <= level_show else 1
 
                                 # 更新失败计数器
                                 if success_fly == 0:  # 如果飞升失败
                                     if level_show == 5:
                                         if target_level == 4:  # 5级降级到4级
                                             current_guarantee["fail_count"] += 1
-                                    elif target_level <= level_show:  # 1-4级平级或降级
+                                    else:  # 1-4级平级或降级
                                         current_guarantee["fail_count"] += 1
 
                                     # 检查是否触发下次保底
@@ -1765,12 +1765,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                         current_guarantee["guaranteed"] = True
 
                             # 返回结果
-                            item_text += f"你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n"
-                            item_text += f"飞升的结果是：{'成功！\n' if success_fly else '失败！\n'}"
+                            item_text += f"- 你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n"
+                            item_text += f"- 飞升的结果是：{'成功！\n' if success_fly else '失败！\n'}"
                             if not success_fly:
-                                item_text += f"当前等级累计失败：{current_guarantee['fail_count']}/3\n"
+                                item_text += f"- {level_show}级飞升累计失败：{current_guarantee['fail_count']}/3\n"
                             if current_guarantee.get("guaranteed", False):
-                                item_text += f"连续3次飞升{level_show}级失败，下次必定成功！\n"
+                                item_text += f"- 连续3次飞升{level_show}级失败，下次必定成功！\n"
 
                 # madeline提取器
                 if(len(command)==2):

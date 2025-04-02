@@ -33,12 +33,12 @@ async def ticket_handle(event: GroupMessageEvent):
     # 常量定义
     MENPIAO_COST = 150
     TAX_RATE = 0.1
-    BUFF_MESSAGES = {
-        'lost': "你现在正在迷路中，连路都找不到，怎么刮刮乐呢？",
-        'confuse': "你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。",
-        'hurt': "你现在受伤了，没有精力刮刮乐！",
-        'tentacle': "你刚被触手玩弄到失神，没有精力刮刮乐！"
-    }
+    # BUFF_MESSAGES = {
+    #     'lost': "你现在正在迷路中，连路都找不到，怎么刮刮乐呢？",
+    #     'confuse': "你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。",
+    #     'hurt': "你现在受伤了，没有精力刮刮乐！",
+    #     'tentacle': "你刚被触手玩弄到失神，没有精力刮刮乐！"
+    # }
     BERRY_PROBABILITY = [
         (4, 666),
         (14, 333),
@@ -71,9 +71,27 @@ async def ticket_handle(event: GroupMessageEvent):
         await ticket.finish("你还有正在进行中的事件", at_sender=True)
 
     # Buff状态检查
-    current_buff = user_data.get('buff') or user_data.get('debuff', 'normal')
-    if message := BUFF_MESSAGES.get(current_buff):
-        await ticket.finish(message, at_sender=True)
+    # current_buff = user_data.get('buff', 'normal') or user_data.get('debuff', 'normal')
+    
+    # if message := BUFF_MESSAGES.get(current_buff):
+        # await ticket.finish(message, at_sender=True)
+
+    # 一堆事件的判定
+    # if(data[str(user_id)]['event']!='nothing' and game_type != "2"):
+        # if data[str(user_id)]['event']!='compulsion_bet1':
+            # await bet.finish("你还有正在进行中的事件", at_sender=True)
+            
+    if(data[str(user_id)].get('buff','normal')=='lost'): 
+        await ticket.finish(f"你现在正在迷路中，连路都找不到，怎么能刮刮乐呢？", at_sender=True)
+        
+    if(data[str(user_id)].get('buff','normal')=='confuse'): 
+        await ticket.finish(f"你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。", at_sender=True)
+
+    if(data[str(user_id)].get('debuff','normal')=='tentacle'): 
+        await ticket.finish(f"你刚被触手玩弄到失神，没有精力刮刮乐！", at_sender=True)
+        
+    if(data[str(user_id)].get('buff','normal')=='hurt'): 
+        await ticket.finish(f"你现在受伤了，没有精力刮刮乐”！", at_sender=True)
 
     # 草莓余额检查
     if user_data['berry'] < 0:

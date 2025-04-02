@@ -1095,9 +1095,8 @@ async def LabStuck(user_data, user_id, message, diamond_text):
 
             # 给小小卒发消息通信
             text_rec = f"*forbid_guess {user_id} {recover_hour}"
-            await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
-
             save_data(user_path, user_data)
+            await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
             await message.finish(
                 f"你遭遇了双重不幸！先是被机械触手绑走玩弄到浑身疲软，"
                 f"又不小心把小小卒推到橙色激光上惹她生气了！\n"
