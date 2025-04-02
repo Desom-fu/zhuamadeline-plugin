@@ -1684,7 +1684,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 5: {"name": "黄色球体", "chance": 3, "requirement": "绿色球体"},
                             }
 
-                            item_text = ""
+                            item_text = "\n"
                             # 检查当前等级是否有对应球体设定
                             if level in ball_data:
                                 ball_info = ball_data[level]
@@ -1724,31 +1724,24 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                             # 展示的level
                             level_show = level
-
+                            
+                            success_fly = 1  # 默认成功
+                            
                             # 检查是否触发保底
                             if current_guarantee["guaranteed"]:
-                                success_fly = 1  # 保底强制成功
                                 current_guarantee["guaranteed"] = False  # 重置保底状态
                                 current_guarantee["fail_count"] = 0  # 重置计数器
                                 item_text += "【保底触发】本次飞升必定成功！\n"
                                 level = level_show + 1
-                            else:
-                                success_fly = 0
                                 
                             # 更新失败计数器
-                            if success_fly == 0:
-                                if level_show == 5:
-                                    if level == 4:
-                                        current_guarantee["fail_count"] += 1
-                                else:
-                                    if level <= level_show:
-                                        current_guarantee["fail_count"] += 1
-                                # 检查是否达到保底条件（每个等级独立计算）
-                                if current_guarantee["fail_count"] >= 3:
-                                    current_guarantee["guaranteed"] = True
-                                    item_text += f"连续3次飞升{level_show}级失败，下次必定成功！\n"
-                            else:
-                                current_guarantee["fail_count"] = 0  # 成功则重置计数器
+                            if level_show == 5:
+                                if level == 4:
+                                    current_guarantee["fail_count"] += 1
+                                    success_fly = 0
+                            elif level <= level_show:
+                                    current_guarantee["fail_count"] += 1
+                                    success_fly = 0
                                 
                             # 正常随机飞升逻辑
                             if level == 1:
@@ -1767,9 +1760,13 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             # 返回飞升后的结果
                             item_text += f"你随机选择了以下这三位{level_show}级Madeline进行飞升：\n{'，'.join(selected_madelines)}\n飞升的结果是……\n"
                             if success_fly:
-                                item_text += "飞升成功！"
+                                item_text += "飞升成功！\n"
                             else:
-                                item_text += f"飞升失败（当前等级累计失败：{current_guarantee['fail_count']}/3）"
+                                item_text += f"飞升失败（当前等级累计失败：{current_guarantee['fail_count']}/3）\n"
+                            # 检查是否达到保底条件（每个等级独立计算）
+                            if current_guarantee["fail_count"] >= 3:
+                                current_guarantee["guaranteed"] = True
+                                item_text += f"连续3次飞升{level_show}级失败，下次必定成功！\n"
 
                 # madeline提取器
                 if(len(command)==2):
