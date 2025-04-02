@@ -140,6 +140,9 @@ async def PlainStuck(user_data, user_id, message, diamond_text):
     # 获得神秘碎片
     elif rnd <= 40 + rnd_regu and items.get('神秘碎片', 0) < 5:
         next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
+        #检测星钻
+        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+            next_time = current_time  # 立即重置冷却时间
  
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         items['神秘碎片'] = items.get('神秘碎片', 0) + 1
@@ -305,6 +308,9 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
     # 受伤事件
     elif rnd <= 250 + rnd_regu:
         next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
+        #检测星钻
+        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+            next_time = current_time  # 立即重置冷却时间
  
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         user_info['buff'] = 'hurt'
@@ -328,10 +334,8 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
         # 确保道具栏存在（已提前setdefault items）
         if items.get('神秘碎片', 0) < 5:
             next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
-            diamond_text = ""
             #检测星钻
-            if collections.get("星钻", 0) > 0 and random.random() < 0.1:
-                diamond_text += "\n\n星钻闪烁，你包里的星钻突然绽放光芒，瞬间你的伤势和疲惫感如星尘般消散！"
+            if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
                 next_time = current_time  # 立即重置冷却时间
             user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['buff'] = 'confuse'
@@ -497,10 +501,6 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
         if debuff == 'illusory':
             return
         
-        next_time = current_time + datetime.timedelta(minutes=29 if collections.get("回想之核", 0) >= 1 else 30)
- 
-        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-        
         rnd_tool = random.randint(1, 1000)
         
         # 开辟道具栏
@@ -594,6 +594,9 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             return
         #受伤1.5小时，在此期间什么都干不了
         next_time = current_time + datetime.timedelta(minutes=89 if collections.get("回想之核", 0) >= 1 else 90)
+        #检测星钻
+        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+            next_time = current_time  # 立即重置冷却时间
  
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         user_info['buff'] = 'hurt'
@@ -626,10 +629,6 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             return
         if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
             user_info['buff2'] = 'normal'
-        #设定冷却
-        next_time = current_time + datetime.timedelta(minutes=29 if collections.get("回想之核", 0) >= 1 else 30)
- 
-        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         
         #遇到水晶矿
         rnd_crystal = random.randint(1,100)
@@ -953,6 +952,9 @@ async def LabStuck(user_data, user_id, message, diamond_text):
     if(rnd<=75):
         #受伤2小时，在此期间什么都干不了
         next_time = current_time + datetime.timedelta(minutes=119 if collections.get("回想之核", 0) >= 1 else 120)
+        #检测星钻
+        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+            next_time = current_time  # 立即重置冷却时间
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         user_info['buff'] = 'hurt'
         #加入被困名单
@@ -1000,10 +1002,6 @@ async def LabStuck(user_data, user_id, message, diamond_text):
 
         # 增加果酱数量
         items["草莓果酱"] += jam_count
-
-        # 设置冷却时间
-        next_time = current_time + datetime.timedelta(minutes=29 if collections.get("回想之核", 0) >= 1 else 30)
-        user_info["next_time"] = next_time.strftime("%Y-%m-%d %H:%M:%S")
 
         # 保存数据
         save_data(user_path, user_data)
