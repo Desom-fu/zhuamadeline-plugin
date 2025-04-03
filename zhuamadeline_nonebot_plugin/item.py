@@ -603,6 +603,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     if kongjun >= 10 and "鱼之契约" not in user_collections:
                         user_collections["鱼之契约"] = 1
                         message += "\n为了感谢你空军了这么多次放过了不少鱼，所以鱼群拟定了一个契约送给你！\n输入.cp 鱼之契约 以查看具体效果"
+                    # 第 50 次钓鱼必定给契约
+                    if fishing >= 50 and "鱼之契约" not in user_collections:
+                        user_collections["鱼之契约"] = 1
+                        message += "\n你坚持不懈的日积月累的50次钓鱼感动了鱼群，所以鱼群拟定了一个契约送给你！\n输入.cp 鱼之契约 以查看具体效果"
                 else:
                     # 70% 钓到鱼，使用权重随机选择鱼
                     fish_probabilities = {
