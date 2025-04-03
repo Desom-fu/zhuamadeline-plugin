@@ -170,8 +170,8 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         bar_data[user_id] = {}
         bar_data[user_id]['status'] = 'nothing'
 
-    if bar_data[user_id]['status'] != 'nothing' and game_type not in ['3','4']:
-        await bet.finish("你已经在玩“游戏”了，请结束本局“游戏”再进行游玩新的“游戏”哦！", at_sender=True)
+    # if bar_data[user_id]['status'] != 'nothing' and game_type not in ['3','4']:
+    #     await bet.finish("你已经在玩“游戏”了，请结束本局“游戏”再进行游玩新的“游戏”哦！", at_sender=True)
 
     if game_type == '1' and not '/' in args:
         if data[user_id]['berry'] < 0:
@@ -196,7 +196,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
 
         # 将玩家添加至“游戏”状态
         bar_data[user_id]['game'] = '1'
-        bar_data[user_id]['status'] = 'beting'
+        # bar_data[user_id]['status'] = 'beting'
 
         # 写入数据
         save_data(full_path, data)
