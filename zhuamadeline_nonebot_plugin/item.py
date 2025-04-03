@@ -2253,10 +2253,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     await daoju.finish(fail_text, at_sender=True)
                     
                 # 最后检查道具名称是否在商品列表中
-                if use_item_name not in item:
-                    await daoju.finish(f"现在整个抓玛德琳都没有这个道具 [{use_item_name}]，你为什么会想用呢？", at_sender=True)
+                if use_item_name not in item or use_item_name not in all_collections:
+                    await daoju.finish(f"现在整个抓玛德琳都没有这个道具/藏品 [{use_item_name}]，你为什么会想用呢？", at_sender=True)
                 # 在商品列表里面就直接回答暂无法使用
-                await daoju.finish(f"[{use_item_name}] 使用方法有误或者现在无法使用哦!", at_sender=True)
+                await daoju.finish(f"[{use_item_name}] 的使用方法有误或者现在无法使用哦!", at_sender=True)
         else:
             await daoju.finish("你还没有任何道具哦", at_sender=True)
     else:
