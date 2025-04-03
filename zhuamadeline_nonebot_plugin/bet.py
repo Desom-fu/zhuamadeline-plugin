@@ -196,7 +196,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
 
         # 将玩家添加至“游戏”状态
         bar_data[user_id]['game'] = '1'
-        # bar_data[user_id]['status'] = 'beting'
+        bar_data[user_id]['status'] = 'beting'
 
         # 写入数据
         save_data(full_path, data)
@@ -242,7 +242,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             data[user_id]['berry'] -= 125
         # 将玩家添加至“游戏”状态
         bar_data[user_id]['game'] = '2'
-        bar_data[user_id]['status'] = 'demon'
+        # bar_data[user_id]['status'] = 'demon'
         # 判断玩家是否为第一位或第二位加入
         if len(demon_data[group_id]['pl']) == 0:
             # 第一位玩家加入
