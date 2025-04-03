@@ -285,16 +285,16 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
                 pangguang_add = 2
                 idt_len = 0
             # 设置玩家血量，随机生成血量值(放在上面后面好改)
-            hp = random.randint(3 + max(int(add_max*2-1), 0) + pangguang_add, 6+add_max*2 + pangguang_add)
+            hp = random.randint(3 + max(int(add_max*2-1), 0) + max(int(pangguang_add*2-1), 0), 6+add_max*2 + pangguang_add*2)
             demon_data[group_id]['hp'] = [hp, hp]
             # 设定轮数
             demon_data[group_id]['game_turn'] = 1
             # 设定血量上限
-            demon_data[group_id]['hp_max'] = 6 + add_max*2 + pangguang_add
+            demon_data[group_id]['hp_max'] = 6 + add_max*2 + pangguang_add*3
             # 设定道具上限
             demon_data[group_id]['item_max'] = 6 + add_max + pangguang_add
             # 加载弹夹状态
-            demon_data[group_id]['clip'] = load()
+            demon_data[group_id]['clip'] = load(identity_found)
             # 设定无限叠加攻击默认值
             demon_data[group_id]['add_atk'] = False
             # 随机决定先手玩家
@@ -774,19 +774,28 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
     return random.choice(item_choices)
 
 # 上弹函数
-def load():
+def load(identity_found):
     """上弹，1代表实弹，0代表空弹"""
-    clip_size = random.randint(2, 8)  # 随机生成弹夹容量
-    if clip_size == 2:
-        # 如果总弹数为2，强制设置一个实弹
-        clip = [0, 1]
-        random.shuffle(clip)  # 随机打乱弹夹顺序
+    # 根据identity_found值决定弹夹容量和实弹数量
+    if 2 <= identity_found <= 999:
+        clip_size = random.randint(3, 10)  # 弹夹容量3-10
+        # 确保至少2个实弹，最多不超过弹夹容量-1（至少留一个空弹）
+        bullets = random.randint(2, clip_size - 1)
     else:
-        bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
-        clip = [0] * clip_size
-        bullet_positions = random.sample(range(clip_size), bullets)  # 确定实弹位置
-        for pos in bullet_positions:
-            clip[pos] = 1
+        clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
+        if clip_size == 2:
+            # 如果总弹数为2，强制设置一个实弹
+            clip = [0, 1]
+            random.shuffle(clip)  # 随机打乱弹夹顺序
+            return clip
+        else:
+            bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
+    
+    # 生成弹夹
+    clip = [0] * clip_size
+    bullet_positions = random.sample(range(clip_size), bullets)  # 确定实弹位置
+    for pos in bullet_positions:
+        clip[pos] = 1
     return clip
 
 # 游戏结束函数
@@ -1031,7 +1040,7 @@ async def shoot(stp, group_id, message,args):
         msg += death_msg
         # 增加换行，优化排版
         msg += "\n"
-        clip = load()
+        clip = load(identity_found)
         # 获取刷新道具
         item_msg, demon_data = refersh_item(identity_found, group_id, demon_data)
         msg += item_msg
@@ -1291,7 +1300,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             bullet_type = "实弹" if removed_bullet == 1 else "空弹"
             msg += f"- 你退掉了一颗子弹，这颗子弹是：{bullet_type}\n"
         if not demon_data[group_id]['clip'] or all(b == 0 for b in demon_data[group_id]['clip']):
-            demon_data[group_id]['clip'] = load()
+            demon_data[group_id]['clip'] = load(identity_found)
             msg += "- 子弹已耗尽，重新装填！\n"
             msg += "\n"
             # 游戏轮数+1
@@ -1318,7 +1327,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             msg += f"你刷新了你的所有道具，新道具为：{', '.join(new_items_names)}\n"
 
     elif item_name == "手套":
-        demon_data[group_id]['clip'] = load()
+        demon_data[group_id]['clip'] = load(identity_found)
         msg += f"你重新装填了子弹！新弹夹总数：{len(demon_data[group_id]['clip'])} 实弹数：{demon_data[group_id]['clip'].count(1)}\n"
 
     elif item_name == "骰子":
