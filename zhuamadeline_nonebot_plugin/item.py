@@ -1779,7 +1779,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             if not success_fly:
                                 item_text += f"- {level}级飞升累计失败：{current_guarantee['fail_count']}/3\n"
                             if current_guarantee.get("guaranteed", False):
-                                item_text += f"- 连续3次飞升{level}级失败，下次必定成功！\n"
+                                item_text += f"累计3次飞升{level}级失败，下次必定成功！\n"
                             
                             success = 1  # 固定为1，不可更改，后面成功的结果
 
