@@ -567,7 +567,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 # 判断是否空军（30% 概率）
                 gailv = random.randint(1,10)
-                # if random.random() < 0.3:  # 30% 概率空军
                 if gailv <= 3:
                     kongjun += 1
                     user_data["kongjun"] = kongjun

@@ -105,6 +105,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".清除冷却 QQ号",
         ".清除钓鱼冷却 QQ号",
         ".全服清除冷却",
+        ".全服清除钓鱼冷却",
         ".补货",
         ".发放道具 QQ号 道具名称 数量",
         ".扣除道具 QQ号 道具名称 数量",
@@ -728,6 +729,37 @@ async def clear_all_cd_handle(event: GroupMessageEvent):
     save_data(user_path / file_name, data)
 
     await clear_all_cd.finish("全服玩家的冷却已清除", at_sender=True)
+    
+# 全服清除冷却
+clear_all_fishing_cd = on_command("全服清除钓鱼冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+
+@clear_all_fishing_cd.handle()
+async def clear_all_fishing_cd_handle(event: GroupMessageEvent):
+    # 判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    data = {}
+    if os.path.exists(user_path / file_name):
+        data = open_data(user_path / file_name)
+
+    # 没有玩家数据就直接返回
+    if not data:
+        await clear_all_fishing_cd.finish("没有玩家数据可清除", at_sender=True)
+        return
+
+    current_time = datetime.datetime.now()
+    next_time_r = current_time + datetime.timedelta(seconds=1)
+
+    # 遍历所有玩家，清除冷却时间
+    for user_id, v in data.items():
+        if isinstance(v, dict):  # 确保数据格式正确
+            v['next_fishing_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    # 写入文件
+    save_data(user_path / file_name, data)
+
+    await clear_all_fishing_cd.finish("全服玩家的钓鱼冷却已清除", at_sender=True)
 
 
 # 手动补货命令
