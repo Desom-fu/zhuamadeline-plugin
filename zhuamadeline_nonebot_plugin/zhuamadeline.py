@@ -389,7 +389,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         #写入主数据表
         save_data(user_path / file_name, data)
         #发送消息
-        if (debuff=='poisoned') or (debuff=='poisoned_2'):
+        if berry_give!= 0:
             lucky_num = data[str(user_id)].get('lucky_times') - 1
             text = str(lucky_num)
             if (lucky_num == -1):
