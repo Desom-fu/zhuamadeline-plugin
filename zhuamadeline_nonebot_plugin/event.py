@@ -1059,7 +1059,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
-            user_info['debuff'] = 'poisoned'
+            user_info['debuff'] = 'poisoned_2'
             save_data(user_path, user_data)
             await message.finish(f"你在路过毒水池的时候，一不小心有毒气体吸入过多，你中毒了，接下来{recover_hour}h内抓Madeline获得不了任何草莓了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==4:

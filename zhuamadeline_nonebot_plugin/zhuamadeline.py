@@ -352,7 +352,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         #判定乐谱
         sheet_music = data[str(user_id)]['collections'].get('星光乐谱',0)
 
-        if (debuff=='poisoned'):
+        if (debuff=='poisoned') or (debuff=='poisoned_2'):
             berry_give = 0
         else:
             # 用字典映射不同 level 的 berry_give 值
@@ -389,7 +389,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         #写入主数据表
         save_data(user_path / file_name, data)
         #发送消息
-        if(debuff!='poisoned'):
+        if (debuff=='poisoned') or (debuff=='poisoned_2'):
             lucky_num = data[str(user_id)].get('lucky_times') - 1
             text = str(lucky_num)
             if (lucky_num == -1):
@@ -602,7 +602,7 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
     }
     # debuff
     debuff_messages = {
-        "illusory": "缺氧", "poisoned": "中毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神/生气的小小卒"
+        "illusory": "缺氧", "poisoned": "中毒", "poisoned_2": "剧毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神/生气的小小卒"
     }
     # buff
     buff_messages = {"hurt": "受伤", "lost": "迷路"}
