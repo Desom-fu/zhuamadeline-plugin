@@ -1,6 +1,5 @@
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.plugin import PluginMetadata
 from pathlib import Path
 import random
 import datetime
@@ -8,13 +7,7 @@ from .function import open_data, print_zhua, save_data, time_text
 from .config import user_path, liechang_count, full_path
 from .whitelist import whitelist_rule
 
-__plugin_meta__ = PluginMetadata(
-    name="手办屋",
-    description="展示所有用户收藏的Madeline手办",
-    usage="发送命令：.garage 或 .手办屋",
-)
-
-garage_cmd = on_command("garage", aliases={"手办屋","handbook"}, priority=5, block=True, rule=whitelist_rule)
+garage_cmd = on_command("garage", aliases={"手办屋","handbook","sbw"}, priority=5, block=True, rule=whitelist_rule)
 
 @garage_cmd.handle()
 async def handle_garage(bot: Bot, event: MessageEvent):
