@@ -546,8 +546,6 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
         messages=forward_message,
     )
 
-
-
 #展示madeline
 show = on_command('show', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
