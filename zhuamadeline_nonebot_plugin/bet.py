@@ -777,10 +777,10 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
 def load(identity_found):
     """上弹，1代表实弹，0代表空弹"""
     # 根据identity_found值决定弹夹容量和实弹数量
-    if 2 <= identity_found <= 999:
+    if identity_found in [2, 999]:
         clip_size = random.randint(3, 10)  # 弹夹容量3-10
         # 确保至少2个实弹，最多不超过弹夹容量-1（至少留一个空弹）
-        bullets = random.randint(2, clip_size - 1)
+        bullets = random.randint(2, clip_size // 2 + 1)  # 随机生成实弹数量
     else:
         clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
         if clip_size == 2:
