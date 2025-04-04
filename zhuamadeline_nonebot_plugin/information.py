@@ -29,7 +29,7 @@ async def zhua_help():
         "- .ck (all): 查看草莓余额及一些其他状态\n"
         "- .mymadeline (猎场号): 查询对应猎场拥有的madeline及数量\n"
         "- .myitem/mycp: 查询自己拥有的道具/藏品\n"
-        "- .jd (1,2,3): 查看自己抓madeline进度\n"
+        f"- .jd (1~{liechang_count}): 查看自己抓madeline进度\n"
         "- .shop: 查看今日商品\n"
         "- .buy (数量)（道具名): 购买道具/藏品\n"
         "- .use (道具名): 使用道具/藏品"
