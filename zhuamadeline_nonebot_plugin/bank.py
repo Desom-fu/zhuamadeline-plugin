@@ -31,57 +31,71 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 demon_path = Path() / "data" / "UserList" / "demon.json"
 pvp_path = Path() / "data" / "UserList" / "pvp.json"
 
-# 设定每日 2:00 自动增加利息
+from datetime import datetime, timedelta
+
+# 1:00 - 1:30重置利息发放状态防止没执行
+@scheduler.scheduled_job(
+    "interval",  # 使用间隔触发器
+    minutes=1,   # 每隔1分钟
+    start_date=datetime.datetime.now().replace(hour=1, minute=0, second=0), 
+    end_date=datetime.datetime.now().replace(hour=1, minute=30, second=0), 
+)
+def cancel_interest_send():
+    bar_data = open_data(bar_path)
+    bar_data["interest_send"] = False
+    save_data(bar_path, bar_data)
+
+# 2:00-2:30每分钟执行一次利息发放（实际上只能执行一次，因为有参数控制）
+@scheduler.scheduled_job(
+    "interval",
+    minutes=1,
+    start_date=datetime.datetime.now().replace(hour=2, minute=0, second=0),
+    end_date=datetime.datetime.now().replace(hour=2, minute=30, second=0),
+    timezone="Asia/Shanghai"
+)
 async def add_interest():
     bots = get_bots()
     if not bots:
         logger.error("没有可用的Bot实例，无法发放利息！")
         return
-    bot = list(bots.values())[0]  # 获取第一个 Bot 实例
+    bot = list(bots.values())[0]
+    
     bar_data = open_data(bar_path)
     bar_data.setdefault("pots", 0)
-    add_pots = 0
-    interest_send = bar_data.setdefault("interest_send", False)
-    if interest_send:
+    
+    # 检查是否已发放利息
+    if bar_data.get("interest_send", False):
         return
+    
+    add_pots = 0
     for user_id, user_bar in bar_data.items():
-        if user_id.isdigit() and isinstance(user_bar, dict):  # 跳过非用户数据
-            user_bar.setdefault("bank",0)
-            user_bar.setdefault("interest", 0)  # 初始化利息
-            user_bar.setdefault("interest_today", 0)  # 初始化今日利息
+        if user_id.isdigit() and isinstance(user_bar, dict):
+            user_bar.setdefault("bank", 0)
+            user_bar.setdefault("interest", 0)
+            user_bar.setdefault("interest_today", 0)
+            
             if user_bar["bank"] > 0:
-                interest = int(user_bar["bank"] * 0.01)  # 计算 1% 利息
-                # 大于1000，超出的全部投给奖池
+                interest = int(user_bar["bank"] * 0.01)
                 if interest > 1000:
                     add_pots += interest - 750
                     interest = 750
-                # 大于500，超出的部分自己获得50%，剩余的投入奖池
                 elif interest > 500:
                     half = (interest - 500) // 2
                     add_pots += half
                     interest -= half
-                user_bar["interest_today"] = interest  # 记录今日利息
-                user_bar["interest"] += interest  # 记录总利息
-                user_bar["bank"] += interest  # 利息加到银行存款中
-    # 所有人的累计add_pots加上底池
+                
+                user_bar["interest_today"] = interest
+                user_bar["interest"] += interest
+                user_bar["bank"] += interest
+    
     bar_data["pots"] += add_pots
     bar_data["interest_send"] = True
     save_data(bar_path, bar_data)
-    # 发送通知
+
     await bot.send_group_msg(
         group_id=zhuama_group,
         message=f"今日利息已发放，请使用命令.ck all查看今天增加利息（向下取整）为多少哦~"
     )
-
-#取消
-def cancel_interest_send():
-    bar_data = open_data(bar_path)
-    bar_data.setdefault("interest_send", False)
-    bar_data["interest_send"] = False
-    save_data(bar_path, bar_data)
-
-scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)
-scheduler.scheduled_job("cron", hour=1, minute=0)(cancel_interest_send)
 
 # 提取草莓命令
 bank = on_command('bank', aliases = {"berrybank"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)

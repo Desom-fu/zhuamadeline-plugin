@@ -780,8 +780,14 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
             messages=forward_message
         )
 
-# 每分钟检查是否需要执行结算任务
-@scheduler.scheduled_job("cron", minute="*", id="check_pvp_end_job")
+# 22:00 - 22:30 检查是否需要执行结算任务
+@scheduler.scheduled_job(
+    "interval",
+    minutes=1,
+    start_date=datetime.datetime.now().replace(hour=22, minute=0, second=0),
+    end_date=datetime.datetime.now().replace(hour=22, minute=30, second=0),
+    timezone="Asia/Shanghai"
+)
 async def check_pvp_end_job():
     bots = get_bots()
     if not bots:
@@ -789,50 +795,49 @@ async def check_pvp_end_job():
         return
     bot = list(bots.values())[0]  # 获取第一个 Bot 实例
     group_id = zhuama_group    # 目标群号
+
+    # 读取用户数据
+    user_data = open_data(user_path)
+
+    # 打开 PVP 数据文件
+    pvp_data = open_data(pvp_path)
+
+    if pvp_data == {}:
+        return  # 如果 PVP 数据为空，直接返回
     
-    # 获取当前时间的小时和分钟
-    current_time = datetime.datetime.now()
-    current_hour = current_time.hour
-    current_minute = current_time.minute
+    # 获取所有擂台上的玩家
+    list_current = pvp_data.get("list", [])
+    list_final = [v[0] for v in list_current]
+    set_final = set(list_final)
+    current_time_2 = datetime.datetime.now()
 
-    # 判断当前时间是否在 22：00 - 22：30 之间
-    if current_hour == 22 and 0 <= current_minute <= 30:
-        # 读取用户数据
-        user_data = open_data(user_path)
-        # 打开 PVP 数据文件
-        pvp_data = open_data(pvp_path)
-        if pvp_data == {}:
-            return  # 如果 PVP 数据为空，直接返回
+    # 当前时间戳
+    timestamp_2 = int(current_time_2.timestamp())
+    start_time = pvp_data.get('startTime')
+    end_time = timestamp_2
+    time_diff = (end_time - start_time) / 60  # 转换为分钟>
 
-        # 获取所有擂台上的玩家
-        list_current = pvp_data.get("list", [])
-        list_final = [v[0] for v in list_current]
-        set_final = set(list_final)
-        current_time_2 = datetime.datetime.now()
-        # 当前时间戳
-        timestamp_2 = int(current_time_2.timestamp())
-        start_time = pvp_data.get('startTime')
-        end_time = timestamp_2
-        time_diff = (end_time - start_time) / 60  # 转换为分钟>
-        # 根据回合数分配奖励
-        reward = pvp_data.get('reward', 0)
-        timeReward = int(calculate_time_reward(time_diff))
-        total_reward = reward + timeReward
-        # 发放奖励给所有在擂台上的玩家
-        text = "恭喜以下玩家获得奖励：\n"
-        for v in set_final:
-            text += MessageSegment.at(v)  # @玩家
-            user_data[v]['berry'] += total_reward  # 给玩家增加奖励
-        # 竞猜结束
-        guess_end_text = pvp_guess_end()
+    # 根据回合数分配奖励
+    reward = pvp_data.get('reward', 0)
+    timeReward = int(calculate_time_reward(time_diff))
+    total_reward = reward + timeReward
 
-        # 强制结束 PVP 数据并清空
-        pvp_data.clear()
+    # 发放奖励给所有在擂台上的玩家
+    text = "恭喜以下玩家获得奖励：\n"
+    for v in set_final:
+        text += MessageSegment.at(v)  # @玩家
+        user_data[v]['berry'] += total_reward  # 给玩家增加奖励
 
-        # 发送奖励公告消息
-        text += f"\n22：00了，时间太晚了，madeline竞技场已经关闭，本局游戏强制结束！\n擂台上的玩家将获得{reward}+{timeReward}={total_reward}草莓的奖励，明天见哦！\n（＾∀＾●）ﾉｼ"
-        await bot.send_group_msg(group_id=group_id, message=text+guess_end_text)
+    # 竞猜结束
+    guess_end_text = pvp_guess_end()
 
-        # 保存清空后的 PVP 数据和用户数据
-        save_data(user_path, user_data)
-        save_data(pvp_path, pvp_data)
+    # 强制结束 PVP 数据并清空
+    pvp_data.clear()
+
+    # 保存清空后的 PVP 数据和用户数据
+    save_data(user_path, user_data)
+    save_data(pvp_path, pvp_data)
+    
+    # 发送奖励公告消息
+    text += f"\n22：00了，时间太晚了，madeline竞技场已经关闭，本局游戏强制结束！\n擂台上的玩家将获得{reward}+{timeReward}={total_reward}草莓的奖励，明天见哦！\n（＾∀＾●）ﾉｼ"
+    await bot.send_group_msg(group_id=group_id, message=text+guess_end_text)

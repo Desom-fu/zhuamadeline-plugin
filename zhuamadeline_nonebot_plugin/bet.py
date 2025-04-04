@@ -1849,8 +1849,13 @@ def reward_amount(pool: int) -> int:
     else:
         return 300
     
-# 22:15 重置 double_ball_send
-@scheduler.scheduled_job("cron", hour=22, minute=15)
+# 22:05 - 22:25 每分钟执行一次
+@scheduler.scheduled_job(
+    "interval",  # 使用间隔触发器
+    minutes=1,   # 每隔1分钟
+    start_date=datetime.datetime.now().replace(hour=22, minute=5, second=0), 
+    end_date=datetime.datetime.now().replace(hour=22, minute=25, second=0), 
+)
 async def reset_double_ball_send():
     bar_data = open_data(bar_path)
     bar_data.setdefault("double_ball_send", False)
@@ -1858,7 +1863,13 @@ async def reset_double_ball_send():
     save_data(bar_path, bar_data)
 
 # 22:30 开奖
-@scheduler.scheduled_job("cron", hour=22, minute=30)
+# 22:30 - 23:00 每分钟执行一次
+@scheduler.scheduled_job(
+    "interval",  # 使用间隔触发器
+    minutes=1,   # 每隔1分钟
+    start_date=datetime.datetime.now().replace(hour=22, minute=30, second=0),  # 今天22:30开始
+    end_date=datetime.datetime.now().replace(hour=23, minute=0, second=0),    # 今天23:00结束
+)
 async def double_ball_lottery():
     bots = get_bots()
     if not bots:
