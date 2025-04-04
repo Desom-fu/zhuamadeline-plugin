@@ -1693,29 +1693,40 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             item_text = "\n"
                             # 检查当前等级是否有对应球体设定
                             if level in ball_data:
-                                ball_info = ball_data[level]
-                                ball_name = ball_info["name"]
-                                user_info["get_ball_value"] += 1
-                                # 检查是否满足获取条件
-                                if user_info["get_ball_value"] >= ball_info["chance"] and ball_name not in collections:
-                                    if not ball_info["requirement"] or ball_info["requirement"] in collections:
-                                        collections[ball_name] = 1
-                                        user_info["get_ball_value"] = 0
-                                        # 根据 level 动态生成第三句话
-                                        if level == 3 or level == 4:
-                                            third_sentence = f"现在你可以在地下终端抓到{level}级的玛德琳了，并且解锁了飞升{level+1}级玛德琳的权限！\n"
-                                        elif level == 5:
-                                            third_sentence = f"现在你完全解锁地下终端了，能抓到{level}级的玛德琳了，同时道具、道具加成、祈愿解封！\n"
-                                        else:
-                                            third_sentence = ""  # 默认情况，避免未定义
+                                # 确定当前应该收集哪个等级的球体
+                                current_target_level = None
+                                if "红色球体" not in collections:  # 第一阶段：收集红色
+                                    current_target_level = 3
+                                elif "绿色球体" not in collections:  # 第二阶段：收集绿色
+                                    current_target_level = 4
+                                else:  # 第三阶段：收集黄色
+                                    current_target_level = 5
 
-                                        # 生成完整文本
-                                        item_text = (
-                                            f"你在使用Madeline飞升器的时候发现了一个{ball_name}，似乎是可以插进哪里的？\n"
-                                            f"你把{ball_name}放进了Madeline飞升器里的{ball_name[:-2]}凹槽，顿时感觉压制力小了点。\n"
-                                            f"{third_sentence}"
-                                            f"输入.cp {ball_name} 以查看具体效果\n\n"
-                                        )
+                                # 只有当当前操作的level等于目标level时才处理
+                                if level == current_target_level:
+                                    ball_info = ball_data[level]
+                                    ball_name = ball_info["name"]
+                                    user_info["get_ball_value"] += 1
+                                    # 检查是否满足获取条件
+                                    if user_info["get_ball_value"] >= ball_info["chance"] and ball_name not in collections: 
+                                        if not ball_info["requirement"] or ball_info["requirement"] in collections:
+                                            collections[ball_name] = 1
+                                            user_info["get_ball_value"] = 0
+                                            # 根据 level 动态生成第三句话
+                                            if level == 3 or level == 4:
+                                                third_sentence = f"现在你可以在地下终端抓到{level}级的玛德琳了，并且解锁了飞升{level+1}级玛德琳的权限！\n"
+                                            elif level == 5:
+                                                third_sentence = f"现在你完全解锁地下终端了，能抓到{level}级的玛德琳了，同时道具、道具加成、祈愿解封！\n"
+                                            else:
+                                                third_sentence = ""  # 默认情况，避免未定义
+    
+                                            # 生成完整文本
+                                            item_text = (
+                                                f"你在使用Madeline飞升器的时候发现了一个{ball_name}，似乎是可以插进哪里的？\n"
+                                                f"你把{ball_name}放进了Madeline飞升器里的{ball_name[:-2]}凹槽，顿时感觉压制力小了点。\n"
+                                                f"{third_sentence}"
+                                                f"输入.cp {ball_name} 以查看具体效果\n\n"
+                                            )
 
                             # 解锁了黄球就不需要积累值了，直接清空
                             if collections.get('黄色球体', 0) > 0:
