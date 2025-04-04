@@ -46,14 +46,47 @@ user_list2 = Path() / "data" / "UserList" / "UserList2.json"
 user_list3 = Path() / "data" / "UserList" / "UserList3.json"
 user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 
+# 查看所有玩家所在猎场数
+ckqflc = on_command('ckqflc', aliases={"猎场人数统计", "查看全服猎场", 'qfcklc', '全服查看猎场'}, 
+                   permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
-# 获取QQ昵称
-async def get_nickname(bot: Bot, user_id: str) -> str:
-    try:
-        user_info = await bot.get_stranger_info(user_id=int(user_id))
-        return user_info.get("nickname", f"用户{user_id}")
-    except:
-        return f"用户{user_id}"  # 获取失败时使用默认名称
+@ckqflc.handle()
+async def handle_ckqflc(bot: Bot, event: GroupMessageEvent):
+    # 读取UserData.json
+    user_data = open_data(user_path / "UserData.json")
+    
+    # 初始化统计结果（包含0号猎场）
+    liechang_stats = {f"{lc}号猎场": 0 for lc in range(0, liechang_count + 1)}
+    total_users = 0
+    
+    # 统计每个猎场的用户数
+    for user_id, user_info in user_data.items():
+        if isinstance(user_info, dict):
+            # 获取用户所在的猎场列表
+            user_liechangs = set()
+            for key, value in user_info.items():
+                if key == "lc":
+                    # 处理单个猎场值
+                    user_liechangs.add(value)
+                elif key.startswith("lc") and isinstance(value, str):
+                    # 处理可能的lc1, lc2等多猎场情况
+                    user_liechangs.add(value)
+            
+            # 统计到各个猎场
+            for lc in user_liechangs:
+                if lc.isdigit() and 0 <= int(lc) <= liechang_count:
+                    liechang_stats[f"{lc}号猎场"] += 1
+            
+            total_users += 1
+    
+    # 构建消息（按0-4号猎场顺序）
+    message = "\n猎场人数统计\n\n"
+    for lc in range(0, liechang_count + 1):
+        message += f"{lc}号猎场: {liechang_stats[f'{lc}号猎场']}人\n"
+    
+    message += f"\n全服总玩家数: {total_users}人"
+    
+    await ckqflc.finish(message, at_sender=True)
 
 # 草莓排行
 ranking = on_command('berryrank', permission=GROUP, priority=1, block=True, rule=whitelist_rule)

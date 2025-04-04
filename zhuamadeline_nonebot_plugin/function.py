@@ -52,7 +52,8 @@ __all__ = [
     'get_user_data',
     'emoji_like',
     'get_alias_name',
-    'all_cool_time'
+    'all_cool_time',
+    'get_nickname'
 ]
 
 #madeline图鉴
@@ -87,6 +88,14 @@ url_emoji_msg = f'http://localhost:9635/set_msg_emoji_like'
 
 # 创建同步锁
 lock = threading.Lock()
+
+# 获取QQ昵称
+async def get_nickname(bot: Bot, user_id: str) -> str:
+    try:
+        user_info = await bot.get_stranger_info(user_id=int(user_id))
+        return user_info.get("nickname", f"用户{user_id}")
+    except:
+        return f"用户{user_id}"  # 获取失败时使用默认名称
 
 # 用 run_in_executor 使 requests 在单独的线程中运行
 async def async_request(url, data):
