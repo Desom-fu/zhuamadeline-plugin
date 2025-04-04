@@ -37,6 +37,8 @@ jiemi32_1_image_path = Path() / "data" / "Image" / "jiemi321.png"
 jiemi33_1_image_path = Path() / "data" / "Image" / "jiemi331.png"
 jiemi35_1_image_path = Path() / "data" / "Image" / "jiemi351.png"
 jiemi36_1_image_path = Path() / "data" / "Image" / "jiemi361.png"
+jiemi37_1_image_path = Path() / "data" / "Image" / "jiemi371.jpg"
+jiemi38_1_image_path = Path() / "data" / "Image" / "jiemi381.png"
 math1_image_path = Path() / "data" / "Image" / "math1.png"
 math1_1_image_path = Path() / "data" / "Image" / "math1-1.jpg"
 math2_image_path = Path() / "data" / "Image" / "math2.png"
@@ -102,6 +104,8 @@ puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=G
 @puzzle_command.handle()
 async def puzzle_command_handle(event: Event, bot: Bot):
     puzzle_message = (
+        "---------------------------------------\n"
+        "由于题目包含图片，请输入 .mmww 来进行查看具体内容\n"
         "---------------------------------------\n"
         "由于题目包含图片，请输入 .彩票刮刮乐（注意是中文！） 来进行查看具体内容\n"
         "---------------------------------------\n"
@@ -755,6 +759,15 @@ def math_3(user_id, berry_data, user_data):
 
 
 # 以下为题面
+# 解密38 题面
+mmww_command = on_fullmatch(['.mmww', '。mmww'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@mmww_command.handle()
+async def handle_where():
+    jiemi38_1_image_segment = MessageSegment.image(jiemi38_1_image_path)
+    text = ("出题者：疯子\n"
+            "难度草莓：350")
+    await mmww_command.finish(jiemi38_1_image_segment + text)
+
 # 解密36 题面
 cpggl_command = on_fullmatch(['.彩票刮刮乐', '。彩票刮刮乐'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @cpggl_command.handle()
