@@ -31,8 +31,6 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 demon_path = Path() / "data" / "UserList" / "demon.json"
 pvp_path = Path() / "data" / "UserList" / "pvp.json"
 
-from datetime import datetime, timedelta
-
 # 1:00 - 1:30重置利息发放状态防止没执行
 @scheduler.scheduled_job(
     "interval",  # 使用间隔触发器
