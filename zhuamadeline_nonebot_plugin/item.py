@@ -428,9 +428,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 success = 999
             if(data[str(user_id)].get("item").get(panding_item, 0) <= 0):
                 success = 999
-            if use_item_name == '时间献祭器' and pan_current_time < pan_next_time_r:
+            if panding_item == '时间献祭器' and pan_current_time < pan_next_time_r:
                 success = 999
-            if pan_next_time_r < trap_next_time_r and use_item_name == '充能陷阱':
+            if pan_next_time_r < trap_next_time_r and panding_item == '充能陷阱':
                 success = 999
             fail_text = "失败！"   #失败文本
         #--------------------这些道具不限制所在猎场的使用--------------------
@@ -723,7 +723,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 else:
                     await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
             
-            if use_item_name.startswith("道具盲盒"):
+            if use_item_name.startswith("道具盲盒") or use_item_name.startswith("盲盒"):
                 # 用户输入命令映射：默认单抽
                 COMMAND_MAP = {
                     "道具盲盒": "单抽",
