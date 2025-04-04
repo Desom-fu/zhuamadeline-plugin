@@ -76,8 +76,8 @@ async def handle_garage(bot: Bot, event: MessageEvent):
 
     # 构建展示消息
     message = (
-        f"\n该玛德琳来自：{selected['liechang']}号猎场"
-        f"\n等级：{info[0]}\n"
+        f"\n该Madeline来自：{selected['liechang']}号猎场\n"
+        f"等级：{info[0]}\n"
         f"名称：{info[1]}\n"
         +MessageSegment.image(info[2])+
         f"描述：{info[3]}"
