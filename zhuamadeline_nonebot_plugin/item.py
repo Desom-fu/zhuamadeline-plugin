@@ -1944,6 +1944,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             helmat = 0
                         rnd_hurt = 10
                         rnd_stuck = random.randint(1,100)
+                        # 测试
+                        # if user_id in bot_owner_id:
+                        #     rnd_hurt == 1
                         if helmat>=1:
                             rnd_hurt -=5
                         if(rnd_stuck<=rnd_hurt):
