@@ -39,20 +39,27 @@ async def handle_garage(bot: Bot, event: MessageEvent):
     # 收集当前猎场所有madeline（去重）
     seen = set()
     for user_items in liechang_data.values():
-        if isinstance(user_items, dict):
-            for madeline_key in user_items:
-                if madeline_key not in seen:
-                    seen.add(madeline_key)
-                    # 解析等级和编号
-                    try:
-                        level, num = madeline_key.split('_')
-                        madeline_pool.append({
-                            "liechang": lc,
-                            "level": int(level),
-                            "num": num
-                        })
-                    except ValueError:
-                        continue  # 跳过格式错误的key
+        if not isinstance(user_items, dict):
+            continue
+        
+        for madeline_key in user_items:
+            if madeline_key in seen:
+                continue
+            seen.add(madeline_key)
+            
+            parts = madeline_key.split('_')
+            if len(parts) != 2:
+                continue
+                
+            level, num = parts
+            try:
+                madeline_pool.append({
+                    "liechang": lc,
+                    "level": int(level),
+                    "num": num
+                })
+            except ValueError:
+                continue
 
     if not madeline_pool:
         await garage_cmd.finish("手办屋空空如也，快去抓些Madeline吧！", at_sender=True)
