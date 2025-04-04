@@ -723,20 +723,19 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         await daoju.finish("你现在没有冷却呀，无需使用此道具", at_sender=True)
                 else:
                     await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
-            
-            if use_item_name.startswith("道具盲盒") or use_item_name.startswith("盲盒"):
+            if use_item_name.startswith("道具盲盒"):
                 # 用户输入命令映射：默认单抽
                 COMMAND_MAP = {
-                    "道具盲盒": "单抽",
-                    "道具盲盒单抽": "单抽",
-                    "道具盲盒五连抽": "五连抽",
-                    "道具盲盒五连": "五连抽",
-                    "道具盲盒十连抽": "十连抽",
-                    "道具盲盒十连": "十连抽",
-                    "道具盲盒模拟一万连": "模拟一万连",
+                    "": "单抽",          # 默认情况
+                    "单抽": "单抽",
+                    "五连抽": "五连抽",
+                    "五连": "五连抽",
+                    "十连抽": "十连抽",
+                    "十连": "十连抽",
+                    "模拟一万连": "模拟一万连",
                 }
-                item_name = use_item_name.replace(" ", "")
-                user_choice = COMMAND_MAP.get(item_name)
+                suffix = use_item_name[4:].replace(" ", "")
+                user_choice = COMMAND_MAP.get(suffix)
                 if not user_choice:
                     await daoju.finish("道具盲盒只能单抽、五连或十连哦，具体指令如下: .use 道具盲盒(单抽/五连/十连)，默认为单抽。", at_sender=True)
 

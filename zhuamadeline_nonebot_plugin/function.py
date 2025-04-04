@@ -272,13 +272,30 @@ def all_cool_time(cd_path, user_id, group_id):
 
 # 辅助函数：获取标准名称
 def get_alias_name(name, item_dict, alias_dict):
-    """获取物品的标准名称"""
+    """
+    智能别名匹配（支持分割替换）
+    逻辑：
+        1. 从长到短尝试分割字符串
+        2. 找到最长匹配的别名后，替换为标准名称
+        3. 保留剩余部分拼接
+    """
+    # 1. 直接匹配完整名称
     if name in item_dict:
-        return name  # 直接返回已有的标准名
-    for key, aliases in alias_dict.items():
-        if name in aliases:
-            return key  # 找到匹配的标准名称
-    return None  # 没找到
+        return name
+    
+    # 2. 尝试从长到短分割匹配
+    max_len = max(len(alias) for aliases in alias_dict.values() for alias in aliases)
+    
+    for l in range(min(max_len, len(name)), 0, -1):  # 从最长可能开始尝试
+        prefix = name[:l]
+        remaining = name[l:]
+        
+        # 检查前缀是否是某个别名
+        for std_name, aliases in alias_dict.items():
+            if prefix in aliases:
+                return std_name + remaining  # 替换前缀并拼接剩余部分
+    
+    return None  # 未找到匹配
 
 # 获取用户数据的方法，避免重复的 try-except
 def get_user_data(user_data, user_id, key, default='normal'):
