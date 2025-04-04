@@ -380,6 +380,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
         panding_debuff = 1
     pan_current_time = datetime.datetime.now()  #读取当前系统时间
     pan_next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
+    trap_next_time_r = datetime.datetime.strptime(data.get(user_id).get('trap_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
     if(str(user_id) in data):
         group_id = str(event.group_id)
         # 添加全局冷却
@@ -428,6 +429,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             if(data[str(user_id)].get("item").get(panding_item, 0) <= 0):
                 success = 999
             if use_item_name == '时间献祭器' and pan_current_time < pan_next_time_r:
+                success = 999
+            if pan_next_time_r < trap_next_time_r and use_item_name == '充能陷阱':
                 success = 999
             fail_text = "失败！"   #失败文本
         #--------------------这些道具不限制所在猎场的使用--------------------
