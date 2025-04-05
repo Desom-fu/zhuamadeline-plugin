@@ -549,7 +549,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
     # 构建总进度信息
     progress_message = (
         f"全服Madeline统计：\n\n"
-        f"猎场共有{total_max}种玛德琳\n"
+        f"玛德琳猎场共有{total_max}种玛德琳\n"
         f"已有{total_captured}种玛德琳被捕捉过\n\n"
         f"总进度：{total_progress}%\n"
     )
