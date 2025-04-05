@@ -46,11 +46,11 @@ async def handle_garage(bot: Bot, event: MessageEvent):
             if madeline_key in seen:
                 continue
             seen.add(madeline_key)
-            
+
             parts = madeline_key.split('_')
             if len(parts) != 2:
                 continue
-                
+
             level, num = parts
             try:
                 madeline_pool.append({
@@ -83,7 +83,8 @@ async def handle_garage(bot: Bot, event: MessageEvent):
 
     # 构建展示消息
     message = (
-        f"\n该Madeline来自：{selected['liechang']}号猎场\n"
+        f"\n你成功从全服手办屋里面抽出来一个新的Madeline手办！"
+        f"该Madeline来自：{selected['liechang']}号猎场\n"
         f"等级：{info[0]}\n"
         f"名称：{info[1]}\n"
         +MessageSegment.image(info[2])+
