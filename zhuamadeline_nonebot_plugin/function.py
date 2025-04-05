@@ -228,7 +228,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
         progress_message += f"\n{target_level}号猎场进度：{progress}%\n"
         for level in range(5, 0, -1):
             progress_message += (
-                f"\n - {level}级madeline：{count[target_idx][level - 1]}/"
+                f"\n - {level}级Madeline：{count[target_idx][level - 1]}/"
                 f"{max_count[target_idx][level - 1]}"
             )
     else:
@@ -243,7 +243,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
             total_captured_all += total_captured
             total_max_all += total_max
 
-        progress_message += f"\n猎场共有{total_max_all}种玛德琳\n"
+        progress_message += f"\n玛德琳猎场共有{total_max_all}种玛德琳\n"
         progress_message += f"已有{total_captured_all}种玛德琳被你捕捉过\n"
 
         total_progress = round((total_captured_all / total_max_all) * 100, 2) if total_max_all > 0 else 0.0
@@ -257,7 +257,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
             total_level_count[level] = sum(count[lc][level] for lc in range(liechang_count))
             total_level_max[level] = sum(max_count[lc][level] for lc in range(liechang_count))
             progress_message += (
-                f"\n- {level + 1}级madeline：{total_level_count[level]}/{total_level_max[level]}"
+                f"\n- {level + 1}级Madeline：{total_level_count[level]}/{total_level_max[level]}"
             )
         # 逐级显示每个猎场的数量
         for lc in range(liechang_count):  # 遍历 开新猎场时要改
@@ -268,7 +268,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
             progress_message += f"\n\n{lc + 1}号猎场进度：{hunt_progress}%"
             for level in range(5, 0, -1):
                 progress_message += (
-                    f"\n- {level}级madeline：{count[lc][level - 1]}/{max_count[lc][level - 1]}"
+                    f"\n- {level}级Madeline：{count[lc][level - 1]}/{max_count[lc][level - 1]}"
                 )
 
     return progress_message, total_progress, progress

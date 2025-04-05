@@ -255,7 +255,7 @@ async def display_liechang_inventory(bot: Bot, event: GroupMessageEvent, liechan
     # 获取madeline数据
     data = get_madeline_data(file_name, user_id)
     if data is None:
-        await bot.send(event, f"你没有抓到过{liechang_number}号猎场的madeline", at_sender=True)
+        await bot.send(event, f"你没有抓到过{liechang_number}号猎场的Madeline", at_sender=True)
         return
     
     # 获取madeline库存并按等级分类
@@ -270,7 +270,7 @@ async def display_liechang_inventory(bot: Bot, event: GroupMessageEvent, liechan
         "data": {
             "name": "库存查询室",
             "uin": event.self_id,
-            "content": f"这是 [{nickname}] 的{liechang_number}号猎场的madeline库存\n{sorted_madelines}"
+            "content": f"这是 [{nickname}] 的{liechang_number}号猎场的Madeline库存\n{sorted_madelines}"
         }
     }]
     
@@ -304,7 +304,7 @@ async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, use
         "data": {
             "name": "库存查询室",
             "uin": event.self_id,
-            "content": f"这是 [{nickname}] 的所有猎场madeline库存"
+            "content": f"这是 [{nickname}] 的所有猎场Madeline库存"
         }
     }]
     
@@ -338,7 +338,7 @@ async def zhuajd(bot: Bot, event: Event, args: Message = CommandArg()):
     # 获取进度消息
     progress_message, total_progress, progress = madelinejd(user_id, target_level, event.sender.nickname)
     if progress_message is None:
-        await jd.finish("你还没有尝试抓过madeline.....")
+        await jd.finish("你还没有尝试抓过Madeline.....")
         return
     # 发送进度消息
     msg_list = [
@@ -555,7 +555,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
     )
     
     for level in range(5, 0, -1):
-        progress_message += f"- {level}级madeline：{total_count[level - 1]}/{total_max_count[level - 1]}\n"
+        progress_message += f"- {level}级Madeline：{total_count[level - 1]}/{total_max_count[level - 1]}\n"
 
     # 构建猎场进度信息
     for lc in range(liechang_count):  # 添加新猎场时更新
@@ -564,7 +564,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
         hunt_progress = round((hunt_captured / hunt_max) * 100, 2) if hunt_max > 0 else 0.0
         progress_message += f"\n{lc + 1}号猎场总进度：{hunt_progress}%\n"
         for level in range(5, 0, -1):
-            progress_message += f"- {level}级madeline：{hunt_count[lc][level - 1]}/{hunt_max_count[lc][level - 1]}\n"
+            progress_message += f"- {level}级Madeline：{hunt_count[lc][level - 1]}/{hunt_max_count[lc][level - 1]}\n"
 
     # 构建转发消息
     forward_message = [
@@ -632,7 +632,7 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
         else:
             await show.finish(f"你还没抓到过 {name}", at_sender=True)
     else:
-        await show.finish("你还没尝试抓过 madeline.....", at_sender=True)
+        await show.finish("你还没尝试抓过 Madeline.....", at_sender=True)
 
 # 查看某 madeline 数量
 count_madeline = on_command('count', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -642,12 +642,12 @@ async def cha_madeline_number(event: Event, arg: Message = CommandArg()):
     # 获取输入的名字
     name = str(arg).strip().lower()
     if not name:
-        await count_madeline.finish("请输入要查询的 madeline 名称", at_sender=True)
+        await count_madeline.finish("请输入要查询的 Madeline 名称", at_sender=True)
 
     # 查找该名字的 madeline 的图像文件坐标
     nums = find_madeline(name)
     if not nums:
-        await count_madeline.finish(f"未找到名为 {name} 的 madeline", at_sender=True)
+        await count_madeline.finish(f"未找到名为 {name} 的 Madeline", at_sender=True)
 
     # 获取用户 ID
     user_id = str(event.get_user_id())
@@ -656,7 +656,7 @@ async def cha_madeline_number(event: Event, arg: Message = CommandArg()):
     main_data = open_data(user_path / file_name)
 
     if user_id not in main_data:
-        await count_madeline.finish("你还没尝试抓过 madeline.....", at_sender=True)
+        await count_madeline.finish("你还没尝试抓过 Madeline.....", at_sender=True)
 
     # 根据猎场号打开对应文件
     liechang_number = nums[2]
