@@ -1923,6 +1923,7 @@ async def double_ball_lottery():
                 bet_data["refund"] = int(ticket_cost * 1.5)  # 记录返还的门票费用
                 total_refund += int(ticket_cost * 1.5)
                 user_bar["bank"] += int(ticket_cost * 1.5)
+                user_bar["double_ball"]["prize"] = int(ticket_cost * 1.5)
                 single_match_users.append(user_id)
 
             # 开奖后，重置 ifplay
