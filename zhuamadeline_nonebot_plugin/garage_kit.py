@@ -83,7 +83,7 @@ async def handle_garage(bot: Bot, event: MessageEvent):
 
     # 构建展示消息
     message = (
-        f"\n你成功从全服手办屋里面抽出来一个新的Madeline手办！"
+        f"\n你成功从全服手办屋里面抽出来一个Madeline手办！\n"
         f"该Madeline来自：{selected['liechang']}号猎场\n"
         f"等级：{info[0]}\n"
         f"名称：{info[1]}\n"
