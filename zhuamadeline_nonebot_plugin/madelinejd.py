@@ -513,17 +513,12 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
     hunt_count = [[0, 0, 0, 0, 0] for _ in range(liechang_count)]  # 各猎场的各级别 madeline 数量
     hunt_max_count = [[0, 0, 0, 0, 0] for _ in range(liechang_count)]  # 各猎场的各级别 madeline 总数
     unique_madelines = [set() for _ in range(liechang_count)]  # 每个猎场独立的 madeline 唯一集
-    
-    # 新增：玛德琳种类计数器
-    total_madeline_types = 0  # 所有玛德琳种类总数
-    captured_madeline_types = 0  # 已被捕捉的玛德琳种类数
 
     # 计算每个猎场的最大数量
     for lc, madeline_data in enumerate([madeline_data1, madeline_data2, madeline_data3, madeline_data4]):  # 添加新猎场时更新
         for k, v in madeline_data.items():
             unique_count = len(set(v))  # 当前等级的玛德琳种类数
             hunt_max_count[lc][int(k) - 1] = unique_count  # 确保唯一性
-            total_madeline_types += unique_count  # 累加总种类数
 
     # 读取所有玩家的数据
     try:
@@ -539,7 +534,6 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
                     if madeline_key not in unique_madelines[lc]:
                         hunt_count[lc][level] += 1
                         unique_madelines[lc].add(madeline_key)
-                        captured_madeline_types += 1  # 新增：累加已捕捉种类数
     except FileNotFoundError:
         await total_madelinejd_query.finish("未找到猎场的数据文件！")
     except json.JSONDecodeError:
@@ -555,8 +549,8 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
     # 构建总进度信息
     progress_message = (
         f"全服Madeline统计：\n\n"
-        f"猎场共有{total_madeline_types}种玛德琳\n"
-        f"已有{captured_madeline_types}种玛德琳被捕捉过\n\n"
+        f"猎场共有{total_max}种玛德琳\n"
+        f"已有{total_captured}种玛德琳被捕捉过\n\n"
         f"总进度：{total_progress}%\n"
     )
     

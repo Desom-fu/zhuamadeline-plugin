@@ -222,7 +222,9 @@ def madelinejd(user_id, target_level=None, nickname=None):
         total_max = sum(max_count[target_idx])
         progress = round((total_captured / total_max) * 100, 2) if total_max > 0 else 0.0
 
-        progress_message = f"这是 [{nickname}] 的madeline进度\n"
+        progress_message = f"这是 [{nickname}] 的Madeline进度\n"
+        progress_message += f"\n本猎场共有{total_max}种玛德琳\n"
+        progress_message += f"本猎场已有{total_captured}种玛德琳被你捕捉过\n"
         progress_message += f"\n{target_level}号猎场进度：{progress}%\n"
         for level in range(5, 0, -1):
             progress_message += (
@@ -230,7 +232,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
                 f"{max_count[target_idx][level - 1]}"
             )
     else:
-        progress_message = f"这是 [{nickname}] 的madeline进度\n"
+        progress_message = f"这是 [{nickname}] 的Madeline进度\n"
         total_captured_all = 0
         total_max_all = 0
 
@@ -240,6 +242,9 @@ def madelinejd(user_id, target_level=None, nickname=None):
             total_max = sum(max_count[lc])
             total_captured_all += total_captured
             total_max_all += total_max
+
+        progress_message += f"\n猎场共有{total_max_all}种玛德琳\n"
+        progress_message += f"已有{total_captured_all}种玛德琳被你捕捉过\n"
 
         total_progress = round((total_captured_all / total_max_all) * 100, 2) if total_max_all > 0 else 0.0
         progress_message += f"\n总进度：{total_progress}%"
