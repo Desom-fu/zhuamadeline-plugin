@@ -1217,13 +1217,13 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             return
     
     # 获得解药
-    elif(rnd<=591):
+    elif(rnd<=541):
         water_rnd = random.randint(2,4)
         items['万能解药'] = items.get('万能解药', 0) + water_rnd
         save_data(user_path, user_data)
         await message.finish(f"你在探险的时候，偶然发现地上有{water_rnd}瓶万能解药，会是谁留下来的呢，小小卒吗？" + diamond_text, at_sender=True)
         
-    elif(rnd<=650):
+    elif(rnd<=600):
         if(not '黄色球体' in collections):
             return
         data4 = open_data(user_list4)
