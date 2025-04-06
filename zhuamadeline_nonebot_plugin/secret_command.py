@@ -105,6 +105,8 @@ puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=G
 async def puzzle_command_handle(event: Event, bot: Bot):
     puzzle_message = (
         "---------------------------------------\n"
+        "由于题目文本过多，请输入 .pvz 来进行查看具体内容\n"
+        "---------------------------------------\n"
         "由于题目包含图片，请输入 .mmww 来进行查看具体内容\n"
         "---------------------------------------\n"
         "由于题目包含图片，请输入 .彩票刮刮乐（注意是中文！） 来进行查看具体内容\n"
@@ -759,6 +761,29 @@ def math_3(user_id, berry_data, user_data):
 
 
 # 以下为题面
+# 解密39 题面
+pvz_command = on_fullmatch(['.pvz', '。pvz'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@pvz_command.handle()
+async def handle_pvz():
+    text = ('''出题者：Princeli
+难度草莓：500
+
+The Zombie
+
+*警报，警报！二号猪场出现一大波不明生物体，行动诡异，不惧疼痛……
+*请各位猎人们不要惊慌，猎场主已派遣不同平台的专员前去剿灭入侵生物！
+“希望我的草莓果圈没事”
+“击退外敌的话，用一次性小手枪比较合适”
+“充能陷阱效果也十分强劲吧”
+“危急时刻用ultra逃跑也不是不行…”
+“我草，什么叫豌豆枪手，向日葵医疗兵和坚果盾兵？”
+……
+I wilfl teael yoau evserytheing
+do   yoU      mInD？
+It's the number：
+43256449''')
+    await pvz_command.finish(text)
+
 # 解密38 题面
 mmww_command = on_fullmatch(['.mmww', '。mmww'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @mmww_command.handle()

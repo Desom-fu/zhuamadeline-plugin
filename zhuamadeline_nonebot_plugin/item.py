@@ -430,8 +430,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 success = 999
             if panding_item == '时间献祭器' and pan_current_time < pan_next_time_r:
                 success = 999
-            if pan_next_time_r < trap_next_time_r and panding_item == '充能陷阱':
+            if panding_item == '充能陷阱' and trap_next_time_r < pan_next_time_r:
                 success = 999
+            
+            logger.info(f"success的数值是{success}")
+
             fail_text = "失败！"   #失败文本
         #--------------------这些道具不限制所在猎场的使用--------------------
             # 身份徽章作为例外不受影响
