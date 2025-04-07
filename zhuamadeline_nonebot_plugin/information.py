@@ -19,7 +19,7 @@ help = on_fullmatch(
 async def zhua_help():
     text = (
         "游戏玩法及全部命令请前往抓Madeline wiki\n"
-        "https://docs.qq.com/smartsheet/DVUZtQWlNTG1zZVhN\n"
+        "https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O\n"
         "进行查看\n"
         "此处仅列出常用指令，其它指令请看wiki：\n"
         "- .zhua: 抓一个madeline\n"
