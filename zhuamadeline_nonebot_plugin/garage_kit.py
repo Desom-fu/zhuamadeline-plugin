@@ -1,5 +1,6 @@
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment, Message
+from nonebot.params import CommandArg
 from pathlib import Path
 import random
 import datetime
@@ -7,12 +8,27 @@ from .function import open_data, print_zhua, save_data, time_text
 from .config import user_path, liechang_count, full_path
 from .whitelist import whitelist_rule
 
-garage_cmd = on_command("garage", aliases={"手办屋","handbook","sbw"}, priority=5, block=True, rule=whitelist_rule)
+garage_cmd = on_command("sbw", aliases={"手办屋","handbook","garage"}, priority=5, block=True, rule=whitelist_rule)
 
 @garage_cmd.handle()
-async def handle_garage(bot: Bot, event: MessageEvent):
-    # 先随机选择一个猎场
-    lc = random.randint(1, liechang_count)
+async def handle_garage(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
+    arg_str = str(arg).strip().lower()
+    if not arg_str:
+        # 随机选择一个猎场
+        lc = random.randint(1, liechang_count)
+    else:
+        # 根据arg选择猎场
+        try:
+            lc = int(arg_str)
+            # 判断是否在范围内
+            if not 1 <= lc <= liechang_count:
+                await garage_cmd.finish(f"请输入正确的手办屋猎场号范围哦！(1 ~ {liechang_count})", at_sender=True)
+                return
+            
+        except ValueError:
+            await garage_cmd.finish(f"请输入正确的手办屋猎场号范围哦！(1 ~ {liechang_count})", at_sender=True)
+            return
+        
     file_name = f"UserList{lc}.json"
 
     # 打开用户文件和猎场文件

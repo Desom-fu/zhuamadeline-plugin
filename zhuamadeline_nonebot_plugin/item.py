@@ -503,6 +503,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     "weaken": 2,  # weaken需要2瓶
                     "clumsy": 2,  # clumsy需要2瓶
                     "tentacle": 2,  # tentacle需要2瓶
+                    "poisoned_2": 2, # poisoned_2需要两瓶
                     "default": 1        # 默认1瓶
                 }
 
