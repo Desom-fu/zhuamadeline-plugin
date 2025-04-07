@@ -37,6 +37,7 @@ pvp_path = Path() / "data" / "UserList" / "pvp.json"
     minutes=1,   # 每隔1分钟
     start_date=datetime.datetime.now().replace(hour=1, minute=0, second=0), 
     end_date=datetime.datetime.now().replace(hour=1, minute=30, second=0), 
+    timezone="Asia/Shanghai"
 )
 def cancel_interest_send():
     bar_data = open_data(bar_path)
