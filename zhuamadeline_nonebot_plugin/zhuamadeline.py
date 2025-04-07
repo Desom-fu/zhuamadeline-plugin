@@ -312,7 +312,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             probabilities['d'] = probabilities['c'] + 300
         # 猎场4专属
         if liechang_number == "4":
-            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 300 + star_add}  # 初始设定
+            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 400 + star_add}  # 初始设定
 
             if red_ball >= 1:
                 probabilities.update({'c': 150, 'd': 450 + star_add})
