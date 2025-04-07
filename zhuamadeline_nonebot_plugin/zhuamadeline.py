@@ -312,12 +312,12 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             probabilities['d'] = probabilities['c'] + 300
         # 猎场4专属
         if liechang_number == "4":
-            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 400 + star_add}  # 初始设定
+            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 300 + star_add}  # 初始设定
 
             if red_ball >= 1:
-                probabilities.update({'c': 100, 'd': 400 + star_add})
+                probabilities.update({'c': 150, 'd': 450 + star_add})
             if green_ball >= 1:
-                probabilities.update({'b': 20, 'c': 150, 'd': 500 + star_add})
+                probabilities.update({'b': 40, 'c': 190, 'd': 490 + star_add})
             if yellow_ball >= 1:
                 probabilities = {
                     'a': 10 + increment,
