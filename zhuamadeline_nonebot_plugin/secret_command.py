@@ -43,6 +43,7 @@ math1_image_path = Path() / "data" / "Image" / "math1.png"
 math1_1_image_path = Path() / "data" / "Image" / "math1-1.jpg"
 math2_image_path = Path() / "data" / "Image" / "math2.png"
 math4_image_path = Path() / "data" / "Image" / "math4.png"
+math5_image_path = Path() / "data" / "Image" / "math5.png"
 huati2_image_path = Path() / "data" / "Image" / "huati2.jpg"
 huati3_image_path = Path() / "data" / "Image" / "huati3.png"
 huati4_image_path = Path() / "data" / "Image" / "huati4.png"
@@ -104,6 +105,8 @@ puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=G
 @puzzle_command.handle()
 async def puzzle_command_handle(event: Event, bot: Bot):
     puzzle_message = (
+        "---------------------------------------\n"
+        ".math （1~5）\n"
         "---------------------------------------\n"
         "由于题目文本过多，请输入 .pvz 来进行查看具体内容\n"
         "---------------------------------------\n"
@@ -174,8 +177,6 @@ async def puzzle_command_handle(event: Event, bot: Bot):
         "---------------------------------------\n"
         "出题者：“疯子” | 草莓总价：800\n"
         "请输入 .十撇 查看\n"
-        "---------------------------------------\n"
-        ".math （题号）\n"
         "---------------------------------------\n"
         "出题者：ztyqwq | 草莓总价：800\n"
         "由于题目包含图片，请输入 .rainbow2 来进行查看具体内容\n"
@@ -419,6 +420,9 @@ async def handle_math(arg: Message = CommandArg()):
                                   "答案请用 + - * / ^ ( ) 表示（电脑键盘上那些）\n"
                                   "请用以下命令回答 .password 计算式，例如 .password 1^(2+3/4)，计算式中间没空格"
                                   )
+    elif number_arg == "5":
+        math5_image_segment = MessageSegment.image(math5_image_path)
+        await math_command.finish(math5_image_segment + "出题者：泰格达人\n草莓手动发放")
     else:
         await math_command.finish("请输入正确的题号(1-4)")
 

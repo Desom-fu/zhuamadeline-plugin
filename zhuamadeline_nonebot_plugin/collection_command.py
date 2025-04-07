@@ -72,3 +72,22 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
     else:
         await ckcplist.finish("你还没尝试抓过madeline......", at_sender=True)
         
+# # 获得喵喵呜呜纪念藏品
+# mewmewwuwu = on_fullmatch(['.喵喵呜呜', '。喵喵呜呜'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+# @mewmewwuwu.handle()
+# async def mewmewwuwu_handle(bot: Bot, event: GroupMessageEvent):
+#     # 打开文件
+#     data = open_data(full_path)
+#     user_id = str(event.get_user_id())
+#     if user_id not in data:
+#         await mewmewwuwu.finish('喵喵呜呜？喵呜，喵呜！', at_sender = True)
+#     # 初始化藏品栏
+#     user_info = data.setdefault(str(user_id), {})
+#     collections = user_info.setdefault("collections", {})
+#     # 检测喵喵呜呜
+#     if "喵喵呜呜" not in collections:
+#         collections["喵喵呜呜"] = 1
+#         save_data(full_path, data)
+#         await mewmewwuwu.finish("呼~呼呼~喵喵呜呜！喵呜！！喵呜！！！\n喵呜 `.cp 喵喵呜呜` 喵呜呣~喵呜呣~喵", at_sender=True)
+#     else:
+#         await mewmewwuwu.finish('喵喵呜呜？喵呜，喵呜！喵呜喵呜喵呜呼呼呼~~~喵呜！呣~喵呜！', at_sender = True)
