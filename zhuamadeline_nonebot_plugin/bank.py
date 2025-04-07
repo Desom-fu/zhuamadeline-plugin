@@ -74,14 +74,26 @@ async def add_interest():
             user_bar.setdefault("interest_today", 0)
             
             if user_bar["bank"] > 0:
-                interest = int(user_bar["bank"] * 0.01)
-                if interest > 1000:
-                    add_pots += interest - 750
-                    interest = 750
-                elif interest > 500:
-                    half = (interest - 500) // 2
-                    add_pots += half
-                    interest -= half
+                bank = user_bar["bank"]
+                interest = 0
+            
+                # 第一段：≤50,000，1/100
+                part1 = min(bank, 50000)
+                interest += int(part1 * 0.01)
+            
+                # 第二段：50,001~100,000，1/200
+                if bank > 50000:
+                    part2 = min(bank - 50000, 50000)
+                    interest += int(part2 * 0.005)
+                    # 第二段 add_pots = (part2的1/100) - (part2 * 0.005)，也就是5w-1w之间的50%
+                    add_pots += int(part2 * 0.01) - int(part2 * 0.005)
+            
+                # 第三段：>100,000，1/1000
+                if bank > 100000:
+                    part3 = bank - 100000
+                    interest += int(part3 * 0.001)
+                    # 第三段 add_pots = (part3的1/100) - (part3 * 0.001)，也就是大于10w的90%
+                    add_pots += int(part3 * 0.01) - int(part3 * 0.001)
                 
                 user_bar["interest_today"] = interest
                 user_bar["interest"] += interest
