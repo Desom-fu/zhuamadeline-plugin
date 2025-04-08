@@ -141,7 +141,7 @@ async def PlainStuck(user_data, user_id, message, diamond_text):
     elif rnd <= 40 + rnd_regu and items.get('神秘碎片', 0) < 5:
         next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
         #检测星钻
-        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+        if diamond_text:
             next_time = current_time  # 立即重置冷却时间
  
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -316,7 +316,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             user_info['buff2'] = 'normal'    
             
         #检测星钻
-        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+        if diamond_text:
             next_time = current_time  # 立即重置冷却时间
             del stuck_data[user_id]
             user_info['buff'] = 'normal'
@@ -341,7 +341,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             items['神秘碎片'] = items.get('神秘碎片', 0) + 1
             stuck_data[user_id] = '2'
             #检测星钻
-            if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+            if diamond_text:
                 next_time = current_time  # 立即重置冷却时间
                 del stuck_data[user_id]
                 user_info['buff'] = 'normal'
@@ -608,7 +608,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
         if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
             user_info['buff2'] = 'normal'
         #检测星钻
-        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+        if diamond_text:
             next_time = current_time  # 立即重置冷却时间
             del stuck_data[user_id]
             user_info['buff'] = 'normal'
@@ -967,7 +967,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':    
             user_info['buff2'] = 'normal'
         #检测星钻
-        if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+        if diamond_text:
             next_time = current_time  # 立即重置冷却时间
             del stuck_data[user_id]
             user_info['buff'] = 'normal'
