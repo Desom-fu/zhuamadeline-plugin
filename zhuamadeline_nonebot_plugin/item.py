@@ -19,7 +19,7 @@ from .list2 import *
 from .list3 import *
 from .list4 import *
 #加载商店信息和商店交互
-from .shop import item, ban_item, item_aliases
+from .shop import item, ban_item, item_aliases, trap_item, fish_prices
 from .collection import collection_aliases, collections
 from .secret import secret_list
 from .function import *
@@ -422,15 +422,21 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             # 检查道具名称是否在商品列表中，防止使用空气掉坑
             usepanding = use_item_name.split("/")
             panding_item = usepanding[0]
-            if use_item_name not in item or panding_item not in item or use_item_name in ban_item:
-                success = 999
-            if(data[str(user_id)].get("item").get(use_item_name, 0) <= 0):
-                success = 999
-            if(data[str(user_id)].get("item").get(panding_item, 0) <= 0):
-                success = 999
-            if panding_item == '时间献祭器' and pan_current_time < pan_next_time_r:
-                success = 999
-            if panding_item == '充能陷阱' and trap_next_time_r < pan_next_time_r:
+            user_items = data[str(user_id)].get("item", {})
+            if any([
+                use_item_name not in item,
+                panding_item not in item,
+                use_item_name in ban_item,
+                use_item_name in trap_item,
+                panding_item in ban_item,
+                panding_item in trap_item,
+                use_item_name in fish_prices,
+                panding_item in fish_prices,
+                user_items.get(use_item_name, 0) <= 0,
+                user_items.get(panding_item, 0) <= 0,
+                panding_item == '时间献祭器' and pan_current_time < pan_next_time_r,
+                panding_item == '充能陷阱' and trap_next_time_r < pan_next_time_r,
+            ]):
                 success = 999
             
             logger.info(f"success的数值是{success}")

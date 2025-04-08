@@ -773,12 +773,78 @@ def get_random_item(identity_found, normal_mode_limit, user_id):
 
     return random.choice(item_choices)
 
+# 特殊扣血逻辑
+def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
+    """
+    处理死斗模式特殊扣血逻辑
+    :param action_type: 0=开枪自己, 1=开枪对方, 2=使用道具
+    :param demon_data: 游戏数据字典
+    :param group_id: 群组ID
+    :return: (消息内容, 更新后的demon_data)
+    """
+    msg = ""
+    identity_found = demon_data[group_id]['identity']
+    
+    # 检查是否处于死斗模式
+    if identity_found not in [2, 999]:
+        return "", demon_data
+    
+    current_turn = demon_data[group_id]['turn']
+    player_idx = current_turn
+    opponent_idx = (current_turn + 1) % 2
+    hp = demon_data[group_id]['hp']
+    hp_max = demon_data[group_id]['hp_max']
+    
+    # 开枪自己 (action_type=0)
+    if action_type == 0 and random.randint(1, 4) == 1:
+        damage = random.randint(1, 2)
+        original_hp = hp[opponent_idx]
+        hp[opponent_idx] = max(1, hp[opponent_idx] - damage)
+        msg = (
+            f"\n- 对方因为你的冒险行动收到波及！"
+            f"\n  造成了{damage}点伤害"
+            f"\n  对方HP: {original_hp} → {hp[opponent_idx]}（最低为1）"
+        )
+    
+    # 开枪对方 (action_type=1)
+    elif action_type == 1 and random.randint(1, 4) == 1:
+        damage = random.randint(1, 2)
+        original_hp = hp[player_idx]
+        hp[player_idx] = max(1, hp[player_idx] - damage)
+        msg = (
+            f"\n- 由于你的攻击过于激进！"
+            f"\n  受到{damage}点反噬伤害"
+            f"\n  自己HP: {original_hp} → {hp[player_idx]}（最低为1）"
+        )
+    
+    # 使用道具 (action_type=2) - 道具特殊处理
+    elif action_type == 2:
+        # 啤酒移除最后一颗实弹的强制扣血
+        if (demon_data[group_id].get('last_action') == 'beer' and 
+            demon_data[group_id].get('last_bullet') == 1 and
+            all(b == 0 for b in demon_data[group_id]['clip'])):
+            
+            original_hp_player = hp[player_idx]
+            original_hp_opponent = hp[opponent_idx]
+            hp[player_idx] = max(1, hp[player_idx] - 1)
+            hp[opponent_idx] = max(1, hp[opponent_idx] - 1)
+            msg = (
+                "\n- 最后一颗实弹被清除！"
+                f"\n  自己HP: {original_hp_player} → {hp[player_idx]}（最低为1）"
+                f"\n  对方HP: {original_hp_opponent} → {hp[opponent_idx]}（最低为1）"
+                f"\n  ※ 双方因冲击波各损失1点HP"
+            )
+    
+    # 更新数据
+    demon_data[group_id]['hp'] = hp
+    return msg, demon_data
+
 # 上弹函数
 def load(identity_found):
     """上弹，1代表实弹，0代表空弹"""
     # 根据identity_found值决定弹夹容量和实弹数量
     if identity_found in [2, 999]:
-        clip_size = random.randint(3, 10)  # 弹夹容量3-10
+        clip_size = random.randint(3, 8)  # 弹夹容量3-8
         # 确保至少2个实弹，最多不超过弹夹容量-1（至少留一个空弹）
         bullets = random.randint(2, clip_size // 2 + 1)  # 随机生成实弹数量
     else:
@@ -1034,9 +1100,12 @@ async def shoot(stp, group_id, message,args):
         msg += '- 子弹用尽，重新换弹，道具更新！\n'
         # 游戏轮数+1
         demon_data[group_id]['game_turn'] += 1
+        msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n'
+        # 调用死斗模式伤害计算 (stp=0是开枪自己，1是开枪对方)
+        damage_msg, demon_data = death_mode_damage(stp, demon_data, group_id)
+        msg += damage_msg
         # 获取死斗模式信息
         death_msg, demon_data = death_mode(identity_found, group_id, demon_data)
-        msg += f'- 当前轮数：{demon_data[group_id]['game_turn']}\n'
         msg += death_msg
         # 增加换行，优化排版
         msg += "\n"
@@ -1298,13 +1367,18 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         if demon_data[group_id]['clip']:
             removed_bullet = demon_data[group_id]['clip'].pop()
             bullet_type = "实弹" if removed_bullet == 1 else "空弹"
+            
             msg += f"- 你退掉了一颗子弹，这颗子弹是：{bullet_type}\n"
+
         if not demon_data[group_id]['clip'] or all(b == 0 for b in demon_data[group_id]['clip']):
             demon_data[group_id]['clip'] = load(identity_found)
             msg += "- 子弹已耗尽，重新装填！\n"
             msg += "\n"
             # 游戏轮数+1
             demon_data[group_id]['game_turn'] += 1
+            # 调用死斗模式伤害计算 (action_type=2)
+            damage_msg, demon_data = death_mode_damage(2, demon_data, group_id)
+            msg += damage_msg
             # 获取死斗模式信息
             death_msg, demon_data = death_mode(identity_found, group_id, demon_data)
             msg += death_msg

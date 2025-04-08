@@ -23,33 +23,6 @@ garden_aliases = {
     '升级': ['upgrade', 'levelup', 'update' ,'提升等级']
 }
 
-# def migrate_user_data():
-#     """迁移用户数据，移除等级相关字段"""
-#     garden_data = open_data(garden_path)
-#     changed = False
-    
-#     for user_id, data in garden_data.items():
-#         # 保留必要字段
-#         keep_fields = {
-#             "garden_berry", "isseed", "seed_time", "isfert", 
-#             "fert_time", "steal_date", "last_update_time",
-#             "be_steal_date", "today_steal", "today_be_stolen",
-#             "garden_level"  # 只保留等级数字
-#         }
-        
-#         # 创建新数据字典
-#         new_data = {k: v for k, v in data.items() if k in keep_fields}
-        
-#         # 检查是否有变化
-#         if new_data != data:
-#             garden_data[user_id] = new_data
-#             changed = True
-    
-#     if changed:
-#         save_data(garden_path, garden_data)
-#         print("用户数据迁移完成！")
-#     return changed
-
 # 全局更新 
 async def update_all_gardens(garden_data: dict):
     current_time = int(time.time())
@@ -234,9 +207,9 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         # 偷菜状态
         if user_garden["steal_date"] == current_date_str:
-            steal_status = f"今日已偷草莓({user_garden['today_steal']}/{level_config['max_steal_times']})"
+            steal_status = f"今日已偷草莓({user_garden['today_steal']}/{level_config['max_steal_times']})次"
         else:
-            steal_status = f"今日未偷草莓(0/{level_config['max_steal_times']})"
+            steal_status = f"今日未偷草莓(0/{level_config['max_steal_times']})次"
         
         if user_garden.get("today_be_stolen", 0) == 0:
             besteal_status = f"今日没被偷草莓(0/{level_config['max_be_stolen']})次"
@@ -420,21 +393,17 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     # 升级操作
     elif operation == "升级":
         # 检查状态
-        if user_garden["isseed"] == 1:
-            await berry_garden.finish("播种期间无法升级！请先收割当前作物。", at_sender=True)
-        if user_garden["isfert"] == 1:
-            await berry_garden.finish("施肥期间无法升级！请等待施肥效果结束。", at_sender=True)
-        
         current_level = user_garden["garden_level"]
         next_level = current_level + 1
-        
+
         # 检查是否存在下一等级
         if next_level not in GARDEN_LEVELS:
             await berry_garden.finish(f"当前已是最高等级（Lv{current_level}）！", at_sender=True)
-        
-        # 获取下一等级配置
+
+        # 获取当前和下一等级配置
+        current_config = get_level_config(current_level)
         next_config = get_level_config(next_level)
-        
+
         # 确定升级所需资源
         if next_config["if_use_berry"] == 1:
             cost_type = "berry"
@@ -444,7 +413,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             cost_type = "energy"
             cost_amount = next_config["upgrade_energy"]
             current_amount = energy
-        
+
         # 资源检查
         if current_amount < cost_amount:
             await berry_garden.finish(
@@ -452,28 +421,61 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
                 f"当前余额：{current_amount}", 
                 at_sender=True
             )
-        
-        # 执行升级
+
+        # 补偿机制计算
+        compensation_msg = ""
+
+        # 1. 播种状态补偿（仅返还种子成本）
+        if user_garden["isseed"] == 1:
+            seed_compensation = current_config["seed_cost"]  # 返还种子成本
+            user_data["berry"] += seed_compensation
+            compensation_msg += f"\n- 播种补偿: 返还种子成本[{seed_compensation}]颗草莓"
+
+        # 2. 施肥状态补偿（按剩余时间比例返还能量）
+        if user_garden["isfert"] == 1:
+            # 计算剩余施肥时间比例
+            remaining_fert_time = max(0, 12 * 3600 - (timestamp - user_garden["fert_time"]))
+            if remaining_fert_time > 0:
+                # 按比例返还能量 (向上取整)
+                energy_return = int(current_config["fert_energy"] * (remaining_fert_time / (12 * 3600)) + 0.5)
+                user_data["energy"] += energy_return
+                compensation_msg += f"\n- 施肥补偿: 返还[{energy_return}]点能量(剩余{remaining_fert_time//3600}小时)"
+
+        # 执行升级扣除
         if cost_type == "berry":
             data[user_id]["berry"] -= cost_amount
         else:
             data[user_id]["energy"] -= cost_amount
-        
+
+        # 重置状态
+        user_garden["isseed"] = 0
+        user_garden["isfert"] = 0
+
         # 更新等级
         user_garden["garden_level"] = next_level
-        
+
+        # 保存数据
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(
-            f"成功升级到 Lv{next_level}！\n"
+
+        # 构建回复消息
+        message = (
+            f"\n恭喜成功升级到 Lv{next_level}！\n"
             f"消耗：{cost_amount} {'颗草莓' if cost_type == 'berry' else '点能量'}\n"
-            f"新属性：\n"
+        )
+
+        if compensation_msg:
+            message += f"\n【状态补偿】{compensation_msg}\n"
+
+        message += (
+            f"\n新属性：\n"
             f"种子价格：{next_config['seed_cost']} 偷取成本：{next_config['steal_cost']}\n"
             f"施肥能耗：{next_config['fert_energy']} 基础产量：{next_config['basic_reward']}\n"
             f"偷取范围：{next_config['steal_min']}-{next_config['steal_max']}\n"
-            f"每日偷取次数：{next_config['max_steal_times']} 每日被偷上限：{next_config['max_be_stolen']}",
-            at_sender=True
+            f"每日偷取次数：{next_config['max_steal_times']} 每日被偷上限：{next_config['max_be_stolen']}"
         )
+
+        await berry_garden.finish(message, at_sender=True)
         
     else:
         # 构建帮助信息
