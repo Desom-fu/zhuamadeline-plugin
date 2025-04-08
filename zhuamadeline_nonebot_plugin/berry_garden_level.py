@@ -41,3 +41,7 @@ GARDEN_LEVELS = {
         "steal_max": 60
     }
 }
+
+# 获取等级配置的辅助函数
+def get_level_config(level):
+    return GARDEN_LEVELS.get(level, GARDEN_LEVELS[1])  # 默认返回1级配置
