@@ -11,18 +11,7 @@ from pathlib import Path
 from .config import *
 from .function import *
 from .whitelist import whitelist_rule
-
-# 常量定义
-SEED_COST = 10
-STEAL_COST = 15
-FERT_ENERGY = 1200
-BASIC_REWARD = 15
-# BUFF_MESSAGES = {
-#     'lost': "你现在正在迷路中，连路都找不到，怎么进入果园呢？",
-#     'confuse': "你现在正在找到了个碎片，疑惑着呢，不能进入果园。",
-#     'hurt': "你现在受伤了，没有精力进入果园！",
-#     'tentacle': "你刚被触手玩弄到失神，没有精力进入果园！"
-# }
+from .berry_garden_level import GARDEN_LEVELS  # 导入等级配置
 
 # 命令别名表
 garden_aliases = {
@@ -30,7 +19,8 @@ garden_aliases = {
     '施肥': ['fert', '肥料', '施肥'],
     '偷菜': ['steal', '偷取', '窃取', '偷草莓'],
     '播种': ['seed', '种植', '种菜'],
-    '查询': ['ck', 'query', 'check', '状态', '查看']
+    '查询': ['ck', 'query', 'check', '状态', '查看'],
+    '升级': ['upgrade', 'levelup', '提升等级']
 }
 
 # 全局更新 
@@ -40,10 +30,35 @@ async def update_all_gardens(garden_data: dict):
     
     for user_id in garden_data:
         garden = garden_data[user_id]
+        
+        ##### 数据迁移已完成，可以直接注释掉 #####
+        
+        # # 数据迁移：如果用户没有等级数据，初始化为1级
+        # if "garden_level" not in garden:
+        #     default_level = 1
+        #     garden["garden_level"] = default_level
+        #     # 从配置初始化所有动态参数
+        #     for key in GARDEN_LEVELS[default_level]:
+        #         if key not in garden:
+        #             garden[key] = GARDEN_LEVELS[default_level][key]
+
+        # # 数据迁移：处理issteal字段（新增部分）
+        # if "issteal" in garden:
+        #     # 如果今天已经被偷过（issteal=1），则设置today_be_stolen=1
+        #     if garden["issteal"] == 1 and garden.get("be_steal_date") == current_date_str:
+        #         garden["today_be_stolen"] = 1
+        #     # 删除旧字段
+        #     del garden["issteal"]
+        #     # 标记数据已变更
+        #     garden_data[user_id] = garden
+        
+        # 重置每日偷菜状态
         if garden.get("be_steal_date",'2000-01-01') != current_date_str:
             garden["be_steal_date"] = current_date_str
-            garden["issteal"] = 0
-    
+            garden["today_steal"] = 0
+            garden["today_be_stolen"] = 0
+            
+        # 处理播种状态
         if garden["isseed"] == 1:
             # 初始化最后更新时间（使用播种时间）
             last_update_time = garden.get("last_update_time", garden["seed_time"])
@@ -70,7 +85,7 @@ async def update_all_gardens(garden_data: dict):
                             fert_hours += 1
                 
                 # 总产量 = 基础产量 + 施肥加成
-                total_new = effective_hours * BASIC_REWARD + fert_hours * BASIC_REWARD
+                total_new = effective_hours * garden["basic_reward"] + fert_hours * garden["basic_reward"]
                 
                 # 更新数据（严格整数运算）
                 garden["garden_berry"] = garden.get("garden_berry", 0) + total_new
@@ -89,7 +104,7 @@ async def update_all_gardens(garden_data: dict):
                             is_fert = 1
                         
                         # 计算最后一小时的收成
-                        final_reward = BASIC_REWARD + (is_fert * BASIC_REWARD)
+                        final_reward = garden["basic_reward"] + (is_fert * garden["basic_reward"])
                         garden["garden_berry"] = garden.get("garden_berry", 0) + final_reward
                         garden["last_update_time"] = final_hour_time
                 
@@ -142,8 +157,19 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     user_bar.setdefault("game","1")
     user_bar.setdefault("bank",0)
 
-    # 初始化果园数据
-    for key in ["garden_berry", "isseed", "seed_time", "isfert", "issteal", "fert_time", "steal_date", "last_update_time", 'be_steal_date']:
+    # 初始化果园数据（包括等级相关字段）
+    default_level = 1
+    if "garden_level" not in user_garden:
+        user_garden["garden_level"] = default_level
+        # 从配置初始化所有动态参数
+        for key in GARDEN_LEVELS[default_level]:
+            if key not in user_garden:
+                user_garden[key] = GARDEN_LEVELS[default_level][key]
+
+    # 初始化其他原有字段
+    for key in ["garden_berry", "isseed", "seed_time", "isfert",
+                "fert_time", "steal_date", "last_update_time", 'be_steal_date', 
+                'today_steal', 'today_be_stolen']:
         user_garden.setdefault(key, 0 if "time" not in key else timestamp) if key not in ["steal_date", 'be_steal_date'] else user_garden.setdefault(key, "2000-01-01")
 
     # 获取日期信息
@@ -156,18 +182,6 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     if user_collections.get("草莓果园地契", 0) == 0:
         await berry_garden.finish("你还没有获得草莓果园地契哦，无法进入草莓果园！", at_sender=True)
 
-    # 事件检查
-    # if user_data['event'] != 'nothing':
-    #     await berry_garden.finish("你还有正在进行中的事件", at_sender=True)
-    
-    # # 状态检查
-    # if (buff := user_data.get('buff') or user_data.get('debuff')) and (msg := BUFF_MESSAGES.get(buff)):
-    #     await berry_garden.finish(msg, at_sender=True)
-
-    # 草莓余额检查
-    if berry < 0:
-        await berry_garden.finish(f"你现在仍在负债中……不允许进入果园！你只有{berry}颗草莓！", at_sender=True)
-        
     # 解析命令
     command = str(args).strip().lower()
     
@@ -209,26 +223,42 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         # 偷菜状态
         if user_garden["steal_date"] == current_date_str:
-            steal_status = "今日已偷草莓"
+            steal_status = f"今日已偷草莓({user_garden['today_steal']}/{user_garden['max_steal_times']})"
         else:
-            steal_status = "今日未偷草莓"
+            steal_status = f"今日未偷草莓(0/{user_garden['max_steal_times']})"
         
-        if user_garden["issteal"] == 1:
-            besteal_status = "今日已被偷草莓"
+        if user_garden.get("besteal_status", 0) != 0:
+            besteal_status = f"今日没被偷草莓(0/{user_garden['max_be_stolen']})"
         else:
-            besteal_status = "今日没被偷草莓，要小心了"
+            besteal_status = f"今日已被偷草莓({user_garden['today_be_stolen']}/{user_garden['max_be_stolen']})次"
+        
+        # 获取升级信息
+        current_level = user_garden["garden_level"]
+        if (next_level := current_level + 1) in GARDEN_LEVELS:
+            next_config = GARDEN_LEVELS[next_level]
+            cost_type = "草莓" if next_config["if_use_berry"] else "能量"
+            cost = next_config[f"upgrade_{'berry' if next_config['if_use_berry'] else 'energy'}"]
+            upgrade_info = f"升级到 Lv{next_level} 需要 {cost} {cost_type}"
+        else:
+            upgrade_info = "已达成最高等级"
         
         # 构建回复消息
         reply_msg = (
-            f"\n【土地状态查询】\n"
-            f"当前草莓数量: {user_garden['garden_berry']}\n"
-            f"播种状态: {seed_status}\n"
-            f"施肥状态: {fert_status}\n"
-            f"偷菜状态: {steal_status}\n"
-            f"被偷状态: {besteal_status}"
+            f"\n【土地状态查询】"
+            f"\n当前等级: Lv{current_level} | {upgrade_info}"
+            f"\n当前草莓数量: {user_garden['garden_berry']}"
+            f"\n播种状态: {seed_status}"
+            f"\n施肥状态: {fert_status}"
+            f"\n偷菜状态: {steal_status}"
+            f"\n被偷状态: {besteal_status}"
+            f"\n当前等级属性:"
+            f"\n种子价格: {user_garden['seed_cost']} 偷取成本: {user_garden['steal_cost']}"
+            f"\n施肥能耗: {user_garden['fert_energy']} 基础产量: {user_garden['basic_reward']}"
+            f"\n偷取范围: {user_garden['steal_min']}-{user_garden['steal_max']}"
         )
         
         await berry_garden.finish(reply_msg, at_sender=True)
+    
     # 收菜操作
     elif operation == "收菜":
         harvest = user_garden["garden_berry"]
@@ -261,18 +291,23 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         await berry_garden.finish(message, at_sender=True)
         
     elif operation == "偷菜":
+        # 检查每日偷菜次数限制
+        if user_garden["today_steal"] >= user_garden["max_steal_times"]:
+            await berry_garden.finish(f"今日偷菜次数已达上限({user_garden['max_steal_times']}次)！", at_sender=True)
+        
         if user_garden["steal_date"] == current_date_str:
             await berry_garden.finish("今天你已经偷过草莓了，请明天再来吧！", at_sender=True)
         
-        if berry < STEAL_COST:
-            await berry_garden.finish(f"偷草莓需要{STEAL_COST}颗草莓，你的草莓数量不足！", at_sender=True)
+        steal_cost = user_garden["steal_cost"]
+        if berry < steal_cost:
+            await berry_garden.finish(f"偷草莓需要{steal_cost}颗草莓，你的草莓数量不足！", at_sender=True)
         
         # 随机选择目标（未被偷过且草莓数量>0的果园）
         targets = [
             uid for uid in garden_data 
             if uid != user_id 
-            and garden_data[uid]["issteal"] == 0 # 只偷没偷过的
-            and garden_data[uid]["garden_berry"] > 0  # 只选择有草莓的果园
+            and garden_data[uid]["today_be_stolen"] < garden_data[uid]["max_be_stolen"]  # 直接使用计数器
+            and garden_data[uid]["garden_berry"] > 0
         ]
         
         if not targets:
@@ -281,19 +316,28 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         # 随机选择
         target_id = random.choice(targets)
         target_garden = garden_data[target_id]
-        steal_amount = random.randint(1, min(50, target_garden["garden_berry"]))
+        steal_amount = random.randint(
+            user_garden["steal_min"], 
+            min(user_garden["steal_max"], target_garden["garden_berry"])
+        )
         
         # 更新数据
-        data[user_id]["berry"] -= STEAL_COST
+        data[user_id]["berry"] -= steal_cost
         user_garden["garden_berry"] += steal_amount
         target_garden["garden_berry"] -= steal_amount
-        target_garden["issteal"] = 1
         user_garden["steal_date"] = current_date_str
         target_garden["be_steal_date"] = current_date_str
+        user_garden["today_steal"] += 1
+        target_garden["today_be_stolen"] += 1
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(f"你花费了{STEAL_COST}颗草莓，成功偷取了"+ MessageSegment.at(target_id) +f" 的草莓地里的{steal_amount}颗草莓！偷取的草莓已放在你自己地里了哦！", at_sender=True)
+        await berry_garden.finish(
+            f"你花费了{steal_cost}颗草莓，成功偷取了"+ MessageSegment.at(target_id) +
+            f" 的草莓地里的{steal_amount}颗草莓！\n" +
+            f"今日已偷: {user_garden['today_steal']}/{user_garden['max_steal_times']}次",
+            at_sender=True
+        )
         
     elif operation == "施肥":
         if user_garden["isseed"] != 1:
@@ -302,32 +346,103 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if user_garden["isfert"] == 1:
             await berry_garden.finish("你已经施肥过了，没必要重新施肥哦！", at_sender=True)
             
-        if energy < FERT_ENERGY:
-            await berry_garden.finish(f"施肥需要{FERT_ENERGY}点能量，你目前只有{energy}点！", at_sender=True)
+        fert_energy = user_garden["fert_energy"]
+        if energy < fert_energy:
+            await berry_garden.finish(f"施肥需要{fert_energy}点能量，你目前只有{energy}点！", at_sender=True)
         
-        user_data["energy"] -= FERT_ENERGY
+        user_data["energy"] -= fert_energy
         user_garden["isfert"] = 1
         user_garden["fert_time"] = timestamp
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(f"你使用了{FERT_ENERGY}点能量对土地施肥成功！接下来的12h内你的草莓地收获将会翻倍！", at_sender=True)
+        await berry_garden.finish(
+            f"你使用了{fert_energy}点能量对土地施肥成功！\n"
+            f"接下来的12h内你的草莓地收获将会翻倍！",
+            at_sender=True
+        )
         
     elif operation == "播种":
         if user_garden["isseed"] == 1:
             await berry_garden.finish("你已经播种过种子了哦，不能重复购买了哦！", at_sender=True)
         
-        if berry < SEED_COST:
-            await berry_garden.finish(f"购买种子需要{SEED_COST}颗草莓！你现在只有{berry}颗！", at_sender=True)
+        seed_cost = user_garden["seed_cost"]
+        if berry < seed_cost:
+            await berry_garden.finish(f"购买种子需要{seed_cost}颗草莓！你现在只有{berry}颗！", at_sender=True)
         
-        data[user_id]["berry"] -= SEED_COST
+        data[user_id]["berry"] -= seed_cost
         user_garden["isseed"] = 1
         user_garden["seed_time"] = timestamp
         user_garden["last_update_time"] = timestamp
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(f"播种成功！24小时内每小时草莓地都会为你带来{BASIC_REWARD}颗草莓的收益哦！", at_sender=True)
+        await berry_garden.finish(
+            f"播种成功！24小时内每小时草莓地都会为你带来{user_garden['basic_reward']}颗草莓的收益哦！\n"
+            f"施肥可使产量翻倍！",
+            at_sender=True
+        )
+    
+    # 升级操作
+    elif operation == "升级":
+        # 检查状态
+        if user_garden["isseed"] == 1:
+            await berry_garden.finish("播种期间无法升级！请先收割当前作物。", at_sender=True)
+        if user_garden["isfert"] == 1:
+            await berry_garden.finish("施肥期间无法升级！请等待施肥效果结束。", at_sender=True)
+        
+        current_level = user_garden["garden_level"]
+        next_level = current_level + 1
+        
+        # 检查是否存在下一等级
+        if next_level not in GARDEN_LEVELS:
+            await berry_garden.finish(f"当前已是最高等级（Lv{current_level}）！", at_sender=True)
+        
+        # 获取下一等级配置
+        next_config = GARDEN_LEVELS[next_level]
+        
+        # 确定升级所需资源
+        if next_config["if_use_berry"] == 1:
+            cost_type = "berry"
+            cost_amount = next_config["upgrade_berry"]
+            current_amount = berry
+        else:
+            cost_type = "energy"
+            cost_amount = next_config["upgrade_energy"]
+            current_amount = energy
+        
+        # 资源检查
+        if current_amount < cost_amount:
+            await berry_garden.finish(
+                f"升级到 Lv{next_level} 需要[{cost_amount}]{'颗草莓' if cost_type == 'berry' else '点能量'}！\n"
+                f"当前余额：{current_amount}", 
+                at_sender=True
+            )
+        
+        # 执行升级
+        if cost_type == "berry":
+            data[user_id]["berry"] -= cost_amount
+        else:
+            data[user_id]["energy"] -= cost_amount
+        
+        # 更新等级和所有属性
+        user_garden["garden_level"] = next_level
+        for key in next_config:
+            if key not in ["if_use_berry", "upgrade_berry", "upgrade_energy"]:
+                user_garden[key] = next_config[key]
+        
+        save_data(full_path, data)
+        save_data(garden_path, garden_data)
+        await berry_garden.finish(
+            f"成功升级到 Lv{next_level}！\n"
+            f"消耗：{cost_amount} {'颗草莓' if cost_type == 'berry' else '点能量'}\n"
+            f"新属性：\n"
+            f"种子价格：{user_garden['seed_cost']} 偷取成本：{user_garden['steal_cost']}\n"
+            f"施肥能耗：{user_garden['fert_energy']} 基础产量：{user_garden['basic_reward']}\n"
+            f"偷取范围：{user_garden['steal_min']}-{user_garden['steal_max']}\n"
+            f"每日偷取次数：{user_garden['max_steal_times']} 每日被偷上限：{user_garden['max_be_stolen']}",
+            at_sender=True
+        )
         
     else:
         # 构建帮助信息
