@@ -424,7 +424,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             panding_item = usepanding[0]
             user_items = data[str(user_id)].get("item", {})
             if any([
-                use_item_name in trap_item,
                 panding_item in trap_item,
                 panding_item == '时间献祭器' and pan_current_time > pan_next_time_r,
                 panding_item == 'madeline提取器' and len(usepanding) == 2,
