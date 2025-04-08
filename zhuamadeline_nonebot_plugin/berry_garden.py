@@ -239,7 +239,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             steal_status = f"今日未偷草莓(0/{level_config['max_steal_times']})"
         
         if user_garden.get("today_be_stolen", 0) == 0:
-            besteal_status = f"今日没被偷草莓(0/{level_config['max_be_stolen']})"
+            besteal_status = f"今日没被偷草莓(0/{level_config['max_be_stolen']})次"
         else:
             besteal_status = f"今日已被偷草莓({user_garden['today_be_stolen']}/{level_config['max_be_stolen']})次"
         
@@ -309,8 +309,14 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         steal_cost = level_config["steal_cost"]
         if berry < steal_cost:
             await berry_garden.finish(f"偷草莓需要{steal_cost}颗草莓，你的草莓数量不足！", at_sender=True)
-        
-        # 随机选择目标（未被偷过且草莓数量>0的果园）
+
+        # 获取当前用户的最小偷取值
+        min_steal = level_config["steal_min"]
+        # 随机选择目标（需满足以下条件）：
+        # 1. 不是自己
+        # 2. 今日被偷次数未达上限
+        # 3. 草莓数量 > 0
+        # 4. 草莓数量 ≥ 你的最小偷取值
         targets = []
         for uid, target in garden_data.items():
             if uid == user_id:
@@ -318,10 +324,22 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             
             target_level = target.get("garden_level", 1)
             target_config = get_level_config(target_level)
-            
+            target_berries = target.get("garden_berry", 0)
+
             if (target.get("today_be_stolen", 0) < target_config["max_be_stolen"] and 
-                target.get("garden_berry", 0) > 0):
+                target_berries > 0 and 
+                target_berries >= min_steal):
                 targets.append(uid)
+
+        if not targets:
+            await berry_garden.finish(
+                "现在没有符合条件的偷取目标！\n"
+                "可能原因：\n"
+                f"- 所有目标的草莓数量都少于你的最小偷取值({min_steal})\n"
+                "- 目标今日已被偷达到上限\n"
+                "- 目标草莓数量为0", 
+                at_sender=True
+            )
         
         if not targets:
             await berry_garden.finish("现在没有可以偷的土地，请早点过来或者晚点过来偷哦！", at_sender=True)
