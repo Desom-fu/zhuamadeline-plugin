@@ -513,11 +513,13 @@ async def dailyjrrp(event: GroupMessageEvent):
 ck = on_command('ck', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @ck.handle()
-async def cha_berry(event: Event, arg: Message = CommandArg()):
+async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     data = open_data(user_path / file_name)
     pvp_data = open_data(pvp_path)
     bar_info = open_data(bar_path)
     user_id = str(event.get_user_id())
+    group_id = str(event.group_id)
+    nickname = await get_nickname(bot, user_id)
 
     if user_id not in data:
         await ck.finish("你还没尝试抓过Madeline.....", at_sender=True)
@@ -630,8 +632,12 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
         '5': '五号猎场 - 遗忘深渊',
     }
     liechang_name = liechang_names.get(liechang_number, "未知猎场")
+    message = ''
     # 生成消息
-    message = (
+    if all_judge == 'all':
+        message += f"以下是玩家[{nickname}]的全部状态："
+        
+    message += (
         f"\n- 所处猎场：{liechang_name}"
         f"\n- 当前持有草莓：{berry}颗"
         )
@@ -754,8 +760,27 @@ async def cha_berry(event: Event, arg: Message = CommandArg()):
                 )
             else:
                 message += f"\n• 本次Madeline竞技场竞猜已结算"
+    if all_judge == 'all': 
+        # 构建转发消息
+        forward_message = [
+            {
+                "type": "node",
+                "data": {
+                    "name": "全服进度",
+                    "uin": str(bot.self_id),
+                    "content": message.strip(),
+                },
+            }
+        ]
 
-    await ck.finish(message, at_sender=True)
+        # 发送转发消息
+        await bot.call_api(
+            "send_group_forward_msg",
+            group_id=group_id,
+            messages=forward_message,
+        )
+    else:
+        await ck.finish(message, at_sender=True)
 
 
 
