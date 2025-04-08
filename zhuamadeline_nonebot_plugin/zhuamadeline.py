@@ -635,7 +635,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     message = ''
     # 生成消息
     if all_judge == 'all':
-        message += f"以下是玩家[{nickname}]的全部状态："
+        message += f"以下是玩家 [{nickname}] 的全部状态：\n"
         
     message += (
         f"\n- 所处猎场：{liechang_name}"
@@ -766,7 +766,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
             {
                 "type": "node",
                 "data": {
-                    "name": "全服进度",
+                    "name": f"{nickname}的全部状态",
                     "uin": str(bot.self_id),
                     "content": message.strip(),
                 },
