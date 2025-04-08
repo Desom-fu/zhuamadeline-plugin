@@ -418,32 +418,26 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 elif standard_collection:
                     use_item_name = standard_collection  # 匹配到藏品
                     
-            success = 0  #0代表没有效果，1代表成功，2代表失败
+            success = 999  #0代表没有效果，1代表成功，2代表失败，999代表不会掉坑
             # 检查道具名称是否在商品列表中，防止使用空气掉坑
             usepanding = use_item_name.split("/")
             panding_item = usepanding[0]
             user_items = data[str(user_id)].get("item", {})
             if any([
-                use_item_name not in item,
-                panding_item not in item,
-                use_item_name in ban_item,
                 use_item_name in trap_item,
-                panding_item in ban_item,
                 panding_item in trap_item,
-                use_item_name in fish_prices,
-                panding_item in fish_prices,
-                user_items.get(use_item_name, 0) <= 0,
-                user_items.get(panding_item, 0) <= 0,
-                panding_item == '时间献祭器' and pan_current_time < pan_next_time_r,
-                panding_item == '充能陷阱' and trap_next_time_r < pan_next_time_r,
+                panding_item == '时间献祭器' and pan_current_time > pan_next_time_r,
+                panding_item == 'madeline提取器' and len(usepanding) == 2,
+                panding_item == '充能陷阱' and pan_current_time > trap_next_time_r ,
             ]):
-                success = 999
+                success = 0
             
             logger.info(f"success的数值是{success}")
+            logger.info(f"user_item_name是{use_item_name}，pan_item_name是{panding_item}")
 
             fail_text = "失败！"   #失败文本
         #--------------------这些道具不限制所在猎场的使用--------------------
-            # 身份徽章作为例外不受影响
+            # 身份徽章作为例外不受影响  
             if use_item_name.startswith("身份徽章"):
                 if not "/" in use_item_name:
                     await daoju.finish("命令格式不正确，请使用 .use 身份徽章/0 或 .use 身份徽章/1 或 .use 身份徽章/2", at_sender=True)
@@ -1965,9 +1959,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             helmat = 0
                         rnd_hurt = 10
                         rnd_stuck = random.randint(1,100)
-                        # 测试
+                        # # 测试
                         # if user_id in bot_owner_id:
-                        #     rnd_hurt == 1
+                        #     rnd_stuck = 1
                         if helmat>=1:
                             rnd_hurt -=5
                         if(rnd_stuck<=rnd_hurt):
