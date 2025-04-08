@@ -2022,7 +2022,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             liechang_mapping = {
                                 '1': rabbit_madeline1,
                                 '2': rabbit_madeline2,
-                                '3': rabbit_madeline3
+                                '3': rabbit_madeline3,
+                                '4': rabbit_madeline4
                             }
                             # 获取对应的列表并筛选
                             rabbit_madeline_list = liechang_mapping.get(liechang_number, [])
