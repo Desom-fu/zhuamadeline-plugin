@@ -136,10 +136,10 @@ GARDEN_LEVELS = {
         "upgrade_energy": 200000,
         "seed_cost": 60,
         "steal_cost": 35,
-        "fert_energy": 8000,
-        "basic_reward": 100,
+        "fert_energy": 9600,
+        "basic_reward": 120,
         "max_steal_times": 5,
-        "max_be_stolen": 4,
+        "max_be_stolen": 3,
         "steal_min": 25,
         "steal_max": 100
     }

@@ -926,7 +926,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                     # 判定是否成功
                     if current_rate <= success_rate:
-                        data[user_id]['next_time'] = (current_time + datetime.timedelta(seconds=1)).strftime("%Y-%m-%d %H:%M:%S")
+                        data[user_id]['next_time'] = (current_time + datetime.timedelta(seconds=0)).strftime("%Y-%m-%d %H:%M:%S")
                         data[user_id]["buff"] = "normal"
 
                         # 移除被困名单
