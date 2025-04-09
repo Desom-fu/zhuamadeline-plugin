@@ -757,7 +757,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     message += (f"\n- 剩余能量：{energy}点") if energy > 0 else ''
 
     # 显示体力（若有）
-    message += (f"\n- 剩余体力：{energy}点") if power > 0 else ''
+    message += (f"\n- 剩余体力：{power}点") if power > 0 else ''
     
     #添加状态（若有）
     message += (f"\n- 状态：{msg_status}") if msg_status else ''

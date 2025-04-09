@@ -612,7 +612,7 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
             data[user_id]['berry'] -= 300
             msg_text += f"\n\n哇！你似乎在负债过程中还得强制预言大师啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
         
-        msg += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
+        msg_text += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 
     save_data(full_path, data)
     save_data(bar_path, bar_data)

@@ -192,9 +192,11 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
 
     madeline_check[user_id][madeline_key] -= 1
     apply_effects(state, [LEVEL_EFFECTS.get(madeline_info[0], {})])  # madeline_info[0] 是等级
+    apply_effects(state, [FOOD_EFFECTS.get(food, {})])
     
     # 设置工作时间
     duration = AREA_CONFIGS[area]['duration']
+    user_info['item']['体力'] -= power_require
     next_time = current_time + datetime.timedelta(hours=duration)
     
     # 更新用户数据
@@ -211,7 +213,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     save_data(full_path, data)
     save_data(config.user_path, madeline_check)
     
-    await work.finish("恭喜, 成功派遣madeline出去工作了!")
+    await work.finish(f"你成功派遣[{madeline}]携带着[{food}]去[{area}]工作了！预计需要工作{duration}个小时！")
 
 
 status_work = on_command('工作进度', aliases={'workjd','jdwork'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -493,43 +495,59 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 "madeline参加了一个名人活动的组织，作为临时工作人员，得到了高薪。",
                 "madeline为一个著名品牌做了临时的视频拍摄工作，薪水非常高。"
             ]
+            # 初始化总草莓，总道具
+            total_berry = 0
+            total_item = {}
             for hour in range(hours):
                 selected_events = random.sample(common_events, 10 - work_per_hour)
                 
                 for i in range(work_per_hour):
                     # 插入工作事件
-                    get_salary = random.randint(1,2)
-                    if get_salary == 1:
+                    get_salary = random.randint(1,10)
+                    if get_salary <= 7:
                         salary = random.randint(20,50)
                         tool_num = 0
-                    else:
+                    elif get_salary <= 9:
                         salary = 0
                         tool_type = random.choice(tool_list)
-                        tool_num = random.randint(1,5)
+                        tool_num = random.randint(1,3)
+                    else:
+                        tool_num = 0
+                        salary = 0
                     # 计算随机事件类型
                     if random.randint(1, 100) < work_simple_chance:
                         event = random.choice(simple_work_events)
                     else:
                         event = random.choice(complex_work_events)
-                        salary *= 3
-                        tool_num *= 3
+                        salary *= 2
+                        tool_num *= 2
                     
                     if salary > 0:
                         event += f"本次工作madeline获得了{salary}颗草莓。"
                         data[str(user_id)]['berry'] += salary
+                        total_berry += salary
                     elif tool_num > 0:
                         event += f"本次工作madeline获得了{tool_num}个{tool_type}。"
                         if(not tool_type in data[str(user_id)]["item"]):
                             data[str(user_id)]["item"][tool_type] = 0
                         data[str(user_id)]["item"][tool_type] += tool_num
+                        # 累加到total_item
+                        if tool_type not in total_item:
+                            total_item[tool_type] = 0
+                        total_item[tool_type] += tool_num
+                    else:
+                        event += f"本次工作由于老板太黑心了，madeline什么都没获得。"
 
                     if bonus_berry>=1:
-                        bonus = random.ranint(1,bonus_berry)
+                        bonus = random.randint(1,bonus_berry)  # 修正了random.ranint拼写错误
                         data[str(user_id)]['berry'] += bonus
-                        event += f"同时因表现非常好，额外获得了{bonus}颗草莓。"
+                        total_berry += bonus
+                        if salary == 0 or tool_num == 0:
+                            event += f"但是由于表现非常好，老板额外奖励了{bonus}颗草莓。"
+                        else:
+                            event += f"同时因表现非常好，额外获得了{bonus}颗草莓。"
                     event += "\n"
                     selected_events.append(event)
-                    
                 
                 # 构造日志字符串
                 random.shuffle(selected_events)  # 打乱顺序
@@ -538,6 +556,15 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 final_log += "-------------\n"
             
             final_log += f"本次工作你获得了{hours}点经验。"
+            final_log += f"\n本次工作你获得了{total_berry}颗草莓。"
+            # 修改道具汇总部分
+            if total_item:
+                final_log += "\n本次工作你获得了以下道具：\n"
+                for item, count in total_item.items():
+                    final_log += f"- {item} × {count}\n"
+            else:
+                final_log += "\n本次工作你没有获得任何道具。"
+            
             data[str(user_id)]['work_exp'] += hours
             tool_bonus = work_exp//100
             if (tool_bonus > 0):
@@ -545,7 +572,11 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 if(not tool_type in data[str(user_id)]["item"]):
                     data[str(user_id)]["item"][tool_type] = 0
                 data[str(user_id)]['item'][tool_type] += tool_bonus
-                final_log += f"同时因madeline非常出色的表现，额外获得了{tool_bonus}个{tool_type}!"
+                # 也累加到total_item
+                if tool_type not in total_item:
+                    total_item[tool_type] = 0
+                total_item[tool_type] += tool_bonus
+                final_log += f"\n同时因madeline非常出色的表现，额外获得了{tool_bonus}个{tool_type}!"
             
             save_data(full_path, data)
 
@@ -609,9 +640,9 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
         
         if today_sleep == 0:
             data[str(user_id)]['last_sleep_date'] = current_date.strftime("%Y-%m-%d")
-            power_per_hour = 5
+            power_per_hour = 50
             # 房产证加成
-            power_per_hour += data[str(user_id)].get("collections").get('房产证', 0) * 25
+            power_per_hour += data[str(user_id)].get("collections").get('房产证', 0) * 100
             next_time_str = data[str(user_id)]['next_time'] 
             next_time_dt = datetime.datetime.strptime(next_time_str, "%Y-%m-%d %H:%M:%S")
             if next_time_dt < current_time:
@@ -667,7 +698,7 @@ async def skip_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
         await skip_work.finish("你暂时没有派遣任何madeline外出工作", at_sender=True)
 
 # 查看帮助菜单和更新信息
-work_help = on_fullmatch(['.工作帮助', '。工作帮助', '。workhelp', '。workhelp'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+work_help = on_fullmatch(['.工作帮助', '。工作帮助', '。workhelp', '.workhelp'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @work_help.handle()
 async def work_help_handle():
     await work_help.finish("关于外出的一些帮助\n"+
