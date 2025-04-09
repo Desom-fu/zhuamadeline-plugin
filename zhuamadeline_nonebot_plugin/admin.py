@@ -103,6 +103,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".设定能量 QQ号 能量数量",
         ".账单 (日期)",
         ".清除冷却 QQ号",
+        ".清除工作冷却 QQ号",
         ".清除钓鱼冷却 QQ号",
         ".全服清除冷却",
         ".全服清除钓鱼冷却",
@@ -667,7 +668,7 @@ async def timeClear_Admin(event: GroupMessageEvent, arg: Message = CommandArg())
     save_data(user_path / file_name, data)
     await admin_timeClear.finish(MessageSegment.at(user_id)+f"的冷却已清除", at_sender=True)
 
-#神权！清除zhuamadeline的cd
+#神权！清除钓鱼的cd
 admin_fish_timeClear = on_command("清除钓鱼冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @admin_fish_timeClear.handle()
 async def admin_fish_timeClear_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -686,7 +687,7 @@ async def admin_fish_timeClear_handle(event: GroupMessageEvent, arg: Message = C
     
     #没有这个玩家
     if(not user_id in data):
-        await admin_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+        await admin_fish_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
     
     current_time = datetime.datetime.now()
     data[str(user_id)]['next_fishing_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -694,6 +695,35 @@ async def admin_fish_timeClear_handle(event: GroupMessageEvent, arg: Message = C
     #写入文件
     save_data(user_path / file_name, data)
     await admin_fish_timeClear.finish(MessageSegment.at(user_id)+f"的钓鱼冷却已清除", at_sender=True)
+
+#神权！清除工作的cd
+admin_work_timeClear = on_command("清除工作冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@admin_work_timeClear.handle()
+async def admin_work_timeClear_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    
+    #判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+    
+    arg = str(arg).split(" ")
+    #清除冷却目标的qq号
+    user_id = arg[0]
+
+    data = {}
+    if(os.path.exists(user_path / file_name)):
+        data = open_data(user_path / file_name)
+    
+    #没有这个玩家
+    if(not user_id in data):
+        await admin_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+    
+    current_time = datetime.datetime.now()
+    data[str(user_id)]['last_sleep_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    data[str(user_id)]['working_endtime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    #写入文件
+    save_data(user_path / file_name, data)
+    await admin_work_timeClear.finish(MessageSegment.at(user_id)+f"的工作冷却已清除", at_sender=True)
 
 # 全服清除冷却
 clear_all_cd = on_command("全服清除冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)

@@ -19,7 +19,7 @@ from .list2 import *
 from .list3 import *
 from .list4 import *
 #加载商店信息和商店交互
-from .shop import item, ban_item, item_aliases, trap_item, fish_prices
+from .shop import item, item_aliases, trap_item
 from .collection import collection_aliases, collections
 from .secret import secret_list
 from .function import *
@@ -692,6 +692,16 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             next_clock_time = datetime.datetime.strptime(data.get(str(user_id)).get('next_clock_time'), "%Y-%m-%d %H:%M:%S")
                         except:
                             next_clock_time = current_time
+                            
+                        # 判定是否在休息状态中
+                        if not 'last_sleep_time' in data[str(user_id)]:
+                            last_sleep_time = current_time
+                        else:
+                            last_sleep_time = datetime.datetime.strptime(data.get(str(user_id)).get('last_sleep_time'), "%Y-%m-%d %H:%M:%S")
+                        
+                        if last_sleep_time >= current_time:
+                            await daoju.finish("好好休息吧，不要试图使用时间秒表了...", at_sender=True)
+                        
                         #然后判断是否能使用秒表
                         if current_time >= next_clock_time:
                             data[str(user_id)]["item"][use_item_name] -= 1 

@@ -21,7 +21,11 @@ __all__ = [
     "zhuama_group",
     'bar_path',
     'garden_path',
-    'hourglass_max'
+    'hourglass_max',
+    'user_path1',
+    'user_path2',
+    'user_path3',
+    'user_path4',
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -68,6 +72,11 @@ full_path = user_path / file_name
 cd_path = Path() / "Data" / "UserList" / "allcooldown.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
 garden_path = Path() / "data" / "UserList" / "garden.json"
+#猎场path 开新猎场要改
+user_path1 = Path() / "data" / "UserList" / "UserList1.json"
+user_path2 = Path() / "data" / "UserList" / "UserList2.json"
+user_path3 = Path() / "data" / "UserList" / "UserList3.json"
+user_path4 = Path() / "data" / "UserList" / "UserList4.json"
 
 #赌场信息
 duchang_list = Path() / "data" / "DuChang" / "duchang.json"

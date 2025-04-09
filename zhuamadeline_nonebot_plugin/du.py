@@ -131,12 +131,14 @@ async def ticket_handle(event: GroupMessageEvent):
     # 负债处理
     if user_data['berry'] < 0:
         user_data['berry'] -= 250
-        msg += f"\n\n哎呀，你负债进行了刮刮乐，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！\n\n你现在拥有的草莓数量为：{user_data['berry']}颗！"
+        msg += f"\n\n哎呀，你负债进行了刮刮乐，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
         
         if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
             user_data.update({'event': 'nothing', 'compulsion_count': 0})
             user_data['berry'] -= 300
             msg += f"\n\n哇！你似乎在负债过程中还得强制刮刮乐啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+            
+        msg += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 
     # 数据保存
     save_data(user_path / file_name, data)
