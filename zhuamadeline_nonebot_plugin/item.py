@@ -1751,11 +1751,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 },
                                 4: {
                                     'guaranteed': (1000, 1001, 1002, 1003, "4"),
-                                    'normal': (300, 850, 1000, 1001, "4")
+                                    'normal': (450, 900, 1000, 1001, "4")
                                 },
                                 5: {
                                     'guaranteed': (1000, 1001, 1002, 1003, "4"),
-                                    'normal': (600, 1000, 1001, 1002, "4")
+                                    'normal': (700, 1000, 1001, 1002, "4")
                                 }
                             }
                             
