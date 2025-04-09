@@ -559,9 +559,9 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             final_log += f"\n本次工作你获得了{total_berry}颗草莓。"
             # 修改道具汇总部分
             if total_item:
-                final_log += "\n本次工作你获得了以下道具：\n"
+                final_log += "\n本次工作你获得了以下道具："
                 for item, count in total_item.items():
-                    final_log += f"- {item} × {count}\n"
+                    final_log += f"\n- {item} × {count}"
             else:
                 final_log += "\n本次工作你没有获得任何道具。"
             
