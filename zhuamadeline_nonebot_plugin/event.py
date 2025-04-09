@@ -90,7 +90,7 @@ async def outofdanger(data, user_id, message, current_time, next_time_r):
         return
 
 
-async def event_happen(user_data, user_id, message, diamond_text):
+async def event_happen(user_data, user_id, message, diamond_text, hourglass_text):
     # 设定默认值
     user_info = user_data.setdefault(user_id, {})
     # 读取猎场编号
@@ -109,10 +109,10 @@ async def event_happen(user_data, user_id, message, diamond_text):
     if event_function is None:  # 如果猎场编号无效
         raise ValueError("错误的猎场编号")
     # 调用对应的函数
-    await event_function(user_data, user_id, message, diamond_text)
+    await event_function(user_data, user_id, message, diamond_text, hourglass_text)
 
 # 一猎事件
-async def PlainStuck(user_data, user_id, message, diamond_text):
+async def PlainStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # 初始化默认值
     user_id = str(user_id)
     user_info = user_data.setdefault(user_id, {})
@@ -135,7 +135,7 @@ async def PlainStuck(user_data, user_id, message, diamond_text):
         berry = random.randint(100, 200)
         user_info['berry'] += berry
         save_data(user_path, user_data)
-        await message.finish(f"呀，你在庇护所外面的草丛里发现了一片草莓丛，你摘了{berry}颗草莓！"+ diamond_text, at_sender=True)
+        await message.finish(f"呀，你在庇护所外面的草丛里发现了一片草莓丛，你摘了{berry}颗草莓！"+ diamond_text+hourglass_text, at_sender=True)
 
     # 获得神秘碎片
     elif rnd <= 40 + rnd_regu and items.get('神秘碎片', 0) < 5:
@@ -147,25 +147,25 @@ async def PlainStuck(user_data, user_id, message, diamond_text):
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         items['神秘碎片'] = items.get('神秘碎片', 0) + 1
         save_data(user_path, user_data)
-        await message.finish("你在一个人迹罕至的地方捡到了一个泛着蓝光的神秘碎片，出于好奇和困惑你在此观察了一个小时"+ diamond_text, at_sender=True)
+        await message.finish("你在一个人迹罕至的地方捡到了一个泛着蓝光的神秘碎片，出于好奇和困惑你在此观察了一个小时"+ diamond_text+hourglass_text, at_sender=True)
 
     # 获得幸运药水
     elif rnd <= 50 + rnd_regu:
         items['幸运药水'] = items.get('幸运药水', 0) + 1
         save_data(user_path, user_data)
-        await message.finish("你捡到了一瓶奇怪的药水，似乎是别人遗留下来的？"+ diamond_text, at_sender=True)
+        await message.finish("你捡到了一瓶奇怪的药水，似乎是别人遗留下来的？"+ diamond_text+hourglass_text, at_sender=True)
 
     # 获得木质十字架
     elif rnd <= 60 + rnd_regu and '木质十字架' not in collections:
         collections['木质十字架'] = 1
         save_data(user_path, user_data)
-        await message.finish("这是？？？\n输入.cp 木质十字架 以查看具体效果"+ diamond_text, at_sender=True)
+        await message.finish("这是？？？\n输入.cp 木质十字架 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
 
     # 获得天使之羽
     elif rnd <= 70 + rnd_regu and '天使之羽' not in collections:
         collections['天使之羽'] = 1
         save_data(user_path, user_data)
-        await message.finish("一片散发着柔和光芒的羽毛缓缓飘落在你的手中，羽毛上似乎蕴含着某种神秘的力量。\n输入.cp 天使之羽 以查看具体效果"+ diamond_text, at_sender=True)
+        await message.finish("一片散发着柔和光芒的羽毛缓缓飘落在你的手中，羽毛上似乎蕴含着某种神秘的力量。\n输入.cp 天使之羽 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
 
     # 遇到流浪商人
     elif rnd <= 110 + rnd_regu:
@@ -226,7 +226,7 @@ async def PlainStuck(user_data, user_id, message, diamond_text):
             
     
 # 二号猎场事件
-async def ForestStuck(user_data, user_id, message, diamond_text):
+async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # 初始化默认值
     user_id = str(user_id)
     user_info = user_data.setdefault(user_id, {})
@@ -276,7 +276,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
             # 发送消息
-            await message.finish("你在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhuamadeline指令)"+diamond_text, at_sender=True)
+            await message.finish("你在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhuamadeline指令)"+diamond_text+hourglass_text, at_sender=True)
 
     ###### 其他事件 #####
     rnd = random.randint(1, 1000)
@@ -285,7 +285,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
         berry = random.randint(150, 250)
         user_info['berry'] += berry
         save_data(user_path, user_data)
-        await message.finish(f"呀，你在森林里发现了一颗变异的草莓树（为什么会有草莓树？），你摘下了{berry}颗草莓！"+ diamond_text, at_sender=True)
+        await message.finish(f"呀，你在森林里发现了一颗变异的草莓树（为什么会有草莓树？），你摘下了{berry}颗草莓！"+ diamond_text+hourglass_text, at_sender=True)
 
     # 遇到被困人员
     elif rnd <= 150 + rnd_regu:
@@ -301,7 +301,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             # 正面buff检测逻辑（已提前setdefault）
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
-            await message.finish(f"恭喜你救出了森林里的" + MessageSegment.at(save_id) + "。\n本次奖励75草莓"+ diamond_text, at_sender=True)
+            await message.finish(f"恭喜你救出了森林里的" + MessageSegment.at(save_id) + "。\n本次奖励75草莓"+ diamond_text+hourglass_text, at_sender=True)
         else:
             return
 
@@ -330,7 +330,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             "走着走着，树上的金草莓落下来砸到你身上，爆炸了，把你炸伤了！",
             "你走进一个山洞，可此地暗得你完全找不着北，你一不小心就被山洞里的石头刮伤了！"
         ]
-        await message.finish(random.choice(text) + "你需要原地等待一个小时，或者使用急救包自救，又或者等待他人来救你……"+diamond_text, at_sender=True)
+        await message.finish(random.choice(text) + "你需要原地等待一个小时，或者使用急救包自救，又或者等待他人来救你……"+diamond_text+hourglass_text, at_sender=True)
 
     # 神秘碎片事件
     elif rnd <= 270 + rnd_regu:
@@ -348,7 +348,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
-            await message.finish("你捡到了一个泛着蓝光的神秘碎片，出于好奇和困惑你在此观察了一个小时\n或许有人发现你的时候...你才会停止观察"+diamond_text, at_sender=True)
+            await message.finish("你捡到了一个泛着蓝光的神秘碎片，出于好奇和困惑你在此观察了一个小时\n或许有人发现你的时候...你才会停止观察"+diamond_text+hourglass_text, at_sender=True)
         else:
             return
 
@@ -358,7 +358,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
             collections["生命之叶"] = 1
             save_data(user_path, user_data)
             await message.finish(
-                "你在神秘森林中跋涉，寒冷的湿气缠绕在你周围，树影在雾中飘动。突然，一缕微光在脚下闪烁，几乎让人错以为是错觉。你蹲下去，拨开层层枯叶与苔藓，手指触碰到一片散发着温暖绿色光芒的叶子。\n“生命之叶”\n它在你掌中微微颤动，似乎蕴藏着久违的生机。周围的迷雾在这一刻似乎变得稍微稀薄，你感到一丝久违的希望。此物似乎带有古老而神秘的力量——一种与你旅程息息相关的力量。\n输入.cp 生命之叶 以查看具体效果"+ diamond_text,
+                "你在神秘森林中跋涉，寒冷的湿气缠绕在你周围，树影在雾中飘动。突然，一缕微光在脚下闪烁，几乎让人错以为是错觉。你蹲下去，拨开层层枯叶与苔藓，手指触碰到一片散发着温暖绿色光芒的叶子。\n“生命之叶”\n它在你掌中微微颤动，似乎蕴藏着久违的生机。周围的迷雾在这一刻似乎变得稍微稀薄，你感到一丝久违的希望。此物似乎带有古老而神秘的力量——一种与你旅程息息相关的力量。\n输入.cp 生命之叶 以查看具体效果"+ diamond_text+hourglass_text,
                 at_sender=True)
         else:
             return
@@ -368,7 +368,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
         if "木质十字架" not in collections:
             collections["木质十字架"] = 1
             save_data(user_path, user_data)
-            await message.finish("这是？？？\n输入.cp 木质十字架 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("这是？？？\n输入.cp 木质十字架 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         else:
             return
 
@@ -377,7 +377,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
         if "调律器" not in collections:
             collections["调律器"] = 1
             save_data(user_path, user_data)
-            await message.finish("你感到一阵微妙的波动，似乎空气中有某种力量在流动。一件金属质感的仪器悄然出现在你手中，散发出微弱的光辉。\n输入.cp 调律器 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("你感到一阵微妙的波动，似乎空气中有某种力量在流动。一件金属质感的仪器悄然出现在你手中，散发出微弱的光辉。\n输入.cp 调律器 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         else:
             return
 
@@ -386,7 +386,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
         if "回想之核" not in collections:
             collections["回想之核"] = 1
             save_data(user_path, user_data)
-            await message.finish("你在探索之时，突然一颗光辉璀璨的核心缓缓漂浮到你掌心。它散发着奇异的光芒，仿佛能带来超凡的力量。\n输入.cp 回想之核 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("你在探索之时，突然一颗光辉璀璨的核心缓缓漂浮到你掌心。它散发着奇异的光芒，仿佛能带来超凡的力量。\n输入.cp 回想之核 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         else:
             return
 
@@ -446,7 +446,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text):
         return
 
 #三号猎场事件
-async def CrystalStuck(user_data, user_id, message, diamond_text):
+async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # 初始化默认值
     user_id = str(user_id)
     user_info = user_data.setdefault(user_id, {})
@@ -529,7 +529,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
                 await message.finish(
                     f"你误打误撞迷失了方向，来到一处隐秘的小溶洞。"
                     f"洞内一片寂静，昏暗中一张桌子上散落着几件道具："
-                    f"草莓果酱×5、时间秒表×1、madeline提取器×1。" + mibao +diamond_text,
+                    f"草莓果酱×5、时间秒表×1、madeline提取器×1。" + mibao +diamond_text+hourglass_text,
                     at_sender=True
                 )
             
@@ -541,7 +541,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
                     "洞内一片寂静，昏暗中你看到鲜血之刃静静地插在一块满是裂痕的石台上，"
                     "刀身被干涸的暗红血迹覆盖，仿佛在述说它的血腥过往。"
                     "洞内的空气冰冷刺骨，死寂中隐约传来低沉的嗡鸣，如同它在呼唤，渴求鲜血的滋养。\n"
-                    "输入.cp 鲜血之刃 以查看具体效果"+ diamond_text,
+                    "输入.cp 鲜血之刃 以查看具体效果"+ diamond_text+hourglass_text,
                     at_sender=True
                 )
         
@@ -549,47 +549,47 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
         elif 51 <= rnd_tool <= 160:
             items['弹弓'] = items.get('弹弓', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个弹弓"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个弹弓"+diamond_text+hourglass_text, at_sender=True)
         
         elif 331 <= rnd_tool <= 500:
             items['一次性小手枪'] = items.get('一次性小手枪', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个一次性小手枪"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个一次性小手枪"+diamond_text+hourglass_text, at_sender=True)
         
         elif 501 <= rnd_tool <= 680:
             items['充能陷阱'] = items.get('充能陷阱', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个充能陷阱"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个充能陷阱"+diamond_text+hourglass_text, at_sender=True)
         
         elif 681 <= rnd_tool <= 840:
             carrot_rnd = random.randint(1, 10)
             if carrot_rnd > 2:
                 items['胡萝卜'] = items.get('胡萝卜', 0) + 1
                 save_data(user_path, user_data)
-                await message.finish("你发现了其他探险者在此遗落的一个胡萝卜，看起来还很新鲜，还能用。"+diamond_text, at_sender=True)
+                await message.finish("你发现了其他探险者在此遗落的一个胡萝卜，看起来还很新鲜，还能用。"+diamond_text+hourglass_text, at_sender=True)
             else:
                 save_data(user_path, user_data)
-                await message.finish("你发现了其他探险者在此遗落的一个胡萝卜，但是看起来变质用不了了"+diamond_text, at_sender=True)
+                await message.finish("你发现了其他探险者在此遗落的一个胡萝卜，但是看起来变质用不了了"+diamond_text+hourglass_text, at_sender=True)
         
         elif 841 <= rnd_tool <= 860:
             items['madeline提取器'] = items.get('madeline提取器', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个madeline提取器"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个madeline提取器"+diamond_text+hourglass_text, at_sender=True)
 
         elif 861 <= rnd_tool <= 880:
             items['时间秒表'] = items.get('时间秒表', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个时间秒表"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个时间秒表"+diamond_text+hourglass_text, at_sender=True)
             
         elif 881 <= rnd_tool <= 940:
             items['道具盲盒'] = items.get('道具盲盒', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个道具盲盒"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个道具盲盒"+diamond_text+hourglass_text, at_sender=True)
             
         elif 941 <= rnd_tool <= 1000:
             items['万能解药'] = items.get('万能解药', 0) + 1
             save_data(user_path, user_data)
-            await message.finish("你发现了其他探险者在此遗落的一个万能解药"+diamond_text, at_sender=True)
+            await message.finish("你发现了其他探险者在此遗落的一个万能解药"+diamond_text+hourglass_text, at_sender=True)
             
     #受伤事件
     elif(rnd<=250):
@@ -626,7 +626,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             "你在移动的板子上没站稳，掉下去被刺儿扎得满身疮痍！"
         ]
         #发送消息
-        await message.finish(random.choice(text)+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……"+diamond_text, at_sender=True)
+        await message.finish(random.choice(text)+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……"+diamond_text+hourglass_text, at_sender=True)
         
     #挖矿事件
     elif(rnd<=350 + rnd_regu): #35
@@ -645,7 +645,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             #写入主数据表
             save_data(user_path, user_data)
             #发送消息
-            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是较为常见的绿色翡翠，不过作为翡翠来讲也是很值钱了。\n本次奖励{berry}颗草莓！"+diamond_text, at_sender=True)
+            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是较为常见的绿色翡翠，不过作为翡翠来讲也是很值钱了。\n本次奖励{berry}颗草莓！"+diamond_text+hourglass_text, at_sender=True)
         elif(rnd_crystal <= 90):
             #奖励草莓
             berry = 200
@@ -653,7 +653,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             #写入主数据表
             save_data(user_path, user_data)
             #发送消息
-            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是不太常见的白色翡翠，是较为珍贵的翡翠之一。\n本次奖励{berry}颗草莓！"+diamond_text, at_sender=True)
+            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是不太常见的白色翡翠，是较为珍贵的翡翠之一。\n本次奖励{berry}颗草莓！"+diamond_text+hourglass_text, at_sender=True)
         elif(rnd_crystal <= 100):
             #奖励草莓
             berry = 500
@@ -661,7 +661,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             #写入主数据表
             save_data(user_path, user_data)
             #发送消息
-            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是相当稀有的紫色翡翠，是极为珍贵的翡翠之一。\n本次奖励{berry}颗草莓！"+diamond_text, at_sender=True)
+            await message.finish(f"呀，你在矿洞里发现了一个小型翡翠矿。\n这种是相当稀有的紫色翡翠，是极为珍贵的翡翠之一。\n本次奖励{berry}颗草莓！"+diamond_text+hourglass_text, at_sender=True)
         else:
             return
     #debuff事件
@@ -730,7 +730,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             save_data(user_path, user_data)
             #写入被困名单
             save_data(stuck_path, stuck_data)
-            await message.finish(f"恭喜你救出了矿洞里的"+ MessageSegment.at(save_id) +"。\n本次奖励100草莓"+ diamond_text, at_sender=True)
+            await message.finish(f"恭喜你救出了矿洞里的"+ MessageSegment.at(save_id) +"。\n本次奖励100草莓"+ diamond_text+hourglass_text, at_sender=True)
         else:
             #没有需要救的人就结束事件，正常抓madeline
             return
@@ -741,7 +741,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             collections['紫晶魄'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你从矿洞深处捡起一块紫色晶体，它的表面微微发光，散发着一种独特的能量。这时，你感到一股难以言喻的力量在你体内流动。\n输入.cp 紫晶魄 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("你从矿洞深处捡起一块紫色晶体，它的表面微微发光，散发着一种独特的能量。这时，你感到一股难以言喻的力量在你体内流动。\n输入.cp 紫晶魄 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -752,7 +752,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             collections['矿工头盔'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你发现了一顶矿工头盔，头盔上的灯光微微闪烁，为你指引前方的道路。即使在黑暗的矿洞中，它也能为你带来光明和安全。\n输入.cp 矿工头盔 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("你发现了一顶矿工头盔，头盔上的灯光微微闪烁，为你指引前方的道路。即使在黑暗的矿洞中，它也能为你带来光明和安全。\n输入.cp 矿工头盔 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -763,7 +763,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             collections['调律器'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你感到一阵微妙的波动，似乎空气中有某种力量在流动。一件金属质感的仪器悄然出现在你手中，散发出微弱的光辉。\n输入.cp 调律器 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("你感到一阵微妙的波动，似乎空气中有某种力量在流动。一件金属质感的仪器悄然出现在你手中，散发出微弱的光辉。\n输入.cp 调律器 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -774,7 +774,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             collections['回想之核'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你在探索之时，突然一颗光辉璀璨的核心缓缓漂浮到你掌心。它散发着奇异的光芒，仿佛能带来超凡的力量。\n输入.cp 回想之核 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("你在探索之时，突然一颗光辉璀璨的核心缓缓漂浮到你掌心。它散发着奇异的光芒，仿佛能带来超凡的力量。\n输入.cp 回想之核 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -785,7 +785,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
             collections['星光乐谱'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("在矿洞深处，你无意间发现了一块被岁月掩埋的石板。掀开尘土，你看见一份微弱发光的乐谱，纸页上星光闪烁，仿佛诉说着未知的故事。你小心地拾起它，感受到一股神秘的力量在你手心涌动。\n输入.cp 星光乐谱 以查看具体效果"+ diamond_text, at_sender=True)
+            await message.finish("在矿洞深处，你无意间发现了一块被岁月掩埋的石板。掀开尘土，你看见一份微弱发光的乐谱，纸页上星光闪烁，仿佛诉说着未知的故事。你小心地拾起它，感受到一股神秘的力量在你手心涌动。\n输入.cp 星光乐谱 以查看具体效果"+ diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -854,7 +854,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text):
 
 
 #四号猎场事件
-async def LabStuck(user_data, user_id, message, diamond_text):
+async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # 初始化默认值
     user_id = str(user_id)
     user_info = user_data.setdefault(user_id, {})
@@ -985,7 +985,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             "你站在移动方块上面，突然踉跄了一下没站稳，掉到下面的酸液里去了！酸液把你烫的嗷嗷直叫！"
         ]
         #发送消息
-        await message.finish(random.choice(text)+"你需要原地疗伤120分钟，或者使用急救包自救……" + diamond_text, at_sender=True)
+        await message.finish(random.choice(text)+"你需要原地疗伤120分钟，或者使用急救包自救……" + diamond_text+hourglass_text, at_sender=True)
         
     # 草莓酱事件
     elif rnd <= 175: 
@@ -1013,7 +1013,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
 
         # 保存数据
         save_data(user_path, user_data)
-        await message.finish(jam_text + diamond_text, at_sender=True)
+        await message.finish(jam_text + diamond_text+hourglass_text, at_sender=True)
     #debuff事件
     elif(rnd<=350): #50
         #首先玩家没有buff/debuff时才会随机触发
@@ -1155,7 +1155,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
     #         collections['充能箱'] = 1
     #         #写入主数据表
     #         save_data(user_path, user_data)
-    #         await message.finish("你在备用发电厂的仓库里面发现了一个充能箱，似乎可以给什么东西充能？\n输入.cp 充能箱 以查看具体效果" + diamond_text, at_sender=True)
+    #         await message.finish("你在备用发电厂的仓库里面发现了一个充能箱，似乎可以给什么东西充能？\n输入.cp 充能箱 以查看具体效果" + diamond_text+hourglass_text, at_sender=True)
         
     #     #否则就是正常抓
     #     else:
@@ -1166,7 +1166,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             collections['脉冲雷达'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你在打开一扇门后，布满尘埃的脉冲雷达被放置在了桌上。它似乎平平无奇，所以被人遗忘，从外观上似乎无法看出它的功能。\n输入.cp 脉冲雷达 以查看具体效果" + diamond_text, at_sender=True)
+            await message.finish("你在打开一扇门后，布满尘埃的脉冲雷达被放置在了桌上。它似乎平平无奇，所以被人遗忘，从外观上似乎无法看出它的功能。\n输入.cp 脉冲雷达 以查看具体效果" + diamond_text+hourglass_text, at_sender=True)
         
         #否则就是正常抓
         else:
@@ -1176,7 +1176,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             user_info['event'] = "getspider"
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你在翻看实验室里的日志的时候，从日志本里翻出了一条纸条，上面写着：“Road in Cave”，你似乎有所明悟。" + diamond_text, at_sender=True)
+            await message.finish("你在翻看实验室里的日志的时候，从日志本里翻出了一条纸条，上面写着：“Road in Cave”，你似乎有所明悟。" + diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -1187,7 +1187,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             user_info['event'] = "getbomb"
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("你在打开开关之时，突然发现这个开关上有一行字：“HOLE IN SANCTUARY”，你似乎有所明悟。" + diamond_text, at_sender=True)
+            await message.finish("你在打开开关之时，突然发现这个开关上有一行字：“HOLE IN SANCTUARY”，你似乎有所明悟。" + diamond_text+hourglass_text, at_sender=True)
         #否则就是正常抓
         else:
             return
@@ -1198,7 +1198,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
             collections['灵魂机器人'] = 1
             #写入主数据表
             save_data(user_path, user_data)
-            await message.finish("熬夜没头发~ 熬夜没~头~发~\n输入.cp 灵魂机器人 以查看具体效果" + diamond_text, at_sender=True)
+            await message.finish("熬夜没头发~ 熬夜没~头~发~\n输入.cp 灵魂机器人 以查看具体效果" + diamond_text+hourglass_text, at_sender=True)
         
         #否则就是正常抓
         else:
@@ -1217,7 +1217,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
                 "没有仪器，没有电源，但它周身缠绕着银河般的光晕。"
                 "你触碰它的刹那，积压多年的疲倦突然像被星光洗净——\n"
                 "墙上的老式辐射计量仪疯狂摆动，最终却停在归零的刻度。\n"
-                "\n输入.cp 星钻 以查看具体效果" + diamond_text, 
+                "\n输入.cp 星钻 以查看具体效果" + diamond_text+hourglass_text, 
                 at_sender=True
             )
         #否则就是正常抓
@@ -1229,7 +1229,7 @@ async def LabStuck(user_data, user_id, message, diamond_text):
         water_rnd = random.randint(2,4)
         items['万能解药'] = items.get('万能解药', 0) + water_rnd
         save_data(user_path, user_data)
-        await message.finish(f"你在探险的时候，偶然发现地上有{water_rnd}瓶万能解药，会是谁留下来的呢，小小卒吗？" + diamond_text, at_sender=True)
+        await message.finish(f"你在探险的时候，偶然发现地上有{water_rnd}瓶万能解药，会是谁留下来的呢，小小卒吗？" + diamond_text+hourglass_text, at_sender=True)
         
     elif(rnd<=600):
         if(not '黄色球体' in collections):

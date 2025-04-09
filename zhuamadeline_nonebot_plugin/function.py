@@ -138,9 +138,9 @@ def calculate_spare_chance(data, user_id):
     collections = data[user_id].get('collections', {})
     
     # 获取有效时间点
-    work_end = datetime.datetime.strptime(data[user_id].get('work_end_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
-    next_time = datetime.datetime.strptime(data[user_id].get('next_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
-    last_allowed = max(work_end, next_time)
+    work_end_time_r = datetime.datetime.strptime(data[user_id].get('work_end_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+    next_time_r = datetime.datetime.strptime(data[user_id].get('next_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+    last_allowed = max(work_end_time_r, next_time_r)
     
     # 计算时间差
     time_diff = current_time - last_allowed

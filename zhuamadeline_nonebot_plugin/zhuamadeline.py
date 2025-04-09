@@ -110,7 +110,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         hourglass_text = '' # 初始化
         if (str(user_id) in data):
             # 添加全局冷却
-
             all_cool_time(cd_path, user_id, group_id)
             
             # 确保 event 字段存在
@@ -293,7 +292,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             return
 
         #触发事件
-        await event_happen(data,str(user_id),catch,diamond_text)
+        await event_happen(data,str(user_id),catch,diamond_text,hourglass_text)
 
         #写入副表
         data2 = open_data(user_path / f"UserList{data[str(user_id)]['lc']}.json")
@@ -415,6 +414,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
                     collections['时隙沙漏'] = 1
                     grade_msg += f"你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
+                    save_data(user_path / file_name, data)
 
             # 更新数据
             data[user_id].update({"exp": exp, "grade": grade, "max_exp": max_exp})
