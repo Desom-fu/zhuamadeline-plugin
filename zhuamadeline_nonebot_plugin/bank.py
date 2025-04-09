@@ -39,7 +39,7 @@ pvp_path = Path() / "data" / "UserList" / "pvp.json"
     end_date=datetime.datetime.now().replace(hour=1, minute=30, second=0), 
     timezone="Asia/Shanghai"
 )
-def cancel_interest_send():
+async def cancel_interest_send():
     bar_data = open_data(bar_path)
     bar_data["interest_send"] = False
     save_data(bar_path, bar_data)
