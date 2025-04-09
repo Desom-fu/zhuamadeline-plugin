@@ -111,7 +111,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         if (str(user_id) in data):
             # 添加全局冷却
             all_cool_time(cd_path, user_id, group_id)
-            
+            liechang_number = data.get(str(user_id),{}).get('lc','1')
             # 确保 event 字段存在
             data[user_id].setdefault('event', 'nothing')
             exp = data[user_id].setdefault("exp", 0)
@@ -193,18 +193,18 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             # 增加一个参数，用来触发时隙沙漏后跳过后续的冷却检查
             hourglass_used = 0
             
-            if collections.get("时隙沙漏", 0) != 0:
+            if collections.get("时隙沙漏", 0) != 0 and liechang_number != "0":
                 # 动态计算当前可累积次数
                 added_chance = calculate_spare_chance(data, str(user_id))
                 current_chance = data[str(user_id)].get('spare_chance', 0)
-                data[str(user_id)]['spare_chance'] = min(current_chance + added_chance, 10)
+                data[str(user_id)]['spare_chance'] = min(current_chance + added_chance, hourglass_max)
 
                 # 优先使用存储次数
                 if data[str(user_id)]['spare_chance'] > 0:
                     data[str(user_id)]['spare_chance'] -= 1
                     hourglass_used = 1
                     answer = 1
-                    hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{data[str(user_id)]['spare_chance']}/10"
+                    hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{data[str(user_id)]['spare_chance']}/{hourglass_max}"
                     save_data(user_path / file_name, data)
 
             if hourglass_used == 0:
@@ -635,7 +635,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         # 动态计算当前可累积次数
         added_chance = calculate_spare_chance(data, str(user_id))
         current_chance = data[str(user_id)].get('spare_chance', 0)
-        spare_chance = min(current_chance + added_chance, 10)
+        spare_chance = min(current_chance + added_chance, hourglass_max)
     
     # 获取酒店数据
     bank = bar_data.get("bank", 0)
@@ -788,7 +788,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         # message += f"\n• 充能箱状态：{'撞开（启用）' if elect_status else '关闭（停用）'}" if collections.get('充能箱', 0) > 0 else ''
     if collections.get("时隙沙漏", 0) != 0:
         # 显示下次累计次数（若有）
-        message += (f"\n- 当前累计抓取次数：{spare_chance}/10")
+        message += (f"\n- 当前累计抓取次数：{spare_chance}/{hourglass_max}")
         
     # 显示下次抓取的时间（若有）
     message += (f"\n- 下次可抓取时间：\n{next_time}") if current_time < next_time else ''

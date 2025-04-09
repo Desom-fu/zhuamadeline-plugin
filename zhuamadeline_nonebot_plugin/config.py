@@ -20,7 +20,8 @@ __all__ = [
     "liechang_count",
     "zhuama_group",
     'bar_path',
-    'garden_path'
+    'garden_path',
+    'hourglass_max'
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -57,6 +58,8 @@ shop_work_img = Path() / "data" / "Shop" / "营业图.png"
 #封禁人员名单
 # 定义猎场数 全局变量 开新猎场要改
 liechang_count = 4
+# 定义时间沙漏最高次数
+hourglass_max = 4
 #定义通信群id
 #用户信息
 user_path = Path() / "Data" / "UserList"

@@ -165,7 +165,7 @@ def calculate_spare_chance(data, user_id):
         if intervals > 0:
             data[user_id]['last_valid_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         
-        return min(intervals, 10)
+        return min(intervals, hourglass_max)
         
     except Exception as e:
         logger.error(f"时隙沙漏计算错误: {e}")
