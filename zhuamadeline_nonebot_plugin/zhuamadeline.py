@@ -205,6 +205,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     hourglass_used = 1
                     answer = 1
                     hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{data[str(user_id)]['spare_chance']}/10"
+                    save_data(user_path / file_name, data)
 
             if hourglass_used == 0:
                 #正常抓的逻辑

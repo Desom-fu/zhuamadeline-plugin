@@ -133,25 +133,43 @@ def json_emoji_like(event, eid: int) -> dict:
 
 # 时隙沙漏相关计算
 def calculate_spare_chance(data, user_id):
-    """动态计算可累积次数"""
-    current_time = datetime.datetime.now()
-    collections = data[user_id].get('collections', {})
-    
-    # 获取有效时间点
-    work_end_time_r = datetime.datetime.strptime(data[user_id].get('work_end_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
-    next_time_r = datetime.datetime.strptime(data[user_id].get('next_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
-    last_allowed = max(work_end_time_r, next_time_r)
-    
-    # 计算时间差
-    time_diff = current_time - last_allowed
-    if time_diff.total_seconds() < 0:
+    if user_id not in data:
         return 0
-    
-    # 计算基准间隔
-    base_mins = 29 if collections.get("回想之核") else 30
-    intervals = int(time_diff.total_seconds() // (base_mins * 60))
-    
-    return min(intervals, 10)  # 上限10次
+
+    try:
+        current_time = datetime.datetime.now()
+        collections = data[user_id].get('collections', {})
+        
+        # 获取并解析时间节点
+        time_nodes = []
+        for time_key in ['work_end_time', 'next_time']:
+            if time_key in data[user_id]:
+                time_nodes.append(datetime.datetime.strptime(
+                    data[user_id][time_key], 
+                    "%Y-%m-%d %H:%M:%S"
+                ))
+        
+        # 计算最后限制时间
+        last_limit = max(time_nodes) if time_nodes else current_time
+        
+        # 计算有效时间差
+        time_diff = current_time - last_limit
+        if time_diff.total_seconds() <= 0:
+            return 0
+
+        # 计算可累积次数
+        interval_mins = 29 if collections.get("回想之核") else 30
+        intervals = int(time_diff.total_seconds() / (interval_mins * 60))
+        
+        # 更新记录时间（仅当确实有时间积累时）
+        if intervals > 0:
+            data[user_id]['last_valid_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        return min(intervals, 10)
+        
+    except Exception as e:
+        logger.error(f"时隙沙漏计算错误: {e}")
+        return 0
 
 #------------mymadeline相关指令----------------
 
