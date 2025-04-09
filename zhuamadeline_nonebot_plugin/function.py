@@ -461,22 +461,22 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
 def shop_list(item_list):
     # 配置映射表（数据源、价格单位、名称后缀）
     LEVEL_CONFIG = {
-        6: {"source": collections, "unit": "点能量", "suffix": ""},
-        7: {"source": collections, "unit": "颗草莓", "suffix": ""},
+        7: {"source": collections, "unit": "点能量", "suffix": "藏品"},
+        8: {"source": collections, "unit": "颗草莓", "suffix": "藏品"},
     }
-    # 默认配置：0-5级道具
-    for level in range(6):
+    # 默认配置：0-6级道具
+    for level in range(7):
         LEVEL_CONFIG[level] = {"source": item, "unit": "颗草莓", "suffix": "道具"}
     
     # 等级名称映射
     LEVEL_NAME = {
-        0: "一级", 1: "二级", 2: "三级", 3: "四级",
-        4: "永久", 5: "特殊", 6: "能量藏品", 7: "草莓藏品"
+        0: "一级", 1: "二级", 2: "三级", 3: "四级", 4:'旅行',
+        5: "永久", 6: "特殊", 7: "能量", 8: "草莓"
     }
     
     parts = []
     # 倒序处理所有等级
-    for level in range(7, -1, -1):
+    for level in range(8, -1, -1):
         config = LEVEL_CONFIG[level]
         items = []
         # 遍历数据源收集商品
