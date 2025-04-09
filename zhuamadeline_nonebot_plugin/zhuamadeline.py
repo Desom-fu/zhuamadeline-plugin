@@ -615,7 +615,9 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     next_recover_time_r = user_data.get('next_recover_time', current_time.strftime("%Y-%m-%d %H:%M:%S"))
     next_fishing_time_r = user_data.get('next_fishing_time', current_time.strftime("%Y-%m-%d %H:%M:%S"))
     next_clock_time_r = user_data.get('next_clock_time', current_time.strftime("%Y-%m-%d %H:%M:%S"))
+    working_endtime_r = user_data.get('working_endtime', current_time.strftime("%Y-%m-%d %H:%M:%S"))
     collections = user_data.get('collections', {})
+    item = user_data.get('item', {})
     pvp_guess = bar_data.get('pvp_guess', {})
     double_ball = bar_data.get('double_ball', {})
     
@@ -631,6 +633,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     lucky_times = get_user_data(data, user_id, "lucky_times", 0)
     compulsion_count = get_user_data(data, user_id, "compulsion_count", 0)
     get_ball_value = get_user_data(data, user_id, "get_ball_value", 0)
+    power = item.get("体力", 0)
     if collections.get("时隙沙漏", 0) != 0:
         # 动态计算当前可累积次数
         added_chance = calculate_spare_chance(data, str(user_id))
@@ -663,6 +666,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     next_clock_time = datetime.datetime.strptime(next_clock_time_r, "%Y-%m-%d %H:%M:%S")
     work_end_time = datetime.datetime.strptime(work_end_time_r, "%Y-%m-%d %H:%M:%S")
     next_fishing_time = datetime.datetime.strptime(next_fishing_time_r, "%Y-%m-%d %H:%M:%S")
+    working_endtime = datetime.datetime.strptime(working_endtime_r, "%Y-%m-%d %H:%M:%S")
     next_time = max(get_time_from_data(user_data), work_end_time)
     
     # 获取pvp数据
@@ -723,6 +727,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     message += (
         f"\n- 所处猎场：{liechang_name}"
         f"\n- 当前持有草莓：{berry}颗"
+        f"\n- 当前拥有体力：{power}点"
         )
     
     # 显示草莓银行草莓（若有）
@@ -803,6 +808,9 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 
         # 判断是否进入时间秒表冷却（若有）
         message += (f"\n• 时间秒表冷却结束时间：\n{next_clock_time}") if current_time < next_clock_time else ''
+        
+        # 判断外出工作时间（若有）
+        message += (f"\n- madeline外出工作预计完成的时间：\n{working_endtime}") if current_time < working_endtime else ''
 
         # 显示debuff时间（若有）
         message += (f"\n• debuff {debuff_messages.get(debuff, '')} 的持续时间至：\n{next_recover_time}") if debuff != 'normal' else ''

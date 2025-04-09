@@ -104,7 +104,7 @@ def apply_effects(state: WorkState, effects: List[Dict]):
         state.work_simple_chance += effect.get('work_simple_chance', 0)
         state.bonus_berry += effect.get('bonus_berry', 0)
 
-work = on_command('外出', aliases={'work'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+work = on_command('外出', aliases={'work'}, permission=GROUP, priority=2, block=True, rule=whitelist_rule)
 
 @work.handle()
 async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = CommandArg()):
@@ -678,7 +678,7 @@ async def work_help_handle():
                         "1级madeline: 无加成\n2级madeline: 工作获得的额外奖励上限+3\n3级madeline: 工作获得的额外奖励上限+10\n4级madeline: 工作类型是高薪工作的概率+10%\n5级madeline: 每个小时必定增加一次工作机会\n"+
                         "同样的，这些效果可以与食物的加成叠加。工作的种类分为普通工作和高薪工作，只要遇到了就必定会获得一定的奖励。"+
                         "目前可以工作的区域如下:\n"+
-                        "丛林: 消耗200体力，耗时3小时\n7d: 消耗325体力，耗时4小时\nmauve: 消耗1500体力，耗时8小时\nlxvi:消耗5000体力，耗时12小时\n"+
+                        "丛林: 消耗200体力，耗时3小时\n7d: 消耗325体力，耗时4小时\nmauve: 消耗1200体力，耗时8小时\nlxvi:消耗4500体力，耗时12小时\n"+
                         "每次完成工作后，你都将获得一定的工作经验，工作经验越高，你在结束工作时能获得的额外奖励越多。\n加油吧，各位madeline~\n"+
                         "---------------------\n"+
                         "下面是不同区域单次普通工作可获得的收益:\n"+

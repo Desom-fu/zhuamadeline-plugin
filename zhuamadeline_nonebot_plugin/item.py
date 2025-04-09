@@ -699,7 +699,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         else:
                             last_sleep_time = datetime.datetime.strptime(data.get(str(user_id)).get('last_sleep_time'), "%Y-%m-%d %H:%M:%S")
                         
-                        if last_sleep_time >= current_time:
+                        if last_sleep_time > current_time:
                             await daoju.finish("好好休息吧，不要试图使用时间秒表了...", at_sender=True)
                         
                         #然后判断是否能使用秒表
