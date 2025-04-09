@@ -27,3 +27,6 @@
 
 # 解密图片忽略
 /zhuamadeline_puzzle
+
+# 抓玛数据文件忽略
+/UserList
