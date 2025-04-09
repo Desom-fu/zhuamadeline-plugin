@@ -542,7 +542,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                         bonus = random.randint(1,bonus_berry)  # 修正了random.ranint拼写错误
                         data[str(user_id)]['berry'] += bonus
                         total_berry += bonus
-                        if salary == 0 or tool_num == 0:
+                        if salary == 0 and tool_num == 0:
                             event += f"但是由于表现非常好，老板额外奖励了{bonus}颗草莓。"
                         else:
                             event += f"同时因表现非常好，额外获得了{bonus}颗草莓。"
