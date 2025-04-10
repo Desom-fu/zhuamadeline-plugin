@@ -49,6 +49,7 @@ __all__ = [
 # 使用字典映射 hunt_bonusb 和 oppo_liechang 的关系
 # 左边的是战力增加，右边的是int猎场号
 hunt_bonusb_to_oppo_liechang = {
+    4: 5,  # 如果 hunt_bonusb 是 4，则设置 oppo_liechang 为 5
     3: 4,  # 如果 hunt_bonusb 是 3，则设置 oppo_liechang 为 4
     2: 3,  # 如果 hunt_bonusb 是 2，则设置 oppo_liechang 为 3
     1: 2,  # 如果 hunt_bonusb 是 1，则设置 oppo_liechang 为 2
@@ -59,7 +60,8 @@ liechang_bonus_rewards = {
     # 开新猎场要改
     "2": (1, 1, 1),  # 对应 2 猎，(guding_rank 增加 1, hunt_bonus 增加 1, bonus_rank_max 增加 1)
     "3": (2, 2, 2),  # 对应 3 猎，(guding_rank 增加 2, hunt_bonus 增加 2, bonus_rank_max 增加 2)
-    "4": (3, 3, 3),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 3, bonus_rank_max 增加 3)
+    "4": (3, 5, 3),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 5, bonus_rank_max 增加 3)
+    "5": (4, 3, 4),  # 对应 5 猎，(guding_rank 增加 4, hunt_bonus 增加 3, bonus_rank_max 增加 4)
 }
 
 # 定义不同猎场的概率分布，键是解锁的最高猎场，值是各个猎场的概率
