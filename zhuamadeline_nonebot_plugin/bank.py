@@ -31,27 +31,13 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 demon_path = Path() / "data" / "UserList" / "demon.json"
 pvp_path = Path() / "data" / "UserList" / "pvp.json"
 
-# 1:00 - 1:30重置利息发放状态防止没执行
-@scheduler.scheduled_job(
-    "interval",  # 使用间隔触发器
-    minutes=1,   # 每隔1分钟
-    start_date=datetime.datetime.now().replace(hour=1, minute=0, second=0), 
-    end_date=datetime.datetime.now().replace(hour=1, minute=30, second=0), 
-    timezone="Asia/Shanghai"
-)
+# 1:00重置利息发放状态防止没执行
 async def cancel_interest_send():
     bar_data = open_data(bar_path)
     bar_data["interest_send"] = False
     save_data(bar_path, bar_data)
 
-# 2:00-2:30每分钟执行一次利息发放（实际上只能执行一次，因为有参数控制）
-@scheduler.scheduled_job(
-    "interval",
-    minutes=1,
-    start_date=datetime.datetime.now().replace(hour=2, minute=0, second=0),
-    end_date=datetime.datetime.now().replace(hour=2, minute=30, second=0),
-    timezone="Asia/Shanghai"
-)
+# 2:00执行一次利息发放
 async def add_interest():
     bots = get_bots()
     if not bots:
@@ -107,6 +93,9 @@ async def add_interest():
         group_id=zhuama_group,
         message=f"今日利息已发放，请使用命令.ck all查看今天增加利息（向下取整）为多少哦~"
     )
+
+scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)
+scheduler.scheduled_job("cron", hour=1, minute=0)(cancel_interest_send)
 
 # 提取草莓命令
 bank = on_command('bank', aliases = {"berrybank"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
