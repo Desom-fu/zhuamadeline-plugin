@@ -142,7 +142,7 @@ def calculate_spare_chance(data, user_id):
         
         # 获取并解析时间节点
         time_nodes = []
-        for time_key in ['work_end_time', 'next_time']:
+        for time_key in ['work_end_time', 'next_time', 'last_valid_time']:
             if time_key in data[user_id]:
                 time_nodes.append(datetime.datetime.strptime(
                     data[user_id][time_key], 
