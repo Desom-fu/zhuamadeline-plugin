@@ -168,7 +168,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     power_require = AREA_CONFIGS[area]['power_require']
     if user_info['item'].get("体力", 0) < power_require:
         await work.finish(
-            f"你的体力不足，总共需要{power_require}点，先去补充体力吧",
+            f"你的体力不足，总共需要{power_require}点，而你现在只有{user_info['item'].get("体力", 0)}点，先去补充体力吧",
             at_sender=True
         )
     
