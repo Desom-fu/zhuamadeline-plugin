@@ -111,7 +111,7 @@ madeline_name_list4 = {
         '正在思考的玛德琳',
     ],
     '3':[
-        "chud小卒",
+        "chud",
         "杨桃星球（星露谷版）",
         "征服者",
         "绿色巨型试管",
@@ -685,7 +685,7 @@ madeline_data4 = {
     },
     '3':{
         '1':{
-            'name': 'chud小卒',
+            'name': 'chud',
             'description':
             '蔚蓝已经沦陷，亿万人必须奥歘'
         },
@@ -1088,9 +1088,9 @@ madeline_data4 = {
             'gif' : True
         },
         '15':{
-            'name': 'xiaozu-notboom',
+            'name': '******-notboom',
             'description':
-            '小卒在.bet3捞了不少草莓，不会动不动就boom了'
+            '那不是它。那只是一个长着按钮的粉色的刺而已。'
         },
         '16':{
             'name': 'Zeus',

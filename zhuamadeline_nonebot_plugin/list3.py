@@ -669,9 +669,9 @@ madeline_data3 = {
             'gif': True     
         },
         '3':{
-            'name': 'xiaozu-boom',
+            'name': '******-boom',
             'description':
-            '被气笑魔盒和气笑扑克气晕的小卒对着伯特按下了致死量的按钮',
+            '它本应得到如此结局',
             'gif': True     
         },
         '4':{

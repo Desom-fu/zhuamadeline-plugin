@@ -261,6 +261,9 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
     # 解析参数
     args = str(arg).strip().lower().split()
 
+    if args[0] == "野生小卒" or args[0] == "yeshengxiaozu":
+        await recycle_item.finish("你成功回收了一块垃圾！本次回收获得0颗草莓！", at_sender=True)
+
     if len(args) < 1 or len(args) > 2:
         await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量) 或 .recycle 道具名称 all", at_sender=True)
 
