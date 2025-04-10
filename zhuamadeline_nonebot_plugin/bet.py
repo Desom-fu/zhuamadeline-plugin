@@ -124,6 +124,19 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         await bet.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
     #debuff清除逻辑
     debuff_clear(data,user_id)
+    status = data[str(user_id)].get('status','normal')
+    if(status =='working'): 
+        if(not 'work_end_time' in data[str(user_id)]):
+            data[str(user_id)]['work_end_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        current_time = datetime.datetime.now()
+        work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
+        if current_time < work_end_time:
+            text = time_text(str(work_end_time-current_time))
+            await bet.finish(f"你正在维护草莓加工器，还需要{text}！", at_sender=True)
+        #时间过了自动恢复正常
+        else:
+            data[str(user_id)]['status'] = 'normal'
+            save_data(full_path, data)
     # 如果该用户不在酒馆名单中，则先创建数据
     if user_id not in bar_data:
         bar_data[user_id] = {}
