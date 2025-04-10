@@ -122,6 +122,9 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     if user_id not in data:
         await work.finish("你还没尝试抓过madeline......")
     
+    # 获取当前时间
+    current_time = datetime.datetime.now()
+    
     # 初始化工作数据
     user_info = data.setdefault(user_id, {})
     user_info.setdefault('working', False)
@@ -131,8 +134,17 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     user_info.setdefault('bonus_berry', 0)
     user_info.setdefault('work_skiptime', 0)
     user_info.setdefault('work_exp', 0)
+    user_info.setdefault('last_work_time', current_time.strftime("%Y-%m-%d %H:%M:%S"))
     
-    current_time = datetime.datetime.now()
+    # 修改时间检查部分
+    try:
+        last_work_time = datetime.datetime.strptime(
+            user_info['last_work_time'], "%Y-%m-%d %H:%M:%S"
+        )
+    except (KeyError, ValueError):
+        # 如果格式错误或不存在，使用当前时间
+        last_work_time = current_time
+        user_info['last_work_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # 检查是否已在工作中
     if user_info['working']:
@@ -194,15 +206,20 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     apply_effects(state, [LEVEL_EFFECTS.get(madeline_info[0], {})])  # madeline_info[0] 是等级
     apply_effects(state, [FOOD_EFFECTS.get(food, {})])
     
-    # 设置工作时间
+    # 设置工作时间以及消耗体力，重置日期
     duration = AREA_CONFIGS[area]['duration']
     user_info['item']['体力'] -= power_require
     next_time = current_time + datetime.timedelta(hours=duration)
+    
+    # 检查日期是否不同（年月日）
+    if last_work_time.date() != current_time.date():
+        user_info['work_skiptime'] = 0  # 重置跳过次数
     
     # 更新用户数据
     user_info.update({
         'working': True,
         'working_endtime': next_time.strftime("%Y-%m-%d %H:%M:%S"),
+        'last_work_time': current_time.strftime("%Y-%m-%d %H:%M:%S"),
         'work_area': area,
         'work_per_hour': state.work_per_hour,
         'work_simple_chance': state.work_simple_chance,
