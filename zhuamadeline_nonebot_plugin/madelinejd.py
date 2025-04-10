@@ -296,7 +296,7 @@ async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, use
         all_sorted_madelines.append(f"猎场{liechang_number}的madeline库存:\n{sorted_madelines}")
 
     # 合并并发送所有猎场的库存
-    user_info = await bot.get_stranger_info(user_id=int(event.get_user_id()))
+    user_info = await bot.get_stranger_info(user_id=int(user_id))
     nickname = user_info.get("nickname", "未知昵称")
     
     msg_list = [{
