@@ -269,9 +269,6 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
     
     if not item_name:
         await recycle_item.finish("格式错误！请输入：.recycle 道具名称 (数量) 或 .recycle 道具名称 all", at_sender=True)
-    
-    # if item_name == "desom-fu" and user_id in bot_owner_id:
-    #     await recycle_item.finish("回收成功……从此zhuamadeline再无存在“Desom-fu”。", at_sender=True)
 
     # 进行别名转换
     standard_item = get_alias_name(item_name, item, item_aliases)

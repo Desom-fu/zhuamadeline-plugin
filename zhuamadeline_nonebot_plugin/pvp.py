@@ -385,7 +385,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         await message.finish(close_text, at_sender=True)
     # 当前时间戳
     if (user_id in ban):
-        await message.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", at_sender=True)
+        await message.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系Desom-fu哦~", at_sender=True)
     if (pvp_coldtime_data != {}):
         last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
         current_time2 = int(time.time())
@@ -409,7 +409,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         # await message.finish("现在madeline竞技场暂未开放哦，敬请期待！", at_sender=True)
     # 当前时间戳
     if (user_id in ban):
-        await message.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", at_sender=True)
+        await message.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系Desom-fu哦~", at_sender=True)
     timestamp = int(current_time.timestamp())
     #检测回想之核
     dream = user_data[str(user_id)].get('collections',{}).get("回想之核", 0)

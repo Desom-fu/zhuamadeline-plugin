@@ -585,7 +585,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         "钓上来一个岩浆块！海里有岩浆块很合理吧，但是由于过于烫手你把它丢了！\n",
                         "钓上来一只小飞机！但是这只小飞机花溜溜的飞走了！\n",
                         '钓上来一个UFO！外星人举着『禁止非法垂钓』的牌子抗议，你尴尬地把飞碟塞回海里！\n',
-                        '钓上来*****的狐狸尾巴毛！这搓毛突然BOOM了，转眼间抓玛也突然爆炸了！\n',
+                        '钓上来Desom的狐狸尾巴毛！这搓毛突然BOOM了，转眼间抓玛也突然爆炸了！\n',
                         '钓上来kevin房彩蛋房间！但里面塞满500个金草莓，焦虑值爆表的你直接剪断了鱼线！\n',
                         '钓上来速通计时器！眼看要破纪录时，鱼钩被判定为『非法捷径』强制重置！\n',
                         '钓上来像素平台！你试图攀爬时触发滑落机制，结果把整个钓鱼平台砸塌了！\n',
@@ -1405,7 +1405,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 #                     await daoju.finish("请输入你需要使用鲜血之刃的正确阶段（1-6）", at_sender=True)
                 #                     # 当前时间戳
                 #             if (user_id in ban):
-                #                 await daoju.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", at_sender=True)
+                #                 await daoju.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系Desom-fu哦~", at_sender=True)
                 #             if (data[str(user_id)].get("item", {}).get(item_name, 0) > 0 or data[str(user_id)].get("collections", {}).get(item_name, 0) > 0):
                 #                 """
                 #                 复仇之刃：使用后基础战斗力+10，挑战指定擂台大于50战力的madeline，使用后冷却时间10min，会受伤
@@ -1526,7 +1526,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 #                     elif stat == 3:
                 #                         pk_text = common_text + f"\n\n你站上擂台的madeline的常驻战力为 [{rana}]！\n\n你复仇成功了！ヽ(o^ ^o)ﾉ"
                 #                     elif stat == 0:
-                #                         pk_text = "如果出现这条回复请向*****-**报告bug，按理来说不可能出现这条回复的（"
+                #                         pk_text = "如果出现这条回复请向Desom-fu报告bug，按理来说不可能出现这条回复的（"
                 #                 else: 
                 #                     #鲜血之刃回复
                 #                     common_text = (
@@ -1543,7 +1543,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 #                     elif stat == 3:
                 #                         pk_text = common_text + f"\n\n进攻成功！ヽ(o^ ^o)ﾉ\n\n你站上擂台的madeline的常驻战力为 [{rana}]！"
                 #                     elif stat == 0:
-                #                         pk_text = "如果出现这条回复请向*****-**报告bug，按理来说不可能出现这条回复的（"
+                #                         pk_text = "如果出现这条回复请向Desom-fu报告bug，按理来说不可能出现这条回复的（"
                 #                 # 如果被踢下去的对方战力大于60，发放安慰奖
                 #                 # 添加@被踢下去的玩家的逻辑
                 #                 if stat in (3, 4):  # 挑战成功或平战力胜利

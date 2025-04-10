@@ -111,7 +111,7 @@ madeline_name_list2 = {
         'Toby Fox'
     ],
     '5':[
-        '*****-boom',
+        'desom-boom',
         'Parrot Dash',
         '狙哥',
         'Kairos',
@@ -610,7 +610,7 @@ madeline_data2 = {
     },
     '5':{
         '1':{
-            'name': '*****-boom',
+            'name': 'desom-boom',
             'description':
             '据说以下内容是来自于抓kid广场里的一些闲聊对话……\n“听说这只狐娘还略有点粗心，虽然说想法很美好，但总是出现意外的事情呢……看，听到爆炸声了吗，似乎她好像又把什么东西搞炸了……”\n“哈哈哈哈哈哈哈哈，走，我们一起看看去！”'      
         },
