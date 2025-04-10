@@ -539,13 +539,16 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                         event += f"本次工作由于老板太黑心了，madeline什么都没获得。"
 
                     if bonus_berry>=1:
-                        bonus = random.randint(1,bonus_berry)  # 修正了random.ranint拼写错误
-                        data[str(user_id)]['berry'] += bonus
-                        total_berry += bonus
-                        if salary == 0 and tool_num == 0:
-                            event += f"但是由于表现非常好，老板额外奖励了{bonus}颗草莓。"
-                        else:
-                            event += f"同时因表现非常好，额外获得了{bonus}颗草莓。"
+                        bonus_rate = random.randint(1,100)
+                        # 5%的概率触发额外草莓
+                        if bonus_rate <= 5:
+                            bonus = random.randint(1,bonus_berry)  # 修正了random.ranint拼写错误
+                            data[str(user_id)]['berry'] += bonus
+                            total_berry += bonus
+                            if salary == 0 and tool_num == 0:
+                                event += f"但是由于表现非常好，老板额外奖励了{bonus}颗草莓。"
+                            else:
+                                event += f"同时因表现非常好，额外获得了{bonus}颗草莓。"
                     event += "\n"
                     selected_events.append(event)
                 

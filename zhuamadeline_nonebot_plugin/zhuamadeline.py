@@ -369,9 +369,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         # 最终概率结果
         a, b, c, d = probabilities.values()
 
-            
-        # if str(user_id) == "121096913":
-        #     a, b, c, d = 996, 997, 998, 999
         madeline = zhua_random(a, b, c, d, liechang_number)
         level       = madeline[0]   #等级
         name        = madeline[1]   #名字
@@ -812,7 +809,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         message += (f"\n• 时间秒表冷却结束时间：\n{next_clock_time}") if current_time < next_clock_time else ''
         
         # 判断外出工作时间（若有）
-        message += (f"\n• madeline外出工作预计完成的时间：\n{working_endtime}") if current_time < working_endtime else ''
+        message += (f"\n• madeline工作预计完成时间：\n{working_endtime}") if current_time < working_endtime else ''
 
         # 显示debuff时间（若有）
         message += (f"\n• debuff {debuff_messages.get(debuff, '')} 的持续时间至：\n{next_recover_time}") if debuff != 'normal' else ''
