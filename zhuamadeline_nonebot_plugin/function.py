@@ -180,9 +180,8 @@ def calculate_level_and_exp(data, user_id, level):
         data: 用户数据字典
         user_id: 用户ID
         level: 本次获得的等级点数
-        exp_growth: 经验增长规则字典
     返回:
-        tuple: (经验消息, 等级消息)
+        tuple: (经验消息，等级消息，data主数据)
     """
     user_data = data[user_id]
     exp = user_data.get("exp", 0)
