@@ -431,7 +431,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if buff2_config[current_buff2]['show_condition'](berry_give):
                 # 这里非得不等于-1，大于-1不行，我真的服了这什么bug啊
                 if buff2_remaining != -1:
-                    buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                    buff2_text = f"\n{buff2_name}buff加成剩余{buff2_remaining}次"
 
         # 构造奖励文本（幸运BUFF的额外奖励）
         reward_text = f"{berry_give}颗草莓"
