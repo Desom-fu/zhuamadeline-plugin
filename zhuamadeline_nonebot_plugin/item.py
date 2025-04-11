@@ -189,7 +189,7 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                 # 5猎要求等级超过21
                 if liechang_number=='5':
                     if data[user_id].get("grade", 1) <= 20:
-                        await daoju.finish("你的等级不够，现在无法在寺庙里发挥出全部的力量……请21级后再来试试吧！", at_sender=True)
+                        await daoju.finish("你的等级不够，祈愿仍然被封印……请21级后再来试试吧！", at_sender=True)
                     rnd_stuck = random.randint(1,100)
                     # # 测试
                     # if user_id in bot_owner_id:
@@ -2044,7 +2044,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         pass
                     else:
                         if data[user_id].get("grade", 1) <= 20:
-                            await daoju.finish("你的等级不够，现在无法在寺庙里发挥出全部的力量……请21级后再来试试吧！", at_sender=True)
+                            await daoju.finish("你的等级不够，道具仍然被封印……请21级后再来试试吧！", at_sender=True)
                         rnd_stuck = random.randint(1,100)
                         # # 测试
                         # if user_id in bot_owner_id:

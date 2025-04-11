@@ -210,6 +210,17 @@ def calculate_level_and_exp(data, user_id, level):
         exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
         grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}'
         
+        # 使用字典存储特殊等级消息
+        special_grades = {
+            6: f"恭喜升到{grade}级，现在你可以在神庙里面抓到2级的Madeline了！",
+            11: f"恭喜升到{grade}级，现在你可以在神庙里面抓到3级的Madeline了！",
+            16: f"恭喜升到{grade}级，现在你可以在神庙里面抓到4级的Madeline了！",
+            21: f"恭喜升到{grade}级，现在你可以在神庙里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
+        }
+
+        if grade in special_grades:
+            grade_msg += special_grades[grade]
+        
         if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
             collections['时隙沙漏'] = 1
             grade_msg += f"你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"

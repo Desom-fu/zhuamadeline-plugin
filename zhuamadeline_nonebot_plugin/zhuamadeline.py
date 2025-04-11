@@ -599,6 +599,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     compulsion_count = get_user_data(data, user_id, "compulsion_count", 0)
     get_ball_value = get_user_data(data, user_id, "get_ball_value", 0)
     power = item.get("体力", 0)
+    work_exp = user_data.get('work_exp', 0)
     if collections.get("时隙沙漏", 0) != 0:
         # 动态计算当前可累积次数
         added_chance = calculate_spare_chance(data, str(user_id))
@@ -723,6 +724,11 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 
     # 显示体力（若有）
     message += (f"\n- 剩余体力：{power}点") if power > 0 else ''
+    
+    if all_judge == 'all':   
+
+        # 显示工作经验（若有）
+        message += (f"\n• 当前工作经验：{work_exp}点") if work_exp > 0 else ''
     
     #添加状态（若有）
     message += (f"\n- 状态：{msg_status}") if msg_status else ''
