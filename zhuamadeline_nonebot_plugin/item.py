@@ -11,6 +11,7 @@ import datetime
 #加载数学算法相关
 import random
 import time
+from pathlib import Path
 #加载madeline档案信息
 from .madelinejd import *
 from .config import *
@@ -23,7 +24,7 @@ from .shop import item, item_aliases, trap_item
 from .collection import collection_aliases, collections
 from .secret import secret_list
 from .function import *
-from .event import *
+from .event import buff2_change_status, outofdanger
 from .pvp import *
 from .whitelist import whitelist_rule
 
@@ -323,6 +324,13 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                 lc          = information[5]   #所属猎场
                 new_print   = information[6]   #是否出新
                 
+                exp_msg = ''
+                grade_msg = ''
+                # 只要抓到的是5号猎场的玛德琳就给经验，不看是否在拿个猎场
+                if lc == '5':
+                    if random.randint(1,100) <= 30:
+                        exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)# 最后一个0代表不是道具
+                
                 #如果是奇想魔盒相关道具则进行判定
                 berry_give = 0
                 magic_text = ''
@@ -377,7 +385,7 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                                 f'{magic_text}'+
                                 f'{puke_text}'+
                                 f"{sheet_text}"+
-                                f'{berry_text}',
+                                f'{berry_text}'+ exp_msg + grade_msg,
                                 at_sender = True)
             else:
                 text = str(energy)
@@ -2284,6 +2292,13 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     num         = information[4]   #编号
                     lc          = information[5]   #所属猎场
                     new_print   = information[6]   #是否出新
+                    
+                    exp_msg = ''
+                    grade_msg = ''
+                    # 只要抓到的是5号猎场的玛德琳就给经验，不看是否在拿个猎场
+                    if lc == '5':
+                        if random.randint(1,100) <= 20:
+                            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 1)# 最后一个1代表是道具
 
                     #如果是奇想魔盒相关道具则进行判定
                     berry_give = 0
@@ -2340,7 +2355,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     f'{magic_text}'+
                                     f'{puke_text}'+
                                     f"{sheet_text}"+
-                                    f'{berry_text}',
+                                    f'{berry_text}'+ exp_msg + grade_msg,
                                     at_sender = True)
                 #使用失败
                 if(success==2):

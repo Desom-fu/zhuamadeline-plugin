@@ -173,13 +173,14 @@ def calculate_spare_chance(data, user_id):
         return 0
 
 # 5猎经验值计算
-def calculate_level_and_exp(data, user_id, level):
+def calculate_level_and_exp(data, user_id, level, isitem):
     """
     计算等级和经验值的增长
     参数:
         data: 用户数据字典
         user_id: 用户ID
         level: 本次获得的等级点数
+        isitem: 是不是道具
     返回:
         tuple: (经验消息，等级消息，data主数据)
     """
@@ -192,9 +193,20 @@ def calculate_level_and_exp(data, user_id, level):
     exp_msg = ''
     grade_msg = ''
     
-    # 加等级点经验
-    exp += level
-    exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
+    # 如果满级直接返回
+    if grade == max_grade:
+        return exp_msg, grade_msg, data
+        
+    if isitem == 1:
+        # 是道具就加levle//2的经验
+        exp += level//2
+    else:
+        # 加等级点经验
+        exp += level
+        
+    if exp > 0:
+        # exp>0才加上消息
+        exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
 
     if exp >= max_exp:
         # 计算升级

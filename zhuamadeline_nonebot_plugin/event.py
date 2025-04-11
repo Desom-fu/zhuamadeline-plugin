@@ -25,23 +25,56 @@ user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 stuck_path = Path() / "data" / "UserList" / "Struct.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
 
+def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
+    """
+    处理buff2状态逻辑
+    参数:
+        data: 完整数据字典
+        user_id: 用户ID
+        buff2_status: 看是哪种状态
+        change_status: 1是加，0是扣
+    返回:
+        更新后的data
+    """
+    user_info = data.setdefault(str(user_id), {})
+    user_info.setdefault("buff2", "normal")
+    user_info.setdefault("lucky_times", 0)
+
+    # 为1就加
+    if change_status == 1:
+        # 检查是否存在buff2状态
+        if user_info["buff2"] == buff2_status:
+            # 如果存在次数记录且大于0，增加次数
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] += 1
+            # 如果次数为0，清除状态
+            else:
+                user_info["buff2"] = "normal"
+    # 为0就扣
+    elif change_status == 0:
+        # 检查是否存在buff2状态
+        if user_info["buff2"] == buff2_status:
+            # 如果存在次数记录且大于0，增加次数
+            if user_info["lucky_times"] > 0:
+                user_info["lucky_times"] -= 1
+            # 如果次数为0，清除状态
+            else:
+                user_info["buff2"] = "normal"
+    # 其他数字直接返回
+    return data
+
 #脱险事件
 async def outofdanger(data, user_id, message, current_time, next_time_r):
     stuck_data = open_data(stuck_path)  # 打开被困名单
     user_info = data.setdefault(str(user_id), {})
     liechang_number = user_info.get('lc','1')
     buff = user_info.get("buff", "normal")
-    user_info.setdefault("buff2", "normal")
-    user_info.setdefault("lucky_times", 0)
     
     # 检测是否在名单中
     if user_id in stuck_data:
-        # 处理幸运状态逻辑
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         # 是否到时间了
         if current_time >= next_time_r:
             user_info["buff"] = "normal"
@@ -55,12 +88,10 @@ async def outofdanger(data, user_id, message, current_time, next_time_r):
         return
     # 有buff也解除
     if buff in ["hurt", "lost", "confuse"]:
-        # 处理幸运状态逻辑
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
+        # 其他逻辑
         user_info["buff"] = "normal"
         user_info["next_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         if user_info["buff2"] == "lucky" and user_info["lucky_times"] == 0:
@@ -71,22 +102,16 @@ async def outofdanger(data, user_id, message, current_time, next_time_r):
     
     # 没到时间加1幸运
     if current_time <= next_time_r:
-        # 处理幸运状态逻辑
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         return
 
     # 0猎加1幸运
     if liechang_number == "0":
-        # 处理幸运状态逻辑
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         return
 
 
@@ -252,12 +277,6 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
 
     # 迷路事件
     if lost == 1:
-        # 处理幸运状态逻辑，迷路不扣幸运
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
         rnd = random.randint(1, 10)
         if rnd <= 2:
             return
@@ -267,11 +286,9 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             user_info['buff'] = 'lost'
             # 加入森林被困名单
             stuck_data[user_id] = '2'
-            # 正面buff检测逻辑（已提前setdefault）
-            if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-                user_info["lucky_times"] += 1
-            if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
-                user_info['buff2'] = 'normal'
+            # 处理buff2状态逻辑
+            data = buff2_change_status(data, user_id, "lucky", 1)
+            data = buff2_change_status(data, user_id, "speed", 1)
             # 写入数据
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
@@ -298,7 +315,6 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             rescue_user = user_data.setdefault(save_id, {})
             rescue_user['next_time'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             del stuck_data[save_id]
-            # 正面buff检测逻辑（已提前setdefault）
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
             await message.finish(f"恭喜你救出了森林里的" + MessageSegment.at(save_id) + "。\n本次奖励75草莓"+ diamond_text+hourglass_text, at_sender=True)
@@ -470,12 +486,9 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
     stuck_data = open_data(stuck_path)
     #是否拥有7个碎片
     if(items.get('神秘碎片',0) < 5):
-        # 处理幸运状态逻辑，检测失败不扣幸运
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         await message.finish("在远古的水晶矿洞前，风轻轻吹过，岩石间传来阵阵低语。眼前的巨大门扉上镶嵌着神秘的符文，发出幽幽的光辉。你注意到面前门上的部分符文与你手上的碎片相契合\n或许......收集足够的碎片就可以打开这扇门？", at_sender=True)
     
     #计算三个猎场的五级
@@ -489,12 +502,9 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
                     num_of_level5 += 1
     
     if num_of_level5 < 9:
-        # 处理幸运状态逻辑，检测失败不扣幸运
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         await message.finish(f"水晶矿洞内传来了强大的灵力，这股力量使你无法前进。或许......多带几个猎场的高等级madeline可以抵御这股力量？\n你目前有{num_of_level5}个5级madeline", at_sender=True)
 
     ######其他事件#####
@@ -877,12 +887,9 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     kc_data = [open_data(user_list1), open_data(user_list2), open_data(user_list3)]
     # 检查前三个猎场是否满足 PVP 门槛
     if not all(check_liechang(user_id, data) for data in kc_data):
-        # 处理幸运状态逻辑，进入事件不扣幸运
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         await message.finish(
             "大门前的激光挡住了你的去路……\n"
             "没准，这些激光是检测你是否满足指定的Madeline条件？",
@@ -897,24 +904,18 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
                    count_anding * item['安定之音'][0] +
                    count_yinkuang * item['音矿'][0])
     if total_value < 15000:
-        # 处理幸运状态逻辑，进入事件不扣幸运
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         await message.finish("在地下终端的大门前，你发现门上有三个图案：音符，玻璃碎片和水晶。\n" +
                              "你似乎明白这几个图案的意思了，然后把对应的物品放了上去，但是却没有任何动静，或许是你背包里面对应的物品总价值不够？\n"+
                              f"你目前拥有的对应物品总价值为：{total_value}", at_sender=True)
 
     # 检测是否已拥有 madeline 飞升器
     if "madeline飞升器" not in collections:
-        # 处理幸运状态逻辑，进入事件不扣幸运
-        if user_info["buff2"] == "lucky":
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            elif user_info["lucky_times"] == 0:
-                user_info["buff2"] = "normal"
+        # 处理buff2状态逻辑
+        data = buff2_change_status(data, user_id, "lucky", 1)
+        data = buff2_change_status(data, user_id, "speed", 1)
         
         if energy < 50000:
             await message.finish(

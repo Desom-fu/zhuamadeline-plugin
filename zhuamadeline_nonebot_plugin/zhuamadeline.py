@@ -24,7 +24,7 @@ from .list4 import *
 #加载抓madeline相关的函数
 from .function import *
 from .render import *
-from .event import event_happen, outofdanger
+from .event import event_happen, outofdanger, buff2_change_status
 from .pvp import madeline_pvp_event, pvp_opening, check_liechang
 from .whitelist import whitelist_rule
 
@@ -117,7 +117,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             exp = data[user_id].setdefault("exp", 0)
             grade = data[user_id].setdefault("grade", 1)
             max_exp = data[user_id].setdefault("max_exp", 10)
-            max_grade = 30 # 满级固定30
             
             #确保collections存在
             collections = data[str(user_id)].get('collections', {})
@@ -172,18 +171,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if(data[str(user_id)]['event']!='nothing'):
                 await catch.finish("你还有正在进行中的事件", at_sender=True)
                 
-            #正面buff检测逻辑
-            #没有就先加上
-            if(not 'buff2' in data[str(user_id)]):
-                data[str(user_id)]['buff2'] = 'normal'
-            if(not 'lucky_times' in data[str(user_id)]):
-                data[str(user_id)]['lucky_times'] = 0
-            #幸运
-            if data[str(user_id)]["lucky_times"] > 0 and data[str(user_id)]['buff2'] == 'lucky':
-                data[str(user_id)]["lucky_times"] -= 1
-            else:
-                data[str(user_id)]['buff2'] = 'normal'
-                data[str(user_id)]["lucky_times"] = 0
+            # buff2先扣除
+            data = buff2_change_status(data, user_id, "lucky", 0)
+            data = buff2_change_status(data, user_id, "speed", 0)
             #迷路脱险事件
             await outofdanger(data,str(user_id),catch,current_time,next_time_r)
             
@@ -258,12 +248,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
     #----------给出回应-----------
     if(answer == 0):
-        #幸运
-        if data[str(user_id)]["lucky_times"] > 0 and data[str(user_id)]['buff2'] == 'lucky':
-            data[str(user_id)]["lucky_times"] += 1
-        else:
-            data[str(user_id)]['buff2'] = 'normal'
-            data[str(user_id)]["lucky_times"] = 0
         text = time_text(str(delta_time))
         await catch.finish(f"别抓啦，{text}后再来吧", at_sender = True)
     elif(answer == 1):
@@ -382,8 +366,8 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         grade_msg = ''
 
         # 经验全局定义到function里面
-        if liechang_number == "5" and grade < max_grade:
-            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level)
+        if liechang_number == "5":
+            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)# 最后一个0代表不是道具
         
         #奖励草莓
         lucky_give = 0
@@ -595,11 +579,14 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     elect_status = user_data.get("elect_status", False)
     kongjun = user_data.get("kongjun", 0)
     fishing = user_data.get("fishing", 0)
+    work_exp = user_data.get('work_exp', 0)
+    exp = user_data.get('exp', 0)
+    grade = user_data.get('grade', 1)
+    max_exp = user_data.get('max_exp', 10)
     lucky_times = get_user_data(data, user_id, "lucky_times", 0)
     compulsion_count = get_user_data(data, user_id, "compulsion_count", 0)
     get_ball_value = get_user_data(data, user_id, "get_ball_value", 0)
     power = item.get("体力", 0)
-    work_exp = user_data.get('work_exp', 0)
     if collections.get("时隙沙漏", 0) != 0:
         # 动态计算当前可累积次数
         added_chance = calculate_spare_chance(data, str(user_id))
@@ -751,6 +738,15 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
             message += f"\n- 当前目标：黄色球体\n- 已飞升次数：{get_ball_value}/3"
         else:
             message += f"\n- 当前目标：无，地下终端已完全开放"
+
+    # 显示5猎当前目标（要在5猎才显示）
+    if liechang_number == "5":
+        if grade < max_grade:
+            message += (
+                f"\n- 当前经验：{exp}/{max_exp}"
+                f"\n- 当前等级：{grade}/{max_grade}")
+        else:
+            message += f'- 您已升到满级：{grade}/{max_grade}'
 
     if all_judge == 'all':
         # 处理“身份徽章”和“充能箱”状态
