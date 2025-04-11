@@ -186,8 +186,39 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         if current_time >= next_time:
             #查看能量有没有600
             if energy >= 600:
+                # 5猎要求等级超过21
+                if liechang_number=='5':
+                    if data[user_id].get("grade", 1) <= 20:
+                        await daoju.finish("你的等级不够，现在无法在寺庙里发挥出全部的力量……请21级后再来试试吧！", at_sender=True)
+                    rnd_stuck = random.randint(1,100)
+                    # # 测试
+                    # if user_id in bot_owner_id:
+                    #     rnd_stuck = 1
+                    rnd_hurt = 20
+                    if(rnd_stuck<=rnd_hurt):
+                        stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                        full_path = Path() / "data" / "UserList" / "UserData.json"
+                        #打开被困名单
+                        stuck_data = open_data(stuck_path)
+                        current_time = datetime.datetime.now()
+                        #检测回想之核
+                        dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                        #受伤2小时，在此期间什么都干不了
+                        next_time = current_time + datetime.timedelta(minutes=120-dream)
+                        data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                        data[str(user_id)]['buff'] = 'hurt'
+                        #加入山洞被困名单
+                        stuck_data[user_id] = '5'
+                        #写入主数据表
+                        save_data(full_path, data)
+                        #写入山洞被困名单
+                        save_data(stuck_path, stuck_data)
+                        #随机事件文本
+                        text = "你在闭眼祈愿的过程中，没有任何madeline响应你，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好祈愿失败不消耗能量……"
+                        #发送消息
+                        await daoju.finish(text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)     
                 # 4猎必须要有黄球才能祈愿
-                if liechang_number == "4":
+                elif liechang_number == "4":
                     # 确保藏品栏存在
                     data[str(user_id)].setdefault('collections', {})
                     if(not '黄色球体' in data[str(user_id)]['collections']):
@@ -2005,7 +2036,43 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 if liechang_number == "4":
                     if not use_item_name.startswith("madeline飞升器"):
                         if(not '黄色球体' in data[str(user_id)]['collections']):
-                            await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用抓捕Madeline的道具……", at_sender = True)                            
+                            await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用抓捕Madeline的道具……", at_sender = True)
+                
+                # 5猎要求等级超过21
+                if liechang_number=='5':
+                    if success != 0:
+                        pass
+                    else:
+                        if data[user_id].get("grade", 1) <= 20:
+                            await daoju.finish("你的等级不够，现在无法在寺庙里发挥出全部的力量……请21级后再来试试吧！", at_sender=True)
+                        rnd_stuck = random.randint(1,100)
+                        # # 测试
+                        # if user_id in bot_owner_id:
+                        #     rnd_stuck = 1
+                        rnd_hurt = 20
+                        if(rnd_stuck<=rnd_hurt):
+                            stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                            full_path = Path() / "data" / "UserList" / "UserData.json"
+                            #打开被困名单
+                            stuck_data = open_data(stuck_path)
+                            current_time = datetime.datetime.now()
+                            #检测回想之核
+                            dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                            #受伤2小时，在此期间什么都干不了
+                            next_time = current_time + datetime.timedelta(minutes=120-dream)
+                            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                            data[str(user_id)]['buff'] = 'hurt'
+                            #加入山洞被困名单
+                            stuck_data[user_id] = '5'
+                            #写入主数据表
+                            save_data(full_path, data)
+                            #写入山洞被困名单
+                            save_data(stuck_path, stuck_data)
+
+                            #随机事件文本
+                            text = "你在使用道具的过程中，没有任何madeline被道具吸引，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好道具没消耗……"
+                            #发送消息
+                            await daoju.finish(text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)                      
 
                 if(use_item_name=="胡萝卜"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
