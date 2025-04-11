@@ -1284,7 +1284,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     save_data(user_path / file_name, data)
 
                     if use_count == 1:
-                        await daoju.finish(f"使用成功，{effect['message']}，持续{effect_per_potion}次。当前剩余次数：{remaining_effect}", at_sender=True)
+                        await daoju.finish(f"使用成功！{effect['message']}，持续{effect_per_potion}次。当前剩余次数：{remaining_effect}", at_sender=True)
                     else:
                         await daoju.finish(f"使用成功！你{display_buff_name}buff的次数增加了{total_effect}次！当前剩余次数：{remaining_effect}", at_sender=True)
 

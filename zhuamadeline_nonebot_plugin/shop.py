@@ -39,13 +39,13 @@ potion_effects = {
         "buff_name": "lucky",
         "effect_per_potion": 20,
         "description": "提升运气的小道具，虽说不知道有没有真的提升...",
-        "message": "现在正常抓madeline可额外获得15草莓"
+        "message": "现在你正常抓madeline可额外获得15草莓"
     },
     "迅捷药水": {
         "buff_name": "speed",
         "effect_per_potion": 20,
         "description": "提升速度的小道具...",
-        "message": "现在移动速度提升了"
+        "message": "现在你的移动速度提升了"
     }
 }
 
