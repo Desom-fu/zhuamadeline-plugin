@@ -88,7 +88,8 @@ FOOD_EFFECTS = {
     '树莓': {},
     '芒果': {'bonus_berry': 20},
     '杨桃': {'work_simple_chance': -10},
-    '百香果': {'work_per_hour': 1}
+    '百香果': {'work_per_hour': 1},
+    '菠萝': {'bonus_item': 1}
 }
 
 @dataclass
@@ -96,6 +97,7 @@ class WorkState:
     work_per_hour: int = 3
     work_simple_chance: int = 90
     bonus_berry: int = 0
+    bonus_item: int = 0
 
 def apply_effects(state: WorkState, effects: List[Dict]):
     """应用效果到工作状态"""
@@ -103,6 +105,7 @@ def apply_effects(state: WorkState, effects: List[Dict]):
         state.work_per_hour += effect.get('work_per_hour', 0)
         state.work_simple_chance += effect.get('work_simple_chance', 0)
         state.bonus_berry += effect.get('bonus_berry', 0)
+        state.bonus_item += effect.get('bonus_item', 0)
 
 work = on_command('外出', aliases={'work'}, permission=GROUP, priority=2, block=True, rule=whitelist_rule)
 
@@ -132,6 +135,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     user_info.setdefault('work_per_hour', 3)
     user_info.setdefault('work_simple_chance', 90)
     user_info.setdefault('bonus_berry', 0)
+    user_info.setdefault('bonus_item', 0)
     user_info.setdefault('work_skiptime', 0)
     user_info.setdefault('work_exp', 0)
     user_info.setdefault('last_work_time', current_time.strftime("%Y-%m-%d %H:%M:%S"))
@@ -223,7 +227,8 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
         'work_area': area,
         'work_per_hour': state.work_per_hour,
         'work_simple_chance': state.work_simple_chance,
-        'bonus_berry': state.bonus_berry
+        'bonus_berry': state.bonus_berry,
+        'bonus_item': state.bonus_item
     })
     
     # 保存数据
@@ -274,6 +279,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             work_per_hour = data[str(user_id)]['work_per_hour']
             work_simple_chance = data[str(user_id)]['work_simple_chance']
             bonus_berry = data[str(user_id)]['bonus_berry']
+            bonus_item = data[str(user_id)].get('bonus_item', 0)
             work_exp = data[str(user_id)]['work_exp']
             final_log=""
             common_events=[
@@ -528,6 +534,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                         salary = 0
                         tool_type = random.choice(tool_list)
                         tool_num = random.randint(1,3)
+                        tool_num += bonus_item
                     else:
                         tool_num = 0
                         salary = 0
@@ -711,7 +718,7 @@ async def skip_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 data[str(user_id)]['working_endtime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 data[str(user_id)]['work_skiptime'] += 1
                 save_data(full_path, data)
-                await skip_work.finish(f"恭喜！你使用{skip_power_require}点体力提前结束了本次工作！", at_sender=True)
+                await skip_work.finish(f"你成功使用{skip_power_require}点体力提前结束了本次工作，你还剩{data[str(user_id)]['item']['体力']}点体力！", at_sender=True)
             else:
                 await skip_work.finish(f"你的体力不足，需要{skip_power_require}点，你只有{data[str(user_id)]['item']['体力']}点", at_sender=True)
     else:
