@@ -2199,7 +2199,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 ckdj = on_command('item', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @ckdj.handle()
 async def ckdj_handle(arg: Message = CommandArg()):
-    dj_name = str(arg)
+    dj_name = str(arg).strip()
     standard_item = get_alias_name(dj_name, item, item_aliases)
     if(standard_item in item):
         await ckdj.finish(standard_item+":\n"+item[standard_item][2])
