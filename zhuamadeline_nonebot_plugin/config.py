@@ -26,6 +26,8 @@ __all__ = [
     'user_path2',
     'user_path3',
     'user_path4',
+    'max_grade',
+    'exp_growth'
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -77,6 +79,16 @@ user_path1 = Path() / "data" / "UserList" / "UserList1.json"
 user_path2 = Path() / "data" / "UserList" / "UserList2.json"
 user_path3 = Path() / "data" / "UserList" / "UserList3.json"
 user_path4 = Path() / "data" / "UserList" / "UserList4.json"
+#5猎相关经验
+max_grade = 30 # 满级固定30
+# 经验增长规则字典
+exp_growth = {
+    range(1, 6): 5,   # 等级 1-5，max_exp +5
+    range(6, 11): 10,  # 等级 6-10，max_exp +10
+    range(11, 16): 15, # 等级 11-15，max_exp +15
+    range(16, 21): 20, # 等级 16-20，max_exp +20
+    range(21, 31): 25  # 等级 21-30，max_exp +25
+}
 
 #赌场信息
 duchang_list = Path() / "data" / "DuChang" / "duchang.json"

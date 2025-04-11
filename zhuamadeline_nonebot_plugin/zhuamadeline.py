@@ -381,41 +381,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         exp_msg = ''
         grade_msg = ''
 
-        # 经验增长规则字典
-        exp_growth = {
-            range(1, 6): 5,   # 等级 1-5，max_exp +5
-            range(6, 11): 10,  # 等级 6-10，max_exp +10
-            range(11, 16): 15, # 等级 11-15，max_exp +15
-            range(16, 21): 20, # 等级 16-20，max_exp +20
-            range(21, 31): 25  # 等级 21-30，max_exp +25
-        }
-
+        # 经验全局定义到function里面
         if liechang_number == "5" and grade < max_grade:
-            # 加等级点经验
-            exp += level
-            exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
-
-            if exp >= max_exp:
-                # 计算升级
-                exp -= max_exp
-                grade += 1
-
-                # 查找对应的经验增长值
-                for level_range, increment in exp_growth.items():
-                    if grade in level_range:
-                        max_exp += increment
-                        break
-                
-                exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
-                grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}'
-                
-                if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
-                    collections['时隙沙漏'] = 1
-                    grade_msg += f"你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
-                    save_data(user_path / file_name, data)
-
-            # 更新数据
-            data[user_id].update({"exp": exp, "grade": grade, "max_exp": max_exp})
+            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level)
         
         #奖励草莓
         lucky_give = 0

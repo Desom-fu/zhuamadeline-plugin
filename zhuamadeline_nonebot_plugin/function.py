@@ -54,7 +54,8 @@ __all__ = [
     'get_alias_name',
     'all_cool_time',
     'get_nickname',
-    'calculate_spare_chance'
+    'calculate_spare_chance',
+    'calculate_level_and_exp'
 ]
 
 #madeline图鉴
@@ -170,6 +171,56 @@ def calculate_spare_chance(data, user_id):
     except Exception as e:
         logger.error(f"时隙沙漏计算错误: {e}")
         return 0
+
+# 5猎经验值计算
+def calculate_level_and_exp(data, user_id, level):
+    """
+    计算等级和经验值的增长
+    参数:
+        data: 用户数据字典
+        user_id: 用户ID
+        level: 本次获得的等级点数
+        exp_growth: 经验增长规则字典
+    返回:
+        tuple: (经验消息, 等级消息)
+    """
+    user_data = data[user_id]
+    exp = user_data.get("exp", 0)
+    grade = user_data.get("grade", 1)
+    max_exp = user_data.get("max_exp", 10)
+    collections = user_data.get("collections", {})
+    
+    exp_msg = ''
+    grade_msg = ''
+    
+    # 加等级点经验
+    exp += level
+    exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
+
+    if exp >= max_exp:
+        # 计算升级
+        exp -= max_exp
+        grade += 1
+
+        # 查找对应的经验增长值
+        for level_range, increment in exp_growth.items():
+            if grade in level_range:
+                max_exp += increment
+                break
+        
+        exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
+        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}'
+        
+        if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
+            collections['时隙沙漏'] = 1
+            grade_msg += f"你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
+
+    # 更新数据
+    user_data.update({"exp": exp, "grade": grade, "max_exp": max_exp})
+    
+    save_data(full_path, data)
+    
+    return exp_msg, grade_msg, data
 
 #------------mymadeline相关指令----------------
 
