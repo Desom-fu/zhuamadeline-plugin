@@ -283,13 +283,14 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
 
     # 受伤事件
     elif rnd <= 250 + rnd_regu:
+        #有迅捷正常抓
+        if user_info['buff2'] == 'speed':
+            return
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
         user_info['buff'] = 'hurt'
         stuck_data[user_id] = '2'
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
             
         #检测星钻
         if diamond_text:
@@ -569,16 +570,17 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         rnd_safe = 3 if helmat < 1 else random.randint(1, 3)
         if rnd_safe <= 1:
             return
+        #有迅捷正常抓
+        if user_info['buff2'] == 'speed':
+            return
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_info = user_data.get(user_id,{})
         #受伤1.5小时，在此期间什么都干不了
         next_time = current_time + datetime.timedelta(minutes=89 if collections.get("回想之核", 0) >= 1 else 90)
         user_info['buff'] = 'hurt'
         #加入山洞被困名单
         stuck_data[user_id] = '3'
-        #负面事件加一次幸运
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
         #检测星钻
         if diamond_text:
             next_time = current_time  # 立即重置冷却时间
@@ -637,8 +639,8 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
     #debuff事件
     elif(rnd<=500+rnd_regu): #50
         #首先玩家没有buff/debuff时才会随机触发
-        #有幸运正常抓
-        if user_info['buff2'] == 'lucky':
+        #有药水状态正常抓
+        if user_info['buff2'] != 'normal':
             return
         #有debuff正常抓
         if user_info['debuff'] != 'normal':
@@ -916,16 +918,17 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # if user_id in bot_owner_id:
     #     rnd = 540
     if(rnd<=75):
+        #有迅捷正常抓
+        if user_info['buff2'] == 'speed':
+            return
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_info = user_data.get(user_id,{})
         #受伤2小时，在此期间什么都干不了
         next_time = current_time + datetime.timedelta(minutes=119 if collections.get("回想之核", 0) >= 1 else 120)
         user_info['buff'] = 'hurt'
         #加入被困名单
         stuck_data[user_id] = '4'
-        #幸运
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
         #检测星钻
         if diamond_text:
             next_time = current_time  # 立即重置冷却时间
@@ -977,8 +980,8 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     #debuff事件
     elif(rnd<=350): #50
         #首先玩家没有buff/debuff时才会随机触发
-        #有幸运正常抓
-        if user_info['buff2'] == 'lucky':
+        #有药水状态正常抓
+        if user_info['buff2'] != 'normal':
             return
         #有debuff正常抓
         if user_info['debuff'] != 'normal':

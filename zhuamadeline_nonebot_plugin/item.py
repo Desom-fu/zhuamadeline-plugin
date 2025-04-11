@@ -20,7 +20,7 @@ from .list2 import *
 from .list3 import *
 from .list4 import *
 #加载商店信息和商店交互
-from .shop import item, item_aliases, trap_item, potion_effects
+from .shop import item, item_aliases, trap_item, potion_effects, buff2_config
 from .collection import collection_aliases, collections
 from .secret import secret_list
 from .function import *
@@ -101,6 +101,11 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     data = open_data(full_path)
     user_id = str(event.get_user_id())
     group_id = str(event.group_id)
+    # 防止掉坑文本
+    buff2_text = ""
+    buff2_remaining = -1
+    current_buff2 = data[str(user_id)].get('buff2', 'normal')
+
     if user_id not in data:
         await pray.finish(f"请先抓一次Madeline后在进行祈愿哦！", at_sender=True)
     #debuff清除逻辑(使用道具前判定)
@@ -191,33 +196,42 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                 if liechang_number=='5':
                     if data[user_id].get("grade", 1) <= 20:
                         await daoju.finish("你的等级不够，祈愿仍然被封印……请21级后再来试试吧！", at_sender=True)
-                    rnd_stuck = random.randint(1,100)
-                    # # 测试
-                    # if user_id in bot_owner_id:
-                    #     rnd_stuck = 1
-                    rnd_hurt = 20
-                    if(rnd_stuck<=rnd_hurt):
-                        stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                        full_path = Path() / "data" / "UserList" / "UserData.json"
-                        #打开被困名单
-                        stuck_data = open_data(stuck_path)
-                        current_time = datetime.datetime.now()
-                        #检测回想之核
-                        dream = data[str(user_id)]['collections'].get("回想之核", 0)
-                        #受伤2小时，在此期间什么都干不了
-                        next_time = current_time + datetime.timedelta(minutes=120-dream)
-                        data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                        data[str(user_id)]['buff'] = 'hurt'
-                        #加入山洞被困名单
-                        stuck_data[user_id] = '5'
-                        #写入主数据表
-                        save_data(full_path, data)
-                        #写入山洞被困名单
-                        save_data(stuck_path, stuck_data)
-                        #随机事件文本
-                        text = "你在闭眼祈愿的过程中，没有任何madeline响应你，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好祈愿失败不消耗能量……"
-                        #发送消息
-                        await daoju.finish(text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)     
+                    # 迅捷药水防止掉坑放这里
+                    if current_buff2 == "speed":
+                        buff2_name = buff2_config[current_buff2]['name']
+                        times_field = f"{current_buff2}_times"  # speed_times
+                        buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+                        user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                        if buff2_remaining != -1:
+                            buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                    else:
+                        rnd_stuck = random.randint(1,100)
+                        # # 测试
+                        # if user_id in bot_owner_id:
+                        #     rnd_stuck = 1
+                        rnd_hurt = 20
+                        if(rnd_stuck<=rnd_hurt):
+                            stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                            full_path = Path() / "data" / "UserList" / "UserData.json"
+                            #打开被困名单
+                            stuck_data = open_data(stuck_path)
+                            current_time = datetime.datetime.now()
+                            #检测回想之核
+                            dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                            #受伤2小时，在此期间什么都干不了
+                            next_time = current_time + datetime.timedelta(minutes=120-dream)
+                            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                            data[str(user_id)]['buff'] = 'hurt'
+                            #加入山洞被困名单
+                            stuck_data[user_id] = '5'
+                            #写入主数据表
+                            save_data(full_path, data)
+                            #写入山洞被困名单
+                            save_data(stuck_path, stuck_data)
+                            #随机事件文本
+                            text = "你在闭眼祈愿的过程中，没有任何madeline响应你，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好祈愿失败不消耗能量……"
+                            #发送消息
+                            await daoju.finish(text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)     
                 # 4猎必须要有黄球才能祈愿
                 elif liechang_number == "4":
                     # 确保藏品栏存在
@@ -228,41 +242,50 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                 elif liechang_number=='3':
                     if data[str(user_id)].get("item").get('神秘碎片', 0) < 5:
                         await pray.finish("你还未解锁通往第三猎场的道路...", at_sender=True)
-                    try:
-                        helmat = data[str(user_id)]['collections']['矿工头盔']
-                    except:
-                        helmat = 0
-                    rnd_hurt = 10
-                    rnd_stuck = random.randint(1,100)
-                    if helmat>=1:
-                        rnd_hurt -=5
-                    if(rnd_stuck<=rnd_hurt):
-                        stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                        #打开被困名单
-                        stuck_data = open_data(stuck_path)
-                        #受伤1.5小时，在此期间什么都干不了
-                        current_time = datetime.datetime.now()
-                        next_time = current_time + datetime.timedelta(minutes=90)
-                        #检测回想之核
+                    # 迅捷药水防止掉坑放这里
+                    if current_buff2 == "speed":
+                        buff2_name = buff2_config[current_buff2]['name']
+                        times_field = f"{current_buff2}_times"  # speed_times
+                        buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+                        user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                        if buff2_remaining != -1:
+                            buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                    else:
                         try:
-                            dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                            helmat = data[str(user_id)]['collections']['矿工头盔']
                         except:
-                            dream = 0
-                        if dream >= 1:
-                            next_time = current_time + datetime.timedelta(minutes=89)
-                        data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                        data[str(user_id)]['buff'] = 'hurt'
-                        #加入山洞被困名单
-                        stuck_data[user_id] = '3'
-                        #写入主数据表
-                        save_data(user_path / file_name, data)
-                        #写入山洞被困名单
-                        save_data(stuck_path, stuck_data)
+                            helmat = 0
+                        rnd_hurt = 10
+                        rnd_stuck = random.randint(1,100)
+                        if helmat>=1:
+                            rnd_hurt -=5
+                        if(rnd_stuck<=rnd_hurt):
+                            stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                            #打开被困名单
+                            stuck_data = open_data(stuck_path)
+                            #受伤1.5小时，在此期间什么都干不了
+                            current_time = datetime.datetime.now()
+                            next_time = current_time + datetime.timedelta(minutes=90)
+                            #检测回想之核
+                            try:
+                                dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                            except:
+                                dream = 0
+                            if dream >= 1:
+                                next_time = current_time + datetime.timedelta(minutes=89)
+                            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                            data[str(user_id)]['buff'] = 'hurt'
+                            #加入山洞被困名单
+                            stuck_data[user_id] = '3'
+                            #写入主数据表
+                            save_data(user_path / file_name, data)
+                            #写入山洞被困名单
+                            save_data(stuck_path, stuck_data)
 
-                        #随机事件文本
-                        text = "你在闭眼祈愿的过程中，没有任何madeline响应你，结果一不小心你就撞到了山洞上！不过幸好祈愿失败不消耗能量……"
-                        #发送消息
-                        await pray.finish(text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
+                            #随机事件文本
+                            text = "你在闭眼祈愿的过程中，没有任何madeline响应你，结果一不小心你就撞到了山洞上！不过幸好祈愿失败不消耗能量……"
+                            #发送消息
+                            await pray.finish(text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
                 # 2猎祈愿 50% 概率迷路
                 elif liechang_number == "2":
                     stuck_path = Path() / "data" / "UserList" / "Struct.json"
@@ -385,7 +408,7 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                                 f'{magic_text}'+
                                 f'{puke_text}'+
                                 f"{sheet_text}"+
-                                f'{berry_text}'+ exp_msg + grade_msg,
+                                f'{berry_text}'+ buff2_text + exp_msg + grade_msg,
                                 at_sender = True)
             else:
                 text = str(energy)
@@ -404,6 +427,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     file_name = "UserData.json"
     full_path = user_path / file_name
     item_text = ""
+    # 防止掉坑文本
+    buff2_text = ""
+    buff2_remaining = -1
     #打开文件
     data = open_data(full_path)
     user_id = str(event.get_user_id())
@@ -1261,58 +1287,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     else:
                         await daoju.finish(f"使用成功！你{buff_name}buff的次数增加了{total_effect}次！当前剩余次数：{remaining_effect}", at_sender=True)
 
-            # if(use_item_name=="幸运药水"):
-            #     """
-            #     提升运气的小道具，虽说不知道有没有真的提升...
-            #     """
-            #     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
-            #         #确保自身没有幸运状态
-            #         if data[str(user_id)].get('buff2')!='lucky' or data[str(user_id)].get('lucky_times', 0)<=0:
-            #             data[str(user_id)]["buff2"]='lucky'
-            #             data[str(user_id)]["lucky_times"] = 21
-            #             data[str(user_id)]["item"][use_item_name] -= 1
-            #             #写入文件
-            #             save_data(user_path / file_name, data)
-            #             await daoju.finish("使用成功，现在正常抓madeline可额外获得15草莓，持续20次。", at_sender=True)
-            #         else:
-            #             data[str(user_id)]["lucky_times"] += 20
-            #             restLucky = data.get(str(user_id)).get("lucky_times", 0) - 1
-            #             data[str(user_id)]["item"][use_item_name] -= 1
-            #             #写入文件
-            #             save_data(user_path / file_name, data)
-            #             await daoju.finish(f"使用成功，你幸运buff的次数额外增加了20次！当前剩余次数为：{restLucky}", at_sender=True)
-            #     else:
-            #         await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
-            
-            
-            # #两个参数的指令
-            # if (len(command) == 2):
-            #     item_name = command[0]  # 参数1(使用的道具名)
-            #     if item_name == "幸运药水":
-            #         success = 999
-            #         try:
-            #             use_count = int(command[1])  # 参数2(使用的数量)
-            #         except ValueError:
-            #             await daoju.finish("请输入正确的幸运药水使用数量！", at_sender=True)
-            #         # 获取玩家的药水数量
-            #         user_items = data[str(user_id)].get("item", {})
-            #         current_potions = user_items.get(item_name, 0)
-            #         if use_count <= 0:
-            #             await daoju.finish("使用数量必须大于0！", at_sender=True)
-            #         if current_potions < use_count:
-            #             await daoju.finish(f"你的{item_name}数量不足！你只有{current_potions}瓶{item_name}！", at_sender=True)
-            #         # 确保自身没有幸运状态
-            #         if data[str(user_id)].get('buff2', "normal") != 'lucky' or data[str(user_id)].get('lucky_times', 0) <= 0:
-            #             data[str(user_id)]["buff2"] = 'lucky'
-            #             data[str(user_id)]["lucky_times"] = 1  # 初始设定
-            #         # 增加幸运次数
-            #         data[str(user_id)]["lucky_times"] += 20 * use_count
-            #         restLucky = data[str(user_id)]["lucky_times"] - 1
-            #         # 扣除药水
-            #         data[str(user_id)]["item"][item_name] -= use_count
-            #         # 写入文件
-            #         save_data(user_path / file_name, data)
-            #         await daoju.finish(f"使用成功！你幸运buff的次数增加了{20 * use_count}次！当前剩余次数：{restLucky}", at_sender=True)
             command = use_item_name.split("/")
             #三个参数的指令
             if (len(command)==3):
@@ -2045,52 +2019,63 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 save_data(stuck_path, stuck_data)   
                                 #发送消息
                                 await daoju.finish("你在使用道具的时候，一不小心在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhuamadeline指令)", at_sender=True)
-                            
+                
+                # 3猎掉坑    
                 if liechang_number=='3':
                     if success != 0:
                         pass
                     else:
                         if data[user_id]['item'].get('神秘碎片',0) < 5:
                             await daoju.finish("你还未解锁通往第三猎场的道路...", at_sender=True)
-                        try:
-                            helmat = data[str(user_id)]['collections']['矿工头盔']
-                        except:
-                            helmat = 0
-                        rnd_hurt = 10
-                        rnd_stuck = random.randint(1,100)
-                        # # 测试
-                        # if user_id in bot_owner_id:
-                        #     rnd_stuck = 1
-                        if helmat>=1:
-                            rnd_hurt -=5
-                        if(rnd_stuck<=rnd_hurt):
-                            stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                            full_path = Path() / "data" / "UserList" / "UserData.json"
-                            #打开被困名单
-                            stuck_data = open_data(stuck_path)
-                            #受伤1.5小时，在此期间什么都干不了
-                            current_time = datetime.datetime.now()
-                            next_time = current_time + datetime.timedelta(minutes=90)
-                            #检测回想之核
+                        # 迅捷药水防止掉坑放这里
+                        current_buff2 = data[str(user_id)].get('buff2', 'normal')
+                        if current_buff2 == "speed":
+                            buff2_name = buff2_config[current_buff2]['name']
+                            times_field = f"{current_buff2}_times"  # speed_times
+                            buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+                            user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                            if buff2_remaining != -1:
+                                buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                        else:
                             try:
-                                dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                                helmat = data[str(user_id)]['collections']['矿工头盔']
                             except:
-                                dream = 0
-                            if dream >= 1:
-                                next_time = current_time + datetime.timedelta(minutes=89)
-                            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                            data[str(user_id)]['buff'] = 'hurt'
-                            #加入山洞被困名单
-                            stuck_data[user_id] = '3'
-                            #写入主数据表
-                            save_data(full_path, data)
-                            #写入山洞被困名单
-                            save_data(stuck_path, stuck_data)
+                                helmat = 0
+                            rnd_hurt = 10
+                            rnd_stuck = random.randint(1,100)
+                            # # 测试
+                            # if user_id in bot_owner_id:
+                            #     rnd_stuck = 1
+                            if helmat>=1:
+                                rnd_hurt -=5
+                            if(rnd_stuck<=rnd_hurt):
+                                stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                                full_path = Path() / "data" / "UserList" / "UserData.json"
+                                #打开被困名单
+                                stuck_data = open_data(stuck_path)
+                                #受伤1.5小时，在此期间什么都干不了
+                                current_time = datetime.datetime.now()
+                                next_time = current_time + datetime.timedelta(minutes=90)
+                                #检测回想之核
+                                try:
+                                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                                except:
+                                    dream = 0
+                                if dream >= 1:
+                                    next_time = current_time + datetime.timedelta(minutes=89)
+                                data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                data[str(user_id)]['buff'] = 'hurt'
+                                #加入山洞被困名单
+                                stuck_data[user_id] = '3'
+                                #写入主数据表
+                                save_data(full_path, data)
+                                #写入山洞被困名单
+                                save_data(stuck_path, stuck_data)
 
-                            #随机事件文本
-                            text = "你在使用道具的过程中，没有任何madeline被道具吸引，结果一不小心你就撞到了山洞上！不过幸好道具没消耗……"
-                            #发送消息
-                            await daoju.finish(text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
+                                #随机事件文本
+                                text = "你在使用道具的过程中，没有任何madeline被道具吸引，结果一不小心你就撞到了山洞上！不过幸好道具没消耗……"
+                                #发送消息
+                                await daoju.finish(text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)
                 # 4猎必须要有黄球才能使用消耗类道具
                 if liechang_number == "4":
                     if not use_item_name.startswith("madeline飞升器"):
@@ -2104,34 +2089,44 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     else:
                         if data[user_id].get("grade", 1) <= 20:
                             await daoju.finish("你的等级不够，道具仍然被封印……请21级后再来试试吧！", at_sender=True)
-                        rnd_stuck = random.randint(1,100)
-                        # # 测试
-                        # if user_id in bot_owner_id:
-                        #     rnd_stuck = 1
-                        rnd_hurt = 20
-                        if(rnd_stuck<=rnd_hurt):
-                            stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                            full_path = Path() / "data" / "UserList" / "UserData.json"
-                            #打开被困名单
-                            stuck_data = open_data(stuck_path)
-                            current_time = datetime.datetime.now()
-                            #检测回想之核
-                            dream = data[str(user_id)]['collections'].get("回想之核", 0)
-                            #受伤2小时，在此期间什么都干不了
-                            next_time = current_time + datetime.timedelta(minutes=120-dream)
-                            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                            data[str(user_id)]['buff'] = 'hurt'
-                            #加入山洞被困名单
-                            stuck_data[user_id] = '5'
-                            #写入主数据表
-                            save_data(full_path, data)
-                            #写入山洞被困名单
-                            save_data(stuck_path, stuck_data)
+                        # 迅捷药水防止掉坑放这里
+                        current_buff2 = data[str(user_id)].get('buff2', 'normal')
+                        if current_buff2 == "speed":
+                            buff2_name = buff2_config[current_buff2]['name']
+                            times_field = f"{current_buff2}_times"  # speed_times
+                            buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+                            user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                            if buff2_remaining != -1:
+                                buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                        else:
+                            rnd_stuck = random.randint(1,100)
+                            # # 测试
+                            # if user_id in bot_owner_id:
+                            #     rnd_stuck = 1
+                            rnd_hurt = 20
+                            if(rnd_stuck<=rnd_hurt):
+                                stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                                full_path = Path() / "data" / "UserList" / "UserData.json"
+                                #打开被困名单
+                                stuck_data = open_data(stuck_path)
+                                current_time = datetime.datetime.now()
+                                #检测回想之核
+                                dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                                #受伤2小时，在此期间什么都干不了
+                                next_time = current_time + datetime.timedelta(minutes=120-dream)
+                                data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                data[str(user_id)]['buff'] = 'hurt'
+                                #加入山洞被困名单
+                                stuck_data[user_id] = '5'
+                                #写入主数据表
+                                save_data(full_path, data)
+                                #写入山洞被困名单
+                                save_data(stuck_path, stuck_data)
 
-                            #随机事件文本
-                            text = "你在使用道具的过程中，没有任何madeline被道具吸引，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好道具没消耗……"
-                            #发送消息
-                            await daoju.finish(text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)                      
+                                #随机事件文本
+                                text = "你在使用道具的过程中，没有任何madeline被道具吸引，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好道具没消耗……"
+                                #发送消息
+                                await daoju.finish(text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", at_sender=True)                      
 
                 if(use_item_name=="胡萝卜"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
@@ -2406,7 +2401,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     f'{magic_text}'+
                                     f'{puke_text}'+
                                     f"{sheet_text}"+
-                                    f'{berry_text}'+ exp_msg + grade_msg,
+                                    f'{berry_text}'+ buff2_text + exp_msg + grade_msg,
                                     at_sender = True)
                 #使用失败
                 if(success==2):
