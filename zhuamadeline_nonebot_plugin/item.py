@@ -20,7 +20,7 @@ from .list2 import *
 from .list3 import *
 from .list4 import *
 #加载商店信息和商店交互
-from .shop import item, item_aliases, trap_item
+from .shop import item, item_aliases, trap_item, potion_effects
 from .collection import collection_aliases, collections
 from .secret import secret_list
 from .function import *
@@ -1211,58 +1211,109 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 #             name = eval(f"madeline_data{liechang_number}.get(k[0]).get(k[1]).get('name')")
                 #             await daoju.finish(f"你的{name}面临被掠夺的风险.....", at_sender=True)
                 #     await daoju.finish("当前du局非常安全，你可以放心进入", at_sender=True) 
-            if(use_item_name=="幸运药水"):
-                """
-                提升运气的小道具，虽说不知道有没有真的提升...
-                """
-                if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
-                    #确保自身没有幸运状态
-                    if data[str(user_id)].get('buff2')!='lucky' or data[str(user_id)].get('lucky_times', 0)<=0:
-                        data[str(user_id)]["buff2"]='lucky'
-                        data[str(user_id)]["lucky_times"] = 21
-                        data[str(user_id)]["item"][use_item_name] -= 1
-                        #写入文件
-                        save_data(user_path / file_name, data)
-                        await daoju.finish("使用成功，现在正常抓madeline可额外获得15草莓，持续20次。", at_sender=True)
+            # 检查是否是药水使用命令
+            for potion_name, effect in potion_effects.items():
+                if use_item_name.startswith(potion_name):
+                    # 解析使用数量
+                    if "/" in use_item_name:
+                        try:
+                            parts = use_item_name.split("/")
+                            use_count = int(parts[1])
+                            if use_count <= 0:
+                                await daoju.finish("使用数量必须大于0！", at_sender=True)
+                        except (ValueError, IndexError):
+                            await daoju.finish(f"请输入正确的{potion_name}使用数量！", at_sender=True)
                     else:
-                        data[str(user_id)]["lucky_times"] += 20
-                        restLucky = data.get(str(user_id)).get("lucky_times", 0) - 1
-                        data[str(user_id)]["item"][use_item_name] -= 1
-                        #写入文件
-                        save_data(user_path / file_name, data)
-                        await daoju.finish(f"使用成功，你幸运buff的次数额外增加了20次！当前剩余次数为：{restLucky}", at_sender=True)
-                else:
-                    await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
-            
-            command = use_item_name.split("/")
-            #两个参数的指令
-            if (len(command) == 2):
-                item_name = command[0]  # 参数1(使用的道具名)
-                if item_name == "幸运药水":
-                    success = 999
-                    try:
-                        use_count = int(command[1])  # 参数2(使用的数量)
-                    except ValueError:
-                        await daoju.finish("请输入正确的幸运药水使用数量！", at_sender=True)
-                    # 获取玩家的药水数量
-                    user_items = data[str(user_id)].get("item", {})
-                    current_potions = user_items.get(item_name, 0)
-                    if use_count <= 0:
-                        await daoju.finish("使用数量必须大于0！", at_sender=True)
+                        use_count = 1
+
+                    # 检查药水数量
+                    current_potions = data[str(user_id)].get("item", {}).get(potion_name, 0)
                     if current_potions < use_count:
-                        await daoju.finish(f"你的{item_name}数量不足！你只有{current_potions}瓶{item_name}！", at_sender=True)
-                    # 确保自身没有幸运状态
-                    if data[str(user_id)].get('buff2', "normal") != 'lucky' or data[str(user_id)].get('lucky_times', 0) <= 0:
-                        data[str(user_id)]["buff2"] = 'lucky'
-                        data[str(user_id)]["lucky_times"] = 1  # 初始设定
-                    # 增加幸运次数
-                    data[str(user_id)]["lucky_times"] += 20 * use_count
-                    restLucky = data[str(user_id)]["lucky_times"] - 1
+                        await daoju.finish(f"你的{potion_name}数量不足！你只有{current_potions}瓶{potion_name}！", at_sender=True)
+
+                    # 检查是否有其他药水效果
+                    current_buff = data[str(user_id)].get('buff2', "normal")
+                    if current_buff != "normal" and current_buff != effect["buff_name"]:
+                        await daoju.finish(f"你已经有一个不同的药水效果了，不能同时使用{potion_name}！", at_sender=True)
+
+                    # 应用药水效果
+                    buff_name = effect["buff_name"]
+                    effect_per_potion = effect["effect_per_potion"]
+
+                    # 如果没有该buff或已过期，则初始化
+                    if current_buff != buff_name or data[str(user_id)].get(f'{buff_name}_times', 0) <= 0:
+                        data[str(user_id)]["buff2"] = buff_name
+                        data[str(user_id)][f"{buff_name}_times"] = 1  # 初始设定
+
+                    # 增加效果次数
+                    total_effect = effect_per_potion * use_count
+                    data[str(user_id)][f"{buff_name}_times"] += total_effect
+                    remaining_effect = data[str(user_id)][f"{buff_name}_times"] - 1
+
                     # 扣除药水
-                    data[str(user_id)]["item"][item_name] -= use_count
+                    data[str(user_id)]["item"][potion_name] -= use_count
+
                     # 写入文件
                     save_data(user_path / file_name, data)
-                    await daoju.finish(f"使用成功！你幸运buff的次数增加了{20 * use_count}次！当前剩余次数：{restLucky}", at_sender=True)
+
+                    if use_count == 1:
+                        await daoju.finish(f"使用成功，{effect['message']}，持续{effect_per_potion}次。当前剩余次数：{remaining_effect}", at_sender=True)
+                    else:
+                        await daoju.finish(f"使用成功！你{buff_name}buff的次数增加了{total_effect}次！当前剩余次数：{remaining_effect}", at_sender=True)
+
+            # if(use_item_name=="幸运药水"):
+            #     """
+            #     提升运气的小道具，虽说不知道有没有真的提升...
+            #     """
+            #     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
+            #         #确保自身没有幸运状态
+            #         if data[str(user_id)].get('buff2')!='lucky' or data[str(user_id)].get('lucky_times', 0)<=0:
+            #             data[str(user_id)]["buff2"]='lucky'
+            #             data[str(user_id)]["lucky_times"] = 21
+            #             data[str(user_id)]["item"][use_item_name] -= 1
+            #             #写入文件
+            #             save_data(user_path / file_name, data)
+            #             await daoju.finish("使用成功，现在正常抓madeline可额外获得15草莓，持续20次。", at_sender=True)
+            #         else:
+            #             data[str(user_id)]["lucky_times"] += 20
+            #             restLucky = data.get(str(user_id)).get("lucky_times", 0) - 1
+            #             data[str(user_id)]["item"][use_item_name] -= 1
+            #             #写入文件
+            #             save_data(user_path / file_name, data)
+            #             await daoju.finish(f"使用成功，你幸运buff的次数额外增加了20次！当前剩余次数为：{restLucky}", at_sender=True)
+            #     else:
+            #         await daoju.finish(f"你现在没有{use_item_name}", at_sender=True)
+            
+            
+            # #两个参数的指令
+            # if (len(command) == 2):
+            #     item_name = command[0]  # 参数1(使用的道具名)
+            #     if item_name == "幸运药水":
+            #         success = 999
+            #         try:
+            #             use_count = int(command[1])  # 参数2(使用的数量)
+            #         except ValueError:
+            #             await daoju.finish("请输入正确的幸运药水使用数量！", at_sender=True)
+            #         # 获取玩家的药水数量
+            #         user_items = data[str(user_id)].get("item", {})
+            #         current_potions = user_items.get(item_name, 0)
+            #         if use_count <= 0:
+            #             await daoju.finish("使用数量必须大于0！", at_sender=True)
+            #         if current_potions < use_count:
+            #             await daoju.finish(f"你的{item_name}数量不足！你只有{current_potions}瓶{item_name}！", at_sender=True)
+            #         # 确保自身没有幸运状态
+            #         if data[str(user_id)].get('buff2', "normal") != 'lucky' or data[str(user_id)].get('lucky_times', 0) <= 0:
+            #             data[str(user_id)]["buff2"] = 'lucky'
+            #             data[str(user_id)]["lucky_times"] = 1  # 初始设定
+            #         # 增加幸运次数
+            #         data[str(user_id)]["lucky_times"] += 20 * use_count
+            #         restLucky = data[str(user_id)]["lucky_times"] - 1
+            #         # 扣除药水
+            #         data[str(user_id)]["item"][item_name] -= use_count
+            #         # 写入文件
+            #         save_data(user_path / file_name, data)
+            #         await daoju.finish(f"使用成功！你幸运buff的次数增加了{20 * use_count}次！当前剩余次数：{restLucky}", at_sender=True)
+            command = use_item_name.split("/")
             #三个参数的指令
             if (len(command)==3):
                 item_name = command[0]   #参数1(一般是使用的道具名)

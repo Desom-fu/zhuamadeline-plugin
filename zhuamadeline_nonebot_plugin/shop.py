@@ -32,6 +32,35 @@ item_aliases = {
     '草莓果酱': ['果酱'],
 }
 
+# 定义药水类型及其效果
+potion_effects = {
+    "幸运药水": {
+        "buff_name": "lucky",
+        "effect_per_potion": 20,
+        "description": "提升运气的小道具，虽说不知道有没有真的提升...",
+        "message": "现在正常抓madeline可额外获得15草莓"
+    },
+    "迅捷药水": {
+        "buff_name": "speed",
+        "effect_per_potion": 20,
+        "description": "提升速度的小道具...",
+        "message": "现在移动速度提升了"
+    }
+}
+
+# 定义buff2类型及其属性和显示规则
+buff2_config = {
+    'lucky': {
+        'name': '幸运',
+        'show_condition': lambda berry_give: berry_give != 0,  # 只在berry_give!=0时显示
+    },
+    'speed': {
+        'name': '迅捷',
+        'show_condition': lambda _: True,  # 总是显示
+    },
+}
+
+
 #商店货物系统，结构为：{物品名称：[价格，等级]}
 item = {
     #永久道具

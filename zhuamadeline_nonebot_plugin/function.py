@@ -55,7 +55,8 @@ __all__ = [
     'all_cool_time',
     'get_nickname',
     'calculate_spare_chance',
-    'calculate_level_and_exp'
+    'calculate_level_and_exp',
+    'buff2_change_status'
 ]
 
 #madeline图鉴
@@ -131,6 +132,45 @@ def json_emoji_like(event, eid: int) -> dict:
         "message_id": event.message_id,
         "emoji_id": str(eid)
     }
+
+# buff2逻辑处理
+def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
+    """
+    处理buff2状态逻辑
+    参数:
+        data: 完整数据字典
+        user_id: 用户ID
+        buff2_status: 看是哪种状态
+        change_status: 1是加，0是扣
+    返回:
+        更新后的data
+    """
+    user_info = data.setdefault(str(user_id), {})
+    user_info.setdefault("buff2", "normal")
+    user_info.setdefault(f"{buff2_status}_times", 0)
+
+    # 为1就加
+    if change_status == 1:
+        # 检查是否存在buff2状态
+        if user_info["buff2"] == buff2_status:
+            # 如果存在次数记录且大于0，增加次数
+            if user_info[f"{buff2_status}_times"] > 0:
+                user_info[f"{buff2_status}_times"] += 1
+            # 如果次数为0，清除状态
+            else:
+                user_info["buff2"] = "normal"
+    # 为0就扣
+    elif change_status == 0:
+        # 检查是否存在buff2状态
+        if user_info["buff2"] == buff2_status:
+            # 如果存在次数记录且大于0，增加次数
+            if user_info[f"{buff2_status}_times"] > 0:
+                user_info[f"{buff2_status}_times"] -= 1
+            # 如果次数为0，清除状态
+            else:
+                user_info["buff2"] = "normal"
+    # 其他数字直接返回
+    return data
 
 # 时隙沙漏相关计算
 def calculate_spare_chance(data, user_id):

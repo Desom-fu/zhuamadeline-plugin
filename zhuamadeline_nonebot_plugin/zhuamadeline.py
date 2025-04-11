@@ -23,8 +23,9 @@ from .list3 import *
 from .list4 import *
 #加载抓madeline相关的函数
 from .function import *
+from .shop import buff2_config
 from .render import *
-from .event import event_happen, outofdanger, buff2_change_status
+from .event import event_happen, outofdanger
 from .pvp import madeline_pvp_event, pvp_opening, check_liechang
 from .whitelist import whitelist_rule
 
@@ -399,7 +400,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     berry_give *= 2
                     sheet_text = "\n\n在悠扬的乐曲声中，草莓似乎被唤醒了，焕发出勃勃生机，迅速分裂出更多的果实！"
         
-        if data[str(user_id)]["lucky_times"] > 0 and berry_give > 0:
+        if data[str(user_id)].get("lucky_times", 0) > 0 and berry_give > 0:
             lucky_give = 15
 
         data[str(user_id)]['berry'] += berry_give + lucky_give
@@ -415,44 +416,57 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
         #写入主数据表
         save_data(user_path / file_name, data)
-        #发送消息
-        if berry_give!= 0:
-            lucky_num = data[str(user_id)].get('lucky_times') - 1
-            text = str(lucky_num)
-            if (lucky_num == -1):
-                data[str(user_id)]['buff2'] = 'normal'
-                data[str(user_id)]['lucky_times'] = 0
-            if (data[str(user_id)].get('buff2')=='lucky'):
-                await catch.finish(new_print+
-                            f'\n等级: {level}\n'+
-                            f'{name}'+
-                            MessageSegment.image(img)+
-                            f'{description}'+
-                            hourglass_text+
-                            f"{sheet_text}" +
-                            '\n\n本次奖励'+f'{berry_give}+{lucky_give}={berry_give+lucky_give}颗草莓\n'+
-                            f'幸运加成剩余{text}次'+ diamond_text +
-                            exp_msg + grade_msg,
-                            at_sender = True)
-            else:
-                await catch.finish(new_print+
-                                f'\n等级: {level}\n'+
-                                f'{name}'+
-                                MessageSegment.image(img)+
-                                f'{description}'+
-                                hourglass_text+
-                                f"{sheet_text}" +
-                                '\n\n本次奖励'+f'{berry_give}颗草莓' + diamond_text +
-                                exp_msg + grade_msg,
-                                at_sender = True)
+        # 发送消息
+        # 获取当前BUFF信息（假设前面已经处理好了）
+        current_buff = data[str(user_id)].get('buff2', 'normal')
+        buff2_remaining = 0
+        buff2_text = ""
+
+        if current_buff in buff2_config:
+            buff_name = buff2_config[current_buff]['name']
+            times_field = f"{current_buff}_times"  # 例如: lucky_times / speed_times
+            buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+
+            # 检查是否要显示这个BUFF的剩余次数
+            if buff2_config[current_buff]['show_condition'](berry_give):
+                # 这里非得不等于-1，大于-1不行，我真的服了这什么bug啊
+                if buff2_remaining != -1:
+                    buff2_text = f"\n{buff_name}加成剩余{buff2_remaining}次"
+
+        # 构造奖励文本（幸运BUFF的额外奖励）
+        reward_text = f"{berry_give}颗草莓"
+        if current_buff == 'lucky' and berry_give != 0 and buff2_remaining > -1:
+            reward_text = f"{berry_give}+{lucky_give}={berry_give + lucky_give}颗草莓"
+
+        # 最终消息拼接
+        message = (
+            new_print +
+            f"\n等级: {level}\n" +
+            f"{name}" +
+            MessageSegment.image(img) +
+            f"{description}" +
+            hourglass_text +
+            sheet_text
+        )
+
+        if berry_give != 0:
+            message += (
+                f"\n\n本次奖励{reward_text}" +
+                buff2_text +  # 这里会自动包含幸运/迅捷的剩余次数（按规则显示）
+                diamond_text +
+                exp_msg +
+                grade_msg
+            )
         else:
-            await catch.finish(new_print+
-                            f'\n等级: {level}\n'+
-                            f'{name}'+
-                            MessageSegment.image(img)+
-                            f'{description}' + hourglass_text + diamond_text +
-                            exp_msg + grade_msg,
-                            at_sender = True)
+            message += (
+                buff2_text +  # 迅捷BUFF会在这里显示（幸运BUFF不会）
+                hourglass_text +
+                diamond_text +
+                exp_msg +
+                grade_msg
+            )
+
+        await catch.finish(message, at_sender=True)
 
 ## 每日签到
 qd = on_fullmatch(['.签到', '.qd', '。签到', '。qd'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)

@@ -9,7 +9,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
-from .function import open_data, save_data, print_zhua, time_decode
+from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status
 from .config import ban, bot_owner_id, connect_bot_id
 from .whitelist import whitelist_rule
 from .shop import item
@@ -24,44 +24,6 @@ user_list3 = Path() / "data" / "UserList" / "UserList3.json"
 user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 stuck_path = Path() / "data" / "UserList" / "Struct.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
-
-def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
-    """
-    处理buff2状态逻辑
-    参数:
-        data: 完整数据字典
-        user_id: 用户ID
-        buff2_status: 看是哪种状态
-        change_status: 1是加，0是扣
-    返回:
-        更新后的data
-    """
-    user_info = data.setdefault(str(user_id), {})
-    user_info.setdefault("buff2", "normal")
-    user_info.setdefault("lucky_times", 0)
-
-    # 为1就加
-    if change_status == 1:
-        # 检查是否存在buff2状态
-        if user_info["buff2"] == buff2_status:
-            # 如果存在次数记录且大于0，增加次数
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] += 1
-            # 如果次数为0，清除状态
-            else:
-                user_info["buff2"] = "normal"
-    # 为0就扣
-    elif change_status == 0:
-        # 检查是否存在buff2状态
-        if user_info["buff2"] == buff2_status:
-            # 如果存在次数记录且大于0，增加次数
-            if user_info["lucky_times"] > 0:
-                user_info["lucky_times"] -= 1
-            # 如果次数为0，清除状态
-            else:
-                user_info["buff2"] = "normal"
-    # 其他数字直接返回
-    return data
 
 #脱险事件
 async def outofdanger(data, user_id, message, current_time, next_time_r):
@@ -94,8 +56,6 @@ async def outofdanger(data, user_id, message, current_time, next_time_r):
         # 其他逻辑
         user_info["buff"] = "normal"
         user_info["next_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        if user_info["buff2"] == "lucky" and user_info["lucky_times"] == 0:
-            user_info["buff2"] = "normal"
         save_data(user_path, data)
         msg = "恭喜你成功脱险...." if buff in ["hurt", "lost"] else "看了半天你还是没想明白这是什么东西，但你意识到不能再在原地停留了"
         await message.finish(msg, at_sender=True)
@@ -147,7 +107,6 @@ async def PlainStuck(user_data, user_id, message, diamond_text, hourglass_text):
     user_info.setdefault('event', 'nothing')
     user_info.setdefault('trade', {})
     user_info.setdefault('buff2', 'normal')
-    user_info.setdefault('lucky_times', 0)
     liechang_number = user_info.get('lc', '1')
     current_time = datetime.datetime.now()
     
@@ -200,10 +159,12 @@ async def PlainStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_info.setdefault("event", "nothing")
         user_info.setdefault("trade", {})
             
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        
         user_info['event'] = 'trading'
 
         k1 = random.choice(list(data1[user_id].keys()))
@@ -260,7 +221,6 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
     items = user_info.setdefault("item", {})
     user_info.setdefault('debuff', "normal")
     user_info.setdefault("buff2", "normal")
-    user_info.setdefault("lucky_times", 0)
     user_info.setdefault("event", "nothing")
     user_info.setdefault("trade", {})
     liechang_number = user_info.get('lc', '1')
@@ -287,8 +247,8 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             # 加入森林被困名单
             stuck_data[user_id] = '2'
             # 处理buff2状态逻辑
-            data = buff2_change_status(data, user_id, "lucky", 1)
-            data = buff2_change_status(data, user_id, "speed", 1)
+            user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+            user_data = buff2_change_status(user_data, user_id, "speed", 1)
             # 写入数据
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
@@ -326,10 +286,10 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
         next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
         user_info['buff'] = 'hurt'
         stuck_data[user_id] = '2'
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':    
-            user_info['buff2'] = 'normal'    
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
             
         #检测星钻
         if diamond_text:
@@ -411,10 +371,11 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
         data2 = open_data(user_list2)
         if user_id not in data2:
             return
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        
         user_info['event'] = 'trading'
 
         k1 = random.choice(list(data2[user_id].keys()))
@@ -472,7 +433,6 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
     user_info.setdefault('event', 'nothing')
     user_info.setdefault('trade', {})
     user_info.setdefault('buff2', 'normal')
-    user_info.setdefault('lucky_times', 0)
     user_info.setdefault('debuff', "normal")
     liechang_number = user_info.get('lc', '1')
     current_time = datetime.datetime.now()
@@ -487,8 +447,9 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
     #是否拥有7个碎片
     if(items.get('神秘碎片',0) < 5):
         # 处理buff2状态逻辑
-        data = buff2_change_status(data, user_id, "lucky", 1)
-        data = buff2_change_status(data, user_id, "speed", 1)
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        save_data(user_path, user_data)
         await message.finish("在远古的水晶矿洞前，风轻轻吹过，岩石间传来阵阵低语。眼前的巨大门扉上镶嵌着神秘的符文，发出幽幽的光辉。你注意到面前门上的部分符文与你手上的碎片相契合\n或许......收集足够的碎片就可以打开这扇门？", at_sender=True)
     
     #计算三个猎场的五级
@@ -503,8 +464,9 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
     
     if num_of_level5 < 9:
         # 处理buff2状态逻辑
-        data = buff2_change_status(data, user_id, "lucky", 1)
-        data = buff2_change_status(data, user_id, "speed", 1)
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        save_data(user_path, user_data)
         await message.finish(f"水晶矿洞内传来了强大的灵力，这股力量使你无法前进。或许......多带几个猎场的高等级madeline可以抵御这股力量？\n你目前有{num_of_level5}个5级madeline", at_sender=True)
 
     ######其他事件#####
@@ -613,10 +575,10 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         #加入山洞被困名单
         stuck_data[user_id] = '3'
         #负面事件加一次幸运
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         #检测星钻
         if diamond_text:
             next_time = current_time  # 立即重置冷却时间
@@ -643,8 +605,6 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         #负面buff检测逻辑
         if user_info['debuff'] == 'unlucky':
             return
-        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
         
         #遇到水晶矿
         rnd_crystal = random.randint(1,100)
@@ -689,10 +649,10 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         if spider >= 1 and random.randint(1, 3) == 1:
             return
         # 负面buff增加幸运次数
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0 and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         #判断是否开辟恢复时间栏
         if(not 'next_recover_time' in user_info):
             user_info['next_recover_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -713,9 +673,6 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'poisoned'
-            #虽说让幸运buff消失是不可能事件，但我还是想写上
-            user_info["buff2"]='normal'
-            user_info["lucky_times"] = 0
             save_data(user_path, user_data)
             await message.finish(f"矿洞的墙壁上的植物似乎在释放有毒气体，你中毒了，抓madeline能力只剩1成，接下来{recover_hour}小时内在抓到madeline时不会获得草莓了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==3:
@@ -806,10 +763,10 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             return
         
         #遇见商人不扣幸运
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         
         #变更事件为交易中
         user_info['event'] = 'trading'
@@ -872,7 +829,6 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     collections = user_info.setdefault("collections", {})
     items = user_info.setdefault("item", {})
     user_info.setdefault("buff2", "normal")
-    user_info.setdefault("lucky_times", 0)
     user_info.setdefault("compulsion_count", 0)
     user_info.setdefault("event", "nothing")
     user_info.setdefault("trade", {})
@@ -888,8 +844,9 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # 检查前三个猎场是否满足 PVP 门槛
     if not all(check_liechang(user_id, data) for data in kc_data):
         # 处理buff2状态逻辑
-        data = buff2_change_status(data, user_id, "lucky", 1)
-        data = buff2_change_status(data, user_id, "speed", 1)
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        save_data(user_path, user_data)
         await message.finish(
             "大门前的激光挡住了你的去路……\n"
             "没准，这些激光是检测你是否满足指定的Madeline条件？",
@@ -905,8 +862,9 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
                    count_yinkuang * item['音矿'][0])
     if total_value < 15000:
         # 处理buff2状态逻辑
-        data = buff2_change_status(data, user_id, "lucky", 1)
-        data = buff2_change_status(data, user_id, "speed", 1)
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        save_data(user_path, user_data)
         await message.finish("在地下终端的大门前，你发现门上有三个图案：音符，玻璃碎片和水晶。\n" +
                              "你似乎明白这几个图案的意思了，然后把对应的物品放了上去，但是却没有任何动静，或许是你背包里面对应的物品总价值不够？\n"+
                              f"你目前拥有的对应物品总价值为：{total_value}", at_sender=True)
@@ -914,8 +872,9 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     # 检测是否已拥有 madeline 飞升器
     if "madeline飞升器" not in collections:
         # 处理buff2状态逻辑
-        data = buff2_change_status(data, user_id, "lucky", 1)
-        data = buff2_change_status(data, user_id, "speed", 1)
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        save_data(user_path, user_data)
         
         if energy < 50000:
             await message.finish(
@@ -963,10 +922,10 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         #加入被困名单
         stuck_data[user_id] = '4'
         #幸运
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':    
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         #检测星钻
         if diamond_text:
             next_time = current_time  # 立即重置冷却时间
@@ -1030,10 +989,10 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         if spider >= 1 and random.randint(1, 3) == 1:
             return
         # 负面事件不消耗幸运
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':    
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         #判断是否开辟恢复时间栏
         if(not 'next_recover_time' in user_info):
             user_info['next_recover_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -1059,9 +1018,6 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'notjam'
-            #虽说让幸运buff消失是不可能事件，但我还是想写上
-            user_info["buff2"]='normal'
-            user_info["lucky_times"] = 0
             save_data(user_path, user_data)
             await message.finish(f"你在帮助研究所里的人做实验的时候逃跑了，接下里的{recover_hour}h内他们对你进行通缉，你似乎没办法从本猎场拿到果酱了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         elif rnd_debuff==3:
@@ -1123,10 +1079,10 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             return
         # ggl和bet事件
         #负面事件不消耗幸运
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         
         # 不加时间
         next_time = current_time
@@ -1239,10 +1195,10 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         if user_id not in data4 :
             return
         #遇见商人不扣幸运
-        if user_info["lucky_times"] >= 0 and user_info['buff2'] == 'lucky':
-            user_info["lucky_times"] += 1
-        if user_info["lucky_times"] == 0  and user_info['buff2'] == 'lucky':
-            user_info['buff2'] = 'normal'
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
         
         #变更事件为交易中
         user_info['event'] = 'trading'
