@@ -418,24 +418,24 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         save_data(user_path / file_name, data)
         # 发送消息
         # 获取当前BUFF信息（假设前面已经处理好了）
-        current_buff = data[str(user_id)].get('buff2', 'normal')
-        buff2_remaining = 0
+        current_buff2 = data[str(user_id)].get('buff2', 'normal')
+        buff2_remaining = -1
         buff2_text = ""
 
-        if current_buff in buff2_config:
-            buff_name = buff2_config[current_buff]['name']
-            times_field = f"{current_buff}_times"  # 例如: lucky_times / speed_times
+        if current_buff2 in buff2_config:
+            buff2_name = buff2_config[current_buff2]['name']
+            times_field = f"{current_buff2}_times"  # 例如: lucky_times / speed_times
             buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
 
             # 检查是否要显示这个BUFF的剩余次数
-            if buff2_config[current_buff]['show_condition'](berry_give):
+            if buff2_config[current_buff2]['show_condition'](berry_give):
                 # 这里非得不等于-1，大于-1不行，我真的服了这什么bug啊
                 if buff2_remaining != -1:
-                    buff2_text = f"\n{buff_name}加成剩余{buff2_remaining}次"
+                    buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
 
         # 构造奖励文本（幸运BUFF的额外奖励）
         reward_text = f"{berry_give}颗草莓"
-        if current_buff == 'lucky' and berry_give != 0 and buff2_remaining > -1:
+        if current_buff2 == 'lucky' and berry_give != 0 and buff2_remaining > -1:
             reward_text = f"{berry_give}+{lucky_give}={berry_give + lucky_give}颗草莓"
 
         # 最终消息拼接
@@ -598,7 +598,6 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     exp = user_data.get('exp', 0)
     grade = user_data.get('grade', 1)
     max_exp = user_data.get('max_exp', 10)
-    lucky_times = get_user_data(data, user_id, "lucky_times", 0)
     compulsion_count = get_user_data(data, user_id, "compulsion_count", 0)
     get_ball_value = get_user_data(data, user_id, "get_ball_value", 0)
     power = item.get("体力", 0)
@@ -650,6 +649,14 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     buff2 = get_user_data(data, user_id, 'buff2')
     event = get_user_data(data, user_id, 'event', 'nothing')
 
+    buff2_remaining = -1
+    # 初始化防止爆炸，虽然不太可能
+    buff2_name = ''
+    if buff2 in buff2_config:
+        buff2_name = buff2_config[buff2]['name']
+        times_field = f"{buff2}_times"  # 例如: lucky_times / speed_times
+        buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+
     # 状态映射
     # 负债
     liability_message = "负债"
@@ -663,8 +670,8 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     }
     # buff
     buff_messages = {"hurt": "受伤", "lost": "迷路"}
-    # 幸运
-    buff2_messages = {"lucky": "幸运"}
+    # 药水
+    buff2_messages = {"lucky": "幸运", "speed": "迅捷"}
 
     # 生成状态信息
     status_list = list(filter(None, [
@@ -672,7 +679,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         status_messages.get(event, ""), 
         status_messages.get(status, ""), 
         buff_messages.get(buff, ""),
-        buff2_messages.get(buff2, "") if lucky_times > 1 else "",
+        buff2_messages.get(buff2, "") if buff2_remaining != -1 else "",
         debuff_messages.get(debuff, "")
     ]))
     msg_status = "，".join(status_list) if status_list else ''
@@ -738,7 +745,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     if all_judge == 'all':   
 
         # 显示幸运次数（若有）
-        message += (f"\n• 剩余幸运次数：{lucky_times - 1}次") if lucky_times > 1 else ''
+        message += (f"\n• 剩余{buff2_name}次数：{buff2_remaining}次") if buff2_remaining != -1 else ''
     
     # 显示钓鱼次数（若有）
     message += (f"\n- 钓鱼次数：{fishing} | 空军次数：{kongjun}") if fishing > 0 else ''
