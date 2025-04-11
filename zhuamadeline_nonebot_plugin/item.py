@@ -1264,6 +1264,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                     # 应用药水效果
                     buff_name = effect["buff_name"]
+                    display_buff_name = buff2_config[buff_name]['name']
                     effect_per_potion = effect["effect_per_potion"]
 
                     # 如果没有该buff或已过期，则初始化
@@ -1285,7 +1286,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     if use_count == 1:
                         await daoju.finish(f"使用成功，{effect['message']}，持续{effect_per_potion}次。当前剩余次数：{remaining_effect}", at_sender=True)
                     else:
-                        await daoju.finish(f"使用成功！你{buff_name}buff的次数增加了{total_effect}次！当前剩余次数：{remaining_effect}", at_sender=True)
+                        await daoju.finish(f"使用成功！你{display_buff_name}buff的次数增加了{total_effect}次！当前剩余次数：{remaining_effect}", at_sender=True)
 
             command = use_item_name.split("/")
             #三个参数的指令
