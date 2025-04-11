@@ -201,9 +201,9 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                         buff2_name = buff2_config[current_buff2]['name']
                         times_field = f"{current_buff2}_times"  # speed_times
                         buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
-                        user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                        data = buff2_change_status(data, user_id, current_buff2, 0)
                         if buff2_remaining != -1:
-                            buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                            buff2_text = f"\n\n{buff2_name}加成剩余{buff2_remaining}次"
                     else:
                         rnd_stuck = random.randint(1,100)
                         # # 测试
@@ -247,9 +247,9 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
                         buff2_name = buff2_config[current_buff2]['name']
                         times_field = f"{current_buff2}_times"  # speed_times
                         buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
-                        user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                        data = buff2_change_status(data, user_id, current_buff2, 0)
                         if buff2_remaining != -1:
-                            buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                            buff2_text = f"\n\n{buff2_name}加成剩余{buff2_remaining}次"
                     else:
                         try:
                             helmat = data[str(user_id)]['collections']['矿工头盔']
@@ -2034,9 +2034,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             buff2_name = buff2_config[current_buff2]['name']
                             times_field = f"{current_buff2}_times"  # speed_times
                             buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
-                            user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                            data = buff2_change_status(data, user_id, current_buff2, 0)
                             if buff2_remaining != -1:
-                                buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                                buff2_text = f"\n\n{buff2_name}加成剩余{buff2_remaining}次"
                         else:
                             try:
                                 helmat = data[str(user_id)]['collections']['矿工头盔']
@@ -2096,9 +2096,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             buff2_name = buff2_config[current_buff2]['name']
                             times_field = f"{current_buff2}_times"  # speed_times
                             buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
-                            user_data = buff2_change_status(user_data, user_id, current_buff2, 1)
+                            data = buff2_change_status(data, user_id, current_buff2, 0)
                             if buff2_remaining != -1:
-                                buff2_text = f"\n{buff2_name}加成剩余{buff2_remaining}次"
+                                buff2_text = f"\n\n{buff2_name}加成剩余{buff2_remaining}次"
                         else:
                             rnd_stuck = random.randint(1,100)
                             # # 测试
