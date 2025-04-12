@@ -4,6 +4,7 @@ from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, Message
 from nonebot import on_command, on_fullmatch, get_bot
 from nonebot.params import CommandArg
 from nonebot.log import logger
+from nonebot.exception import FinishedException  # 新增导入
 import json
 import datetime
 import os
@@ -25,6 +26,7 @@ from .list3 import *
 from .bet import demon_default
 from .whitelist import whitelist_rule
 from .config import *
+from .backup import backup_user_data
 
 
 __all__ = [
@@ -130,7 +132,8 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".qdmn 数量 0/1",
         ".结束游戏 (游戏编号)",
         ".无视冷却 QQ号",
-        ".查询双球开奖 (日期)"
+        ".查询双球开奖 (日期)",
+        ".备份"
     ]
     text = "\n以下为管理员命令(带有括号的是可选项)：\n" + "\n".join(commands)
     await admin_command.send(text, at_sender=True)
@@ -2053,3 +2056,23 @@ def build_winner_message(winner_type: str, nicknames: list, date: str) -> str:
         return f"\n\n{winner_type}中奖者：未记录"
     else:
         return f"\n\n{winner_type}中奖者：\n{', '.join(nicknames)}" if nicknames else f"\n\n{winner_type}中奖者：无"
+
+# 手动触发备份命令
+backup_cmd = on_command("备份", priority=5, block=True, rule=whitelist_rule)
+@backup_cmd.handle()
+async def handle_backup(bot: Bot, event: GroupMessageEvent):
+    #判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+    group_id = event.group_id
+    try:
+        success = await backup_user_data(bot, group_id)
+        if success:
+            logger.success("手动备份已完成")
+        else:
+            logger.error("手动备份失败，请检查日志")
+    except FinishedException:
+        raise
+    except Exception as e:
+        logger.error(f"手动备份失败: {e}")
+        await backup_cmd.finish(f"备份失败: {str(e)}")

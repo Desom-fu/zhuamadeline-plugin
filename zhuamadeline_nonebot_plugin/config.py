@@ -27,7 +27,8 @@ __all__ = [
     'user_path3',
     'user_path4',
     'max_grade',
-    'exp_growth'
+    'exp_growth',
+    'backup_path'
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -68,6 +69,7 @@ liechang_count = 4
 hourglass_max = 4
 #定义通信群id
 #用户信息
+backup_path = Path() / "Data" / "UserList_Backup"
 user_path = Path() / "Data" / "UserList"
 file_name = "UserData.json"
 full_path = user_path / file_name
