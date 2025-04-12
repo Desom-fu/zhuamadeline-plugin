@@ -1078,13 +1078,16 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         if user_info['berry'] < 0:
             return
         # 失神debuff直接返回
-        if  user_info['debuff'] == 'tentacle':
+        if user_info['debuff'] == 'tentacle':
+            return
+        # 迅捷状态直接返回
+        if user_info['buff2'] == 'speed':
             return
         # ggl和bet事件
         #负面事件不消耗幸运
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        # user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
         
         # 不加时间
