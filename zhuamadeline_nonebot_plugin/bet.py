@@ -838,7 +838,7 @@ def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
     # demon_data[group_id]['hp'] = hp
     return msg, demon_data
 
-# # 上弹函数
+# 上弹函数
 def load(identity_found):
     """上弹，1代表实弹，0代表空弹"""
     # # 根据identity_found值决定弹夹容量和实弹数量
@@ -856,8 +856,12 @@ def load(identity_found):
     #     else:
     #         bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
     
-    # 先随机确定实弹数量(1-5)
-    bullets = random.randint(1, 5)
+    # 定义实弹数量及其概率（1发30%，2发25%，3发20%，4发15%，5发10%）
+    bullet_options = [1, 2, 3, 4, 5]
+    bullet_weights = [0.3, 0.25, 0.2, 0.15, 0.1]
+    
+    # 使用加权随机选择实弹数量
+    bullets = random.choices(bullet_options, weights=bullet_weights, k=1)[0]
     
     # 计算弹夹最小容量(实弹*2-1)，最大为8
     min_clip_size = bullets * 2 - 1
