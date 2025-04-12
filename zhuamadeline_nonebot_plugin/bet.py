@@ -838,7 +838,7 @@ def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
     # demon_data[group_id]['hp'] = hp
     return msg, demon_data
 
-# 上弹函数
+# # 上弹函数
 def load(identity_found):
     """上弹，1代表实弹，0代表空弹"""
     # # 根据identity_found值决定弹夹容量和实弹数量
@@ -855,21 +855,59 @@ def load(identity_found):
     #         return clip
     #     else:
     #         bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
-    clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
-    if clip_size == 2:
-        # 如果总弹数为2，强制设置一个实弹
+    
+    # 先随机确定实弹数量(1-5)
+    bullets = random.randint(1, 5)
+    
+    # 计算弹夹最小容量(实弹*2-1)，最大为8
+    min_clip_size = bullets * 2 - 1
+    clip_size = random.randint(min_clip_size, 8) if min_clip_size <= 8 else 8
+    
+    # 特殊情况处理：如果clip_size为1，固定为1实弹1空弹
+    if clip_size == 1:
         clip = [0, 1]
-        random.shuffle(clip)  # 随机打乱弹夹顺序
+        random.shuffle(clip)
         return clip
-    else:
-        bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
     
     # 生成弹夹
     clip = [0] * clip_size
-    bullet_positions = random.sample(range(clip_size), bullets)  # 确定实弹位置
+    bullet_positions = random.sample(range(clip_size), bullets)  # 随机生成实弹位置
     for pos in bullet_positions:
         clip[pos] = 1
     return clip
+
+# # 以下为旧上弹逻辑，暂时保留
+# def load(identity_found):
+#     """上弹，1代表实弹，0代表空弹"""
+#     # # 根据identity_found值决定弹夹容量和实弹数量
+#     # if identity_found in [2, 999]:
+#     #     clip_size = random.randint(3, 8)  # 弹夹容量3-8
+#     #     # 确保至少2个实弹，最多不超过弹夹容量-1（至少留一个空弹）
+#     #     bullets = random.randint(2, clip_size // 2 + 1)  # 随机生成实弹数量
+#     # else:
+#     #     clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
+#     #     if clip_size == 2:
+#     #         # 如果总弹数为2，强制设置一个实弹
+#     #         clip = [0, 1]
+#     #         random.shuffle(clip)  # 随机打乱弹夹顺序
+#     #         return clip
+#     #     else:
+#     #         bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
+#     clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
+#     if clip_size == 2:
+#         # 如果总弹数为2，强制设置一个实弹
+#         clip = [0, 1]
+#         random.shuffle(clip)  # 随机打乱弹夹顺序
+#         return clip
+#     else:
+#         bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
+    
+#     # 生成弹夹
+#     clip = [0] * clip_size
+#     bullet_positions = random.sample(range(clip_size), bullets)  # 确定实弹位置
+#     for pos in bullet_positions:
+#         clip[pos] = 1
+#     return clip
 
 # 游戏结束函数
 def handle_game_end(

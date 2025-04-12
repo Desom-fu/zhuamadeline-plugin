@@ -99,6 +99,7 @@ async def myitem_handle(bot: Bot, event: GroupMessageEvent):
 pray = on_command('祈愿', aliases={"pray"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @pray.handle()
 async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    full_path = user_path / file_name  # 拼接完整路径
     data = open_data(full_path)
     user_id = str(event.get_user_id())
     group_id = str(event.group_id)
