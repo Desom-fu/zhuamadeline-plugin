@@ -802,9 +802,8 @@ def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
         original_hp = hp[opponent_idx]
         hp[opponent_idx] = max(1, hp[opponent_idx] - damage)
         msg = (
-            f"\n- 对方因为你的冒险行动收到波及！"
-            f"\n  造成了{damage}点伤害"
-            f"\n  对方HP: {original_hp} → {hp[opponent_idx]}（最低为1）"
+            f"\n- 你开枪自己的冲击波震伤了对方，造成{damage}点伤害！"
+            f"\n- 对方HP: {original_hp} → {hp[opponent_idx]}（最低为1）"
         )
     
     # 开枪对方 (action_type=1)
@@ -813,9 +812,8 @@ def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
         original_hp = hp[player_idx]
         hp[player_idx] = max(1, hp[player_idx] - damage)
         msg = (
-            f"\n- 由于你的攻击过于激进！"
-            f"\n  受到{damage}点反噬伤害"
-            f"\n  自己HP: {original_hp} → {hp[player_idx]}（最低为1）"
+            f"\n- 你的攻击过于激进，受到子弹冲击波的{damage}点反噬伤害！"
+            f"\n- 自己HP: {original_hp} → {hp[player_idx]}（最低为1）"
         )
     
     # 使用道具 (action_type=2) - 道具特殊处理
@@ -831,9 +829,9 @@ def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
             hp[opponent_idx] = max(1, hp[opponent_idx] - 1)
             msg = (
                 "\n- 最后一颗实弹被清除！"
-                f"\n  自己HP: {original_hp_player} → {hp[player_idx]}（最低为1）"
-                f"\n  对方HP: {original_hp_opponent} → {hp[opponent_idx]}（最低为1）"
-                f"\n  ※ 双方因冲击波各损失1点HP"
+                f"\n- 自己HP: {original_hp_player} → {hp[player_idx]}（最低为1）"
+                f"\n- 对方HP: {original_hp_opponent} → {hp[opponent_idx]}（最低为1）"
+                f"\n- 实弹卸下的冲击波震得双方各掉1点HP！"
             )
     
     # 更新数据

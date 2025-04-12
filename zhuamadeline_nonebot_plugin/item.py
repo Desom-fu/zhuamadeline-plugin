@@ -864,7 +864,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         "madeline提取器": "我去，是madeline提取器，这下可以好好爆madeline了！",
                         "时间秒表": "居然是时间秒表，这下不用怕爆炸了！",
                         "幸运药水": "原来道具盲盒里还能爆出幸运药水的吗？",
-                        "迅捷药水": '/give @p minecraft:potion{Potion:"minecraft:swiftness"} 1',
+                        "迅捷药水": '/give @p minecraft:potion{Potion:"minecraft:swiftness"} 1\n对的，这就是文案。',
                         "madeline提取器+时间秒表礼包组合": "恭喜！你获得了稀有组合：madeline提取器+时间秒表！这下赚翻了啊。",
                         "鲜血之刃": (
                             "你打开了道具盲盒，误打误撞间触发了一股神秘的力量，眼前的场景骤然变换。"
