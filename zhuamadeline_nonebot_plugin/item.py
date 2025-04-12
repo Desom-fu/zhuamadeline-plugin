@@ -1452,6 +1452,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             #--------------------这些道具需要限制所在猎场的使用--------------------、
                 # 判定是否在休息状态中
                 if not 'last_sleep_time' in data[str(user_id)]:
+                    current_time = datetime.datetime.now()
                     last_sleep_time = current_time
                 else:
                     last_sleep_time = datetime.datetime.strptime(data.get(str(user_id)).get('last_sleep_time'), "%Y-%m-%d %H:%M:%S")

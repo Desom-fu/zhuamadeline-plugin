@@ -15,7 +15,7 @@ from nonebot.exception import FinishedException
 require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
-async def delayed_backup(delay: float = 2.5):
+async def delayed_backup(delay: float = 4.0):
     """延迟执行备份"""
     await asyncio.sleep(delay)
     try:
@@ -76,5 +76,5 @@ async def daily_backup():
 @get_driver().on_startup
 async def schedule_delayed_backup():
     """启动时调度延迟备份任务"""
-    asyncio.create_task(delayed_backup(2.5))
-    logger.info("已创建延迟2.5秒的备份任务")
+    asyncio.create_task(delayed_backup(4))
+    logger.info("已创建延迟4秒的备份任务")
