@@ -1452,12 +1452,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             #--------------------这些道具需要限制所在猎场的使用--------------------、
                 # 判定是否在休息状态中
                 if not 'last_sleep_time' in data[str(user_id)]:
-                    current_time = datetime.datetime.now()
-                    last_sleep_time = current_time
+                    last_sleep_time = datetime.datetime.now()
                 else:
                     last_sleep_time = datetime.datetime.strptime(data.get(str(user_id)).get('last_sleep_time'), "%Y-%m-%d %H:%M:%S")
                 
-                if last_sleep_time > current_time:
+                if last_sleep_time > datetime.datetime.now():
                     await daoju.finish("好好休息吧，不要试图使用抓捕类道具了...", at_sender=True)
                     
                 # 两个参数的指令 提取器放猎场判定之前
