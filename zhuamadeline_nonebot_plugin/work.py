@@ -257,7 +257,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             work_skiptime = int(data[str(user_id)]['work_skiptime'])
             time_delta = working_endtime - current_time
             minutes_remaining = int(time_delta.total_seconds() // 60)
-            skip_power_require = (minutes_remaining // 2) * pow(2, work_skiptime) + 1
+            skip_power_require = (minutes_remaining // 2) * pow(2, work_skiptime+1) + 1
             await status_work.finish(f"你已经派遣madeline出去工作了，耐心等待吧。他/她/它/TA大概会在{text}后完成工作，工作完成后他自然会将工作日志汇报给您的哦\n"+
                                      f"今日你加速了{work_skiptime}次，本次加速你需要{skip_power_require}点体力", at_sender=True)
         else:
@@ -704,7 +704,7 @@ async def skip_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             work_skiptime = int(data[str(user_id)]['work_skiptime'])
             time_delta = working_endtime - current_time
             minutes_remaining = int(time_delta.total_seconds() // 60)
-            skip_power_require = (minutes_remaining // 2) * pow(2, work_skiptime) + 1
+            skip_power_require = (minutes_remaining // 2) * pow(2, work_skiptime+1) + 1
             if not '体力' in data[str(user_id)]['item']:
                 data[str(user_id)]['item']['体力'] = 0
             if data[str(user_id)]['item']['体力'] >= skip_power_require:
