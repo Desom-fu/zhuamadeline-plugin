@@ -766,8 +766,14 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         else:
                             last_sleep_time = datetime.datetime.strptime(data.get(str(user_id)).get('last_sleep_time'), "%Y-%m-%d %H:%M:%S")
                         
-                        if last_sleep_time > current_time:
-                            await daoju.finish("好好休息吧，不要试图使用时间秒表了...", at_sender=True)
+                        time_since_last_sleep = current_time - last_sleep_time
+                        
+                        if time_since_last_sleep < datetime.timedelta(hours=4):
+                            remaining_time = datetime.timedelta(hours=23) - time_since_last_sleep
+                            await daoju.finish(
+                                f"好好休息吧，{remaining_time.seconds // 3600}小时"
+                                f"{(remaining_time.seconds % 3600) // 60}分钟"
+                                f"{remaining_time.seconds % 60}内不要试图使用抓捕类道具了……", at_sender=True)
                         
                         #然后判断是否能使用秒表
                         if current_time >= next_clock_time:
@@ -1451,13 +1457,20 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
             #--------------------这些道具需要限制所在猎场的使用--------------------、
                 # 判定是否在休息状态中
+                sleep_current_time = datetime.datetime.now()
                 if not 'last_sleep_time' in data[str(user_id)]:
-                    last_sleep_time = datetime.datetime.now()
+                    last_sleep_time = sleep_current_time
                 else:
                     last_sleep_time = datetime.datetime.strptime(data.get(str(user_id)).get('last_sleep_time'), "%Y-%m-%d %H:%M:%S")
                 
-                if last_sleep_time > datetime.datetime.now():
-                    await daoju.finish("好好休息吧，不要试图使用抓捕类道具了...", at_sender=True)
+                time_since_last_sleep = sleep_current_time - last_sleep_time
+                
+                if time_since_last_sleep < datetime.timedelta(hours=4):
+                    remaining_time = datetime.timedelta(hours=23) - time_since_last_sleep
+                    await daoju.finish(
+                        f"好好休息吧，{remaining_time.seconds // 3600}小时"
+                        f"{(remaining_time.seconds % 3600) // 60}分钟"
+                        f"{remaining_time.seconds % 60}内不要试图使用抓捕类道具了……", at_sender=True)
                     
                 # 两个参数的指令 提取器放猎场判定之前
                 if use_item_name.startswith("madeline飞升器"):
