@@ -629,67 +629,61 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
 sleep = on_command('休息', aliases={'worksleep'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @sleep.handle()
 async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = CommandArg()):
-    #打开文件
     data = open_data(full_path)
-
     user_id = str(event.get_user_id())
     current_time = datetime.datetime.now()
-    if(str(user_id) in data):
-        #初始化
-        if(not 'working' in data[str(user_id)]):
-            data[str(user_id)]['working'] = False
-            data[str(user_id)]['work_area'] = None
-            data[str(user_id)]['work_per_hour'] = 3
-            data[str(user_id)]['work_simple_chance'] = 90
-            data[str(user_id)]['bonus_berry'] = 0
-            data[str(user_id)]['working_endtime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            data[str(user_id)]['work_exp'] = 0
-        
-        if(not 'work_skiptime' in data[str(user_id)]):
-            data[str(user_id)]['work_skiptime'] = 0
-        
-        if(not 'last_sleep_date' in data[str(user_id)]):
-            data[str(user_id)]['last_sleep_date'] = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-            data[str(user_id)]['last_sleep_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S") #这个变量是检测是否可用时间秒表用的
 
-        if(not 'item' in data[str(user_id)]):
-            await sleep.finish("请先获取任意道具再来休息", at_sender=True)
-        
-        current_date = datetime.date.today()
-        #判断今天是否已经休息过了
-        last_sleep_str = data[str(user_id)]['last_sleep_date']
-        last_sleep_date = datetime.datetime.strptime(last_sleep_str, "%Y-%m-%d").date()
+    if str(user_id) not in data:
+        await sleep.finish("请先获取任意道具再来休息", at_sender=True)
+    
+    # 初始化用户数据（如果字段不存在）
+    user_data = data.setdefault(user_id, {})
+    user_data.setdefault('working', False)
+    user_data.setdefault('work_area', None)
+    user_data.setdefault('work_per_hour', 3)
+    user_data.setdefault('work_simple_chance', 90)
+    user_data.setdefault('bonus_berry', 0)
+    user_data.setdefault('working_endtime', current_time.strftime("%Y-%m-%d %H:%M:%S"))
+    user_data.setdefault('work_exp', 0)
+    user_data.setdefault('work_skiptime', 0)
+    user_data.setdefault('last_sleep_time', "2000-01-01 00:00:00")  # 默认值（很久以前）
 
-        if last_sleep_date != current_date:
-            today_sleep = 0
-        else:
-            today_sleep = 1
-        
-        if today_sleep == 0:
-            data[str(user_id)]['last_sleep_date'] = current_date.strftime("%Y-%m-%d")
-            power_per_hour = 50
-            # 房产证加成
-            power_per_hour += data[str(user_id)].get("collections").get('房产证', 0) * 100
-            next_time_str = data[str(user_id)]['next_time'] 
-            next_time_dt = datetime.datetime.strptime(next_time_str, "%Y-%m-%d %H:%M:%S")
-            if next_time_dt < current_time:
-                next_time_dt = current_time
-            next_time_dt += datetime.timedelta(hours=4)
+    # 检查冷却时间（23小时）
+    last_sleep_time_str = user_data['last_sleep_time']
+    last_sleep_time = datetime.datetime.strptime(last_sleep_time_str, "%Y-%m-%d %H:%M:%S")
+    time_since_last_sleep = current_time - last_sleep_time
 
-            sleep_time_str = data[str(user_id)]['last_sleep_time'] 
-            sleep_time_dt = datetime.datetime.strptime(sleep_time_str, "%Y-%m-%d %H:%M:%S")
-            sleep_time_dt += datetime.timedelta(hours=4)
-            data[str(user_id)]['next_time'] = next_time_dt.strftime("%Y-%m-%d %H:%M:%S")
-            data[str(user_id)]['last_sleep_time'] = sleep_time_dt.strftime("%Y-%m-%d %H:%M:%S")
+    if time_since_last_sleep < datetime.timedelta(hours=23):
+        remaining_time = datetime.timedelta(hours=23) - time_since_last_sleep
+        await sleep.finish(
+            f"你在{remaining_time.seconds // 3600}小时"
+            f"{(remaining_time.seconds % 3600) // 60}分钟"
+            f"{remaining_time.seconds % 60}秒前刚刚休息过哦，现在还不困呢！",
+            at_sender=True
+        )
+    
+    # 执行休息逻辑
+    power_per_hour = 50
+    power_per_hour += user_data.get("collections", {}).get('房产证', 0) * 100  # 房产证加成
 
-            if not '体力' in data[str(user_id)]['item']:
-                data[str(user_id)]['item']['体力'] = 0
-            data[str(user_id)]['item']['体力'] += power_per_hour * 4
+    # 更新下次可抓时间（延长4小时）
+    next_time_str = user_data.get('next_time', current_time.strftime("%Y-%m-%d %H:%M:%S"))
+    next_time = max(
+        datetime.datetime.strptime(next_time_str, "%Y-%m-%d %H:%M:%S"),
+        current_time
+    ) + datetime.timedelta(hours=4)
 
-            save_data(full_path, data)
-            await sleep.finish(f"开始休息了，下次可抓时间延长了4个小时，醒来后可以获得{power_per_hour*4}体力", at_sender=True)
-        else:
-            await sleep.finish("你今天已经休息过了，明天再来吧", at_sender=True)
+    # 更新休息时间和体力
+    user_data['last_sleep_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    user_data['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+    user_data.setdefault('item', {}).setdefault('体力', 0)
+    user_data['item']['体力'] += power_per_hour * 4
+
+    save_data(full_path, data)
+    await sleep.finish(
+        f"休息完成！下次可抓时间延长4小时，获得 {power_per_hour * 4} 体力。",
+        at_sender=True
+    )
 
 #加速完成工作
 skip_work = on_command('工作加速', aliases={'workspeed'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
