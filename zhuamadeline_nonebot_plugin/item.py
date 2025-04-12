@@ -1706,7 +1706,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 await daoju.finish("请先在本猎场抓到任意一个Madeline再使用提取器吧！", at_sender=True)
                             
                             if liechang_number != nums[2]:
-                                await daoju.finish("你只有切换到你想提取Madeline所在的猎场，才能提取这个猎场的Madeline哦！", at_sender=True)
+                                await daoju.finish("你只有切换到你想提取的Madeline所在的猎场，才能提取这个猎场的Madeline哦！", at_sender=True)
                                     
                             rnd = random.randint(1,100)
                             if(rnd <= 20+15*(5-int(nums[0]))):
