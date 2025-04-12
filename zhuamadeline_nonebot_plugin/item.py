@@ -44,6 +44,7 @@ user_list1 = Path() / "data" / "UserList" / "UserList1.json"
 user_list2 = Path() / "data" / "UserList" / "UserList2.json"
 user_list3 = Path() / "data" / "UserList" / "UserList3.json"
 user_list4 = Path() / "data" / "UserList" / "UserList4.json"
+user_list5 = Path() / "data" / "UserList" / "UserList5.json"
 pvp_coldtime_path = Path() / "data" / "UserList" / "pvp_coldtime.json"
 # 石山，这么做试试
 all_collections = collections
@@ -1689,32 +1690,23 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             """
                             可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
                             """
+                            list_name = f"UserList{liechang_number}.json"
                             # 开新猎场要改
                             nums = find_madeline(arg2.lower())
                             # 没有对应的玛德琳
                             if nums == 0:
-                                await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)
-                            data2 = open_data(user_list2)
-                            data3 = open_data(user_list3)
-                            data4 = open_data(user_list4)
+                                await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)                            
+                            # 检测是否抓到过对应的玛德琳
+                            check_data = open_data(user_path / list_name)
                             # 检查返回值
                             if not nums or len(nums) < 3:
                                 await daoju.finish("请输入正确的Madeline名称哦！", at_sender=True)
                             # 判定猎场
-                            if liechang_number=='2' or nums[2] == "2":  
-                                if str(user_id) not in data2:
-                                    await daoju.finish("你还未解锁通往异域茂林的道路，请先在第异域茂林抓到任意一个Madeline哦！", at_sender=True)
-                            if liechang_number=='3' or nums[2] == "3":  
-                                if data[str(user_id)].get("item").get('神秘碎片', 0) < 5:
-                                    await daoju.finish("你还未解锁通往翡翠矿井的道路...", at_sender=True)
-                                if str(user_id) not in data3:
-                                    await daoju.finish("请先在翡翠矿井抓到任意一个Madeline吧！", at_sender=True)
-                            # 4猎必须要有黄球才能使用提取器
-                            if liechang_number == "4" or nums[2] == "4":
-                                if(not '黄色球体' in data[str(user_id)]['collections']):
-                                    await daoju.finish("地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内使用Madeline提取器……", at_sender = True)
-                                if str(user_id) not in data:
-                                    await daoju.finish("请先在地下终端抓到任意一个Madeline吧！", at_sender=True)
+                            if str(user_id) not in check_data:
+                                await daoju.finish("请先在本猎场抓到任意一个Madeline再使用提取器吧！", at_sender=True)
+                            
+                            if liechang_number != nums[2]:
+                                await daoju.finish("你只有切换到你想提取Madeline所在的猎场，才能提取这个猎场的Madeline哦！", at_sender=True)
                                     
                             rnd = random.randint(1,100)
                             if(rnd <= 20+15*(5-int(nums[0]))):
@@ -1759,7 +1751,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 #此处判定猎场是否已解锁
                 #此处判定如果2猎是否有指南针，若没有则迷路
                 if liechang_number == "2":
-                    if success != 0:
+                    if success == 999:
                         pass
                     else:
                         stuck_path = Path() / "data" / "UserList" / "Struct.json"
@@ -1798,7 +1790,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 
                 # 3猎掉坑    
                 if liechang_number=='3':
-                    if success != 0:
+                    if success == 999:
                         pass
                     else:
                         if data[user_id]['item'].get('神秘碎片',0) < 5:
@@ -1860,7 +1852,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 
                 # 5猎要求等级超过21
                 if liechang_number=='5':
-                    if success != 0:
+                    if success == 999:
                         pass
                     else:
                         if data[user_id].get("grade", 1) <= 20:
