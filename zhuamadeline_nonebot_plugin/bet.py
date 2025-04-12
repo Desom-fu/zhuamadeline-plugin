@@ -784,77 +784,85 @@ def death_mode_damage(action_type: int, demon_data: dict, group_id: str):
     :return: (消息内容, 更新后的demon_data)
     """
     msg = ""
-    identity_found = demon_data[group_id]['identity']
+    # identity_found = demon_data[group_id]['identity']
     
-    # 检查是否处于死斗模式
-    if identity_found not in [2, 999]:
-        return "", demon_data
+    # # 检查是否处于死斗模式
+    # if identity_found not in [2, 999]:
+    #     return "", demon_data
     
-    current_turn = demon_data[group_id]['turn']
-    player_idx = current_turn
-    opponent_idx = (current_turn + 1) % 2
-    hp = demon_data[group_id]['hp']
-    hp_max = demon_data[group_id]['hp_max']
+    # current_turn = demon_data[group_id]['turn']
+    # player_idx = current_turn
+    # opponent_idx = (current_turn + 1) % 2
+    # hp = demon_data[group_id]['hp']
+    # hp_max = demon_data[group_id]['hp_max']
+    # # damage = random.randint(1, 2)
+    # damage = 1
     
-    # 开枪自己 (action_type=0)
-    if action_type == 0 and random.randint(1, 4) == 1:
-        damage = random.randint(1, 2)
-        original_hp = hp[opponent_idx]
-        hp[opponent_idx] = max(1, hp[opponent_idx] - damage)
-        msg = (
-            f"\n- 你开枪自己的冲击波震伤了对方，造成{damage}点伤害！"
-            f"\n- 对方HP: {original_hp} → {hp[opponent_idx]}（最低为1）"
-        )
+    # # 开枪自己 (action_type=0)
+    # if action_type == 0 and random.randint(1, 4) == 1:
+    #     original_hp = hp[opponent_idx]
+    #     hp[opponent_idx] = max(1, hp[opponent_idx] - damage)
+    #     msg = (
+    #         f"\n- 你开枪自己的冲击波震伤了对方，造成{damage}点伤害！"
+    #         f"\n- 对方HP: {original_hp} → {hp[opponent_idx]}（最低为1）\n"
+    #     )
     
-    # 开枪对方 (action_type=1)
-    elif action_type == 1 and random.randint(1, 4) == 1:
-        damage = random.randint(1, 2)
-        original_hp = hp[player_idx]
-        hp[player_idx] = max(1, hp[player_idx] - damage)
-        msg = (
-            f"\n- 你的攻击过于激进，受到子弹冲击波的{damage}点反噬伤害！"
-            f"\n- 自己HP: {original_hp} → {hp[player_idx]}（最低为1）"
-        )
+    # # 开枪对方 (action_type=1)
+    # elif action_type == 1 and random.randint(1, 4) == 1:
+    #     original_hp = hp[player_idx]
+    #     hp[player_idx] = max(1, hp[player_idx] - damage)
+    #     msg = (
+    #         f"\n- 你的攻击过于激进，受到子弹冲击波的{damage}点反噬伤害！"
+    #         f"\n- 自己HP: {original_hp} → {hp[player_idx]}（最低为1）\n"
+    #     )
     
-    # 使用道具 (action_type=2) - 道具特殊处理
-    elif action_type == 2:
-        # 啤酒移除最后一颗实弹的强制扣血
-        if (demon_data[group_id].get('last_action') == 'beer' and 
-            demon_data[group_id].get('last_bullet') == 1 and
-            all(b == 0 for b in demon_data[group_id]['clip'])):
+    # # 使用道具 (action_type=2) - 道具特殊处理
+    # elif action_type == 2:
+    #     # 啤酒移除最后一颗实弹的强制扣血
+    #     if (demon_data[group_id].get('last_action') == 'beer' and 
+    #         demon_data[group_id].get('last_bullet') == 1 and
+    #         all(b == 0 for b in demon_data[group_id]['clip'])):
             
-            original_hp_player = hp[player_idx]
-            original_hp_opponent = hp[opponent_idx]
-            hp[player_idx] = max(1, hp[player_idx] - 1)
-            hp[opponent_idx] = max(1, hp[opponent_idx] - 1)
-            msg = (
-                "\n- 最后一颗实弹被清除！"
-                f"\n- 自己HP: {original_hp_player} → {hp[player_idx]}（最低为1）"
-                f"\n- 对方HP: {original_hp_opponent} → {hp[opponent_idx]}（最低为1）"
-                f"\n- 实弹卸下的冲击波震得双方各掉1点HP！"
-            )
+    #         original_hp_player = hp[player_idx]
+    #         original_hp_opponent = hp[opponent_idx]
+    #         hp[player_idx] = max(1, hp[player_idx] - 1)
+    #         hp[opponent_idx] = max(1, hp[opponent_idx] - 1)
+    #         msg = (
+    #             "\n- 最后一颗实弹被清除！"
+    #             f"\n- 自己HP: {original_hp_player} → {hp[player_idx]}（最低为1）"
+    #             f"\n- 对方HP: {original_hp_opponent} → {hp[opponent_idx]}（最低为1）"
+    #             f"\n- 实弹卸下的冲击波震得双方各掉1点HP！"
+    #         )
     
-    # 更新数据
-    demon_data[group_id]['hp'] = hp
+    # # 更新数据
+    # demon_data[group_id]['hp'] = hp
     return msg, demon_data
 
 # 上弹函数
 def load(identity_found):
     """上弹，1代表实弹，0代表空弹"""
-    # 根据identity_found值决定弹夹容量和实弹数量
-    if identity_found in [2, 999]:
-        clip_size = random.randint(3, 8)  # 弹夹容量3-8
-        # 确保至少2个实弹，最多不超过弹夹容量-1（至少留一个空弹）
-        bullets = random.randint(2, clip_size // 2 + 1)  # 随机生成实弹数量
+    # # 根据identity_found值决定弹夹容量和实弹数量
+    # if identity_found in [2, 999]:
+    #     clip_size = random.randint(3, 8)  # 弹夹容量3-8
+    #     # 确保至少2个实弹，最多不超过弹夹容量-1（至少留一个空弹）
+    #     bullets = random.randint(2, clip_size // 2 + 1)  # 随机生成实弹数量
+    # else:
+    #     clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
+    #     if clip_size == 2:
+    #         # 如果总弹数为2，强制设置一个实弹
+    #         clip = [0, 1]
+    #         random.shuffle(clip)  # 随机打乱弹夹顺序
+    #         return clip
+    #     else:
+    #         bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
+    clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
+    if clip_size == 2:
+        # 如果总弹数为2，强制设置一个实弹
+        clip = [0, 1]
+        random.shuffle(clip)  # 随机打乱弹夹顺序
+        return clip
     else:
-        clip_size = random.randint(2, 8)  # 默认弹夹容量2-8
-        if clip_size == 2:
-            # 如果总弹数为2，强制设置一个实弹
-            clip = [0, 1]
-            random.shuffle(clip)  # 随机打乱弹夹顺序
-            return clip
-        else:
-            bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
+        bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
     
     # 生成弹夹
     clip = [0] * clip_size
@@ -947,7 +955,8 @@ def death_mode(identity_found, group_id, demon_data):
                 new_item_max = demon_data[group_id]["item_max"]
                 msg += f'- {new_item_max+1}>6，扣1点道具上限，当前道具上限：{demon_data[group_id]["item_max"]}\n'
 
-            remove_random = random.randint(1, 2)
+            # remove_random = random.randint(1, 2)
+            remove_random = 1
             
             # 计算可删除的道具数量
             remove_count0 = min(remove_random, len(demon_data[group_id]['item_0'])) if demon_data[group_id]['item_0'] else 0
