@@ -450,6 +450,8 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         save_data(user_path, user_data)
         await message.finish("在远古的水晶矿洞前，风轻轻吹过，岩石间传来阵阵低语。眼前的巨大门扉上镶嵌着神秘的符文，发出幽幽的光辉。你注意到面前门上的部分符文与你手上的碎片相契合\n或许......收集足够的碎片就可以打开这扇门？", at_sender=True)
     
@@ -467,6 +469,8 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         save_data(user_path, user_data)
         await message.finish(f"水晶矿洞内传来了强大的灵力，这股力量使你无法前进。或许......多带几个猎场的高等级madeline可以抵御这股力量？\n你目前有{num_of_level5}个5级madeline", at_sender=True)
 
@@ -848,6 +852,8 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         save_data(user_path, user_data)
         await message.finish(
             "大门前的激光挡住了你的去路……\n"
@@ -866,6 +872,8 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         save_data(user_path, user_data)
         await message.finish("在地下终端的大门前，你发现门上有三个图案：音符，玻璃碎片和水晶。\n" +
                              "你似乎明白这几个图案的意思了，然后把对应的物品放了上去，但是却没有任何动静，或许是你背包里面对应的物品总价值不够？\n"+
@@ -876,9 +884,11 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        save_data(user_path, user_data)
+        user_info = user_data.get(user_id,{})
         
         if energy < 50000:
+            user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            save_data(user_path, user_data)
             await message.finish(
                 f"你打开了大门，突然发现地上有一个巨大的、奇怪的机械装置，上面有三个空位。\n"
                 f"而在机械装置的后面有一道屏障，看起来要激活这个机器才能继续前行。\n"

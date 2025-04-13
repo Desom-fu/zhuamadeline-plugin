@@ -656,9 +656,9 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     if time_since_last_sleep < datetime.timedelta(hours=23):
         remaining_time = datetime.timedelta(hours=23) - time_since_last_sleep
         await sleep.finish(
-            f"你在{remaining_time.seconds // 3600}小时"
+            f"你现在还充满精神！请在{remaining_time.seconds // 3600}小时"
             f"{(remaining_time.seconds % 3600) // 60}分钟"
-            f"{remaining_time.seconds % 60}秒前刚刚休息过哦，现在还不困呢！",
+            f"{remaining_time.seconds % 60}秒后再进行休息哦！",
             at_sender=True
         )
     
