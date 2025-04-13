@@ -1012,7 +1012,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # debuff不加时间
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-        rnd_debuff = random.randint(1,5)
+        rnd_debuff = random.randint(1,4) # 暂时关闭失神debuff
         # rnd_debuff = random.randint(1,6)
         # # 测试
         # if user_id in bot_owner_id:
@@ -1084,6 +1084,8 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             )
     
     elif(rnd<=465):#61
+        # 暂时关闭小黑屋
+        return
         # 负债遇不到这个事件
         if user_info['berry'] < 0:
             return

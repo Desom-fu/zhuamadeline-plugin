@@ -30,6 +30,7 @@ ticket = on_fullmatch(['.ggl', '。ggl', '.刮刮乐', '。刮刮乐', '.彩票'
 
 @ticket.handle()
 async def ticket_handle(event: GroupMessageEvent):
+    await ticket.finish("由于不可抗力，暂时先关闭这个功能。", at_sender=True)
     # 常量定义
     MENPIAO_COST = 150
     TAX_RATE = 0.1

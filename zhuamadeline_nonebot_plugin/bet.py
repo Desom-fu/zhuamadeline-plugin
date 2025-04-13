@@ -115,6 +115,9 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     third_game_type = game_type_split[2] if len(game_type_split) > 2 else False
     forth_game_type = game_type_split[3] if len(game_type_split) > 3 else False
 
+    if game_type != '2':
+        await bet.finish("由于不可抗力，暂时先关闭除了恶魔轮盘以外的其他东西", at_sender=True)
+
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
         if(not 'berry' in data[str(user_id)]):
