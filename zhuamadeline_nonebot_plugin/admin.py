@@ -96,6 +96,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".查询草莓 QQ号",
         ".发放草莓 QQ号 草莓数量",
         ".扣除草莓 QQ号 草莓数量",
+        ".投入草莓 QQ号 草莓数量",
         ".转移草莓 QQ号A QQ号B 数量",
         ".设定草莓 QQ号 草莓数量",
         ".查询能量 QQ号",
@@ -395,6 +396,43 @@ async def deduct_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         save_data(user_path / file_name, data)
 
         await deduct_single.finish(f"已扣除"+MessageSegment.at(user_id)+f"{jiangli}草莓！", at_sender=True)
+
+#给某个玩家扣除草莓
+init_single = on_command("投入草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@init_single.handle()
+async def init_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    #判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    #得到at的人的qq号
+    arg = str(arg).split(" ")
+    user_id = arg[0]
+
+    #打开文件
+    data = {}
+    data = open_data(user_path/file_name)
+    bar_data = open_data(bar_path)
+
+    #没有这个玩家
+    if(not user_id in data):
+        await init_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+
+    #有这个玩家
+    try:
+        jiangli = int(arg[1])
+    except:
+        await init_single.finish("命令格式错误！正确格式：.扣除草莓 玩家QQ号 数量", at_sender=True)
+    else:
+        if(jiangli <= 0):
+            return
+        data[user_id]['berry'] -= jiangli
+        bar_data["pots"] += jiangli
+
+        #写入文件
+        save_data(user_path / file_name, data)
+
+        await init_single.finish(f"已扣除"+MessageSegment.at(user_id)+f"{jiangli}草莓！这些草莓会投入奖池哦！", at_sender=True)
 
 #转移草莓
 transfer_berry = on_command("转移草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
