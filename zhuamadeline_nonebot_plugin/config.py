@@ -41,6 +41,7 @@ driver.config.HOST = "127.0.0.1"  # 如果没有从 .env 文件读取到
 driver.config.PORT = 9635  # 默认端口
 
 #抓madeline专用群
+
 group_img = Path() / "data" / "group.jpg"
 
 #除了madeline名字以外的其他key值
