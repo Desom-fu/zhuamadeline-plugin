@@ -431,6 +431,7 @@ async def init_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
         #写入文件
         save_data(user_path / file_name, data)
+        save_data(bar_path, bar_data)
 
         await init_single.finish(f"已扣除"+MessageSegment.at(user_id)+f"{jiangli}草莓！这些草莓会投入奖池哦！", at_sender=True)
 
