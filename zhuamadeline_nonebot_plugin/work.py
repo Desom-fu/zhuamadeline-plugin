@@ -60,7 +60,7 @@ MADELINE_CONFIGS = {
 
 LEVEL_EFFECTS = {
     '5': {'work_per_hour': 1},
-    '4': {'work_simple_chance': -10},
+    '4': {'work_simple_chance': -20},
     '3': {'bonus_berry': 10},
     '2': {'bonus_berry': 3}
 }
@@ -87,7 +87,7 @@ AREA_CONFIGS = {
 FOOD_EFFECTS = {
     '树莓': {},
     '芒果': {'bonus_berry': 20},
-    '杨桃': {'work_simple_chance': -10},
+    '杨桃': {'work_simple_chance': -20},
     '百香果': {'work_per_hour': 1},
     '菠萝': {'bonus_item': 1}
 }
@@ -264,16 +264,16 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             area = data[str(user_id)]['work_area']
             if area == '丛林':
                 hours = 3
-                tool_list = ['急救包','弹弓']
+                tool_list = ['急救包','弹弓','海星']
             elif area == '7d':
                 hours = 4
-                tool_list = ['急救包','弹弓','一次性小手枪']
+                tool_list = ['急救包','弹弓','一次性小手枪','海星','水母']
             elif area == 'mauve':
                 hours = 8
-                tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒']
+                tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','海星','水母','胖头鱼']
             elif area == 'lxvi':
                 hours = 12
-                tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表']
+                tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表','海星','水母','胖头鱼','胖头鱼罐头','水晶胖头鱼','星鱼']
             data[str(user_id)]['working'] = False
             data[str(user_id)]['work_area'] = None
             work_per_hour = data[str(user_id)]['work_per_hour']
@@ -735,17 +735,17 @@ async def work_help_handle(bot: Bot, Bot_event: GroupMessageEvent):
         "每次外出都会消耗大量的时间和体力，并且外出完成后你所派遣的madeline不会回来。"+
         "你派遣的madeline等级越高，在工作中的加成收益就越明显。"+
         "加成增益效果如下：\n"
-        "1级madeline: 无加成\n2级madeline: 工作获得的额外奖励上限+3\n3级madeline: 工作获得的额外奖励上限+10\n4级madeline: 工作类型是高薪工作的概率+10%\n5级madeline: 每个小时必定增加一次工作机会\n"+
+        "1级madeline: 无加成\n2级madeline: 工作获得的额外奖励上限+3\n3级madeline: 工作获得的额外奖励上限+10\n4级madeline: 工作类型是高薪工作的概率+20%\n5级madeline: 每个小时必定增加一次工作机会\n"+
         "同样的，这些效果可以与食物的加成叠加。工作的种类分为普通工作和高薪工作，只要遇到了就必定会获得一定的奖励。"+
         "目前可以工作的区域如下:\n"+
         "丛林: 消耗200体力，耗时3小时\n7d: 消耗325体力，耗时4小时\nmauve: 消耗1200体力，耗时8小时\nlxvi:消耗4500体力，耗时12小时\n"+
         "每次完成工作后，你都将获得一定的工作经验，工作经验越高，你在结束工作时能获得的额外奖励越多。\n加油吧，各位madeline~\n"+
         "---------------------\n"+
         "下面是不同区域单次普通工作可获得的收益:\n"+
-        "丛林: 随机数量的草莓、急救包、弹弓\n"+
-        "7d: 随机数量的草莓、急救包、弹弓、一次性小手枪\n"+
-        "mauve: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒\n"+
-        "lxvi: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、胡萝卜、madeline提取器、时间秒表")
+        "丛林: 随机数量的草莓、急救包、弹弓、海星\n"+
+        "7d: 随机数量的草莓、急救包、弹弓、一次性小手枪、海星、水母\n"+
+        "mauve: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、海星、水母、胖头鱼\n"+
+        "lxvi: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、胡萝卜、madeline提取器、时间秒表、海星、水母、胖头鱼、胖头鱼罐头、水晶胖头鱼、星鱼")
     # 构建转发的消息内容
     msg_list = [
         {
