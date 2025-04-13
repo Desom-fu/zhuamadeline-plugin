@@ -2017,6 +2017,7 @@ async def double_ball_lottery():
     big_winners = []
     winners = []
     single_match_users = []
+    all_users = [] # 如果当天没有人下注就直接return 
     total_refund = 0
 
     for user_id, user_bar in bar_data.items():
@@ -2032,6 +2033,7 @@ async def double_ball_lottery():
             user_red = bet_data.get("red_points", 0)
             user_blue = bet_data.get("blue_points", 0)
             user_yellow = bet_data.get("yellow_points", 0)
+            all_users.append(user_id)
 
             # 先检查三球中奖
             if user_red == red_ball and user_blue == blue_ball and user_yellow == yellow_ball:
@@ -2055,6 +2057,9 @@ async def double_ball_lottery():
 
             # 开奖后，重置 ifplay
             bet_data["ifplay"] = 0
+    
+    if not all_users:
+        return
 
     # 计算奖金
     # 百分比
