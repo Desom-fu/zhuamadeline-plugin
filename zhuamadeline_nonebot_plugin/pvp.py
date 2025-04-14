@@ -127,7 +127,7 @@ def pvp_guess(pos):
                 value["pvp_guess"]["choose_nickname"] = "暂无数据"
                 value['last_pvp_guess_berry'] = final_berry_reward
                 value['bank'] += final_berry_reward
-                text = f'竞猜本擂台的奖励已发放，发放了{berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！竞猜本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
+                text = f'鼓励本擂台的奖励已发放，发放了{berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！鼓励本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
 
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
@@ -179,7 +179,7 @@ def pvp_guess_end():
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
     if back_text:
-        text = "\n\n本轮Madeline竞技场已结束，已经向对应竞猜的玩家发放对应的税后草莓，详情请输入 `.ck all` 查看。"
+        text = "\n\n本轮Madeline竞技场已结束，已经向鼓励擂台的玩家发放对应的税后草莓，详情请输入 `.ck all` 查看。"
         
     return text
 
