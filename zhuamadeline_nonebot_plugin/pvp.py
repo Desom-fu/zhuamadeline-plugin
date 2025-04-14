@@ -747,11 +747,11 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
         name = madeline_data.get(liechang_number, {}).get(level, {}).get(num, {}).get('name', "未知名称")
 
         # 检查是否有人下注
-        has_bet = "否"
+        has_game = "否"
         for key, value in bar_data.items():
             if key.isdigit() and isinstance(value, dict) and value.get("pvp_guess", {}).get("ifguess", 0) == 1:
                 if value["pvp_guess"]["pos"] == i-1:  # 判断是否对应当前擂台
-                    has_bet = "是"
+                    has_game = "是"
                     break  # 只要找到一个人下注，就可以退出循环
 
         text += (
@@ -760,7 +760,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
             f"该madeline的常驻战力：[{rank}]\n"
             f"所在猎场：[{liechang_number}]号猎场\n"
             f"加入回合数：[{join_count}]\n"
-            f"本擂台是否有人下注：[{has_bet}]"
+            f"本擂台是否有人下注：[{has_game}]"
         )
 
     # 创建转发消息

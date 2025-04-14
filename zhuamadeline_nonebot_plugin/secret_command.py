@@ -112,7 +112,7 @@ async def puzzle_command_handle(event: Event, bot: Bot):
         "---------------------------------------\n"
         "由于题目包含图片，请输入 .mmww 来进行查看具体内容\n"
         "---------------------------------------\n"
-        "由于题目包含图片，请输入 .彩票刮刮乐（注意是中文！） 来进行查看具体内容\n"
+        "由于题目包含图片，请输入 .彩票抽卡（注意是中文！） 来进行查看具体内容\n"
         "---------------------------------------\n"
         "出题人：硝基胍\n"
         '难度草莓：300\n'
@@ -798,13 +798,13 @@ async def handle_where():
     await mmww_command.finish(jiemi38_1_image_segment + text)
 
 # 解密36 题面
-cpggl_command = on_fullmatch(['.彩票刮刮乐', '。彩票刮刮乐'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+cpggl_command = on_fullmatch(['.彩票抽卡', '。彩票抽卡'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @cpggl_command.handle()
 async def handle_where():
     jiemi36_1_image_segment = MessageSegment.image(jiemi36_1_image_path)
     text = ("出题者：tgdr\n"
             "难度草莓：600\n"
-            "你的玛德琳今天又来.ggl了，但是fhloy并没有结算草莓，反而对玛德琳说她得到了一份神秘奖励，是一张玛彩的刮刮乐，这张刮刮乐与彩票站里售卖的完全不一样，你的玛德琳百思不得其解。")
+            "你的玛德琳今天又来.ggl了，但是fhloy并没有结算草莓，反而对玛德琳说她得到了一份神秘奖励，是一张玛彩的抽卡，这张抽卡与彩票站里售卖的完全不一样，你的玛德琳百思不得其解。")
     await cpggl_command.finish(jiemi36_1_image_segment + text)
 
 # 解密35 题面

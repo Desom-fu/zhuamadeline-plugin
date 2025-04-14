@@ -23,7 +23,7 @@ from .collection import collections, collection_aliases
 from .list1 import *
 from .list2 import *
 from .list3 import *
-from .bet import demon_default
+from .game import demon_default
 from .whitelist import whitelist_rule
 from .config import *
 from .backup import backup_user_data
@@ -57,7 +57,7 @@ __all__ = [
     "qd_simu",
     'fafang_item_global',
     'deduct_item_global',
-    'clear_bet',
+    'clear_game',
     "restock_shop"
 ]
 
@@ -1778,9 +1778,9 @@ async def dailyqd_simu(event: GroupMessageEvent, arg: Message = CommandArg()):
 
 
 # 强制结束黑市游戏
-clear_bet = on_command("结束游戏", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
-@clear_bet.handle()
-async def clear_bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+clear_game = on_command("结束游戏", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@clear_game.handle()
+async def clear_game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     user_id = str(event.user_id)
     group_id = str(event.group_id)
     if user_id not in bot_owner_id:
@@ -1793,9 +1793,9 @@ async def clear_bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
     user_data = open_data(full_path)
     bar_data = open_data(bar_path)
     if len(game_type) != 1:
-        await clear_bet.finish("命令格式错误！正确格式：.结束游戏 游戏id", at_sender=True)
+        await clear_game.finish("命令格式错误！正确格式：.结束游戏 游戏id", at_sender=True)
     if game_type == '1':
-        await clear_bet.finish("啊？这个还有必要清除吗？", at_sender = True)
+        await clear_game.finish("啊？这个还有必要清除吗？", at_sender = True)
     elif game_type == '2':
         #把所有玩2号游戏的状态变更为nothing
         for key, value in bar_data.items():
@@ -1836,7 +1836,7 @@ async def clear_bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
     save_data(demon_path, demon_data)
     
     # 发送文案
-    await clear_bet.finish(text, at_sender = True)
+    await clear_game.finish(text, at_sender = True)
 
 # 永久无冷却神权
 coolclear = on_command("无视冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1848,7 +1848,7 @@ async def coolclear_handle(bot:Bot, event: GroupMessageEvent, arg: Message = Com
     #得到at的人的qq号
     arg = str(arg).split(" ")
     if len(arg) != 1:
-        await clear_bet.finish("命令格式错误！正确格式：.无视冷却 qq号", at_sender=True)
+        await clear_game.finish("命令格式错误！正确格式：.无视冷却 qq号", at_sender=True)
     user_id = arg[0]
     data = open_data(full_path)
     #没有这个玩家
@@ -2019,7 +2019,7 @@ async def len_user_handle(event: GroupMessageEvent, arg: Message = CommandArg())
     await len_user.finish(f"zhuamadeline游戏目前共有{count}个玩家！", at_sender=True)
 
 # 查询开奖号码
-ssq_query = on_command("查询三球开奖", aliases={'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询bet4", "threeballs", "balls", "tripleballs", "doubleballs", "twoballs"}, priority=1, block=True)
+ssq_query = on_command("查询三球开奖", aliases={'查询双球开奖', "threeball", "ball", "tripleball", "doubleball", "twoball", "查询game4", "threeballs", "balls", "tripleballs", "doubleballs", "twoballs"}, priority=1, block=True)
 
 @ssq_query.handle()
 async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -2030,7 +2030,7 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
     history = bar_data.get("double_ball_history", [])
 
     if not history:
-        await ssq_query.finish("暂无三球竞猜开奖历史数据。", at_sender=True)
+        await ssq_query.finish("暂无洞窟探险开奖历史数据。", at_sender=True)
         return
 
     if args:  # 如果用户输入了日期
@@ -2043,7 +2043,7 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
         # 查找指定日期的开奖信息
         result = next((draw for draw in history if draw["date"] == query_date), None)
         if not result:
-            await ssq_query.finish(f"\n未找到 {query_date} 的三球竞猜开奖信息，请检查日期是否正确。", at_sender=True)
+            await ssq_query.finish(f"\n未找到 {query_date} 的洞窟探险获奖信息，请检查日期是否正确。", at_sender=True)
             return
 
     else:  # 如果用户没有输入日期，则返回最近一期开奖数据
@@ -2069,10 +2069,10 @@ async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
     single_match_users_nicknames = await get_nicknames(bot, group_id, single_match_users)
 
     # 构建消息
-    msg = f"\n{date} 的三球竞猜的开奖号码为：\n红球: {red_ball} | 蓝球: {blue_ball} | 黄球: {yellow_ball}"
-    msg += build_winner_message("一等奖", big_winners_nicknames, date)
-    msg += build_winner_message("二等奖", winners_nicknames, date)
-    msg += build_winner_message("单球", single_match_users_nicknames, date)
+    msg = f"\n{date} 的洞窟探险石门密码为：\n红: {red_ball} | 蓝: {blue_ball} | 黄: {yellow_ball}"
+    msg += build_winner_message("终极宝藏", big_winners_nicknames, date)
+    msg += build_winner_message("次极宝藏", winners_nicknames, date)
+    msg += build_winner_message("探险补给", single_match_users_nicknames, date)
 
     return msg
 
@@ -2092,9 +2092,9 @@ def build_winner_message(winner_type: str, nicknames: list, date: str) -> str:
     """构建中奖者信息，根据日期判断显示内容"""
     # 判断日期是否小于等于 2025-3-21
     if datetime.datetime.strptime(date, "%Y-%m-%d") <= datetime.datetime.strptime("2025-03-21", "%Y-%m-%d"):
-        return f"\n\n{winner_type}中奖者：未记录"
+        return f"\n\n{winner_type}获得探险家：未记录"
     else:
-        return f"\n\n{winner_type}中奖者：\n{', '.join(nicknames)}" if nicknames else f"\n\n{winner_type}中奖者：无"
+        return f"\n\n{winner_type}获得探险家：\n{', '.join(nicknames)}" if nicknames else f"\n\n{winner_type}中奖者：无"
 
 # 手动触发备份命令
 backup_cmd = on_command("备份", priority=5, block=True, rule=whitelist_rule)

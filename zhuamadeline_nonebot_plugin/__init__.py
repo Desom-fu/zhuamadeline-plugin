@@ -29,7 +29,7 @@ from .zhuamadeline import *
 from .collection_command import *
 from .trade import *
 from .bot_connect import *
-from .bet import *
+from .game import *
 from .news import *
 from .berry_garden import *
 from .whitelist import allowed_groups, allowed_groups2

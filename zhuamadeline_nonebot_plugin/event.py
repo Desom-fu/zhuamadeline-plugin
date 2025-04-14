@@ -1053,7 +1053,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         #     user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
         #     user_info['debuff'] = 'tentacle'
         #     save_data(user_path, user_data)
-        #     await message.finish(f"你一不小心失足被机械触手绑走了！你被触手玩弄的浑身疲软，毫无精力！接下来{recover_hour}小时内你无法进行任何bet/ggl/竞技场等行动了！\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
+        #     await message.finish(f"你一不小心失足被机械触手绑走了！你被触手玩弄的浑身疲软，毫无精力！接下来{recover_hour}小时内你无法进行任何game/ggl/竞技场等行动了！\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。", at_sender=True)
         # elif rnd_debuff==6:
         #     next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
         #     user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -1077,7 +1077,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 f"你遭遇了双重不幸！先是被机械触手绑走玩弄到浑身疲软，"
                 f"又不小心把小小卒推到橙色激光上惹她生气了！\n"
                 f"接下来{recover_hour}小时内你将：\n"
-                f"1. 无法进行任何bet/ggl/竞技场等行动\n"
+                f"1. 无法进行任何game/ggl/竞技场等行动\n"
                 f"2. 无法进行guess/roulette\n"
                 f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。",
                 at_sender=True
@@ -1095,7 +1095,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # 迅捷状态直接返回
         if user_info['buff2'] == 'speed':
             return
-        # ggl和bet事件
+        # ggl和game事件
         #负面事件不消耗幸运
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
@@ -1106,16 +1106,16 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         
-        # 一半强制刮刮乐，一半强制bet1
+        # 一半强制抽卡，一半强制game1
         rnd_event = random.randint(1,10)
         if rnd_event <= 5:
             user_info['event'] = 'compulsion_ggl'
-            # 刮刮乐为1-5次随机
+            # 抽卡为1-5次随机
             complusion_count = random.randint(1,5)
-            bad_event_text = "刮刮乐"
+            bad_event_text = "抽卡"
         else:
-            user_info['event'] = 'compulsion_bet1'
-            # bet1为1-3次随机，如果是有事件则没有冷却
+            user_info['event'] = 'compulsion_game1'
+            # game1为1-3次随机，如果是有事件则没有冷却
             complusion_count = random.randint(1,3)
             bad_event_text = "预言大师"
         # 强制次数随机

@@ -662,7 +662,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     liability_message = "负债"
     # 事件
     status_messages = {
-        "trading": "交易进行中", "compulsion_ggl": "强制刮刮乐", "compulsion_bet1": "强制预言大师", "working": "维护加工器中", "getspider": "神秘事件1", "getbomb": "神秘事件2"
+        "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_game1": "强制预言大师", "working": "维护加工器中", "getspider": "神秘事件1", "getbomb": "神秘事件2"
     }
     # debuff
     debuff_messages = {
@@ -715,18 +715,18 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         message += (f"\n• 草莓银行总利息：{interest}颗") if interest > 0 else ''
     
         # 显示当前奖池积累（若有）
-        message += (f"\n• 当前奖池积累草莓：{pots}颗") if pots > 0 else ''
+        message += (f"\n• 当前洞窟宝藏总量：{pots}颗") if pots > 0 else ''
         
         # 显示上次竞猜获得的草莓（若有）
-        message += (f"\n• 上次bet3获得草莓：{last_pvp_guess_berry}颗") if last_pvp_guess_berry > -1 else ''
+        message += (f"\n• 上次game3获得草莓：{last_pvp_guess_berry}颗") if last_pvp_guess_berry > -1 else ''
 
         if ball_ifplay == 0:
             # 优先显示中奖信息，然后显示门票信息
             if ball_prize > 0:
-                message += f"\n• 上次三球中奖草莓：{ball_prize}颗"
+                message += f"\n• 上次洞窟获得草莓：{ball_prize}颗"
             
             elif refund > 0:
-                message += f"\n• 上次三球中奖草莓：{refund}颗"
+                message += f"\n• 上次洞窟探险费用：{refund}颗"
 
     # 显示能量（若有）
     message += (f"\n- 剩余能量：{energy}点") if energy > 0 else ''
@@ -792,7 +792,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     if all_judge == 'all':   
 
         # 显示事件（若有）
-        message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_bet1'] else ''
+        message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_game1'] else ''
 
         # 显示下次钓鱼的时间（若有）
         message += (f"\n• 下次可钓鱼时间：\n{next_fishing_time}") if current_time < next_fishing_time else ''
@@ -808,13 +808,13 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 
         if ball_ifplay == 1:
             # 显示双色球以及本场门票
-            message += (f"\n• 本场三球入场费：{ticket_cost}颗草莓")
+            message += (f"\n• 本场洞窟探险费用：{ticket_cost}颗草莓")
         
-            message += (f"\n• 本场三球猜测号码（{user_date}期）：\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}")
+            message += (f"\n• 本场洞窟探险选择按钮（{user_date}期）：\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}")
             
         elif ball_ifplay == 0:
             # 显示常态双色球
-            message += (f"\n• 上次三球猜测号码（{user_date}期）：\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}") if user_red>0 and user_blue>0 and user_yellow>0 else ''
+            message += (f"\n• 上次洞窟石门密码（{user_date}期）：\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}") if user_red>0 and user_blue>0 and user_yellow>0 else ''
         # if history and ball_ifplay == 0:
         #     latest_draw = history[-1]  # 取列表最后一个元素
         #     latest_red = latest_draw["red"]
@@ -837,14 +837,14 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 final_berry_reward = berry_reward - tax  # 计算税后收益
 
                 message += (
-                    f"\n• 本场Madeline竞技你猜测的是[{pos+1}]号擂台，"
+                    f"\n• 本场Madeline竞技你鼓励的是[{pos+1}]号擂台的Madeline，"
                     f"该擂台擂主为[{choose_nickname}]，上台回合为[{choose_turn}]，"
                     f"所选占擂Madeline的战力为[{choose_rank}]！\n"
                     f"截至目前第[{turn}]轮的草莓收益为：[{berry_reward}]颗草莓，"
                     f"草莓税为[{tax}]颗草莓，税后草莓收益为[{final_berry_reward}]颗草莓！"
                 )
             else:
-                message += f"\n• 本次Madeline竞技场竞猜已结算"
+                message += f"\n• 本次Madeline竞技场已结算"
     if all_judge == 'all': 
         # 构建转发消息
         forward_message = [

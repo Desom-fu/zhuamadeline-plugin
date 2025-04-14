@@ -25,8 +25,8 @@ __all__ = [
 
 ########赌场系统#######
 
-#买刮刮乐
-ticket = on_fullmatch(['.ggl', '。ggl', '.刮刮乐', '。刮刮乐', '.彩票', '。彩票'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+#买抽卡
+ticket = on_fullmatch(['.ggl', '。ggl', '.抽卡', '。抽卡'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @ticket.handle()
 async def ticket_handle(event: GroupMessageEvent):
@@ -35,10 +35,10 @@ async def ticket_handle(event: GroupMessageEvent):
     MENPIAO_COST = 150
     TAX_RATE = 0.1
     # BUFF_MESSAGES = {
-    #     'lost': "你现在正在迷路中，连路都找不到，怎么刮刮乐呢？",
-    #     'confuse': "你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。",
-    #     'hurt': "你现在受伤了，没有精力刮刮乐！",
-    #     'tentacle': "你刚被触手玩弄到失神，没有精力刮刮乐！"
+    #     'lost': "你现在正在迷路中，连路都找不到，怎么抽卡呢？",
+    #     'confuse': "你现在正在找到了个碎片，疑惑着呢，不能抽卡。",
+    #     'hurt': "你现在受伤了，没有精力抽卡！",
+    #     'tentacle': "你刚被触手玩弄到失神，没有精力抽卡！"
     # }
     BERRY_PROBABILITY = [
         (4, 666),
@@ -79,24 +79,24 @@ async def ticket_handle(event: GroupMessageEvent):
 
     # 一堆事件的判定
     # if(data[str(user_id)]['event']!='nothing' and game_type != "2"):
-        # if data[str(user_id)]['event']!='compulsion_bet1':
-            # await bet.finish("你还有正在进行中的事件", at_sender=True)
+        # if data[str(user_id)]['event']!='compulsion_game1':
+            # await game.finish("你还有正在进行中的事件", at_sender=True)
             
     if(data[str(user_id)].get('buff','normal')=='lost'): 
-        await ticket.finish(f"你现在正在迷路中，连路都找不到，怎么能刮刮乐呢？", at_sender=True)
+        await ticket.finish(f"你现在正在迷路中，连路都找不到，怎么能抽卡呢？", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='confuse'): 
-        await ticket.finish(f"你现在正在找到了个碎片，疑惑着呢，不能刮刮乐。", at_sender=True)
+        await ticket.finish(f"你现在正在找到了个碎片，疑惑着呢，不能抽卡。", at_sender=True)
 
     if(data[str(user_id)].get('debuff','normal')=='tentacle'): 
-        await ticket.finish(f"你刚被触手玩弄到失神，没有精力刮刮乐！", at_sender=True)
+        await ticket.finish(f"你刚被触手玩弄到失神，没有精力抽卡！", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='hurt'): 
-        await ticket.finish(f"你现在受伤了，没有精力刮刮乐”！", at_sender=True)
+        await ticket.finish(f"你现在受伤了，没有精力抽卡”！", at_sender=True)
 
     # 草莓余额检查
     if user_data['berry'] < 0:
-        await ticket.finish(f"你现在仍在负债中......还想继续刮刮乐？你只有{user_data['berry']}颗草莓！", at_sender=True)
+        await ticket.finish(f"你现在仍在负债中......还想继续抽卡？你只有{user_data['berry']}颗草莓！", at_sender=True)
 
     # 生成随机奖励
     rnd = random.randint(1, 100)
@@ -106,7 +106,7 @@ async def ticket_handle(event: GroupMessageEvent):
     if rnd == 100:
         if '奇想魔盒' not in user_data['collections']:
             user_data['collections']['奇想魔盒'] = 1
-            await ticket.send(f"你花费{MENPIAO_COST}颗草莓，购买了一张刮刮乐，但是刮出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
+            await ticket.send(f"你花费{MENPIAO_COST}颗草莓，购买了一张抽卡，但是刮出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
         else:
             berry = 666
 
@@ -118,13 +118,13 @@ async def ticket_handle(event: GroupMessageEvent):
     user_data['berry'] += get_berry
     bar_data["pots"] = bar_data.get("pots", 0) + tax
 
-    # 强制刮刮乐处理
-    msg = f"\n- 你花费{MENPIAO_COST}颗草莓，购买了一张刮刮乐！\n- 本次刮刮乐你获得{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+    # 强制抽卡处理
+    msg = f"\n- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n- 你卖出抽出来的卡后获得了{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
     
     if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
         user_data['compulsion_count'] -= 1
         if user_data['compulsion_count'] > 0:
-            msg += f"\n你现在仍需强制刮刮乐{user_data['compulsion_count']}次。"
+            msg += f"\n你现在仍需强制抽卡{user_data['compulsion_count']}次。"
         else:
             user_data.update({'event': "nothing", 'compulsion_count': 0})
             msg += '\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
@@ -132,12 +132,12 @@ async def ticket_handle(event: GroupMessageEvent):
     # 负债处理
     if user_data['berry'] < 0:
         user_data['berry'] -= 250
-        msg += f"\n\n哎呀，你负债进行了刮刮乐，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
+        msg += f"\n\n哎呀，你负债进行了抽卡，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
         
         if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
             user_data.update({'event': 'nothing', 'compulsion_count': 0})
             user_data['berry'] -= 300
-            msg += f"\n\n哇！你似乎在负债过程中还得强制刮刮乐啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+            msg += f"\n\n哇！你似乎在负债过程中还得强制买卡包啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
             
         msg += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 
