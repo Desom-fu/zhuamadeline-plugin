@@ -760,7 +760,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
             f"该madeline的常驻战力：[{rank}]\n"
             f"所在猎场：[{liechang_number}]号猎场\n"
             f"加入回合数：[{join_count}]\n"
-            f"本擂台是否有人下注：[{has_game}]"
+            f"本擂台是否有人鼓励：[{has_game}]"
         )
 
     # 创建转发消息
