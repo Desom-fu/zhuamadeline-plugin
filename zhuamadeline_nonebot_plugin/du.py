@@ -106,7 +106,7 @@ async def ticket_handle(event: GroupMessageEvent):
     if rnd == 100:
         if '奇想魔盒' not in user_data['collections']:
             user_data['collections']['奇想魔盒'] = 1
-            await ticket.send(f"你花费{MENPIAO_COST}颗草莓，购买了一张抽卡，但是刮出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
+            await ticket.send(f"你花费{MENPIAO_COST}颗草莓，购买了一包卡包，但是抽出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
         else:
             berry = 666
 
