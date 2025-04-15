@@ -1059,12 +1059,12 @@ def calculate_interval(game_turn_add, identity_found):
         upper_bound = 3 + game_turn_add
 
     # 身份模式
-    if identity_found == 1:
+    elif identity_found == 1:
         lower_bound = 1 + game_turn_add*2
         upper_bound = 3 + game_turn_add*2
         
     # 极速模式
-    if identity_found in [2, 999]:
+    elif identity_found in [2, 999]:
         lower_bound = 3 + game_turn_add
         upper_bound = 5 + game_turn_add
     
