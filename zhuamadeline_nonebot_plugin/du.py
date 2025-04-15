@@ -96,7 +96,7 @@ async def ticket_handle(event: GroupMessageEvent):
 
     # 草莓余额检查
     if user_data['berry'] < 0:
-        await ticket.finish(f"你现在仍在负债中......还想继续抽卡？你只有{user_data['berry']}颗草莓！", at_sender=True)
+        await ticket.finish(f"你现在仍处于失约状态中......还想继续抽卡？你只有{user_data['berry']}颗草莓！", at_sender=True)
 
     # 生成随机奖励
     rnd = random.randint(1, 100)
@@ -129,15 +129,15 @@ async def ticket_handle(event: GroupMessageEvent):
             user_data.update({'event': "nothing", 'compulsion_count': 0})
             msg += '\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
 
-    # 负债处理
+    # 失约处理
     if user_data['berry'] < 0:
         user_data['berry'] -= 250
-        msg += f"\n\n哎呀，你负债进行了抽卡，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
+        msg += f"\n\n哎呀，你没有草莓了却又进行了抽卡，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
         
         if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
             user_data.update({'event': 'nothing', 'compulsion_count': 0})
             user_data['berry'] -= 300
-            msg += f"\n\n哇！你似乎在负债过程中还得强制买卡包啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+            msg += f"\n\n哇！你似乎在失约的情况下中还得强制买卡包啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
             
         msg += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 

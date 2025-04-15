@@ -114,9 +114,9 @@ async def pray_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     debuff_clear(data,user_id)
     # 添加全局冷却
     all_cool_time(cd_path, user_id, group_id)
-    # 负债检测
+    # 失约检测
     if data[user_id]['berry'] < 0:
-        await pray.finish(f"你现在仍在负债中……无法进行祈愿！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
+        await pray.finish(f"你现在仍处于失约状态中……无法进行祈愿！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
     liechang_number = data[str(user_id)].get('lc')
     energy = data[str(user_id)].get("energy")
     # # 处理命令参数，如果用户输入“能量”则查询能量
@@ -436,9 +436,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     data = open_data(full_path)
     user_id = str(event.get_user_id())
     panding_debuff = 0 # 为以后方便扩展，0无事发生，其他数值无法使用某些特定道具
-    # 负债检测
+    # 失约检测
     if data[user_id]['berry'] < 0:
-        await daoju.finish(f"你现在仍在负债中……无法使用道具！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
+        await daoju.finish(f"你现在仍处于失约状态中……无法使用道具！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
     # 事件检测
     if data[str(user_id)].get('event',"nothing") != "nothing":
         await daoju.finish("你还有正在进行中的事件", at_sender=True)

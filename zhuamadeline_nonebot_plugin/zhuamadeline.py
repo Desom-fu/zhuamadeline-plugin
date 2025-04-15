@@ -68,7 +68,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 特殊竞技猎场（0号）
     if number_int == 0:
         if data[user_id]['berry'] < 0:
-            await qhlc.finish(f"你现在仍在负债中……不允许进入竞技场！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
+            await qhlc.finish(f"你现在仍处于失约状态中……不允许进入竞技场！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
 
         if(data[user_id].get('debuff','normal')=='tentacle' ): 
             await qhlc.finish(f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", at_sender=True)
@@ -260,9 +260,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         if(data[str(user_id)]['lc']=='0'):
             # if str(user_id) not in bot_owner_id:
                 # await message.finish("现在madeline竞技场暂未开放哦，敬请期待！", at_sender=True)
-            # 负债检测
+            # 失约检测
             if data[user_id]['berry'] < 0:
-                await catch.finish(f"你现在仍在负债中……不允许进入竞技场！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
+                await catch.finish(f"你现在仍处于失约状态中……不允许进入竞技场！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
             # 失神检测
             if(data[user_id].get('debuff','normal')=='tentacle' ): 
                 await catch.finish(f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", at_sender=True)
@@ -658,8 +658,8 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
 
     # 状态映射
-    # 负债
-    liability_message = "负债"
+    # 失约
+    liability_message = "失约"
     # 事件
     status_messages = {
         "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_game1": "强制预言大师", "working": "维护加工器中", "getspider": "神秘事件1", "getbomb": "神秘事件2"

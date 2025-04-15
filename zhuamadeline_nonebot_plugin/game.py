@@ -180,7 +180,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     if game_type == '1' and not '/' in args:
         if data[user_id]['berry'] < 0:
-            await game.finish(f"你现在仍在负债中……还想继续game1？你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
+            await game.finish(f"你现在仍处于失约状态中……还想继续game1？你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
 
         cooldown_time = 2 * 60  # 2 分钟冷却时间
         # 事件中game1无冷却
@@ -610,12 +610,12 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     bar_data["pots"] += tax
     if data[user_id]['berry'] < 0:
         data[user_id]['berry'] -= 250
-        msg_text += f"\n\n哎呀，你负债进行了预言大师，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
+        msg_text += f"\n\n哎呀，你没有草莓了却又进行了预言大师，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
         if data[str(user_id)]['event']=='compulsion_game1' and data[str(user_id)]['compulsion_count']!= 0:
             data[str(user_id)]['event']='nothing'
             data[str(user_id)]['compulsion_count']= 0
             data[user_id]['berry'] -= 300
-            msg_text += f"\n\n哇！你似乎在负债过程中还得强制预言大师啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+            msg_text += f"\n\n哇！你似乎在失约的状态下还得强制预言大师啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
         
         msg_text += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 

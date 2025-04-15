@@ -1086,7 +1086,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     elif(rnd<=465):#61
         # 暂时关闭小黑屋
         return
-        # 负债遇不到这个事件
+        # 失约遇不到这个事件
         if user_info['berry'] < 0:
             return
         # 失神debuff直接返回

@@ -122,7 +122,7 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     user_data.setdefault('berry', 0)
 
     if user_data['berry'] < 0:
-        await bank.finish(f"你现在仍在负债中……不允许使用草莓仓库！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
+        await bank.finish(f"你现在仍处于失约状态中……不允许使用草莓仓库！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
 
     # 初始化仓库数据
     user_bar = bar_data.setdefault(user_id, {})
