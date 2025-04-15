@@ -704,15 +704,15 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         f"\n- 当前持有草莓：{berry}颗"
         )
     
-    # 显示草莓银行草莓（若有）
-    message += (f"\n- 银行草莓余额：{bank}颗") if bank > 0 else ''
+    # 显示草莓仓库草莓（若有）
+    message += (f"\n- 仓库草莓余额：{bank}颗") if bank > 0 else ''
 
     if all_judge == "all":
-        # 显示当日增加的利息（若有）
-        message += (f"\n• 今日草莓银行利息：{interest_today}颗") if interest_today > 0 else ''
+        # 显示当日增加的报酬（若有）
+        message += (f"\n• 今日草莓仓库报酬：{interest_today}颗") if interest_today > 0 else ''
     
-        # 显示总增加的利息（若有）
-        message += (f"\n• 草莓银行总利息：{interest}颗") if interest > 0 else ''
+        # 显示总增加的报酬（若有）
+        message += (f"\n• 草莓仓库总报酬：{interest}颗") if interest > 0 else ''
     
         # 显示当前奖池积累（若有）
         message += (f"\n• 当前洞窟宝藏总量：{pots}颗") if pots > 0 else ''

@@ -250,7 +250,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if harvest <= 0:
             message = "当前没有可收获的草莓！"
         else:
-            # 更新银行数据
+            # 更新仓库数据
             user_bar["bank"] += harvest
             user_garden["garden_berry"] = 0
 
@@ -264,7 +264,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             )
 
             message += f"本次收获: {harvest}颗草莓\n"
-            message += "草莓已经存进银行里了哦！"
+            message += "草莓已经存进仓库里了哦！"
             
         if user_garden["isseed"] == 0:
             message += "\n- 你的草莓已经全部收获完毕啦，需要再次播种哦！"

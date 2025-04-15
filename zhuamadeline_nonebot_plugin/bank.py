@@ -31,24 +31,24 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 demon_path = Path() / "data" / "UserList" / "demon.json"
 pvp_path = Path() / "data" / "UserList" / "pvp.json"
 
-# 1:00重置利息发放状态防止没执行
+# 1:00重置报酬发放状态防止没执行
 async def cancel_interest_send():
     bar_data = open_data(bar_path)
     bar_data["interest_send"] = False
     save_data(bar_path, bar_data)
 
-# 2:00执行一次利息发放
+# 2:00执行一次报酬发放
 async def add_interest():
     bots = get_bots()
     if not bots:
-        logger.error("没有可用的Bot实例，无法发放利息！")
+        logger.error("没有可用的Bot实例，无法发放报酬！")
         return
     bot = list(bots.values())[0]
     
     bar_data = open_data(bar_path)
     bar_data.setdefault("pots", 0)
     
-    # 检查是否已发放利息
+    # 检查是否已发放报酬
     if bar_data.get("interest_send", False):
         return
     
@@ -91,7 +91,7 @@ async def add_interest():
 
     await bot.send_group_msg(
         group_id=zhuama_group,
-        message=f"今日利息已发放，请使用命令.ck all查看今天增加利息（向下取整）为多少哦~"
+        message=f"今日报酬已发放，请使用命令.ck all查看今天增加报酬（向下取整）为多少哦~"
     )
 
 scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)
@@ -116,15 +116,15 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     # 用户数据校验
     if user_id not in data:
-        await bank.finish("请先抓一次Madeline再使用银行哦！", at_sender=True)
+        await bank.finish("请先抓一次Madeline再使用仓库哦！", at_sender=True)
 
     user_data = data.setdefault(user_id, {})
     user_data.setdefault('berry', 0)
 
     if user_data['berry'] < 0:
-        await bank.finish(f"你现在仍在负债中……不允许使用草莓银行！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
+        await bank.finish(f"你现在仍在负债中……不允许使用草莓仓库！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
 
-    # 初始化银行数据
+    # 初始化仓库数据
     user_bar = bar_data.setdefault(user_id, {})
     user_bar.setdefault("status","nothing")
     user_bar.setdefault("game","1")
@@ -156,13 +156,13 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             if berry_number == "all":
                 withdraw = user_bar['bank']
                 if withdraw <= 0:
-                    await bank.finish("你的银行账户空空如也！", at_sender=True)
+                    await bank.finish("你的仓库账户空空如也！", at_sender=True)
             else:
                 withdraw = int(berry_number)
                 if withdraw <= 0:
                     await bank.finish("草莓取款数必须是大于0的整数哦！", at_sender=True)
                 if user_bar['bank'] < withdraw:
-                    await bank.finish(f"取款失败，银行只有{user_bar['bank']}颗草莓！", at_sender=True)
+                    await bank.finish(f"取款失败，仓库只有{user_bar['bank']}颗草莓！", at_sender=True)
 
             user_bar['bank'] -= withdraw
             user_data['berry'] += withdraw
@@ -177,7 +177,7 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         await bank.finish(
             f"{action}成功！"
             f"\n当前持有草莓：{user_data['berry']}颗"
-            f"\n银行草莓余额：{user_bar['bank']}颗",
+            f"\n仓库草莓余额：{user_bar['bank']}颗",
             at_sender=True
         )
 

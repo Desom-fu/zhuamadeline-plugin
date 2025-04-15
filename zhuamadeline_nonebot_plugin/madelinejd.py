@@ -120,7 +120,7 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
         # 计算鱼类的总价值
         fish_total_value = sum(user_data.get("item", {}).get(fish, 0) * price for fish, price in fish_prices.items())
 
-        # 总草莓 = 现有草莓 + 银行 + 果酱 + 鱼的总价值
+        # 总草莓 = 现有草莓 + 仓库 + 果酱 + 鱼的总价值
         total_berry = berry + bank + jam + fish_total_value
         berry_rank.append((uid, berry, bank, jam, fish_total_value, total_berry))
 
@@ -162,7 +162,7 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
     for (uid, berry, bank, jam, fish_value, total_berry), nickname in zip(selected_users, selected_nicknames):
         rank_msg += (
             f"{actual_ranks[uid]}. {nickname} • {total_berry} 颗草莓\n"
-            f"（持有: {berry}颗）\n（银行: {bank}颗）\n（果酱: {jam//248}*248={jam}颗）\n（鱼类: {fish_value}颗）\n\n"
+            f"（持有: {berry}颗）\n（仓库: {bank}颗）\n（果酱: {jam//248}*248={jam}颗）\n（鱼类: {fish_value}颗）\n\n"
         )
 
     # 查找当前用户排名（如果不在前10或倒数10）

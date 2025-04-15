@@ -288,9 +288,9 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
 
     #有这个玩家
     berry = data[user_id]['berry']
-    #银行里没有就是0颗
+    #仓库里没有就是0颗
     bank_berry = bar_data.get(user_id, {}).get("bank", 0)
-    await ck_admin_single.finish(f"\n{nickname}目前拥有{berry}颗草莓，银行里存有{bank_berry}颗草莓！", at_sender=True)
+    await ck_admin_single.finish(f"\n{nickname}目前拥有{berry}颗草莓，仓库里存有{bank_berry}颗草莓！", at_sender=True)
 
 #给某个玩家发放草莓
 grant_single = on_command("发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
