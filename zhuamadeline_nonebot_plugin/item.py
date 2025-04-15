@@ -1366,9 +1366,14 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     arg5 = command[4]  # 参数5：每个 Madeline 保留的数量
                     # 检查道具是否足够
                     if data[str(user_id)].get("item", {}).get(item_name, 0) > 0:
-                        liechang = str(arg3)  # 猎场号
-                        if liechang not in ["1","2","3"]:
+                        try:
+                            liechang = int(arg3)  # 猎场号
+                            if not 0 < liechang <= liechang_count:
+                                await daoju.finish("请输入正确的猎场号！", at_sender=True)
+                                return
+                        except ValueError:
                             await daoju.finish("请输入正确的猎场号！", at_sender=True)
+                        
                         try:
                             min_keep = int(arg5)  # 需要保留的最小数量
                             if min_keep < 0:

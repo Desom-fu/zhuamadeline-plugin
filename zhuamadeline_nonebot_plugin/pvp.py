@@ -60,8 +60,8 @@ liechang_bonus_rewards = {
     # 开新猎场要改
     "2": (1, 1, 1),  # 对应 2 猎，(guding_rank 增加 1, hunt_bonus 增加 1, bonus_rank_max 增加 1)
     "3": (2, 2, 2),  # 对应 3 猎，(guding_rank 增加 2, hunt_bonus 增加 2, bonus_rank_max 增加 2)
-    "4": (3, 5, 3),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 5, bonus_rank_max 增加 3)
-    "5": (4, 3, 4),  # 对应 5 猎，(guding_rank 增加 4, hunt_bonus 增加 3, bonus_rank_max 增加 4)
+    "4": (3, 3, 5),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 3, bonus_rank_max 增加 5)
+    "5": (4, 4, 4),  # 对应 5 猎，(guding_rank 增加 4, hunt_bonus 增加 4, bonus_rank_max 增加 4)
 }
 
 # 定义不同猎场的概率分布，键是解锁的最高猎场，值是各个猎场的概率

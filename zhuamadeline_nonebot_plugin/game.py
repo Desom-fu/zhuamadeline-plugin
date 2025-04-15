@@ -862,9 +862,9 @@ def load(identity_found):
     #     else:
     #         bullets = random.randint(1, clip_size // 2 + 1)  # 随机生成实弹数量
     
-    # 定义实弹数量及其概率（1发30%，2发25%，3发20%，4发15%，5发10%）
+    # 定义实弹数量及其概率（1发30%，2发30%，3发20%，4发10%，5发10%）
     bullet_options = [1, 2, 3, 4, 5]
-    bullet_weights = [0.3, 0.25, 0.2, 0.15, 0.1]
+    bullet_weights = [0.3, 0.3, 0.2, 0.1, 0.1]
     
     # 使用加权随机选择实弹数量
     bullets = random.choices(bullet_options, weights=bullet_weights, k=1)[0]
@@ -1047,40 +1047,45 @@ def death_mode(identity_found, group_id, demon_data):
     return msg, demon_data
 
 # 计算随机函数
-def calculate_interval(game_turn_add, add_max, pangguang_add):
-    # 计算下限
-    lower_bound = 1 + (add_max // 2) + (game_turn_add * (pangguang_add // 3))
-    
-    # 计算上限
-    upper_bound = 3 + (add_max // 2) + (game_turn_add * (pangguang_add // 2))
-    
-    # 确保下限不超过上限
-    if lower_bound > upper_bound:
-        lower_bound = upper_bound
+def calculate_interval(game_turn_add, identity_found):
+    # 设置默认值
+    lower_bound = 1
+    upper_bound = 3
+        
+    # 根据不同的模式计算道具刷新上下限
+    # 普通模式
+    if identity_found == 0:
+        lower_bound = 1 + game_turn_add
+        upper_bound = 3 + game_turn_add
+
+    # 身份模式
+    if identity_found == 1:
+        lower_bound = 1 + game_turn_add*2
+        upper_bound = 3 + game_turn_add*2
+        
+    # 极速模式
+    if identity_found in [2, 999]:
+        lower_bound = 3 + game_turn_add
+        upper_bound = 5 + game_turn_add
     
     return lower_bound, upper_bound
 
 # 刷新道具函数
 def refersh_item(identity_found, group_id, demon_data):
     idt_len = len(item_dic2)
-    add_max = 0
-    pangguang_add = 0
+    # add_max = 0
+    # pangguang_add = 0
     game_turn_add = 0
     msg = ''
-    if identity_found == 1:
-        idt_len = 0
-        add_max = 2
-        pangguang_add = 5
-    elif identity_found in [2,999]:
-        idt_len = 0
-        add_max = 2
-        pangguang_add = 2
+    
+    # 查看是否开局
     game_turn_cal = demon_data[group_id]["game_turn"]
-
+    # 查看是否开局
     if game_turn_cal == 1:
         game_turn_add = 1
 
-    lower, upper = calculate_interval(game_turn_add, add_max, pangguang_add)
+    # 从函数中获取道具刷新上下限
+    lower, upper = calculate_interval(game_turn_add, identity_found)
     player0 = str(demon_data[group_id]['pl'][0])
     player1 = str(demon_data[group_id]['pl'][1])
     hp0 = demon_data[group_id]["hp"][0]
