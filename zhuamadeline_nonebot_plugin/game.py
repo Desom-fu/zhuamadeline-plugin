@@ -123,10 +123,6 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
-        if(not 'berry' in data[str(user_id)]):
-            data[user_id]['berry'] = 1000
-            # 写入数据
-            save_data(full_path, data)
         await game.finish("请先抓一次madeline再来玩游戏哦！", at_sender=True)
     #debuff清除逻辑
     debuff_clear(data,user_id)

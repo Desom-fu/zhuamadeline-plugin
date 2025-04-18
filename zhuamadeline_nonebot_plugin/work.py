@@ -634,7 +634,7 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     current_time = datetime.datetime.now()
 
     if str(user_id) not in data:
-        await sleep.finish("请先获取任意道具再来休息", at_sender=True)
+        await sleep.finish("请先抓一次madeline再来休息哦！", at_sender=True)
     
     # 初始化用户数据（如果字段不存在）
     user_data = data.setdefault(user_id, {})
