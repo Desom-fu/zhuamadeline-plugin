@@ -41,26 +41,26 @@ pvp_path = Path() / "data" / "UserList" / "pvp.json"
 
 #--------------------game游戏-------------------------
 
-# “游戏”规则命令
+# 游戏规则命令
 rule = on_command('rule', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @rule.handle()
 async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
-    game_type = str(arg)  # 获取玩家请求的“游戏”编号
+    game_type = str(arg)  # 获取玩家请求的游戏编号
     if game_type == '1':
         await rule.finish(
-            "“游戏”1：预言大师(1人)\n" +
-            "- 本“游戏”入场费为125草莓\n" +
-            "- “游戏”开始时系统会为你从52张扑克牌（除去大小王）中随机抽取一张，你要做的就是猜测这一张牌\n" +
+            "游戏1：预言大师(1人)\n" +
+            "- 本游戏入场费为125草莓\n" +
+            "- 游戏开始时系统会为你从52张扑克牌（除去大小王）中随机抽取一张，你要做的就是猜测这一张牌\n" +
             "- 你的猜测可以是点数、大于/小于某值，或者具体的花色\n" +
             "- 如果猜对了，你将获得大量草莓奖励！祝你好运~\n" +
-            "- 输入.game 1 游玩此“游戏”"
+            "- 输入.game 1 游玩此游戏"
         )
     elif game_type == '2':
         await rule.finish(
-            "“游戏”2：恶魔轮盘(2人)\n" +
-            "- 本“游戏”入场费为125草莓\n" +
-            "- “游戏”开始时，双方的血量在区间内随机（上限为6），并且都可以获得等量道具，然后由随机一人开始\n" +
+            "游戏2：恶魔轮盘(2人)\n" +
+            "- 本游戏入场费为125草莓\n" +
+            "- 游戏开始时，双方的血量在区间内随机（上限为6），并且都可以获得等量道具，然后由随机一人开始\n" +
             "- 在枪里面有不定量的子弹，实弹空弹随机\n" +
             "- 你可以向自己开枪，也可以向对方开枪，向自己开枪后无论是否实弹下一回合都是你行动\n" +
             "- 如果你向对方开枪，无论是否实弹都是对方行动\n" +
@@ -68,23 +68,23 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 获胜的一方将获得388颗草莓奖励~\n" +
             "- 注意！步时为10min，使用道具和开枪（无论是否自己）都会刷新步时！若超时对方返还草莓，本回合玩家不返还！\n" +
             "- 使用 .恶魔帮助 指令可以查看所有的指令~ \n" +
-            "- 输入 .game 2 游玩此“游戏”"
+            "- 输入 .game 2 游玩此游戏"
         )
     elif game_type == '3':
         await rule.finish(
-            "“游戏”3：Madeline竞技场鼓励\n" +
-            "- 本“游戏”入场费为150草莓\n" +
+            "游戏3：Madeline竞技场鼓励\n" +
+            "- 本游戏入场费为150草莓\n" +
             "- 用 `.game 3/擂台号码` 鼓励一个擂台，当该擂台的玛德琳被踢下或替换时，你会得到（120-原擂主常驻战力）*原擂主存活回合数*1/6的奖励。\n" +
             "- 如果本局擂台结束，将给所有参与鼓励的玩家发对应的草莓，并存储在仓库里！请通过 `.ck` 查看哦！\n" +
             "- 可以使用命令 `.bank take 数量/all` 从仓库中提取草莓哦！\n"+
-            "- 你在给其他Madeline鼓励的时候同时也能玩其他“游戏”哦！\n" +
+            "- 你在给其他Madeline鼓励的时候同时也能玩其他游戏哦！\n" +
             "- 注意1：每局Madeline竞技场只能鼓励Madeline一次！\n" +
             "- 注意2：不能鼓励在场超过5回合的玛德琳"
         )
     elif game_type == '4':
         await rule.finish(
-            "“游戏”4：洞窟探险\n" +
-            "- 本“游戏”探险为50-300草莓（随宝藏总量变化），入场费会投入洞窟宝藏总量！\n" +
+            "游戏4：洞窟探险\n" +
+            "- 本游戏探险为50-300草莓（随宝藏总量变化），入场费会投入洞窟宝藏总量！\n" +
             "- 洞窟探险开放时间为每天的6:00 - 22:00！\n" +
             "- 在洞窟里面，共有三条岔道，而每一个岔道里面都有1-10共10个按钮，最左边岔道的按钮为红色，中间岔道的按钮为蓝色，而最右边岔道的按钮为黄色\n" +
             "- 而每条岔道中，每天你只能按下一个按钮\n"
@@ -92,12 +92,12 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 每天的 22:30 将会打开洞窟的奖励石门！\n"+
             "- 若有人三个按钮全部按中，开门后可以拿走洞窟宝藏总量中最少50%的份额哦！若有两个按钮对应上，将拿走洞窟宝藏总量里最少10%的份额哦！如果多人同时中奖，将平分当前份额的洞窟宝藏哦！\n" +
             "- 如果只有一个按钮能对应上，不用担心，开门后你能拿走洞窟宝藏里你所交入场费的150%的草莓！\n"+
-            "- 你在探险的时候同时也能玩其他“游戏”哦！"
+            "- 你在探险的时候同时也能玩其他游戏哦！"
         )
     else:
-        await rule.finish("请输入正确的“游戏”编号，例如.rule 1", at_sender=True)
+        await rule.finish("请输入正确的游戏编号，例如.rule 1", at_sender=True)
 
-# 地下酒馆 - “游戏”判定
+# 地下酒馆 - 游戏判定
 game = on_command('game', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @game.handle()
@@ -127,7 +127,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             data[user_id]['berry'] = 1000
             # 写入数据
             save_data(full_path, data)
-        await game.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
+        await game.finish("请先抓一次madeline再来玩游戏哦！", at_sender=True)
     #debuff清除逻辑
     debuff_clear(data,user_id)
     status = data[str(user_id)].get('status','normal')
@@ -159,16 +159,16 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             await game.finish("你还有正在进行中的事件", at_sender=True)
             
     if(data[str(user_id)].get('buff','normal')=='lost') and game_type != "2": 
-        await game.finish(f"你现在正在迷路中，连路都找不到，怎么能玩“游戏”呢？", at_sender=True)
+        await game.finish(f"你现在正在迷路中，连路都找不到，怎么能玩游戏呢？", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='confuse') and game_type not in ["2","4"]: 
-        await game.finish(f"你现在正在找到了个碎片，疑惑着呢，不能玩“游戏”。", at_sender=True)
+        await game.finish(f"你现在正在找到了个碎片，疑惑着呢，不能玩游戏。", at_sender=True)
 
     if(data[str(user_id)].get('debuff','normal')=='tentacle'): 
-        await game.finish(f"你刚被触手玩弄到失神，没有精力玩“游戏”！", at_sender=True)
+        await game.finish(f"你刚被触手玩弄到失神，没有精力玩游戏！", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='hurt') and game_type != "2": 
-        await game.finish(f"你现在受伤了，没有精力玩“游戏”！", at_sender=True)
+        await game.finish(f"你现在受伤了，没有精力玩游戏！", at_sender=True)
         
     # 如果该用户不在酒馆名单中，则先创建数据
     if user_id not in bar_data:
@@ -176,7 +176,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         bar_data[user_id]['status'] = 'nothing'
 
     # if bar_data[user_id]['status'] != 'nothing' and game_type not in ['3','4']:
-    #     await game.finish("你已经在玩“游戏”了，请结束本局“游戏”再进行游玩新的“游戏”哦！", at_sender=True)
+    #     await game.finish("你已经在玩游戏了，请结束本局游戏再进行游玩新的游戏哦！", at_sender=True)
 
     if game_type == '1' and not '/' in args:
         if data[user_id]['berry'] < 0:
@@ -199,7 +199,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         # 更新用户的最后游戏时间
         data[user_id]['last_game_time'] = current_time
 
-        # 将玩家添加至“游戏”状态
+        # 将玩家添加至游戏状态
         bar_data[user_id]['game'] = '1'
         bar_data[user_id]['status'] = 'gameing'
 
@@ -245,7 +245,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             await game.finish("你需要有至少125草莓才能进来玩哦", at_sender=True)
         else:
             data[user_id]['berry'] -= 125
-        # 将玩家添加至“游戏”状态
+        # 将玩家添加至游戏状态
         bar_data[user_id]['game'] = '2'
         # bar_data[user_id]['status'] = 'demon'
         # 判断玩家是否为第一位或第二位加入
@@ -393,7 +393,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         save_data(full_path, data)
         # 上台回合只能写pvp_choose[5]以防显示错误
         await game.finish(f"你已经消耗{kouchu_berry}颗草莓成功进行竞技场猜测！你所选的擂台为[{pos+1}]，该擂台擂主为[{choose_nickname}]，上台回合为[{pvp_choose[5]}]，所选占擂Madeline的战力为[{choose_rank}]！", at_sender=True)
-    # “游戏”4逻辑：三球竞猜
+    # 游戏4逻辑：三球竞猜
     elif game_type == '4' and len(game_type_split) == 4:
         if len(game_type_split) != 4:
             await game.finish("请输入正确的红蓝黄三球的号码哦！", at_sender=True)
@@ -455,7 +455,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     else:
         await game.finish("请输入正确的游戏类型或者检查输入参数是否正确哦！", at_sender=True)
 
-# “游戏”1逻辑 - 猜测
+# 游戏1逻辑 - 猜测
 guess = on_command('猜测', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @guess.handle()
 async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -473,7 +473,7 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     #判断是否有强制次数随机
     if(not 'compulsion_count' in data[str(user_id)]):
         data[str(user_id)]['compulsion_count'] = 0
-    # 判断是否开始了“游戏”
+    # 判断是否开始了游戏
     try:
         game_type = bar_data[user_id]['game']
         game_status = bar_data[user_id]['status']
@@ -484,7 +484,7 @@ async def guess_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     if game_type == '1' and game_status == 'gameing':
         pass
     else:
-        await guess.finish("你似乎没有参与本场“游戏”呢~")
+        await guess.finish("你似乎没有参与本场游戏呢~")
     
     # 扣除门票费
     data[user_id]['berry'] -= 125

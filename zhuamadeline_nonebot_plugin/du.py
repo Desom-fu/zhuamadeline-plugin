@@ -56,7 +56,7 @@ async def ticket_handle(event: GroupMessageEvent):
 
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
-        await ticket.finish("请先抓一次madeline再来玩“游戏”哦！", at_sender=True)
+        await ticket.finish("请先抓一次madeline再来玩吧！", at_sender=True)
     
     # 用户数据初始化
     user_data = data.setdefault(user_id, {'berry': 1000})
