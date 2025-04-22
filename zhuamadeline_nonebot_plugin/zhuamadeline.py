@@ -28,7 +28,7 @@ from .render import *
 from .event import event_happen, outofdanger
 from .pvp import madeline_pvp_event, pvp_opening, check_liechang
 from .whitelist import whitelist_rule
-from .text_image_taxt import generate_image_with_text
+from .text_image_text import generate_image_with_text
 
 __all__ = [
     "qhlc",
