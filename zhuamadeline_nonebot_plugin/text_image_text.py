@@ -234,11 +234,12 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
         result.save(png_path)
         return png_path
 
-async def send_image_or_text(handler, text, max_chars = 50):
+async def send_image_or_text(handler, text, max_chars = 50, forward_text = ""):
     '''方便于直接发送的一个函数
     handler: 前缀，用于finish
     text: 发送的文本
     max_chars: 每一行最大字符串
+    forward_text: 发在图片前的文本
     '''
     img = generate_image_with_text(
         text1=text,
@@ -248,9 +249,9 @@ async def send_image_or_text(handler, text, max_chars = 50):
         center=False
     )
     if img:
-        await handler.finish(MessageSegment.image(img))
+        await handler.finish(forward_text + MessageSegment.image(img))
     else:
-        await handler.finish(text)
+        await handler.finish(forward_text + text)
 
 async def send_image_or_text_forward(handler, text, bot, bot_id, forward_name, group_id, max_chars = 50):
     '''方便于直接发送的一个函数（用转发）

@@ -36,8 +36,7 @@ async def zhua_help():
         "- .buy (数量)（道具名): 购买道具/藏品\n"
         "- .use (道具名): 使用道具/藏品"
     )
-    await help.send(text1)
-    await send_image_or_text(help, text)
+    await send_image_or_text(help, text, text1)
 
 # 更新公告
 gong_gao = on_fullmatch(
