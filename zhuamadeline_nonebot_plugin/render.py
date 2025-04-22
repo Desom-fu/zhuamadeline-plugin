@@ -2,15 +2,9 @@
 from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 import textwrap  # 用于处理文本换行
+from .config import save_dir, font_path, background_qd
 
 __all__ = ["draw_qd"]
-
-#保存目录
-save_dir = Path()/"Data"/"Image"
-
-#素材和字体
-font_path = Path()/"Data"/"Image"/"ZhanKu.ttf"
-background_qd = Path()/"Data"/"Image"/"background_qd.png"
 
 #将图片渲染到绘制对象上
 def texture_render(image: Image, file: str, x: int, y: int, scale: int=1):

@@ -1,9 +1,10 @@
 from nonebot import on_command, on_fullmatch
 from nonebot.params import CommandArg
-from nonebot.adapters.onebot.v11 import GROUP, Message
+from nonebot.adapters.onebot.v11 import GROUP, Message, MessageSegment
 from .npc import npc_da
 from .whitelist import whitelist_rule
 from .config import liechang_count
+from .text_image_text import send_image_or_text
 
 __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
 
@@ -17,10 +18,11 @@ help = on_fullmatch(
 
 @help.handle()
 async def zhua_help():
-    text = (
+    text1 = (
         "游戏玩法及全部命令请前往抓Madeline wiki\n"
         "https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O\n"
-        "进行查看\n"
+        "进行查看\n")
+    text = (
         "此处仅列出常用指令，其它指令请看wiki：\n"
         "- .zhua: 抓一个madeline\n"
         "- .qd: 每日签到\n"
@@ -34,7 +36,8 @@ async def zhua_help():
         "- .buy (数量)（道具名): 购买道具/藏品\n"
         "- .use (道具名): 使用道具/藏品"
     )
-    await help.finish(text)
+    await help.send(text1)
+    await send_image_or_text(help, text)
 
 # 更新公告
 gong_gao = on_fullmatch(
@@ -58,7 +61,7 @@ async def gong_gao_handle():
         "*\n"
         "*"
     )
-    await gong_gao.finish(text)
+    await send_image_or_text(gong_gao, text)
 
 # NPC档案
 npc = on_command(
@@ -71,12 +74,12 @@ npc = on_command(
 
 @npc.handle()
 async def npc_handle(arg: Message = CommandArg()):
-    name = str(arg).strip().lower()  # 将输入转换为小写
-    npc_da_lower = {k.lower(): v for k, v in npc_da.items()}  # 将字典的键转换为小写
+    name = str(arg).strip().lower()
+    npc_da_lower = {k.lower(): v for k, v in npc_da.items()}
     if name in npc_da_lower: 
-        await npc.finish(npc_da_lower[name])
+        await send_image_or_text(npc, npc_da_lower[name])
     else:
-        await npc.finish("未找到相关NPC信息。")
+        await send_image_or_text(npc, "未找到相关NPC信息。")
 
 # 猎场信息
 cklc = on_command(
@@ -88,7 +91,6 @@ cklc = on_command(
 
 @cklc.handle()
 async def cklc_handle(arg: Message = CommandArg()):
-    # 猎场详细信息映射表
     LC_INFO = {
         0: '''· 猎场名称：madeline竞技场
 · 危险等级：PVP！！！
@@ -127,7 +129,6 @@ async def cklc_handle(arg: Message = CommandArg()):
 · 准入需求：？？？'''
     }
 
-    # 默认总览信息
     DEFAULT_TEXT = """####### 猎场信息 #######
 · 0号猎场：madeline竞技场
 危险等级：PVP！！！
@@ -144,24 +145,22 @@ async def cklc_handle(arg: Message = CommandArg()):
 
     args = str(arg).strip().lower()
     
-    # 处理特殊符号和数字转换
     if args in ['?', '？']:
         number_arg = 999
     else:
         try:
             number_arg = int(args)
         except ValueError:
-            return await cklc.finish(DEFAULT_TEXT)
+            await send_image_or_text(cklc, DEFAULT_TEXT)
+            return
 
-    # 验证数字范围
     if 0 <= number_arg <= liechang_count or number_arg == 999:
-        # 获取详细信息并格式化
         detail = LC_INFO.get(number_arg, "")
         text = f"####### {number_arg}号猎场 #######\n{detail}" if number_arg != 999 else f"####### 危险…… #######\n{detail}"
     else:
         text = DEFAULT_TEXT
 
-    await cklc.finish(text)
+    await send_image_or_text(cklc, text)
 
 # 竞技场细则
 pvpck = on_fullmatch(
@@ -182,4 +181,4 @@ async def pvpck_handle():
         "休息一段时间后就会重新开始哦！\n"
         "详细规则可以查看抓kid wiki！因为基础规则是一样的我懒得重新写抓madeline wiki了！"
     )
-    await pvpck.finish(text)
+    await send_image_or_text(pvpck, text)

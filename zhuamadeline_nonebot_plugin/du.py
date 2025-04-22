@@ -17,6 +17,7 @@ from .list3 import *
 from .list4 import *
 from .function import *
 from .whitelist import whitelist_rule
+from .text_image_text import generate_image_with_text, send_image_or_text
 
 __all__ = [
     "ticket",
@@ -25,21 +26,14 @@ __all__ = [
 
 ########赌场系统#######
 
-#买抽卡
+#买卡包
 ticket = on_fullmatch(['.ggl', '。ggl', '.抽卡', '。抽卡'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @ticket.handle()
-async def ticket_handle(event: GroupMessageEvent):
-    await ticket.finish("由于不可抗力，暂时先关闭这个功能。", at_sender=True)
+async def ticket_handle(bot: Bot, event: GroupMessageEvent):
     # 常量定义
     MENPIAO_COST = 150
     TAX_RATE = 0.1
-    # BUFF_MESSAGES = {
-    #     'lost': "你现在正在迷路中，连路都找不到，怎么抽卡呢？",
-    #     'confuse': "你现在正在找到了个碎片，疑惑着呢，不能抽卡。",
-    #     'hurt': "你现在受伤了，没有精力抽卡！",
-    #     'tentacle': "你刚被触手玩弄到失神，没有精力抽卡！"
-    # }
     BERRY_PROBABILITY = [
         (4, 666),
         (14, 333),
@@ -47,6 +41,7 @@ async def ticket_handle(event: GroupMessageEvent):
         (74, 83),
         (99, 55)
     ]
+    
     # 初始化数据访问
     user_id = str(event.user_id)
     group_id = str(event.group_id)
@@ -72,27 +67,17 @@ async def ticket_handle(event: GroupMessageEvent):
         await ticket.finish("你还有正在进行中的事件", at_sender=True)
 
     # Buff状态检查
-    # current_buff = user_data.get('buff', 'normal') or user_data.get('debuff', 'normal')
-    
-    # if message := BUFF_MESSAGES.get(current_buff):
-        # await ticket.finish(message, at_sender=True)
-
-    # 一堆事件的判定
-    # if(data[str(user_id)]['event']!='nothing' and game_type != "2"):
-        # if data[str(user_id)]['event']!='compulsion_game1':
-            # await game.finish("你还有正在进行中的事件", at_sender=True)
-            
     if(data[str(user_id)].get('buff','normal')=='lost'): 
-        await ticket.finish(f"你现在正在迷路中，连路都找不到，怎么能抽卡呢？", at_sender=True)
+        await ticket.finish("你现在正在迷路中，连路都找不到，怎么能抽卡呢？", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='confuse'): 
-        await ticket.finish(f"你现在正在找到了个碎片，疑惑着呢，不能抽卡。", at_sender=True)
+        await ticket.finish("你现在正在找到了个碎片，疑惑着呢，不能抽卡。", at_sender=True)
 
     if(data[str(user_id)].get('debuff','normal')=='tentacle'): 
-        await ticket.finish(f"你刚被触手玩弄到失神，没有精力抽卡！", at_sender=True)
+        await ticket.finish("你刚被触手玩弄到失神，没有精力抽卡！", at_sender=True)
         
     if(data[str(user_id)].get('buff','normal')=='hurt'): 
-        await ticket.finish(f"你现在受伤了，没有精力抽卡”！", at_sender=True)
+        await ticket.finish("你现在受伤了，没有精力抽卡！", at_sender=True)
 
     # 草莓余额检查
     if user_data['berry'] < 0:
@@ -106,7 +91,9 @@ async def ticket_handle(event: GroupMessageEvent):
     if rnd == 100:
         if '奇想魔盒' not in user_data['collections']:
             user_data['collections']['奇想魔盒'] = 1
-            await ticket.send(f"你花费{MENPIAO_COST}颗草莓，购买了一包卡包，但是抽出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果", at_sender=True)
+            msg = f"你花费{MENPIAO_COST}颗草莓，购买了一包卡包，但是抽出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果"
+            save_data(user_path / file_name, data)
+            await send_image_or_text(ticket, msg)
         else:
             berry = 666
 
@@ -118,26 +105,35 @@ async def ticket_handle(event: GroupMessageEvent):
     user_data['berry'] += get_berry
     bar_data["pots"] = bar_data.get("pots", 0) + tax
 
-    # 强制抽卡处理
-    msg = f"\n- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n- 你卖出抽出来的卡后获得了{berry}颗草莓！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+    # 构建消息内容
+    msg = f"【抽卡结果】\n\n"
+    msg += f"- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n"
+    msg += f"- 你卖出抽出来的卡后获得了{berry}颗草莓！\n"
+    msg += f"- 但是由于草莓税法的实行，需要上交10%，所以你最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
     
+    # 强制抽卡处理
     if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
         user_data['compulsion_count'] -= 1
         if user_data['compulsion_count'] > 0:
-            msg += f"\n你现在仍需强制抽卡{user_data['compulsion_count']}次。"
+            msg += f"\n\n你现在仍需强制抽卡{user_data['compulsion_count']}次。"
         else:
             user_data.update({'event': "nothing", 'compulsion_count': 0})
-            msg += '\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
+            msg += '\n\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
 
     # 失约处理
     if user_data['berry'] < 0:
         user_data['berry'] -= 250
-        msg += f"\n\n哎呀，你没有草莓了却又进行了抽卡，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
+        msg += f"\n\n【失约惩罚】\n"
+        msg += f"- 你没有草莓了却又进行了抽卡，并且没有赚回来！\n"
+        msg += f"- 现在作为惩罚我要再扣除你250草莓\n"
+        msg += f"- 在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
         
         if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
             user_data.update({'event': 'nothing', 'compulsion_count': 0})
             user_data['berry'] -= 300
-            msg += f"\n\n哇！你似乎在失约的情况下中还得强制买卡包啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+            msg += f"\n\n哇！你似乎在失约的情况下中还得强制买卡包啊……\n"
+            msg += f"- 你抵押了300草莓作为担保\n"
+            msg += f"- 现在黑衣人放你出酒馆了！"
             
         msg += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 
@@ -145,8 +141,9 @@ async def ticket_handle(event: GroupMessageEvent):
     save_data(user_path / file_name, data)
     save_data(bar_path, bar_data)
     
-    await ticket.finish(msg, at_sender=True)
-
+    # 将最终结果消息转为图片发送
+    await send_image_or_text(ticket, msg, 20)
+    
 #5人场赌博
 dubo = on_command('du', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @dubo.handle()

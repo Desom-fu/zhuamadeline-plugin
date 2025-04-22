@@ -18,6 +18,7 @@ from .event import *
 from .pvp import *
 from .whitelist import whitelist_rule
 from .config import full_path
+from .text_image_text import generate_image_with_text, send_image_or_text_forward
 
 #查看藏品信息
 ckcp = on_command('藏品', aliases={"cp"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -42,7 +43,9 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
     if str(user_id) in data:
         # 检查是否有藏品
         if 'collections' not in data[str(user_id)] or not data[str(user_id)]['collections']:
-            await ckcplist.finish("你还没有任何藏品哦！", at_sender=True)
+            msg = "你还没有任何藏品哦！"
+            img = generate_image_with_text(msg, None, None, 50, False)
+            await ckcplist.finish(MessageSegment.image(img) if img else msg, at_sender=True)
 
         # 有道具则读取道具名字和其对应数量
         nickname = event.sender.nickname
@@ -53,24 +56,16 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         # 按数量降序排序
         collections_list.sort(key=lambda x: x[1], reverse=True)
 
-        text = f"这是 [{nickname}] 的藏品列表\n"
+        # 构建藏品列表文本
+        text = f"【{nickname}的藏品列表】\n\n"
         for k, v in collections_list:
-            text += f"\n- {k}"
+            text += f"· {k} ×{v}\n"
+        
+        await send_image_or_text_forward(ckcplist, text, bot, event.self_id, '藏品库存室', event.group_id)
 
-        # 转发消息
-        msg_list = [
-            {
-                "type": "node",
-                "data": {
-                    "name": "藏品库存室",
-                    "uin": event.self_id,
-                    "content": text
-                }
-            }
-        ]
-        await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
     else:
-        await ckcplist.finish("你还没尝试抓过madeline......", at_sender=True)
+        msg = "你还没尝试抓过madeline......"
+        await ckcplist.finish(msg, at_sender=True)
         
 # # 获得喵喵呜呜纪念藏品
 # mewmewwuwu = on_fullmatch(['.喵喵呜呜', '。喵喵呜呜'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)

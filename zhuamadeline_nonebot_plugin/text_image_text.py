@@ -1,11 +1,13 @@
 from PIL import Image, ImageDraw, ImageFont, ImageSequence 
 from pathlib import Path
 import textwrap  
-import uuid 
+import uuid
+from .config import save_dir, font_path
+from nonebot.adapters.onebot.v11 import MessageSegment
 
-# 设置保存目录与字体文件路径
-save_dir = Path("Data") / "Image" 
-font_path = save_dir / "ZhanKu.ttf"
+__all__ = ["generate_image_with_text",'send_image_or_text']
+
+# 设置字体相关
 font_size = 24  # 字体大小
 font = ImageFont.truetype(str(font_path), font_size)  # 加载字体对象
 
@@ -13,7 +15,7 @@ font = ImageFont.truetype(str(font_path), font_size)  # 加载字体对象
 MAX_WIDTH = 800           # 画布最大宽度
 MAX_IMAGE_HEIGHT = 600    # 图像最大高度（超过则缩放）
 PADDING = 20              # 画布四周留白
-CACHE_LIMIT = 15          # 缓存目录中保留最近生成的文件数
+CACHE_LIMIT = 20          # 缓存目录中保留最近生成的文件数
 
 
 def wrap_text(text, max_chars=20):
@@ -38,14 +40,15 @@ def wrap_text(text, max_chars=20):
     return lines
 
 
-def draw_text(draw, lines, y, canvas_width, line_spacing=5):
+def draw_text(draw, lines, y, canvas_width, line_spacing=5, center=True):
     """
-    在画布上绘制多行文本并水平居中
+    在画布上绘制多行文本
     draw: ImageDraw 对象
     lines: 文本行列表
     y: 初始垂直坐标
-    canvas_width: 画布宽度，用于水平居中计算
+    canvas_width: 画布宽度
     line_spacing: 行间距像素值
+    center: 是否水平居中显示
     返回绘制结束后的 y 坐标
     """
     # 获取字体高度
@@ -60,7 +63,8 @@ def draw_text(draw, lines, y, canvas_width, line_spacing=5):
         bbox = draw.textbbox((0, 0), line, font=font)
         w = bbox[2] - bbox[0]  # 文本宽度
         h = bbox[3] - bbox[1]  # 文本高度
-        draw.text(((canvas_width - w) // 2, y), line, font=font, fill="black")
+        x = (canvas_width - w) // 2 if center else PADDING  # 居中使用计算位置，不居中使用PADDING
+        draw.text((x, y), line, font=font, fill="black")
         y += h + line_spacing  # 更新 y 坐标到下一行，并添加行间距
     return y
 
@@ -76,12 +80,14 @@ def clean_cache():
         f.unlink()
 
 
-def generate_image_with_text(text1, image_path, text2):
+def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True):
     """
     主函数：根据上下两段文本和可选图片生成静态图或 GIF
     text1: 顶部文字，可为空
     image_path: 图片路径，可为 None 或不存在(若是gif则是透明)
     text2: 底部文字，可为空
+    max_chars: 每行最大字符数，默认20
+    center: 是否水平居中显示，默认True
     返回生成文件的 Path 对象，或 None
     """
     # 若三者都为空，则无需生成
@@ -91,9 +97,9 @@ def generate_image_with_text(text1, image_path, text2):
     # 将可能为 Path 的 image_path 转成字符串
     image_path = str(image_path) if image_path else None
 
-    # 对上下文字分别调用换行处理
-    lines1 = wrap_text(text1) if text1 else []
-    lines2 = wrap_text(text2) if text2 else []
+    # 对上下文字分别调用换行处理，使用传入的max_chars参数
+    lines1 = wrap_text(text1, max_chars) if text1 else []
+    lines2 = wrap_text(text2, max_chars) if text2 else []
 
     # 尝试打开图片文件
     image = None
@@ -139,28 +145,53 @@ def generate_image_with_text(text1, image_path, text2):
         else:
             max_content_width = max(text1_width, text2_width)
 
-        # 计算画布宽度（文字或图片最大宽度 + 留白）
+        # 计算画布宽度（内容最大宽度 + 两侧PADDING，不超过MAX_WIDTH）
         canvas_width = min(max_content_width + 2 * PADDING, MAX_WIDTH)
-        # 计算总画布高度（文字高度 + 图片高度 + 上下留白 + 行间距）
-        total_height = text1_height + text2_height + image_h + font_size * 3 + 2 * PADDING
-
-        # 创建最终 RGBA 画布
+        
+        # 创建临时画布计算内容高度
+        temp_canvas = Image.new("RGBA", (canvas_width, 1), "white")
+        temp_draw = ImageDraw.Draw(temp_canvas)
+        
+        # 计算内容高度
+        y = 0
+        y = draw_text(temp_draw, lines1, y, canvas_width, center=center)
+        if base_image:
+            y += font_size  # 图片前留白
+            y += image_h + font_size  # 图片高度和间距
+        y = draw_text(temp_draw, lines2, y, canvas_width, center=center)
+        
+        # 计算实际需要的高度（内容高度 + 上下PADDING）
+        content_height = y
+        total_height = content_height + 2 * PADDING
+        
+        # 创建最终 RGBA 画布（确保四周都是PADDING）
         canvas = Image.new("RGBA", (canvas_width, total_height), "white")
         draw = ImageDraw.Draw(canvas)
 
-        # 纵向起始位置：上方留白 + 一行文字行距
-        y = PADDING + font_size
-        # 绘制上段文字并更新 y
-        y = draw_text(draw, lines1, y, canvas_width)
-        y += font_size  # 图片前留白
-
+        # 纵向起始位置：上方PADDING
+        y = PADDING
+        # 绘制上段文字并更新 y，使用传入的center参数
+        y = draw_text(draw, lines1, y, canvas_width, center=center)
+        
         # 如有图，粘贴并更新 y，保留gif透明度
         if resized_image:
-            canvas.paste(resized_image, ((canvas_width - image_w) // 2, y), resized_image)
-            y += image_h + font_size
+            y += font_size  # 图片前留白
+            x_pos = (canvas_width - image_w) // 2 if center else PADDING  # 图片位置同样遵循center参数
+            canvas.paste(resized_image, (x_pos, y), resized_image)
+            y += image_h + font_size  # 图片高度和间距
 
-        # 绘制下段文字
-        y = draw_text(draw, lines2, y, canvas_width)
+        # 绘制下段文字，使用传入的center参数
+        y = draw_text(draw, lines2, y, canvas_width, center=center)
+        
+        # 确保底部留白为PADDING
+        current_bottom_padding = total_height - y
+        if current_bottom_padding != PADDING:
+            # 调整画布高度
+            new_total_height = y + PADDING
+            new_canvas = Image.new("RGBA", (canvas_width, new_total_height), "white")
+            new_canvas.paste(canvas, (0, 0))
+            canvas = new_canvas
+        
         return canvas
 
     # 清理旧缓存
@@ -185,7 +216,6 @@ def generate_image_with_text(text1, image_path, text2):
             frames.append(result_frame)
             durations.append(frame.info.get("duration", image.info.get("duration", 100)))
 
-
         # 保存GIF
         gif_path = save_dir / f"send_image{current_send}.gif"
         frames[0].save(
@@ -205,3 +235,54 @@ def generate_image_with_text(text1, image_path, text2):
         png_path = save_dir / f"send_image{current_send}.png"
         result.save(png_path)
         return png_path
+
+async def send_image_or_text(handler, text, max_chars = 50):
+    '''方便于直接发送的一个函数
+    handler: 前缀，用于finish
+    text: 发送的文本
+    '''
+    img = generate_image_with_text(
+        text1=text,
+        image_path=None,
+        text2=None,
+        max_chars=max_chars,
+        center=False
+    )
+    if img:
+        await handler.finish(MessageSegment.image(img))
+    else:
+        await handler.finish(text)
+
+async def send_image_or_text_forward(handler, text, bot, bot_id, forward_name, group_id, max_chars = 50):
+    '''方便于直接发送的一个函数（用转发）
+    handler: 前缀，用于finish
+    text: 发送的文本
+    bot: 当前bot传递一下，一般就是bot
+    bot_id: 一般是event.self_id
+    forward_name: 转发的名字
+    group_id: 发到哪个群
+    max_chars: 每一行最大字符串
+    '''
+    img = generate_image_with_text(
+        text1=text,
+        image_path=None,
+        text2=None,
+        max_chars = max_chars,
+        center=False
+    )
+    if img:
+        await handler.finish(MessageSegment.image(img))
+    else:
+        # 图片生成失败，回退到转发消息
+        msg_list = [
+            {
+                "type": "node",
+                "data": {
+                    "name": forward_name,
+                    "uin": bot_id,
+                    "content": text
+                }
+            }
+        ]
+        await bot.call_api("send_group_forward_msg", group_id=group_id, messages=msg_list)
+        await handler.finish()  # 结束处理，避免重复发送消息

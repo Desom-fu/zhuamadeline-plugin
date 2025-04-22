@@ -454,7 +454,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 f"{diamond_text}"
                 f"{exp_msg}"
                 f"{grade_msg}"
-                "\n"
             )
         else:
             extra_text = (
@@ -463,7 +462,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 f"{diamond_text}"
                 f"{exp_msg}"
                 f"{grade_msg}"
-                "\n"
             )
 
         # 合并所有文本到图片底部

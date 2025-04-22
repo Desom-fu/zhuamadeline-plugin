@@ -28,7 +28,10 @@ __all__ = [
     'user_path4',
     'max_grade',
     'exp_growth',
-    'backup_path'
+    'backup_path',
+    'save_dir',
+    'font_path',
+    'background_qd'
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -92,6 +95,10 @@ exp_growth = {
     range(16, 21): 20, # 等级 16-20，max_exp +20
     range(21, 31): 25  # 等级 21-30，max_exp +25
 }
+# 绘图相关路径
+save_dir = Path("Data") / "generate_image" 
+font_path = Path("Data") / "fonts"  / "ZhanKu.ttf"
+background_qd = Path()/"Data"/"Image"/"background_qd.png"
 
 #赌场信息
 duchang_list = Path() / "data" / "DuChang" / "duchang.json"

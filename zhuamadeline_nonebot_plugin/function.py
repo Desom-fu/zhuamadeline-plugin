@@ -96,9 +96,9 @@ lock = threading.Lock()
 async def get_nickname(bot: Bot, user_id: str) -> str:
     try:
         user_info = await bot.get_stranger_info(user_id=int(user_id))
-        return user_info.get("nickname", f"用户{user_id}")
+        return user_info.get("nickname", f"{user_id}")
     except:
-        return f"用户{user_id}"  # 获取失败时使用默认名称
+        return f"玩家{user_id}"  # 获取失败时使用默认名称
 
 # 用 run_in_executor 使 requests 在单独的线程中运行
 async def async_request(url, data):

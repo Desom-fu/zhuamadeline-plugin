@@ -12,6 +12,7 @@ from .config import *
 from .function import *
 from .whitelist import whitelist_rule
 from .berry_garden_level import GARDEN_LEVELS, get_level_config  # 导入等级配置
+from .text_image_text import generate_image_with_text, send_image_or_text
 
 # 命令别名表
 garden_aliases = {
@@ -47,10 +48,12 @@ async def update_all_gardens(garden_data: dict):
             last_update_time = garden.get("last_update_time", garden["seed_time"])
             
             # 计算完整的小时数差（不足1小时舍弃）
-            elapsed_hours = (current_time - last_update_time) // 3600
+            time_diff = max(0, current_time - last_update_time)
+            elapsed_hours = time_diff // 3600
             
             # 计算剩余生长时间（秒）
-            remaining_seconds = 24 * 3600 - (current_time - garden["seed_time"])
+            growth_duration = 24 * 3600
+            remaining_seconds = max(0, growth_duration - (current_time - garden["seed_time"]))
             
             if elapsed_hours > 0 or remaining_seconds <= 0:
                 total_new = 0
@@ -175,14 +178,16 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if command == main_cmd or command in aliases:
             operation = main_cmd
             break
-    
+
     if not operation:
         # 构建帮助信息
         help_msg = "请输入正确的指令哦！可用指令："
         for main_cmd, aliases in garden_aliases.items():
             help_msg += f"\n.garden {main_cmd}({'/'.join(aliases)})"
-        await berry_garden.finish(help_msg, at_sender=True)
-
+        
+        
+        await send_image_or_text(berry_garden, help_msg)
+        
     # 查询操作
     if operation == "查询":
         # 计算播种剩余时间
@@ -228,7 +233,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         # 构建回复消息
         reply_msg = (
-            f"\n【土地状态查询】"
+            f"【土地状态查询】"
             f"\n当前等级: Lv{current_level} | {upgrade_info}"
             f"\n当前草莓数量: {user_garden['garden_berry']}"
             f"\n播种状态: {seed_status}"
@@ -240,8 +245,8 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"\n施肥能耗: {level_config['fert_energy']} 基础产量: {level_config['basic_reward']}"
             f"\n偷取范围: {level_config['steal_min']}-{level_config['steal_max']}"
         )
-        
-        await berry_garden.finish(reply_msg, at_sender=True)
+        # 改为图片形式
+        await send_image_or_text(berry_garden, reply_msg)
     
     # 收菜操作
     elif operation == "收菜":
@@ -260,7 +265,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
             # 构建回复消息
             message = (
-                f"\n🍓 收获报告 🍓\n"
+                f"🍓 收获报告 🍓\n"
             )
 
             message += f"本次收获: {harvest}颗草莓\n"
@@ -272,7 +277,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if user_garden["isfert"] == 0:
             message += "\n- 施肥时间已到，如需要可以重新施肥哦！"
         
-        await berry_garden.finish(message, at_sender=True)
+        await send_image_or_text(berry_garden, message)
         
     elif operation == "偷菜":
         # 检查每日偷菜次数限制
@@ -339,16 +344,20 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(
+        message = (
             f"你花费了{steal_cost}颗草莓，成功偷取了"+ MessageSegment.at(target_id) +
-            f" 的草莓地里的{steal_amount}颗草莓！\n" +
-            f"今日已偷: {user_garden['today_steal']}/{level_config['max_steal_times']}次",
-            at_sender=True
+            f"的草莓地里的{steal_amount}颗草莓！\n" +
+            f"今日已偷: {user_garden['today_steal']}/{level_config['max_steal_times']}次"
         )
+
+        await berry_garden.finish(message, at_sender=True)
         
     elif operation == "施肥":
+        # 未播种检查
         if user_garden["isseed"] != 1:
-            await berry_garden.finish("请先播种后再进行施肥哦！", at_sender=True)
+            msg = "请先播种后再进行施肥哦！"
+            img = generate_image_with_text(msg, None, None, 50, False)
+            await berry_garden.finish(MessageSegment.image(img) if img else msg, at_sender=True)
             
         if user_garden["isfert"] == 1:
             await berry_garden.finish("你已经施肥过了，没必要重新施肥哦！", at_sender=True)
@@ -363,11 +372,12 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(
+        message = (
             f"你使用了{fert_energy}点能量对土地施肥成功！\n"
-            f"接下来的12h内你的草莓地收获将会翻倍！",
-            at_sender=True
+            f"接下来的12h内你的草莓地收获将会翻倍！"
         )
+
+        await berry_garden.finish(message, at_sender=True)
         
     elif operation == "播种":
         if user_garden["isseed"] == 1:
@@ -384,11 +394,12 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         
         save_data(full_path, data)
         save_data(garden_path, garden_data)
-        await berry_garden.finish(
+        message = (
             f"播种成功！24小时内每小时草莓地都会为你带来{level_config['basic_reward']}颗草莓的收益哦！\n"
-            f"施肥可使产量翻倍！",
-            at_sender=True
+            f"施肥可使产量翻倍！"
         )
+
+        await berry_garden.finish(message, at_sender=True)
     
     # 升级操作
     elif operation == "升级":
@@ -460,7 +471,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
         # 构建回复消息
         message = (
-            f"\n恭喜成功升级到 Lv{next_level}！\n"
+            f"恭喜成功升级到 Lv{next_level}！\n"
             f"消耗：{cost_amount} {'颗草莓' if cost_type == 'berry' else '点能量'}\n"
         )
 
@@ -475,11 +486,5 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"每日偷取次数：{next_config['max_steal_times']} 每日被偷上限：{next_config['max_be_stolen']}"
         )
 
-        await berry_garden.finish(message, at_sender=True)
-        
-    else:
-        # 构建帮助信息
-        help_msg = "请输入正确的指令哦！可用指令：\n"
-        for main_cmd, aliases in garden_aliases.items():
-            help_msg += f".garden {main_cmd}({'/'.join(aliases)})\n"
-        await berry_garden.finish(help_msg, at_sender=True)
+        # 改为图片形式
+        await send_image_or_text(berry_garden, message)

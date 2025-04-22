@@ -21,6 +21,7 @@ from .config import *
 from .function import *
 from .whitelist import whitelist_rule
 from .admin import restock_shop
+from .text_image_text import generate_image_with_text, send_image_or_text
 
 scheduler = require("nonebot_plugin_apscheduler").scheduler
 
@@ -39,56 +40,48 @@ async def madeline_shop(bot: Bot, event: Event):
     #比较营业时间与时间点
     current_time = datetime.datetime.now().time()
     hour = current_time.hour
-    if(hour < 6): await shop.finish("便利店还没开门，请再等一会吧")
+    if hour < 6:
+        msg = "便利店还没开门，请再等一会吧"
+        img = generate_image_with_text(msg, None, None, 50, False)
+        await shop.finish(MessageSegment.image(img) if img else msg, at_sender=True)
+    
     data = open_data(user_path / file_name)
     user_id = str(event.user_id)
     # 事件检测
     if data[str(user_id)].get('event',"nothing") != "nothing":
-        await buy.finish("你还有正在进行中的事件", at_sender=True)
+        msg = "你还有正在进行中的事件"
+        img = generate_image_with_text(msg, None, None, 50, False)
+        await shop.finish(MessageSegment.image(img) if img else msg, at_sender=True)
+    
     #输出商店仓库
     current_date = datetime.date.today()  #返回今天日期
     current_date_str = current_date.strftime("%Y-%m-%d")  #日期时间对象转字符串
-    if(os.path.exists(shop_database)):
-
+    
+    if os.path.exists(shop_database):
         #打开商店仓库
         shop_data = open_data(shop_database)
 
         #根据是否为同一天来查看是否刷新商品
         previous_date_str = shop_data["date"]
 
-        if (previous_date_str!=current_date_str):
+        if previous_date_str != current_date_str:
             shop_data["item"] = today_item
             shop_data["date"] = current_date_str
             #写入商店库存
             save_data(shop_database, shop_data)
         #写入商店库存
         save_data(shop_database, shop_data)
-
     else:
         shop_data["item"] = today_item
         shop_data["date"] = current_date_str
-        
         #写入商店库存
         save_data(shop_database, shop_data)
-    # 创建转发消息内容
+    
+    # 获取商品列表文本
     item_text = shop_list(shop_data["item"])
-    forward_messages = [
-        {
-            "type": "node",
-            "data": {
-                "name": "商品列表",
-                "uin": event.self_id,  # 设置为机器人的QQ号
-                "content": item_text
-            }
-        }
-    ]
-        
-    # 转发消息
-    if forward_messages:
-        await bot.send_group_forward_msg(
-            group_id=event.group_id,  # 转发到当前群组
-            messages=forward_messages
-        )
+    
+    # 改为图片形式发送
+    await send_image_or_text(shop, item_text)
 
 # 定时任务：每天 18:00 自动补货
 @scheduler.scheduled_job("cron", hour=18, minute=0)
