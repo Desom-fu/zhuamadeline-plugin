@@ -5,8 +5,6 @@ import uuid
 from .config import save_dir, font_path
 from nonebot.adapters.onebot.v11 import MessageSegment
 
-__all__ = ["generate_image_with_text",'send_image_or_text']
-
 # 设置字体相关
 font_size = 24  # 字体大小
 font = ImageFont.truetype(str(font_path), font_size)  # 加载字体对象
