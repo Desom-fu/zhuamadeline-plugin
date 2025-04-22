@@ -142,7 +142,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
     save_data(bar_path, bar_data)
     
     # 将最终结果消息转为图片发送
-    await send_image_or_text(ticket, msg, 20)
+    await send_image_or_text(ticket, msg, 25)
     
 #5人场赌博
 dubo = on_command('du', permission=GROUP, priority=1, block=True, rule=whitelist_rule)

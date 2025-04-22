@@ -240,6 +240,7 @@ async def send_image_or_text(handler, text, max_chars = 50):
     '''方便于直接发送的一个函数
     handler: 前缀，用于finish
     text: 发送的文本
+    max_chars: 每一行最大字符串
     '''
     img = generate_image_with_text(
         text1=text,
