@@ -28,6 +28,7 @@ from .render import *
 from .event import event_happen, outofdanger
 from .pvp import madeline_pvp_event, pvp_opening, check_liechang
 from .whitelist import whitelist_rule
+from .text_image_taxt import generate_image_with_text
 
 __all__ = [
     "qhlc",
@@ -438,32 +439,52 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         if current_buff2 == 'lucky' and berry_give != 0 and buff2_remaining > -1:
             reward_text = f"{berry_give}+{lucky_give}={berry_give + lucky_give}颗草莓"
 
-        # 最终消息拼接
-        message = (
-            new_print +
-            f"\n等级: {level}\n" +
-            f"{name}" +
-            MessageSegment.image(img) +
-            f"{description}" +
-            hourglass_text +
-            sheet_text
-        )
+        # 准备所有要放入图片的文本内容
+        if new_print:
+            top_text = f"{new_print}\n等级: {level}\n{name}"
+        else:
+            top_text = f"等级: {level}\n{name}"
+        bottom_text = f"{description}"
 
+        # 根据berry_give判断要添加的额外信息
         if berry_give != 0:
-            message += (
-                f"\n\n本次奖励{reward_text}" +
-                buff2_text +  # 这里会自动包含幸运/迅捷的剩余次数（按规则显示）
-                diamond_text +
-                exp_msg +
-                grade_msg
+            extra_text = (
+                f"\n\n本次奖励{reward_text}"
+                f"{buff2_text}"
+                f"{diamond_text}"
+                f"{exp_msg}"
+                f"{grade_msg}"
+                "\n"
             )
         else:
-            message += (
-                buff2_text +  # 迅捷BUFF会在这里显示（幸运BUFF不会）
-                hourglass_text +
-                diamond_text +
-                exp_msg +
-                grade_msg
+            extra_text = (
+                f"{buff2_text}"
+                f"{hourglass_text}"
+                f"{diamond_text}"
+                f"{exp_msg}"
+                f"{grade_msg}"
+                "\n"
+            )
+
+        # 合并所有文本到图片底部
+        bottom_text += extra_text
+
+        # 生成包含所有内容的图片
+        combined_img_path = generate_image_with_text(
+            text1=top_text,    # 顶部文字
+            image_path=img,         # 原始图片路径
+            text2=bottom_text  # 底部文字（包含所有额外信息）
+        )
+
+        # 最终消息只需要包含生成的图片
+        if combined_img_path:
+            message = MessageSegment.image(combined_img_path)
+        else:
+            # 如果生成失败，回退到原始文本形式
+            message = (
+                f"{top_text}\n"
+                f"[图片]\n"
+                f"{bottom_text}"
             )
 
         await catch.finish(message, at_sender=True)
