@@ -13,7 +13,7 @@ font = ImageFont.truetype(str(font_path), font_size)  # 加载字体对象
 MAX_WIDTH = 800           # 画布最大宽度
 MAX_IMAGE_HEIGHT = 600    # 图像最大高度（超过则缩放）
 PADDING = 20              # 画布四周留白
-CACHE_LIMIT = 20          # 缓存目录中保留最近生成的文件数
+CACHE_LIMIT = 40          # 缓存目录中保留最近生成的文件数
 
 
 def wrap_text(text, max_chars=20):
@@ -254,13 +254,13 @@ async def send_image_or_text(handler, text, at_sender = False, forward_text = No
     else:
         await handler.finish(forward_text + text, at_sender = at_sender)
 
-async def send_image_or_text_forward(handler, text, bot, bot_id, forward_name, group_id, max_chars = 50):
+async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  group_id, max_chars = 50):
     '''方便于直接发送的一个函数（用转发）
     handler: 前缀，用于finish
     text: 发送的文本
+    forward_text: 转发的名字
     bot: 当前bot传递一下，一般就是bot
     bot_id: 一般是event.self_id
-    forward_name: 转发的名字
     group_id: 发到哪个群
     max_chars: 每一行最大字符串
     '''
@@ -279,7 +279,7 @@ async def send_image_or_text_forward(handler, text, bot, bot_id, forward_name, g
             {
                 "type": "node",
                 "data": {
-                    "name": forward_name,
+                    "name": forward_text,
                     "uin": bot_id,
                     "content": text
                 }

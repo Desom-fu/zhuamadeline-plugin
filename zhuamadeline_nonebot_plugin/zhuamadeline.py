@@ -715,8 +715,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     liechang_name = liechang_names.get(liechang_number, "未知猎场")
     message = ''
     # 生成消息
-    if all_judge == 'all':
-        message += f"以下是玩家 [{nickname}] 的全部状态：\n"
+    message += f"以下是玩家 [{nickname}] 的状态：\n"
         
     message += (
         f"\n- 所处猎场：{liechang_name}"
@@ -864,11 +863,8 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 )
             else:
                 message += f"\n• 本次Madeline竞技场已结算"
-                
-    if all_judge == 'all': 
-        await send_image_or_text_forward(ck, message, bot, event.self_id, f"{nickname}的全部状态", event.group_id, 50)
-    else:
-        await send_image_or_text(ck, message, True)
+    # 发送图片     
+    await send_image_or_text(ck, message, True, "", 25)
 
 
 # 转账 - 1000以下150手续费，1000上15%

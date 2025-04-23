@@ -60,7 +60,7 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         for k, v in collections_list:
             text += f"· {k} ×{v}\n"
         
-        await send_image_or_text_forward(ckcplist, text, bot, event.self_id, '藏品库存室', event.group_id)
+        await send_image_or_text_forward(ckcplist, text, '藏品库存室', bot, event.self_id,  event.group_id)
 
     else:
         msg = "你还没尝试抓过madeline......"

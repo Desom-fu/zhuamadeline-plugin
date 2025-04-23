@@ -192,7 +192,7 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
     )
 
     # 发送图片
-    await send_image_or_text_forward(ranking, rank_msg, bot, event.self_id, title_msg, event.group_id, 50)
+    await send_image_or_text_forward(ranking, rank_msg, title_msg, bot, event.self_id, event.group_id, 50)
 
 # 统一处理mymadeline命令，支持查询单个猎场或所有猎场的库存，并保留0点的特殊事件
 mymadeline = on_command('mymadeline', aliases={"mymade","mymadline","my玛德琳","我的玛德琳"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -206,7 +206,7 @@ async def mymadeline_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     # 半夜0点整查看库存时，隐藏并返回特殊事件
     if hour == 0 and minute == 0 and 0 <= second <= 30:
         # 发送图片
-        await send_image_or_text_forward(ranking, "please give me your eyes", bot, event.self_id, '藏品库存室', event.group_id, 50)
+        await send_image_or_text_forward(ranking, "please give me your eyes", '藏品库存室', bot, event.self_id, event.group_id, 50)
     
     # 如果没有输入猎场号，默认展示所有猎场的库存
     if not arg:
@@ -243,7 +243,7 @@ async def display_liechang_inventory(bot: Bot, event: GroupMessageEvent, liechan
     nickname = user_info.get("nickname", "未知昵称")
     msg = f'这是 [{nickname}] 的\n{liechang_number}号猎场的Madeline库存\n{sorted_madelines}'
     # 发送图片
-    await send_image_or_text_forward(mymadeline, msg, bot, event.self_id, '库存查询室', event.group_id, 50)
+    await send_image_or_text_forward(mymadeline, msg, '库存查询室', bot, event.self_id, event.group_id, 50)
 
 
 # 查询并展示所有猎场的库存
@@ -273,7 +273,7 @@ async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, use
     for sorted_madeline in all_sorted_madelines:
         msg += "\n\n========================\n\n" + sorted_madeline
     # 发送图片
-    await send_image_or_text_forward(mymadeline, msg, bot, event.self_id, '库存查询室', event.group_id, 50)
+    await send_image_or_text_forward(mymadeline, msg, '库存查询室', bot, event.self_id, event.group_id, 50)
 
 # 查询进度，具体函数也丢function.py里了
 jd = on_command('jd', aliases={"madelinejd"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -297,7 +297,7 @@ async def zhuajd(bot: Bot, event: Event, args: Message = CommandArg()):
         return
     
     # 发送图片
-    await send_image_or_text_forward(jd, progress_message, bot, event.self_id, '进度查询', event.group_id, 50)
+    await send_image_or_text_forward(jd, progress_message, '进度查询', bot, event.self_id, event.group_id, 50)
 
 # 全服进度排名指令
 rankingjd = on_command('jdrank', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -427,7 +427,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
     else:
         await send_image_or_text(rankingjd, "无效的参数！请使用\n`.jdrank` 或 `.jdrank <猎场号>`", at_sender=True)
     
-    await send_image_or_text_forward(rankingjd, rank_msg, bot, event.self_id, title_msg, event.group_id, 50)
+    await send_image_or_text_forward(rankingjd, rank_msg, title_msg, bot, event.self_id, event.group_id, 50)
 
 # 查询全服madeline总进度
 total_madelinejd_query = on_command(
@@ -497,7 +497,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
         for level in range(5, 0, -1):
             progress_message += f"- {level}级Madeline：{hunt_count[lc][level - 1]}/{hunt_max_count[lc][level - 1]}\n"
 
-    await send_image_or_text_forward(total_madelinejd_query, progress_message, bot, event.self_id, "全服进度", event.group_id, 50)
+    await send_image_or_text_forward(total_madelinejd_query, progress_message, "全服进度", bot, event.self_id,  event.group_id, 50)
 
 #展示madeline
 show = on_command('show', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
