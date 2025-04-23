@@ -19,6 +19,7 @@ from .list4 import *
 from .function import *
 from .whitelist import whitelist_rule
 from .shop import fish_prices
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 __all__ = [
     "mymadeline",
@@ -86,7 +87,7 @@ async def handle_ckqflc(bot: Bot, event: GroupMessageEvent):
     
     message += f"\n全服总玩家数: {total_users}人"
     
-    await ckqflc.finish(message, at_sender=True)
+    await send_image_or_text(ckqflc, message)
 
 # 草莓排行
 ranking = on_command('berryrank', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -149,11 +150,11 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
     # **选择显示正序或倒序**
     if arg == "down":  # **倒数排名**
         title_msg = '倒数前10名'
-        rank_msg = "📉 倒数前 10 名 🍓\n\n"
+        rank_msg = "倒数前 10 名\n\n"
         selected_users = berry_rank[-10:]  # 取后 10 名
     else:
         title_msg = '全服草莓排名'
-        rank_msg = "📜 全服草莓排名 🍓\n\n"
+        rank_msg = "全服草莓排名\n\n"
         selected_users = berry_rank[:10]  # 取前 10 名
 
     # 获取选中玩家的昵称
@@ -185,29 +186,13 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
 
     user_nickname = await get_nickname(bot, user_id)
     rank_msg += (
-        f"🔹 {user_nickname}的排名为：{user_rank}，"
-        f"拥有 {user_berry} + {user_bank_berry} + {user_jam_berry} + {user_fish_value} = "
-        f"{user_berry + user_bank_berry + user_jam_berry + user_fish_value} 颗草莓"
+        f"{user_nickname}的排名为：{user_rank}，\n"
+        f"拥有【存有{user_berry}+仓库{user_bank_berry}+果酱{user_jam_berry}+鱼类{user_fish_value}】\n"
+        f"= {user_berry + user_bank_berry + user_jam_berry + user_fish_value}颗草莓"
     )
 
-    # 构建转发消息
-    forward_messages = [
-        {
-            "type": "node",
-            "data": {
-                "name": title_msg,
-                "uin": event.self_id,
-                "content": rank_msg
-            }
-        }
-    ]
-
-    # 转发消息
-    if forward_messages:
-        await bot.send_group_forward_msg(
-            group_id=event.group_id,
-            messages=forward_messages
-        )
+    # 发送图片
+    await send_image_or_text_forward(ranking, rank_msg, bot, event.self_id, title_msg, event.group_id, 50)
 
 # 统一处理mymadeline命令，支持查询单个猎场或所有猎场的库存，并保留0点的特殊事件
 mymadeline = on_command('mymadeline', aliases={"mymade","mymadline","my玛德琳","我的玛德琳"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -220,16 +205,8 @@ async def mymadeline_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
 
     # 半夜0点整查看库存时，隐藏并返回特殊事件
     if hour == 0 and minute == 0 and 0 <= second <= 30:
-        msg_list = [{
-            "type": "node",
-            "data": {
-                "name": "库存查询室",
-                "uin": event.self_id,
-                "content": 'please give me your eyes'
-            }
-        }]
-        await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
-        return
+        # 发送图片
+        await send_image_or_text_forward(ranking, "please give me your eyes", bot, event.self_id, '藏品库存室', event.group_id, 50)
     
     # 如果没有输入猎场号，默认展示所有猎场的库存
     if not arg:
@@ -264,17 +241,10 @@ async def display_liechang_inventory(bot: Bot, event: GroupMessageEvent, liechan
     # 返回库存信息
     user_info = await bot.get_stranger_info(user_id=int(user_id))
     nickname = user_info.get("nickname", "未知昵称")
-    
-    msg_list = [{
-        "type": "node",
-        "data": {
-            "name": "库存查询室",
-            "uin": event.self_id,
-            "content": f"这是 [{nickname}] 的{liechang_number}号猎场的Madeline库存\n{sorted_madelines}"
-        }
-    }]
-    
-    await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
+    msg = f'这是 [{nickname}] 的\n{liechang_number}号猎场的Madeline库存\n{sorted_madelines}'
+    # 发送图片
+    await send_image_or_text_forward(mymadeline, msg, bot, event.self_id, '库存查询室', event.group_id, 50)
+
 
 # 查询并展示所有猎场的库存
 async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, user_id):
@@ -298,27 +268,12 @@ async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, use
     # 合并并发送所有猎场的库存
     user_info = await bot.get_stranger_info(user_id=int(user_id))
     nickname = user_info.get("nickname", "未知昵称")
-    
-    msg_list = [{
-        "type": "node",
-        "data": {
-            "name": "库存查询室",
-            "uin": event.self_id,
-            "content": f"这是 [{nickname}] 的所有猎场Madeline库存"
-        }
-    }]
+    msg = f'这是 [{nickname}] 的\n所有猎场Madeline库存'
     
     for sorted_madeline in all_sorted_madelines:
-        msg_list.append({
-            "type": "node",
-            "data": {
-                "name": "库存查询室",
-                "uin": event.self_id,
-                "content": sorted_madeline
-            }
-        })
-
-    await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
+        msg += "\n\n========================\n\n" + sorted_madeline
+    # 发送图片
+    await send_image_or_text_forward(mymadeline, msg, bot, event.self_id, '库存查询室', event.group_id, 50)
 
 # 查询进度，具体函数也丢function.py里了
 jd = on_command('jd', aliases={"madelinejd"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -333,26 +288,16 @@ async def zhuajd(bot: Bot, event: Event, args: Message = CommandArg()):
             if target_level < 1 or target_level > liechang_count:
                 raise ValueError
         except ValueError:
-            await jd.finish(f"猎场等级只能是1到{liechang_count}之间的整数！")
+            await send_image_or_text(jd, f"猎场等级只能是1到{liechang_count}之间的整数！", at_sender=True)
             return
     # 获取进度消息
     progress_message, total_progress, progress = madelinejd(user_id, target_level, event.sender.nickname)
     if progress_message is None:
-        await jd.finish("你还没有尝试抓过Madeline.....")
+        await send_image_or_text(jd, "你还没有尝试抓过Madeline……", at_sender=True)
         return
-    # 发送进度消息
-    msg_list = [
-        {
-            "type": "node",
-            "data": {
-                "name": "进度",
-                "uin": event.self_id,
-                "content": progress_message
-            }
-        }
-    ]
-
-    await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
+    
+    # 发送图片
+    await send_image_or_text_forward(jd, progress_message, bot, event.self_id, '进度查询', event.group_id, 50)
 
 # 全服进度排名指令
 rankingjd = on_command('jdrank', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -399,13 +344,13 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
                 'progress': progress
             })
         except ValueError:
-            await rankingjd.finish("无效的猎场号！请确保 <猎场号> 是一个整数且目前存在该猎场。", at_sender=True)
+            await send_image_or_text(rankingjd, "无效的猎场号！\n请确保 <猎场号> 是一个整数且目前存在该猎场。", at_sender=True)
             return
 
     # **总进度排名**
     if arg == '':  
         title_msg = '全服总进度排名'
-        rank_msg = "📜 全服总进度排名 📊\n\n"
+        rank_msg = "全服总进度排名\n\n"
         sorted_rank = sorted(progress_data, key=lambda x: x['total_progress'], reverse=True)
 
         top_10 = sorted_rank[:10]
@@ -444,7 +389,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
     # 开新猎场要改
     elif 0 < arg <= liechang_count:
         title_msg = f'全服{arg}号猎场进度排名'
-        rank_msg = f"📜 全服 {arg} 号猎场进度排名 📊\n\n"
+        rank_msg = f"全服 {arg} 号猎场进度排名\n\n"
         sorted_rank = sorted(progress_data, key=lambda x: x['progress'], reverse=True)
 
         top_10 = sorted_rank[:10]
@@ -477,26 +422,12 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
 
         user_progress = next((entry['progress'] for entry in sorted_rank if entry['user_id'] == user_id), 0)
         user_nickname = await get_nickname(bot, user_id)
-        rank_msg += f"\n🔹 {user_nickname}的排名为：{user_rank}，{arg}号猎场进度：{user_progress}%"
+        rank_msg += f"\n{user_nickname}的排名为：{user_rank}，{arg}号猎场进度：{user_progress}%"
 
     else:
-        await rankingjd.finish("无效的参数！请使用 `.jdrank` 或 `.jdrank <猎场号>`。", at_sender=True)
-    forward_messages = [
-        {
-            "type": "node",
-            "data": {
-                "name": title_msg,
-                "uin": event.self_id,  # 设置为机器人的QQ号
-                "content": rank_msg
-            }
-        }
-    ]
-    # 转发消息
-    if forward_messages:
-        await bot.send_group_forward_msg(
-            group_id=event.group_id,  # 转发到当前群组
-            messages=forward_messages
-        )
+        await send_image_or_text(rankingjd, "无效的参数！请使用\n`.jdrank` 或 `.jdrank <猎场号>`", at_sender=True)
+    
+    await send_image_or_text_forward(rankingjd, rank_msg, bot, event.self_id, title_msg, event.group_id, 50)
 
 # 查询全服madeline总进度
 total_madelinejd_query = on_command(
@@ -566,24 +497,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
         for level in range(5, 0, -1):
             progress_message += f"- {level}级Madeline：{hunt_count[lc][level - 1]}/{hunt_max_count[lc][level - 1]}\n"
 
-    # 构建转发消息
-    forward_message = [
-        {
-            "type": "node",
-            "data": {
-                "name": "全服进度",
-                "uin": str(bot.self_id),
-                "content": progress_message.strip(),
-            },
-        }
-    ]
-
-    # 发送转发消息
-    await bot.call_api(
-        "send_group_forward_msg",
-        group_id=event.group_id,
-        messages=forward_message,
-    )
+    await send_image_or_text_forward(total_madelinejd_query, progress_message, bot, event.self_id, "全服进度", event.group_id, 50)
 
 #展示madeline
 show = on_command('show', permission=GROUP, priority=1, block=True, rule=whitelist_rule)

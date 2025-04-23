@@ -234,10 +234,11 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
         result.save(png_path)
         return png_path
 
-async def send_image_or_text(handler, text, forward_text = "", max_chars = 50):
+async def send_image_or_text(handler, text, at_sender = False, forward_text = None, max_chars = 50):
     '''方便于直接发送的一个函数
     handler: 前缀，用于finish
     text: 发送的文本
+    at_sender: 是否at，传入True/False
     forward_text: 发在图片前的文本
     max_chars: 每一行最大字符串
     '''
@@ -249,9 +250,9 @@ async def send_image_or_text(handler, text, forward_text = "", max_chars = 50):
         center=False
     )
     if img:
-        await handler.finish(forward_text + MessageSegment.image(img))
+        await handler.finish(forward_text + MessageSegment.image(img), at_sender = at_sender)
     else:
-        await handler.finish(forward_text + text)
+        await handler.finish(forward_text + text, at_sender = at_sender)
 
 async def send_image_or_text_forward(handler, text, bot, bot_id, forward_name, group_id, max_chars = 50):
     '''方便于直接发送的一个函数（用转发）
@@ -286,3 +287,28 @@ async def send_image_or_text_forward(handler, text, bot, bot_id, forward_name, g
         ]
         await bot.call_api("send_group_forward_msg", group_id=group_id, messages=msg_list)
         await handler.finish()  # 结束处理，避免重复发送消息
+
+async def auto_send_message(text, bot, group_id, forward_text = None, max_chars = 50):
+    '''方便于bot自动发送消息的一个函数（定时发消息）
+    text: 发送的文本
+    bot: 当前bot传递一下，一般就是bot
+    group_id: 发到哪个群
+    max_chars: 每一行最大字符串
+    '''
+    img = generate_image_with_text(
+        text1=text,
+        image_path=None,
+        text2=None,
+        max_chars = max_chars,
+        center=False
+    )
+    if img:
+        await bot.send_group_msg(
+            group_id=group_id,
+            message=forward_text + img
+        )
+    else:
+        await bot.send_group_msg(
+            group_id=group_id,
+            message=forward_text + text
+        )

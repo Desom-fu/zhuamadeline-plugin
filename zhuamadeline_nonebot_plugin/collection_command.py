@@ -18,7 +18,7 @@ from .event import *
 from .pvp import *
 from .whitelist import whitelist_rule
 from .config import full_path
-from .text_image_text import generate_image_with_text, send_image_or_text_forward
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 #查看藏品信息
 ckcp = on_command('藏品', aliases={"cp"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -27,9 +27,9 @@ async def ckcp_handle(arg: Message = CommandArg()):
     cp_name = str(arg)
     standard_collection = get_alias_name(cp_name, collections, collection_aliases)
     if(standard_collection in collections):
-        await ckcp.finish(standard_collection+":\n"+collections[standard_collection][3])
+        await send_image_or_text(ckcp, standard_collection+":\n"+collections[standard_collection][3], '', 20)
     else:
-        await ckcp.finish("请输入正确的藏品名称哦！", at_sender=True)
+        await send_image_or_text(ckcp, '请输入正确的藏品名称哦！')
 
 #查看自身所持有的藏品
 ckcplist = on_fullmatch(['.mycp', '。mycp'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -44,8 +44,7 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         # 检查是否有藏品
         if 'collections' not in data[str(user_id)] or not data[str(user_id)]['collections']:
             msg = "你还没有任何藏品哦！"
-            img = generate_image_with_text(msg, None, None, 50, False)
-            await ckcplist.finish(MessageSegment.image(img) if img else msg, at_sender=True)
+            await send_image_or_text(ckcplist, msg)
 
         # 有道具则读取道具名字和其对应数量
         nickname = event.sender.nickname

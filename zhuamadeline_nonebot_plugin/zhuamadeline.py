@@ -28,7 +28,7 @@ from .render import *
 from .event import event_happen, outofdanger
 from .pvp import madeline_pvp_event, pvp_opening, check_liechang
 from .whitelist import whitelist_rule
-from .text_image_text import generate_image_with_text
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 __all__ = [
     "qhlc",
@@ -567,8 +567,8 @@ async def dailyjrrp(event: GroupMessageEvent):
     
     reply_text = f"\n- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
     reply_text += f"\n- 检测到你拥有鱼之契约，你今日签到获得的草莓翻倍，为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
-    # 发送信息
-    await jrrp.finish(reply_text, at_sender=True)
+    
+    await send_image_or_text(jrrp, reply_text, True)
 
 
 # 查看状态
@@ -864,28 +864,11 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 )
             else:
                 message += f"\n• 本次Madeline竞技场已结算"
+                
     if all_judge == 'all': 
-        # 构建转发消息
-        forward_message = [
-            {
-                "type": "node",
-                "data": {
-                    "name": f"{nickname}的全部状态",
-                    "uin": str(bot.self_id),
-                    "content": message.strip(),
-                },
-            }
-        ]
-
-        # 发送转发消息
-        await bot.call_api(
-            "send_group_forward_msg",
-            group_id=group_id,
-            messages=forward_message,
-        )
+        await send_image_or_text_forward(ck, message, bot, event.self_id, f"{nickname}的全部状态", event.group_id, 50)
     else:
-        await ck.finish(message, at_sender=True)
-
+        await send_image_or_text(ck, message, True)
 
 
 # 转账 - 1000以下150手续费，1000上15%
@@ -893,46 +876,78 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 user_transfer_berry = on_command("transfer", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @user_transfer_berry.handle()
-async def transfer_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     # 解析命令参数
     arg = str(arg).split(" ")
     if len(arg) != 2:
-        await user_transfer_berry.finish("命令格式错误！正确格式：.transfer QQ号 数量", at_sender=True)
+        msg = "命令格式错误！正确格式：\n.transfer QQ号 数量"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
     user_a = str(event.user_id)
     user_b = arg[0]  # 转入方QQ号
+    
     try:
         transfer_amount = int(arg[1])
     except ValueError:
-        await user_transfer_berry.finish("转移数量必须为数字！", at_sender=True)
+        msg = "转移数量必须为数字！"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
     if transfer_amount <= 0:
-        await user_transfer_berry.finish("转移数量必须大于0！", at_sender=True)
+        msg = "转移数量必须大于0！"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
     # 打开文件
     data = open_data(user_path / file_name)
     bar_data = open_data(bar_path)
+    
     # 检查玩家是否存在
     if user_a not in data:
-        await user_transfer_berry.finish(f"找不到 [{user_a}] 的信息", at_sender=True)
+        msg = f"找不到 [{user_a}] 的信息"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
     if user_b not in data:
-        await user_transfer_berry.finish(f"找不到 [{user_b}] 的信息", at_sender=True)
+        msg = f"找不到 [{user_b}] 的信息"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
     if user_a == user_b:
-        await user_transfer_berry.finish(f"你为什么想给自己转账，想送给我手续费吗？", at_sender=True)    
-    tax = 100
-    if transfer_amount <= 1000:
-        tax = 100
-    else:
-        tax = math.floor(transfer_amount * 0.1)
+        msg = "你为什么想给自己转账，想送给我手续费吗？"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
+    # 计算手续费
+    tax = 100 if transfer_amount <= 1000 else math.floor(transfer_amount * 0.15)
     final_berry = transfer_amount + tax
     owner_berry = data[user_a]['berry']
+    
     # 检查转出方草莓数量是否足够
     if data[user_a]['berry'] < final_berry:
-        await user_transfer_berry.finish(f"你的草莓不足，你目前想转移{transfer_amount}颗草莓，草莓税为{tax}，总共为{final_berry}颗草莓，你目前只有{owner_berry}颗草莓！", at_sender=True)
+        msg = f"你的草莓不足，你目前想转移{transfer_amount}颗草莓，草莓税为{tax}，总共为{final_berry}颗草莓，你目前只有{owner_berry}颗草莓！"
+        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        return
+    
+    # 获取昵称
+    user_a_nickname = await get_nickname(bot, user_a)
+    user_b_nickname = await get_nickname(bot, user_b)
+    
     # 执行转移操作
     data[user_a]['berry'] -= final_berry
     data[user_b]['berry'] += transfer_amount
+    
     # 税加入pots奖池里
     pots = bar_data.setdefault("pots", 0)
     bar_data["pots"] += tax
+    
     # 写入文件
     save_data(bar_path, bar_data)
     save_data(user_path / file_name, data)
-    await user_transfer_berry.finish(f"已成功将{transfer_amount}颗草莓从" +MessageSegment.at(user_a)+ "转移给" +MessageSegment.at(user_b)+f"！\n本次扣税{tax}颗草莓，已经从转出者的草莓内扣除！")
+    
+    # 构造消息
+    msg = f"已成功将{transfer_amount}颗草莓从[{user_a_nickname}]转移给[{user_b_nickname}]！\n本次扣税{tax}颗草莓，已经从转出者[{user_a_nickname}]的草莓余额内扣除！"
+    forward_text = MessageSegment.at(user_a) + MessageSegment.at(user_b)
+    
+    await send_image_or_text(user_transfer_berry, msg, False, forward_text, 50)

@@ -27,6 +27,7 @@ from .game import demon_default
 from .whitelist import whitelist_rule
 from .config import *
 from .backup import backup_user_data
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 
 __all__ = [
@@ -136,8 +137,8 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".查询双球开奖 (日期)",
         ".备份"
     ]
-    text = "\n以下为管理员命令(带有括号的是可选项)：\n" + "\n".join(commands)
-    await admin_command.send(text, at_sender=True)
+    text = "以下为管理员命令(带有括号的是可选项)：\n" + "\n".join(commands)
+    await send_image_or_text(admin_command, text)
 
 #查看开放神权命令    
 notadmin_command = on_command("开放神权", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
@@ -148,8 +149,8 @@ async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = Comma
         ".玩家数",
         ".查询三球开奖 (日期)"
     ]
-    text = "\n以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
-    await notadmin_command.send(text, at_sender=True)
+    text = "以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
+    await send_image_or_text(notadmin_command, text)
 
 # 删除账号
 delete_account = on_command("删除账号", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1995,7 +1996,7 @@ async def handle_status():
     sp = get_usage(swap_percent)
 
     # 发送信息
-    await status.finish(
+    message = (
         f"当前时间：{now_time_computer}\n"
         f"运行时间：{booted}\n"
         f"系统：{system_info} {system_version}\n"
@@ -2006,6 +2007,7 @@ async def handle_status():
         f"---------\n"
         f"实时网速：\n{up}\n{down}"
     )
+    await send_image_or_text(status, message)
 
 #查看玩家数量
 len_user = on_command("玩家数", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -2051,7 +2053,7 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
 
     # 构建消息
     msg = await build_result_message(bot, event.group_id, result)
-    await ssq_query.finish(msg, at_sender=True)
+    await send_image_or_text(ssq_query, msg)
 
 async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
     """构建开奖结果消息"""

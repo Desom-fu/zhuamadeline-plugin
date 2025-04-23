@@ -628,14 +628,14 @@ def shop_list(item_list):
     
     # 拼接最终文本
     if not parts:
-        return "今日商品\n——————————————\n暂无商品"
+        return "今日商品\n——————————————\n\n暂无商品"
     
-    divider = "\n——————————————"
+    divider = "\n——————————————\n"
     return (
         "今日商品" + 
         divider + 
         divider.join(parts) + 
-        ("\n——————————————" if len(parts) > 1 else "")
+        ("\n——————————————\n" if len(parts) > 1 else "")
     )
 
 # def decode_buy_text(item_name_list, text):

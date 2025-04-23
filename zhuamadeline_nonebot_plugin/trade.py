@@ -23,6 +23,7 @@ from .function import *
 from .event import *
 from .pvp import *
 from .whitelist import whitelist_rule
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 user_path = Path() / "Data" / "UserList"
 file_name = "UserData.json"
@@ -105,7 +106,7 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
         data[str(user_id)]['event'] = 'nothing'
 
     if data[str(user_id)]['event'] == 'nothing':
-        await confirm.finish("你现在似乎没有需要确定的事情", at_sender=True)
+        await deny.finish("你现在似乎没有需要确定的事情", at_sender=True)
     elif data[str(user_id)]['event'] == 'trading':
         data[str(user_id)]['event'] = 'nothing'
         #写入主数据表
