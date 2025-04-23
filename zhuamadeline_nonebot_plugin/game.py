@@ -221,7 +221,7 @@ async def game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         # 确保 'demon_data' 和 'group_id' 存在
         # 初始化 group_id 中的游戏数据
         if group_id not in demon_data:
-            demon_data[group_id] = demon_default
+            demon_data[group_id] = demon_default()
             save_data(demon_path, demon_data)
         # 检查是否有冷却时间，如果没有设置，默认为 0
         demon_coldtime = demon_data[group_id].get('demon_coldtime', 0)
@@ -658,7 +658,8 @@ item_dic2 = {
 item_dic = item_dic1 | item_dic2
 
 # demon_default
-demon_default = {
+def demon_default():
+    return {
     "pl": [],
     "hp": [],
     "item_0": [],
@@ -964,7 +965,7 @@ def handle_game_end(
             user_data[p]['pangguang'] = 1
     
     # 重置游戏数据
-    demon_data[group_id] = demon_default.copy()
+    demon_data[group_id] = demon_default()
     demon_data[group_id]['demon_coldtime'] = int(time.time()) + 1200
     
     # 统一保存数据
@@ -1879,7 +1880,7 @@ async def check_timeout(group_id):
     # 确保 'demon_data' 和 'group_id' 存在
     # 初始化 group_id 中的游戏数据
     if group_id not in demon_data:
-        demon_data[group_id] = demon_default
+        demon_data[group_id] = demon_default()
     elapsed = int(time.time()) - demon_data[group_id]['turn_start_time']
     if elapsed > turn_time:  # 全局变量，设定时间（秒）
         # 判断游戏是否开始
@@ -1917,7 +1918,7 @@ async def check_timeout(group_id):
                 bar_data[player]['game'] = '1'
                 bar_data[player]['status'] = 'nothing'
                 # 重置游戏
-                demon_data[group_id] = demon_default
+                demon_data[group_id] = demon_default()
                 save_data(demon_path, demon_data)
                 save_data(full_path, user_data)
                 save_data(bar_path, bar_data)

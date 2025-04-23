@@ -1804,7 +1804,7 @@ async def clear_game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 value["status"] = "nothing"
                 value["game"] = "1"
                 user_data[str(key)]["berry"] += 125
-        demon_data[group_id] = demon_default
+        demon_data[group_id] = demon_default()
         demon_data[group_id]['demon_coldtime'] = 0
         text = "本局恶魔轮盘du已强制结束，对应的门票费已返还"
     elif game_type == '3':
