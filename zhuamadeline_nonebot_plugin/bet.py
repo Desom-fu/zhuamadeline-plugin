@@ -29,7 +29,7 @@ from .whitelist import whitelist_rule
 
 __all__ = [
     "rule",
-    "game",
+    "bet",
     "demon_default"
 ]
 
