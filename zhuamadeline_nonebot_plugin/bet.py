@@ -54,9 +54,9 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 游戏开始时系统会为你从52张扑克牌（除去大小王）中随机抽取一张，你要做的就是猜测这一张牌\n" +
             "- 你的猜测可以是点数、大于/小于某值，或者具体的花色\n" +
             "- 如果猜对了，你将获得大量草莓奖励！祝你好运~\n" +
-            "- 输入.bet1/大于7/小于7\n以猜测该牌是否大于7/小于7，\n猜测正确可以获得少量奖励！\n" +
-            "- 输入.bet1/梅花/方片/黑桃/红桃\n以猜测该牌的花色，\n猜测正确可以获得中量奖励！\n" +
-            "- 输入.bet1/(任意两个数字，用/分隔，如10/Q)\n以猜测该牌是否为这两个点数，\n猜测正确可以获得大量奖励！"
+            "- 输入.bet 1/大于7/小于7\n以猜测该牌是否大于7/小于7，\n猜测正确可以获得少量奖励！\n" +
+            "- 输入.bet 1/梅花/方片/黑桃/红桃\n以猜测该牌的花色，\n猜测正确可以获得中量奖励！\n" +
+            "- 输入.bet 1/(任意两个数字，用/分隔，如10/Q)\n以猜测该牌是否为这两个点数，\n猜测正确可以获得大量奖励！"
         )
         await send_image_or_text(rule, msg, True, None, 30)
     elif game_type == '2':
@@ -206,7 +206,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         
         # 必须有猜测参数
         if not second_game_type:
-            await send_image_or_text(bet, "请直接输入猜测参数，例如：\n.bet1/大于7\n.bet1/黑桃\n.bet1/5/3", True, None, 25)
+            await send_image_or_text(bet, "请直接输入猜测参数，例如：\n.bet 1/大于7\n.bet 1/黑桃\n.bet 1/A/Q", True, None, 25)
             return
             
         # 处理猜测
