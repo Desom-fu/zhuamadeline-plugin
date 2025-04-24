@@ -125,22 +125,21 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
             msg += f"\n\n你现在仍需强制抽卡{user_data['compulsion_count']}次。"
         else:
             user_data.update({'event': "nothing", 'compulsion_count': 0})
-            msg += '\n\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
+            msg += '\n\n你已经完成了黑帮布置的任务……\n现在你可以离开这个酒馆了。'
 
     # 失约处理
     if user_data['berry'] < 0:
         user_data['berry'] -= 250
-        msg += f"\n\n【失约惩罚】\n"
-        msg += f"- 你没有草莓了却又进行了抽卡，并且没有赚回来！\n"
-        msg += f"- 现在作为惩罚我要再扣除你250草莓\n"
-        msg += f"- 在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
+        msg += f"哎呀！你没有草莓了却又进行了抽卡，并且没有赚回来！\n"
+        msg += f"现在作为惩罚我要再扣除你250草莓\n"
+        msg += f"在抓回正数之前\n你无法使用道具，无法祈愿，无法进行pvp竞技！\n买卖蓝莓也是不允许的！"
         
         if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
             user_data.update({'event': 'nothing', 'compulsion_count': 0})
             user_data['berry'] -= 300
             msg += f"\n\n哇！你似乎在失约的情况下中还得强制买卡包啊……\n"
-            msg += f"- 你抵押了300草莓作为担保\n"
-            msg += f"- 现在黑衣人放你出酒馆了！"
+            msg += f"你抵押了300草莓作为担保\n"
+            msg += f"现在黑衣人放你出酒馆了！"
             
         msg += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 

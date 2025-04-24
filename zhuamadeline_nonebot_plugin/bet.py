@@ -517,18 +517,18 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             berry = int(original_berry - tax)
             if card_value > 7:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于7，\n你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"
             else:
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于等于7，你的猜测失败了！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于等于7，\n你的猜测失败了！"
         elif guess_type == "小于7":
             original_berry = int(REWARD_MAPPING[guess_type])
             tax = int(original_berry*0.1)
             berry = int(original_berry - tax)
             if card_value < 7:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于7，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于7，\n你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"
             else:
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于等于7，你的猜测失败了！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于等于7，\n你的猜测失败了！"
         elif guess_type in ["梅花", "方片", "黑桃", "红桃"]:
             send_guess_type = "花色"
             original_berry = int(REWARD_MAPPING[send_guess_type])
@@ -536,7 +536,7 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             berry = int(original_berry - tax)
             if card_type == guess_type:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"
             else:
                 msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
         else:
@@ -571,13 +571,13 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
                 #如果没有，则添加
                 if(not '奇想扑克' in data[str(user_id)]['collections']):
                     data[str(user_id)]['collections']['奇想扑克'] = 1
-                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！你在酒馆的桌子地下看到了一副奇怪的白色扑克，你将这副扑克捡了起来\n输入.cp 奇想扑克 以查看具体效果"
+                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n你在酒馆的桌子地下看到了一副奇怪的白色扑克，\n你将这副扑克捡了起来\n输入.cp 奇想扑克 以查看具体效果"
                 else:
                     data[user_id]['berry'] += berry
-                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"    
+                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n但是由于草莓税法的实行，\n需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"    
             else:                
                 data[user_id]['berry'] += berry
-                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！获得{original_berry}颗草莓奖励！但是由于草莓税法的实行，需要上交10%，所以你最终获得了{berry}颗草莓，上交了{tax}颗草莓税！"
+                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n但是由于草莓税法的实行，\n需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"
         else:
             msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
     
@@ -589,7 +589,7 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             # 清除状态
             data[str(user_id)]['event'] = "nothing"
             data[str(user_id)]['compulsion_count'] = 0
-            msg_text += '\n你已经完成了黑帮布置的任务……现在你可以离开这个酒馆了。'
+            msg_text += '\n你已经完成了黑帮布置的任务……\n现在你可以离开这个酒馆了。'
     
     # 写入主数据表
     bar_data[user_id]['status'] = 'nothing'
@@ -600,12 +600,12 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
     
     if data[user_id]['berry'] < 0:
         data[user_id]['berry'] -= 250
-        msg_text += f"\n\n哎呀，你没有草莓了却又进行了预言大师，并且没有赚回来！现在作为惩罚我要再扣除你250草莓，并且在抓回正数之前你无法使用道具，无法祈愿，无法进行pvp竞技！买卖蓝莓也是不允许的！"
+        msg_text += f"\n\n哎呀，你没有草莓了却又进行了预言大师，并且没有赚回来！\n现在作为惩罚我要再扣除你250草莓，\n并且在抓回正数之前\n你无法使用道具，无法祈愿，无法进行pvp竞技！\n买卖蓝莓也是不允许的！"
         if data[str(user_id)]['event']=='compulsion_game1' and data[str(user_id)]['compulsion_count']!= 0:
             data[str(user_id)]['event']='nothing'
             data[str(user_id)]['compulsion_count']= 0
             data[user_id]['berry'] -= 300
-            msg_text += f"\n\n哇！你似乎在失约的状态下还得强制预言大师啊……你抵押了300草莓作为担保，现在黑衣人放你出酒馆了！"
+            msg_text += f"\n\n哇！你似乎在失约的状态下还得强制预言大师啊……\n你抵押了300草莓作为担保，\n现在黑衣人放你出酒馆了！"
         
         msg_text += f"\n\n你现在拥有的草莓数量为：{data[user_id]['berry']}颗！"
 
