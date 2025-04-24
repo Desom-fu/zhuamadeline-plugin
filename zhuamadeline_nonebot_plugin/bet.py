@@ -206,7 +206,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         
         # 必须有猜测参数
         if not second_game_type:
-            await send_image_or_text(bet, "请直接输入猜测参数，\n例如：.bet1/大于7 或 .bet1/黑桃 或 .bet1/5/3", True, None, 25)
+            await send_image_or_text(bet, "请直接输入猜测参数，例如：\n.bet1/大于7\n.bet1/黑桃\n.bet1/5/3", True, None, 25)
             return
             
         # 处理猜测
@@ -536,9 +536,9 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             berry = int(original_berry - tax)
             if card_type == guess_type:
                 data[user_id]['berry'] += berry
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，\n你的猜测成功了！\n获得{original_berry}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{berry}颗草莓，\n上交了{tax}颗草莓税！"
             else:
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
+                msg_text = f"- 你抽到的牌是{card_type}{card_name}，\n你的猜测失败了！"
         else:
             return "请输入一个正确的猜测值"
     elif len(guess_type) == 2:
