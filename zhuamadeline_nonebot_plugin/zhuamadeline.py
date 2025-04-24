@@ -57,43 +57,53 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     if number_arg in ['?','？']:
         number_arg = "999"
     if user_id not in data:
-        await qhlc.finish("你还没尝试抓过madeline.....", at_sender=True)
+        await send_image_or_text(qhlc, "你还没尝试抓过madeline.....", True, None)
+        return
         
     try:
         number_int = int(number_arg)
     except:
-        await qhlc.finish(f"请输入正确的猎场号！现在只开放了0~{liechang_count}猎哦！", at_sender=True)
+        await send_image_or_text(qhlc, f"请输入正确的猎场号！\n现在只开放了0~{liechang_count}猎哦！", True, None)
+        return
         
     number = str(number_int)
     
     # 特殊竞技猎场（0号）
     if number_int == 0:
         if data[user_id]['berry'] < 0:
-            await qhlc.finish(f"你现在仍处于失约状态中……不允许进入竞技场！你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
+            await send_image_or_text(qhlc, f"你现在仍处于失约状态中……不允许进入竞技场！\n你只有{data[user_id]['berry']}颗草莓！", True, None)
+            return
 
         if(data[user_id].get('debuff','normal')=='tentacle' ): 
-            await qhlc.finish(f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", at_sender=True)
+            await send_image_or_text(qhlc, f"你刚被触手玩弄到失神\n没有精力打Madeline竞技场了！", True, None)
+            return
 
         if data[user_id].get('lc') == number:
-            await qhlc.finish("你现在就在这个猎场呀~", at_sender=True)
+            await send_image_or_text(qhlc, "你现在就在这个猎场呀~", True, None)
+            return
 
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
-        await qhlc.finish(f"已经成功切换到madeline竞技场！\n有关madeline竞技场的规则请输入`.0场细则`查询！\n可以通过命令`.cklc {number_int}`来查询PVP竞技场的具体信息和准入需求哦！", at_sender=True)
+        await send_image_or_text(qhlc, f"已经成功切换到madeline竞技场！\n有关madeline竞技场的规则请输入`.0场细则`查询！\n可以通过命令`.cklc {number_int}`\n来查询PVP竞技场的具体信息和准入需求哦！", True, None)
+        return
 
     # 普通收集型猎场
     elif 0 < number_int <= liechang_count:
         if data[user_id].get('lc') == number:
-            await qhlc.finish("你现在就在这个猎场呀~", at_sender=True)
+            await send_image_or_text(qhlc, "你现在就在这个猎场呀~", True, None)
+            return
 
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
-        await qhlc.finish(f"已经成功切换到{number}号猎场！\n可以通过命令`.cklc {number_int}`来查询本猎场的具体信息和准入需求哦！", at_sender=True)
+        await send_image_or_text(qhlc, f"已经成功切换到{number}号猎场！\n可以通过命令`.cklc {number_int}`\n来查询本猎场的具体信息和准入需求哦！", True, None)
+        return
     elif number_int == 999:
-        await qhlc.finish(f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", at_sender=True)
+        await send_image_or_text(qhlc, f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", True, None)
+        return
     # 处理错误输入
     else:
-        await qhlc.finish(f"请输入正确的猎场号！现在只开放了1~{liechang_count}猎哦！", at_sender=True)
+        await send_image_or_text(qhlc, f"请输入正确的猎场号！\n现在只开放了1~{liechang_count}猎哦！", True, None)
+        return
 
 
 #随机抓出一个madeline，且有时间间隔限制
@@ -450,7 +460,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         if berry_give != 0:
             extra_text = (
                 f"\n\n本次奖励{reward_text}"
+                f"{sheet_text}"
                 f"{buff2_text}"
+                f"{hourglass_text}"
                 f"{diamond_text}"
                 f"{exp_msg}"
                 f"{grade_msg}"
@@ -855,11 +867,11 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 final_berry_reward = berry_reward - tax  # 计算税后收益
 
                 message += (
-                    f"\n• 本场Madeline竞技你鼓励的是[{pos+1}]号擂台的Madeline，"
-                    f"该擂台擂主为[{choose_nickname}]，上台回合为[{choose_turn}]，"
+                    f"\n• 本场Madeline竞技\n你鼓励的是[{pos+1}]号擂台的Madeline，\n"
+                    f"该擂台擂主为[{choose_nickname}]，\n上台回合为[{choose_turn}]，\n"
                     f"所选占擂Madeline的战力为[{choose_rank}]！\n"
-                    f"截至目前第[{turn}]轮的草莓收益为：[{berry_reward}]颗草莓，"
-                    f"草莓税为[{tax}]颗草莓，税后草莓收益为[{final_berry_reward}]颗草莓！"
+                    f"截至目前第[{turn}]轮的草莓收益为：\n[{berry_reward}]颗草莓，\n"
+                    f"草莓税为[{tax}]颗草莓，\n税后草莓收益为[{final_berry_reward}]颗草莓！"
                 )
             else:
                 message += f"\n• 本次Madeline竞技场已结算"

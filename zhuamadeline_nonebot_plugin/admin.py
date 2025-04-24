@@ -1830,7 +1830,7 @@ async def clear_game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
                 value["double_ball"]["ball_prize"] = 0
                 value["double_ball"]["refund"] = 0
                 value["double_ball"]["ticket_cost"] = 0
-        text = "本场三球竞猜已强制结束，对应的门票费已返还。"
+        text = "本场洞窟探险已强制结束，对应的门票费已返还。"
     # 保存数据
     save_data(full_path, user_data)
     save_data(bar_path, bar_data)

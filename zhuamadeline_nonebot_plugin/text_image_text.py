@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageSequence
 from pathlib import Path
 import textwrap  
 import uuid
+import re
 from .config import save_dir, font_path
 from nonebot.adapters.onebot.v11 import MessageSegment
 
@@ -15,26 +16,92 @@ MAX_IMAGE_HEIGHT = 600    # 图像最大高度（超过则缩放）
 PADDING = 20              # 画布四周留白
 CACHE_LIMIT = 40          # 缓存目录中保留最近生成的文件数
 
+# 愚人节特供！
+# def wrap_text(text, max_chars=20):
+#     """
+#     将文本按段落拆分，并按单词/数字块自动换行
+#     - 连续的字母（如 "hello"）视为 1 个单元
+#     - 连续的数字（如 "123"）视为 1 个单元
+#     - 其他字符（标点、空格、换行）仍按 1 个字符处理
+#     """
+#     lines = []
+#     paragraphs = text.split("\n")
+    
+#     for paragraph in paragraphs:
+#         if not paragraph.strip():
+#             lines.append("\n")  # 保留空行
+#             continue
+        
+#         # 使用正则表达式分割单词和数字块
+#         tokens = re.findall(r'([a-zA-Z]+|\d+|\s|[^\w\s])', paragraph)
+        
+#         current_line = []
+#         current_length = 0
+        
+#         for token in tokens:
+#             token_length = len(token)
+            
+#             # 如果当前行 + 新 token 不超过 max_chars，则加入当前行
+#             if current_length + token_length <= max_chars:
+#                 current_line.append(token)
+#                 current_length += token_length
+#             else:
+#                 # 否则，换行
+#                 if current_line:
+#                     lines.append("".join(current_line))
+#                 current_line = [token]
+#                 current_length = token_length
+        
+#         # 添加最后一行
+#         if current_line:
+#             lines.append("".join(current_line))
+    
+#     return lines
+import re
 
 def wrap_text(text, max_chars=20):
     """
-    将文本按段落拆分并自动换行，保留所有换行符
-    text: 原始文本
-    max_chars: 每行最大字符数
-    返回列表形式的每行文本
+    改进版换行函数：
+    - 英文单词（连续字母）视为 1 个单元
+    - 连续数字视为 1 个单元
+    - 中文字符（包括中文标点）视为 1 个单元
+    - 其他字符（如空格、换行、标点）按原样处理
     """
     lines = []
     paragraphs = text.split("\n")
+    
+    # 匹配：英文单词 | 数字 | 中文字符 | 其他字符（如空格、标点）
+    token_pattern = re.compile(
+        r'([a-zA-Z]+|\d+|[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|\s|[^\w\s])'
+    )
+    
     for paragraph in paragraphs:
-        if paragraph.strip() == "":
-            # 对于空段落，添加一个空行标记
-            lines.append("\n")  # 使用特殊标记表示这是换行符产生的空行
-        else:
-            # 对非空段落进行自动换行处理
-            wrapped = textwrap.wrap(paragraph, width=max_chars)
-            if not wrapped:  # 处理空字符串但不是纯空白的情况
-                wrapped = [""]
-            lines.extend(wrapped)
+        if not paragraph.strip():
+            lines.append("\n")  # 保留空行
+            continue
+        
+        tokens = token_pattern.findall(paragraph)
+        current_line = []
+        current_length = 0
+        
+        for token in tokens:
+            token_length = len(token)  # 中文每个字算 1 个长度
+            
+            # 如果当前行 + 新 token 不超过 max_chars，则加入当前行
+            if current_length + token_length <= max_chars:
+                current_line.append(token)
+                current_length += token_length
+            else:
+                # 否则，换行
+                if current_line:
+                    lines.append("".join(current_line))
+                current_line = [token]
+                current_length = token_length
+        
+        # 添加最后一行
+        if current_line:
+            lines.append("".join(current_line))
+    
     return lines
 
 
@@ -77,6 +144,11 @@ def clean_cache():
     for f in files[:-CACHE_LIMIT]:
         f.unlink()
 
+
+"""
+注意！
+max_chars建议在30以下，超过30就有未知bug！
+"""
 
 def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True):
     """
@@ -234,7 +306,7 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
         result.save(png_path)
         return png_path
 
-async def send_image_or_text(handler, text, at_sender = False, forward_text = None, max_chars = 50):
+async def send_image_or_text(handler, text, at_sender = False, forward_text = None, max_chars = 30):
     '''方便于直接发送的一个函数
     handler: 前缀，用于finish
     text: 发送的文本
@@ -254,7 +326,7 @@ async def send_image_or_text(handler, text, at_sender = False, forward_text = No
     else:
         await handler.finish(forward_text + text, at_sender = at_sender)
 
-async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  group_id, max_chars = 50):
+async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  group_id, max_chars = 30):
     '''方便于直接发送的一个函数（用转发）
     handler: 前缀，用于finish
     text: 发送的文本
@@ -288,7 +360,7 @@ async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  
         await bot.call_api("send_group_forward_msg", group_id=group_id, messages=msg_list)
         await handler.finish()  # 结束处理，避免重复发送消息
 
-async def auto_send_message(text, bot, group_id, forward_text = None, max_chars = 50):
+async def auto_send_message(text, bot, group_id, forward_text = None, max_chars = 30):
     '''方便于bot自动发送消息的一个函数（定时发消息）
     text: 发送的文本
     bot: 当前bot传递一下，一般就是bot
@@ -303,9 +375,10 @@ async def auto_send_message(text, bot, group_id, forward_text = None, max_chars 
         center=False
     )
     if img:
+        img_segment = MessageSegment.image(img)
         await bot.send_group_msg(
             group_id=group_id,
-            message=forward_text + img
+            message=forward_text + img_segment
         )
     else:
         await bot.send_group_msg(
