@@ -60,12 +60,12 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         for k, v in collections_list:
             text += f"· {k} ×{v}\n"
         
-        await send_image_or_text_forward(ckcplist, text, '藏品库存室', bot, event.self_id,  event.group_id)
+        await send_image_or_text_forward(ckcplist, text, '藏品库存室', bot, event.self_id, event.group_id, 30, True)
 
     else:
-        msg = "你还没尝试抓过madeline......"
-        await ckcplist.finish(msg, at_sender=True)
-        
+        msg = "你还没尝试抓过madeline……"
+        await send_image_or_text(ckcplist, msg, True)
+
 # # 获得喵喵呜呜纪念藏品
 # mewmewwuwu = on_fullmatch(['.喵喵呜呜', '。喵喵呜呜'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 # @mewmewwuwu.handle()

@@ -23,7 +23,7 @@ from .collection import collections, collection_aliases
 from .list1 import *
 from .list2 import *
 from .list3 import *
-from .game import demon_default
+from .bet import demon_default
 from .whitelist import whitelist_rule
 from .config import *
 from .backup import backup_user_data

@@ -206,8 +206,14 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
         resized_image = None
         if base_image:
             iw, ih = base_image.size  # 原图宽高
-            # 缩放比例：保持高度不超限，并且不放大
-            scale = min((MAX_IMAGE_HEIGHT - 2 * PADDING) / ih, 1)
+            # 修改这里的缩放逻辑，添加最大宽度限制
+            max_image_width = font_size * 20  # 20个中文字宽度
+            # 计算缩放比例：同时考虑宽度和高度限制
+            scale = min(
+                (MAX_IMAGE_HEIGHT - 2 * PADDING) / ih,  # 高度限制
+                max_image_width / iw,  # 新增的宽度限制
+                1  # 不放大
+            )
             image_w, image_h = int(iw * scale), int(ih * scale)
             resized_image = base_image.resize((image_w, image_h), Image.LANCZOS)
             # 内容最宽值需考虑图片宽度
@@ -326,7 +332,7 @@ async def send_image_or_text(handler, text, at_sender = False, forward_text = No
     else:
         await handler.finish(forward_text + text, at_sender = at_sender)
 
-async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  group_id, max_chars = 30):
+async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  group_id, max_chars = 30, at_sender = False):
     '''方便于直接发送的一个函数（用转发）
     handler: 前缀，用于finish
     text: 发送的文本
@@ -344,7 +350,7 @@ async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id,  
         center=False
     )
     if img:
-        await handler.finish(MessageSegment.image(img))
+        await handler.finish(forward_text + MessageSegment.image(img), at_sender = at_sender)
     else:
         # 图片生成失败，回退到转发消息
         msg_list = [

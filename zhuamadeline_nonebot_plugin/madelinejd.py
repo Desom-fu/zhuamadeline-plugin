@@ -192,7 +192,7 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
     )
 
     # 发送图片
-    await send_image_or_text_forward(ranking, rank_msg, title_msg, bot, event.self_id, event.group_id, 50)
+    await send_image_or_text_forward(ranking, rank_msg, title_msg, bot, event.self_id, event.group_id, 30, True)
 
 # 统一处理mymadeline命令，支持查询单个猎场或所有猎场的库存，并保留0点的特殊事件
 mymadeline = on_command('mymadeline', aliases={"mymade","mymadline","my玛德琳","我的玛德琳"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -206,7 +206,7 @@ async def mymadeline_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     # 半夜0点整查看库存时，隐藏并返回特殊事件
     if hour == 0 and minute == 0 and 0 <= second <= 30:
         # 发送图片
-        await send_image_or_text_forward(ranking, "please give me your eyes", '藏品库存室', bot, event.self_id, event.group_id, 50)
+        await send_image_or_text_forward(ranking, "please give me your eyes", '藏品库存室', bot, event.self_id, event.group_id, 30, True)
     
     # 如果没有输入猎场号，默认展示所有猎场的库存
     if not arg:
@@ -243,7 +243,7 @@ async def display_liechang_inventory(bot: Bot, event: GroupMessageEvent, liechan
     nickname = user_info.get("nickname", "未知昵称")
     msg = f'这是 [{nickname}] 的\n{liechang_number}号猎场的Madeline库存\n{sorted_madelines}'
     # 发送图片
-    await send_image_or_text_forward(mymadeline, msg, '库存查询室', bot, event.self_id, event.group_id, 50)
+    await send_image_or_text_forward(mymadeline, msg, '库存查询室', bot, event.self_id, event.group_id, 30, True)
 
 
 # 查询并展示所有猎场的库存
@@ -273,7 +273,7 @@ async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, use
     for sorted_madeline in all_sorted_madelines:
         msg += "\n\n========================\n\n" + sorted_madeline
     # 发送图片
-    await send_image_or_text_forward(mymadeline, msg, '库存查询室', bot, event.self_id, event.group_id, 50)
+    await send_image_or_text_forward(mymadeline, msg, '库存查询室', bot, event.self_id, event.group_id, 30, True)
 
 # 查询进度，具体函数也丢function.py里了
 jd = on_command('jd', aliases={"madelinejd"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -297,7 +297,7 @@ async def zhuajd(bot: Bot, event: Event, args: Message = CommandArg()):
         return
     
     # 发送图片
-    await send_image_or_text_forward(jd, progress_message, '进度查询', bot, event.self_id, event.group_id, 50)
+    await send_image_or_text_forward(jd, progress_message, '进度查询', bot, event.self_id, event.group_id, 30, True)
 
 # 全服进度排名指令
 rankingjd = on_command('jdrank', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -314,7 +314,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
         try:
             arg = int(arg)
         except:
-            await rankingjd.finish("请输入正确的猎场号！", at_sender=True)
+            await send_image_or_text(rankingjd, "请输入正确的猎场号", True)
             
     # 读取数据
     try:
@@ -427,7 +427,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
     else:
         await send_image_or_text(rankingjd, "无效的参数！请使用\n`.jdrank` 或 `.jdrank <猎场号>`", at_sender=True)
     
-    await send_image_or_text_forward(rankingjd, rank_msg, title_msg, bot, event.self_id, event.group_id, 50)
+    await send_image_or_text_forward(rankingjd, rank_msg, title_msg, bot, event.self_id, event.group_id, 30, True)
 
 # 查询全服madeline总进度
 total_madelinejd_query = on_command(
@@ -497,7 +497,7 @@ async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
         for level in range(5, 0, -1):
             progress_message += f"- {level}级Madeline：{hunt_count[lc][level - 1]}/{hunt_max_count[lc][level - 1]}\n"
 
-    await send_image_or_text_forward(total_madelinejd_query, progress_message, "全服进度", bot, event.self_id,  event.group_id, 50)
+    await send_image_or_text_forward(total_madelinejd_query, progress_message, "全服进度", bot, event.self_id,  event.group_id, 30, True)
 
 #展示madeline
 show = on_command('show', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -513,13 +513,13 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
     # 查找 madeline
     nums = find_madeline(name)
     if nums == 0:
-        await show.finish(f"未找到名为 {name} 的 madeline", at_sender=True)
+        await send_image_or_text(show, f"未找到名为[{name}]的Madeline", True)
         return
 
     # 获取对应猎场文件
     file_path = user_path / f"UserList{nums[2]}.json"
     if not file_path.exists():
-        await show.finish("对应的猎场数据文件不存在", at_sender=True)
+        await send_image_or_text(show, "对应的猎场数据文件不存在", True)
         return
 
     # 打开猎场文件
@@ -544,24 +544,36 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
             # 发送图片和描述
             await show.finish(f"\n等级：{level}\n{name}\n" + MessageSegment.image(img) + description, at_sender=True)
         else:
-            await show.finish(f"你还没抓到过 {name}", at_sender=True)
+            await send_image_or_text(show, f"你还没抓到过[{name}]", True)
     else:
-        await show.finish("你还没尝试抓过 Madeline.....", at_sender=True)
+        await send_image_or_text(show, "你还没尝试抓过Madeline……", True)
 
 # 查看某 madeline 数量
 count_madeline = on_command('count', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @count_madeline.handle()
-async def cha_madeline_number(event: Event, arg: Message = CommandArg()):
+async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     # 获取输入的名字
     name = str(arg).strip().lower()
     if not name:
-        await count_madeline.finish("请输入要查询的 Madeline 名称", at_sender=True)
+        await send_image_or_text(
+            count_madeline,
+            "请输入要查询的Madeline名称",
+            True,
+            None
+        )
+        return
 
     # 查找该名字的 madeline 的图像文件坐标
     nums = find_madeline(name)
     if not nums:
-        await count_madeline.finish(f"未找到名为 {name} 的 Madeline", at_sender=True)
+        await send_image_or_text(
+            count_madeline,
+            f"未找到名为[{name}]的Madeline",
+            True,
+            None
+        )
+        return
 
     # 获取用户 ID
     user_id = str(event.get_user_id())
@@ -570,22 +582,44 @@ async def cha_madeline_number(event: Event, arg: Message = CommandArg()):
     main_data = open_data(user_path / file_name)
 
     if user_id not in main_data:
-        await count_madeline.finish("你还没尝试抓过 Madeline.....", at_sender=True)
+        await send_image_or_text(
+            count_madeline,
+            "你还没尝试抓过Madeline……",
+            True,
+            None
+        )
+        return
 
     # 根据猎场号打开对应文件
     liechang_number = nums[2]
     try:
         arena_data = open_data(user_path / f"UserList{liechang_number}.json")
     except FileNotFoundError:
-        await count_madeline.finish(f"猎场 {liechang_number} 的数据文件缺失，请联系管理员。", at_sender=True)
+        await send_image_or_text(
+            count_madeline,
+            f"猎场{liechang_number}的数据文件缺失，请联系管理员。",
+            True,
+            None
+        )
+        return
 
     # 检查用户数据
     user_data = arena_data.get(user_id, {})
     madeline_key = f"{nums[0]}_{nums[1]}"
 
-    # 查找 madeline 数量
+    # 查找 madeline 数量并发送结果
     if madeline_key in user_data:
         number = user_data[madeline_key]
-        await count_madeline.finish(f"你有 {number} 个 {name}", at_sender=True)
+        await send_image_or_text(
+            count_madeline,
+            f"你有[{number}]个[{name}]",
+            True,
+            None
+        )
     else:
-        await count_madeline.finish(f"你还没抓到过 {name}", at_sender=True)
+        await send_image_or_text(
+            count_madeline,
+            f"你还没抓到过[{name}]",
+            True,
+            None
+        )

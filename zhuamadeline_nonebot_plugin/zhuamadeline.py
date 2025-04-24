@@ -57,7 +57,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     if number_arg in ['?','？']:
         number_arg = "999"
     if user_id not in data:
-        await send_image_or_text(qhlc, "你还没尝试抓过madeline.....", True, None)
+        await send_image_or_text(qhlc, "你还没尝试抓过Madeline……", True, None)
         return
         
     try:
@@ -71,7 +71,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 特殊竞技猎场（0号）
     if number_int == 0:
         if data[user_id]['berry'] < 0:
-            await send_image_or_text(qhlc, f"你现在仍处于失约状态中……不允许进入竞技场！\n你只有{data[user_id]['berry']}颗草莓！", True, None)
+            await send_image_or_text(qhlc, f"你现在仍处于失约状态中……\n不允许进入竞技场！\n你只有{data[user_id]['berry']}颗草莓！", True, None)
             return
 
         if(data[user_id].get('debuff','normal')=='tentacle' ): 
@@ -148,7 +148,8 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     data[str(user_id)]['collections'][collection_name] = 1
                     data[str(user_id)]['event'] = "nothing"
                     save_data(user_path/file_name, data)
-                    await catch.finish(f"{message}\n输入.cp {collection_name} 以查看具体效果", at_sender=True)
+                    await send_image_or_text(catch, f"{message}\n输入.cp {collection_name} 以查看具体效果", True, None)
+                    return
                 
             #读取信息
             next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
@@ -167,7 +168,8 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
                 if current_time < work_end_time:
                     text = time_text(str(work_end_time-current_time))
-                    await catch.finish(f"你正在维护草莓加工器，还需要{text}！", at_sender=True)
+                    await send_image_or_text(catch, f"你正在维护草莓加工器，还需要{text}！", True, None)
+                    return
                 #时间过了自动恢复正常
                 else:
                     data[str(user_id)]['status'] = 'normal'
@@ -177,11 +179,13 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if(data[str(user_id)].get("buff")=="hurt"): 
                 if(current_time < next_time_r):
                     delta_time = next_time_r - current_time
-                    await catch.finish(f"你受伤了，需要等{time_text(delta_time)}后才能抓", at_sender=True)
+                    await send_image_or_text(catch, f"你受伤了，需要等{time_text(delta_time)}后才能抓", True, None)
+                    return
                     
             #有其他正在进行的事件未完成
             if(data[str(user_id)]['event']!='nothing'):
-                await catch.finish("你还有正在进行中的事件", at_sender=True)
+                await send_image_or_text(catch, "你还有正在进行中的事件", True, None)
+                return
                 
             # buff2先扣除
             data = buff2_change_status(data, user_id, "lucky", 0)
@@ -234,10 +238,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             # 新人送1000草莓
             if(not 'berry' in data[str(user_id)]):
                 data[str(user_id)]['berry'] = 1000
-            # #检测回想之核
-            # dream = collections.get("回想之核", 0)
-            # if dream >= 1:
-            #     next_time = current_time + datetime.timedelta(minutes=29)
             data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
             answer = 1
     else:
@@ -251,17 +251,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         # 新人送1000草莓
         if(not 'berry' in data[str(user_id)]):
             data[str(user_id)]['berry'] = 1000
-        # #检测回想之核
-        # dream = collections.get("回想之核", 0)
-        # if dream >= 1:
-        #     next_time = current_time + datetime.timedelta(minutes=29)
         data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         answer = 1
 
     #----------给出回应-----------
     if(answer == 0):
         text = time_text(str(delta_time))
-        await catch.finish(f"别抓啦，{text}后再来吧", at_sender = True)
+        await send_image_or_text(catch, f"别抓啦，{text}后再来吧", True, None)
+        return
     elif(answer == 1):
         #第一次抓
         if(not 'lc' in data[str(user_id)]):
@@ -269,23 +266,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
         #特殊猎场madeline竞技场内事件
         if(data[str(user_id)]['lc']=='0'):
-            # if str(user_id) not in bot_owner_id:
-                # await message.finish("现在madeline竞技场暂未开放哦，敬请期待！", at_sender=True)
-            # 失约检测
             if data[user_id]['berry'] < 0:
-                await catch.finish(f"你现在仍处于失约状态中……不允许进入竞技场！你只有{str(data[str(user_id)]['berry'])}颗草莓！", at_sender=True)
-            # 失神检测
+                await send_image_or_text(catch, f"你现在仍处于失约状态中……不允许进入竞技场！你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
+                return
             if(data[user_id].get('debuff','normal')=='tentacle' ): 
-                await catch.finish(f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", at_sender=True)
+                await send_image_or_text(catch, f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", True, None)
+                return
             nickname = event.sender.nickname
-            # next_time = current_time + datetime.timedelta(minutes=10)
-            # #检测回想之核
-            # dream = data[str(user_id)]['collections'].get("回想之核", 0)
-            # if dream >= 1:
-            #     next_time = current_time + datetime.timedelta(minutes=9)
-            # data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
             await madeline_pvp_event(data,str(user_id),nickname,catch,bot)
-            #后面的程序不执行
             return
 
         #触发事件
@@ -308,8 +296,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         green_ball = collections.get("绿色球体", 0)
         yellow_ball = collections.get("黄色球体", 0)
         increment = math.floor(0.01 * yinkuang)
-        # 计算音矿加成
-        increment = math.floor(0.01 * yinkuang)
 
         # 应用音矿加成
         if yinkuang >= 1:
@@ -327,7 +313,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             probabilities['d'] = probabilities['c'] + 300
         # 猎场4专属
         if liechang_number == "4":
-            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 400 + star_add}  # 初始设定
+            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 400 + star_add}
 
             if red_ball >= 1:
                 probabilities.update({'c': 150, 'd': 450 + star_add})
@@ -343,7 +329,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 
         # 猎场5专属
         if liechang_number == "5":
-            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 0}  # 初始设定，只能抓1
+            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
             if grade >= 6:
                 probabilities.update({'d': 300 + star_add})
             if grade >= 11:
@@ -360,52 +346,43 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 
         # 虚弱debuff全局生效
         if debuff == 'weaken':
-            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 0}  # 只能抓出1
+            probabilities = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
 
         # 最终概率结果
         a, b, c, d = probabilities.values()
 
         madeline = zhua_random(a, b, c, d, liechang_number)
-        level       = madeline[0]   #等级
-        name        = madeline[1]   #名字
-        img         = madeline[2]   #图片
-        description = madeline[3]   #描述
-        num         = madeline[4]   #编号
+        level       = madeline[0]
+        name        = madeline[1]
+        img         = madeline[2]
+        description = madeline[3]
+        num         = madeline[4]
         
         # 5猎加经验
-        # 初始化
         exp_msg = ''
         grade_msg = ''
 
-        # 经验全局定义到function里面
         if liechang_number == "5":
-            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)# 最后一个0代表不是道具
+            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)
         
         #奖励草莓
         lucky_give = 0
         sheet_text = ""
-        #判定秘宝
         treasure = data[str(user_id)]['collections'].get('尘封的宝藏',0)
-
-        #判定乐谱
         sheet_music = data[str(user_id)]['collections'].get('星光乐谱',0)
 
         if (debuff=='poisoned') or (debuff=='poisoned_2'):
             berry_give = 0
         else:
-            # 用字典映射不同 level 的 berry_give 值
             berry_give_map = {1: 10, 2: 20, 3: 30, 4: 40, 5: 50}
-            berry_give = berry_give_map.get(level, 0)  # 默认为 0，避免 level 不在范围内时报错
+            berry_give = berry_give_map.get(level, 0)
             
-            # 4/5猎裸抓加成 +5
             if data[str(user_id)]['lc'] in ["4","5"]:
                 berry_give += 5
 
-            # 宝藏加成 +5
             if treasure >= 1:
                 berry_give += 5
             
-            # sheet_music 触发双倍奖励
             if sheet_music >= 1 and random.randint(1, 10) <= 2:
                 if berry_give > 0:
                     berry_give *= 2
@@ -422,45 +399,36 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         data2 = countList[0]
         new_print = countList[1]
         
-        #写入madeline收集表(副统计表)
         save_data(user_path / f"UserList{data[str(user_id)]['lc']}.json", data2)
-
-        #写入主数据表
         save_data(user_path / file_name, data)
-        # 发送消息
-        # 获取当前BUFF信息（假设前面已经处理好了）
+
         current_buff2 = data[str(user_id)].get('buff2', 'normal')
         buff2_remaining = -1
         buff2_text = ""
 
         if current_buff2 in buff2_config:
             buff2_name = buff2_config[current_buff2]['name']
-            times_field = f"{current_buff2}_times"  # 例如: lucky_times / speed_times
+            times_field = f"{current_buff2}_times"
             buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
 
-            # 检查是否要显示这个BUFF的剩余次数
             if buff2_config[current_buff2]['show_condition'](berry_give):
-                # 这里非得不等于-1，大于-1不行，我真的服了这什么bug啊
                 if buff2_remaining != -1:
                     buff2_text = f"\n{buff2_name}buff加成剩余{buff2_remaining}次"
 
-        # 构造奖励文本（幸运BUFF的额外奖励）
         reward_text = f"{berry_give}颗草莓"
         if current_buff2 == 'lucky' and berry_give != 0 and buff2_remaining > -1:
             reward_text = f"{berry_give}+{lucky_give}={berry_give + lucky_give}颗草莓"
 
-        # 准备所有要放入图片的文本内容
         if new_print:
             top_text = f"{new_print}\n等级: {level}\n{name}"
         else:
             top_text = f"等级: {level}\n{name}"
         bottom_text = f"{description}"
 
-        # 根据berry_give判断要添加的额外信息
         if berry_give != 0:
             extra_text = (
-                f"\n\n本次奖励{reward_text}"
                 f"{sheet_text}"
+                f"\n\n本次奖励{reward_text}"
                 f"{buff2_text}"
                 f"{hourglass_text}"
                 f"{diamond_text}"
@@ -476,24 +444,20 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 f"{grade_msg}"
             )
 
-        # 合并所有文本到图片底部
         bottom_text += extra_text
 
-        # 生成包含所有内容的图片
         combined_img_path = generate_image_with_text(
-            text1=top_text,    # 顶部文字
-            image_path=img,         # 原始图片路径
-            text2=bottom_text  # 底部文字（包含所有额外信息）
+            text1=top_text,
+            image_path=img,
+            text2=bottom_text
         )
 
-        # 最终消息只需要包含生成的图片
         if combined_img_path:
             message = MessageSegment.image(combined_img_path)
         else:
-            # 如果生成失败，回退到原始文本形式
             message = (
-                f"{top_text}\n"
-                f"[图片]\n"
+                f"{top_text}\n"+
+                MessageSegment.image(img)+
                 f"{bottom_text}"
             )
 
@@ -511,7 +475,8 @@ async def dailyqd(event: GroupMessageEvent):
     nickname = event.sender.nickname
 
     if user_id not in data:
-        await qd.finish("你还没尝试抓过madeline.....", at_sender=True)
+        await send_image_or_text(qd, "你还没尝试抓过madeline.....", True, None)
+        return
 
     user_data = data.setdefault(user_id, {"berry": 0, "jrrp": 0, "item": {}, "date": "2000-01-01"})
     collections = user_data.setdefault('collections', {})
@@ -519,7 +484,8 @@ async def dailyqd(event: GroupMessageEvent):
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
     
     if user_data.get("date", "2000-01-01") == current_date_str:
-        await qd.finish("一天只能签到一次吧......", at_sender=True)
+        await send_image_or_text(qd, "一天只能签到一次吧......", True, None)
+        return
 
     # 计算随机奖励
     base_berry = random.randint(1, 100)
@@ -552,7 +518,8 @@ async def dailyjrrp(event: GroupMessageEvent):
 
     # 检查用户是否注册
     if user_id not in data:
-        await jrrp.finish("你还没抓过madeline，无法进行今日人品的查询哦！", at_sender=True)
+        await send_image_or_text(jrrp, "你还没抓过madeline，无法进行今日人品的查询哦！", True, None)
+        return
 
     user_data = data.setdefault(user_id, {"jrrp": 0, "date": ""})
     collections = user_data.setdefault('collections', {})
@@ -562,12 +529,15 @@ async def dailyjrrp(event: GroupMessageEvent):
 
     # 判断是否已经签到
     if user_data["date"] != current_date_str:
-        await jrrp.finish("请先签到后再查询jrrp哦！", at_sender=True)
+        await send_image_or_text(jrrp, "请先签到后再查询jrrp哦！", True, None)
+        return
 
     # 获取 jrrp 数值
     jrrp_int = user_data.get("jrrp", 0)
     if jrrp_int == 0:
-        await jrrp.finish("啊哦，出错了，今日人品似乎没能成功查询到呢！(可能是因为签到后没有成功保存 jrrp 的数值？)", at_sender=True)
+        await send_image_or_text(jrrp, "啊哦，出错了，今日人品似乎没能成功查询到呢！(可能是因为签到后没有成功保存 jrrp 的数值？)", True, None)
+        return
+    
     extra_berry = user_data["item"].get("招财猫", 0) * 3
     
     # 检测是否翻倍
@@ -577,10 +547,10 @@ async def dailyjrrp(event: GroupMessageEvent):
     # 获取图片、文案
     picture_str, text, luck_text = draw_qd(nickname, jrrp_int, extra_berry, double)
     
-    reply_text = f"\n- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
-    reply_text += f"\n- 检测到你拥有鱼之契约，你今日签到获得的草莓翻倍，为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
+    reply_text = f"- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
+    reply_text += f"\n- 检测到你拥有鱼之契约，\n你今日签到获得的草莓翻倍，\n为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
     
-    await send_image_or_text(jrrp, reply_text, True)
+    await send_image_or_text(jrrp, reply_text, True, None)
 
 
 # 查看状态
@@ -596,8 +566,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     nickname = await get_nickname(bot, user_id)
 
     if user_id not in data:
-        await ck.finish("你还没尝试抓过Madeline.....", at_sender=True)
-        return
+        await send_image_or_text(ck, "你还没尝试抓过Madeline……", True)
     
     all_judge = str(arg).strip().lower()
     

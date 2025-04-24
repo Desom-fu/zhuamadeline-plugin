@@ -114,7 +114,8 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     # 解析命令参数
     command = str(arg).split("/")
     if len(command) != 3:
-        await work.finish("输入不合规，请按照以下格式输入:\n.work 工作区域/携带食物/派遣madeline的名称")
+        await send_image_or_text(work, "输入不合规，请按照以下格式输入:\n.work 工作区域/携带食物/派遣madeline的名称", True, None)
+        return
     
     area, food, madeline = [part.lower() for part in command]
     
@@ -123,7 +124,8 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     data = open_data(full_path)
     
     if user_id not in data:
-        await work.finish("你还没尝试抓过madeline......")
+        await send_image_or_text(work, "你还没尝试抓过madeline......", True, None)
+        return
     
     # 获取当前时间
     current_time = datetime.datetime.now()
@@ -157,31 +159,41 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
         )
         if current_time < working_endtime:
             text = time_text(str(working_endtime - current_time))
-            await work.finish(
-                f"你已经派遣madeline出去工作了，耐心等待吧。他/她/它/TA大概会在{text}后完成工作",
-                at_sender=True
+            await send_image_or_text(
+                work,
+                f"你已经派遣madeline出去工作了，耐心等待吧。\n他/她/它/TA大概会在{text}后完成工作",
+                True,
+                None
             )
+            return
         else:
-            await work.finish("工作已结束，请先输入 .workjd 来结束本次外出工作", at_sender=True)
+            await send_image_or_text(work, "工作已结束，请输入 .workjd\n来结束本次外出工作", True, None)
+            return
     
     # 验证工作区域
     if area not in AREA_CONFIGS:
-        await work.finish("输入不合规，请输入一个合理的工作区域", at_sender=True)
+        await send_image_or_text(work, "输入不合规\n请输入一个合理的工作区域", True, None)
+        return
     
     # 验证体力
     power_require = AREA_CONFIGS[area]['power_require']
     if user_info['item'].get("体力", 0) < power_require:
-        await work.finish(
-            f"你的体力不足，总共需要{power_require}点，而你现在只有{user_info['item'].get("体力", 0)}点，先去补充体力吧",
-            at_sender=True
+        await send_image_or_text(
+            work,
+            f"你的体力不足，总共需要{power_require}点，\n而你现在只有{user_info['item'].get('体力', 0)}点，\n先去补充体力吧！",
+            True,
+            None
         )
+        return
     
     # 验证食物
     if food not in FOOD_EFFECTS:
-        await work.finish("输入不合规，请输入一个合理的食物", at_sender=True)
+        await send_image_or_text(work, "输入不合规\n请输入一个合理的食物", True, None)
+        return
     
     if user_info['item'].get(food, 0) <= 0:
-        await work.finish(f"你现在没有{food}", at_sender=True)
+        await send_image_or_text(work, f"你现在没有{food}!", True, None)
+        return
     
     # 消耗食物
     user_info['item'][food] -= 1
@@ -191,7 +203,8 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     # 查找 madeline 信息
     madeline_info = find_madeline(madeline)
     if madeline_info == 0:
-        await work.finish("输入不合规，你输入了一个不存在的madeline", at_sender=True)
+        await send_image_or_text(work, "输入不合规，\n你输入了一个不存在的Madeline", True, None)
+        return
     
     # 获取对应猎场数据
     lc = madeline_info[2]  # 猎场编号
@@ -204,7 +217,8 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     # 修改为（利用 find_madeline 返回的信息）：
     madeline_key = f"{madeline_info[0]}_{madeline_info[1]}"  # 等级_编号
     if madeline_check[user_id].get(madeline_key, 0) <= 0:
-        await work.finish("你没有抓到过此madeline，或者此madeline数量为0", at_sender=True)
+        await send_image_or_text(work, "你没有抓到过此Madeline，\n或者此Madeline数量为0", True, None)
+        return
 
     madeline_check[user_id][madeline_key] -= 1
     apply_effects(state, [LEVEL_EFFECTS.get(madeline_info[0], {})])  # madeline_info[0] 是等级
@@ -235,7 +249,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     save_data(full_path, data)
     save_data(config.user_path, madeline_check)
     
-    await work.finish(f"你成功派遣[{madeline}]携带着[{food}]去[{area}]工作了！预计需要工作{duration}个小时！")
+    await send_image_or_text(work, f"你成功派遣[{madeline}]携带着[{food}]去[{area}]工作了！\n预计需要工作{duration}个小时！", True, None)
 
 
 status_work = on_command('工作进度', aliases={'workjd','jdwork'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -246,22 +260,34 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
 
     user_id = str(Bot_event.get_user_id())
     current_time = datetime.datetime.now()
-    #是否工作过
-    if(not 'working' in data[str(user_id)]):
-        await status_work.finish(f"你还没有派遣madeline外出工作过", at_sender=True)
+    # 检查用户数据是否存在
+    if user_id not in data:
+        await send_image_or_text(status_work, "你还没有派遣madeline外出工作过", True, None)
+        return
+    
+    # 初始化工作数据
+    user_data = data.setdefault(user_id, {})
+    user_data.setdefault('working', False)
+    
     #是否已经派遣madeline去工作了
-    if data[str(user_id)]['working']:
+    if user_data['working']:
         working_endtime = datetime.datetime.strptime(data.get(str(user_id)).get('working_endtime'), "%Y-%m-%d %H:%M:%S")
         if current_time < working_endtime:
             text = time_text(str(working_endtime-current_time))
-            work_skiptime = int(data[str(user_id)]['work_skiptime'])
+            work_skiptime = int(user_data['work_skiptime'])
             time_delta = working_endtime - current_time
             minutes_remaining = int(time_delta.total_seconds() // 60)
             skip_power_require = (minutes_remaining // 2) * pow(2, work_skiptime+1) + 1
-            await status_work.finish(f"你已经派遣madeline出去工作了，耐心等待吧。他/她/它/TA大概会在{text}后完成工作，工作完成后他自然会将工作日志汇报给您的哦\n"+
-                                     f"今日你加速了{work_skiptime}次，本次加速你需要{skip_power_require}点体力", at_sender=True)
+            await send_image_or_text(
+                status_work,
+                f"- 你已经派遣madeline出去工作了，耐心等待吧。\n他/她/它/TA大概会在{text}后完成工作，\n工作完成后他自然会将工作日志汇报给您的哦\n"+
+                f"- 今日你加速了{work_skiptime}次，\n本次加速你需要{skip_power_require}点体力。",
+                True,
+                None
+            )
+            return
         else:
-            area = data[str(user_id)]['work_area']
+            area = user_data['work_area']
             if area == '丛林':
                 hours = 3
                 tool_list = ['急救包','弹弓','海星']
@@ -274,13 +300,13 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             elif area == 'lxvi':
                 hours = 12
                 tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表','海星','水母','胖头鱼','胖头鱼罐头','水晶胖头鱼','星鱼']
-            data[str(user_id)]['working'] = False
-            data[str(user_id)]['work_area'] = None
-            work_per_hour = data[str(user_id)]['work_per_hour']
-            work_simple_chance = data[str(user_id)]['work_simple_chance']
-            bonus_berry = data[str(user_id)]['bonus_berry']
-            bonus_item = data[str(user_id)].get('bonus_item', 0)
-            work_exp = data[str(user_id)]['work_exp']
+            user_data['working'] = False
+            user_data['work_area'] = None
+            work_per_hour = user_data['work_per_hour']
+            work_simple_chance = user_data['work_simple_chance']
+            bonus_berry = user_data['bonus_berry']
+            bonus_item = user_data.get('bonus_item', 0)
+            work_exp = user_data['work_exp']
             final_log=""
             common_events=["无"]
             simple_work_events = [
@@ -402,27 +428,27 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                         tool_num *= 2
                     
                     if salary > 0:
-                        event += f"本次工作madeline获得了{salary}颗草莓。"
-                        data[str(user_id)]['berry'] += salary
+                        event += f"本次工作Madeline获得了{salary}颗草莓。"
+                        user_data['berry'] += salary
                         total_berry += salary
                     elif tool_num > 0:
                         event += f"本次工作madeline获得了{tool_num}个{tool_type}。"
-                        if(not tool_type in data[str(user_id)]["item"]):
-                            data[str(user_id)]["item"][tool_type] = 0
-                        data[str(user_id)]["item"][tool_type] += tool_num
+                        if(not tool_type in user_data["item"]):
+                            user_data["item"][tool_type] = 0
+                        user_data["item"][tool_type] += tool_num
                         # 累加到total_item
                         if tool_type not in total_item:
                             total_item[tool_type] = 0
                         total_item[tool_type] += tool_num
                     else:
-                        event += f"本次工作由于老板太黑心了，madeline什么都没获得。"
+                        event += f"本次工作由于老板太黑心了，Madeline什么都没获得。"
 
                     if bonus_berry>=1:
                         bonus_rate = random.randint(1,100)
                         # 5%的概率触发额外草莓
                         if bonus_rate <= 10:
                             bonus = random.randint(1,bonus_berry)
-                            data[str(user_id)]['berry'] += bonus
+                            user_data['berry'] += bonus
                             total_berry += bonus
                             if salary == 0 and tool_num == 0:
                                 event += f"但是由于表现非常好，老板额外奖励了{bonus}颗草莓。"
@@ -446,38 +472,40 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
             else:
                 final_log += "\n本次工作你没有获得任何道具。"
             
-            data[str(user_id)]['work_exp'] += hours
+            user_data['work_exp'] += hours
             tool_bonus = work_exp//100
             if (tool_bonus > 0):
                 tool_type = random.choice(tool_list)
-                if(not tool_type in data[str(user_id)]["item"]):
-                    data[str(user_id)]["item"][tool_type] = 0
-                data[str(user_id)]['item'][tool_type] += tool_bonus
+                if(not tool_type in user_data["item"]):
+                    user_data["item"][tool_type] = 0
+                user_data['item'][tool_type] += tool_bonus
                 # 也累加到total_item
                 if tool_type not in total_item:
                     total_item[tool_type] = 0
                 total_item[tool_type] += tool_bonus
-                final_log += f"\n同时因madeline非常出色的表现，额外获得了{tool_bonus}个{tool_type}!"
+                final_log += f"\n同时因Madeline非常出色的表现，额外获得了{tool_bonus}个{tool_type}!"
             
             save_data(full_path, data)
-
-            # 构建转发的消息内容
-            msg_list = [
-                {
-                    "type": "node",
-                    "data": {
-                        "name": "工作日志",
-                        "uin": Bot_event.self_id,
-                        "content": final_log
-                    }
-                }
-            ]
-
-            await bot.call_api("send_group_forward_msg", group_id=Bot_event.group_id, messages=msg_list)
-            await status_work.finish("外出工作完成啦，madeline将所有收入和工作日志送给你以后也回到原本的猎场中休息了，期待下次与你的见面~", at_sender=True)
+            # 发送工作日志(使用转发)
+            await send_image_or_text_forward(
+                status_work,
+                final_log,
+                "\n外出工作完成啦，Madeline将所有收入和工作日志送给你以后就回到原本的猎场中休息了，期待下次与你的见面~",
+                bot,
+                Bot_event.self_id,
+                Bot_event.group_id,
+                30,
+                True
+            )
+            return
     else:
-        work_exp = data[str(user_id)]['work_exp']
-        await status_work.finish(f"你似乎没有派遣任何madeline去外出，你现在的工作经验点数是:{work_exp}，工作结束后将额外获得{work_exp//100}个随机道具", at_sender=True)
+        work_exp = user_data.get('work_exp', 0)
+        await send_image_or_text(
+            status_work,
+            f"你似乎没有派遣任何madeline去外出，\n你现在的工作经验点数是:{work_exp}，\n工作结束后将额外获得{work_exp//100}个随机道具",
+            True,
+            None
+        )
 
 #休息
 sleep = on_command('休息', aliases={'worksleep'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -488,7 +516,8 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     current_time = datetime.datetime.now()
 
     if str(user_id) not in data:
-        await sleep.finish("请先抓一次madeline再来休息哦！", at_sender=True)
+        await send_image_or_text(sleep, "请先抓一次madeline再来休息哦！", True, None)
+        return
     
     # 初始化用户数据（如果字段不存在）
     user_data = data.setdefault(user_id, {})
@@ -509,12 +538,15 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
     if time_since_last_sleep < datetime.timedelta(hours=23):
         remaining_time = datetime.timedelta(hours=23) - time_since_last_sleep
-        await sleep.finish(
-            f"你现在还充满精神！请在{remaining_time.seconds // 3600}小时"
+        await send_image_or_text(
+            sleep,
+            f"你现在还充满精神！\n请在{remaining_time.seconds // 3600}小时"
             f"{(remaining_time.seconds % 3600) // 60}分钟"
             f"{remaining_time.seconds % 60}秒后再进行休息哦！",
-            at_sender=True
+            True,
+            None
         )
+        return
     
     # 执行休息逻辑
     power_per_hour = 50
@@ -534,9 +566,11 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     user_data['item']['体力'] += power_per_hour * 4
 
     save_data(full_path, data)
-    await sleep.finish(
-        f"休息完成！下次可抓时间延长4小时，获得 {power_per_hour * 4} 体力。",
-        at_sender=True
+    await send_image_or_text(
+        sleep,
+        f"休息完成！下次可抓时间延长4小时，\n获得{power_per_hour * 4}点体力。",
+        True,
+        None
     )
 
 #加速完成工作
@@ -548,29 +582,45 @@ async def skip_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
 
     user_id = str(Bot_event.get_user_id())
     current_time = datetime.datetime.now()
-    #是否工作过
-    if(not 'working' in data[str(user_id)]):
-        await skip_work.finish("你还没有派遣madeline外出工作过", at_sender=True)
     
-    if data[str(user_id)]['working']:
-        working_endtime = datetime.datetime.strptime(data.get(str(user_id)).get('working_endtime'), "%Y-%m-%d %H:%M:%S")
+    #是否工作过
+    if user_id not in data or 'working' not in data[user_id]:
+        await send_image_or_text(skip_work, "你还没有派遣madeline外出工作过", True, None)
+        return
+    
+    if data[user_id]['working']:
+        working_endtime = datetime.datetime.strptime(data[user_id].get('working_endtime'), "%Y-%m-%d %H:%M:%S")
         if current_time < working_endtime:
-            work_skiptime = int(data[str(user_id)]['work_skiptime'])
+            work_skiptime = int(data[user_id].get('work_skiptime', 0))
             time_delta = working_endtime - current_time
             minutes_remaining = int(time_delta.total_seconds() // 60)
             skip_power_require = (minutes_remaining // 2) * pow(2, work_skiptime+1) + 1
-            if not '体力' in data[str(user_id)]['item']:
-                data[str(user_id)]['item']['体力'] = 0
-            if data[str(user_id)]['item']['体力'] >= skip_power_require:
-                data[str(user_id)]['item']['体力'] -= skip_power_require
-                data[str(user_id)]['working_endtime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                data[str(user_id)]['work_skiptime'] += 1
+            
+            # 初始化体力
+            data[user_id].setdefault('item', {}).setdefault('体力', 0)
+            
+            if data[user_id]['item']['体力'] >= skip_power_require:
+                data[user_id]['item']['体力'] -= skip_power_require
+                data[user_id]['working_endtime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                data[user_id]['work_skiptime'] += 1
                 save_data(full_path, data)
-                await skip_work.finish(f"你成功使用{skip_power_require}点体力提前结束了本次工作，你还剩{data[str(user_id)]['item']['体力']}点体力！", at_sender=True)
+                await send_image_or_text(
+                    skip_work,
+                    f"你成功使用{skip_power_require}点体力提前结束了本次工作，\n你还剩{data[user_id]['item']['体力']}点体力！",
+                    True,
+                    None
+                )
             else:
-                await skip_work.finish(f"你的体力不足，需要{skip_power_require}点，你只有{data[str(user_id)]['item']['体力']}点", at_sender=True)
+                await send_image_or_text(
+                    skip_work,
+                    f"你的体力不足，需要{skip_power_require}点，\n你只有{data[user_id]['item']['体力']}点",
+                    True,
+                    None
+                )
+        else:
+            await send_image_or_text(skip_work, "工作已完成，\n请使用.workjd查看结果", True, None)
     else:
-        await skip_work.finish("你暂时没有派遣任何madeline外出工作", at_sender=True)
+        await send_image_or_text(skip_work, "你暂时没有派遣任何madeline外出工作", True, None)
 
 # 查看帮助菜单和更新信息
 work_help = on_fullmatch(['.工作帮助', '。工作帮助', '。workhelp', '.workhelp'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -583,7 +633,7 @@ async def work_help_handle(bot: Bot, Bot_event: GroupMessageEvent):
         ".workjd\n查询Madeline工作的进度，工作完成后用这个命令来收取草莓/道具\n\n"
         ".worksleep\n休息4h，休息的这4h能恢复200体力（若有房产证藏品则是600），但是这个时间内不能抓，不过能和加工器同时使用。不过每23h只能休息一次哦！\n\n"
         ".workhelp\n可以查询工作帮助，也就是本界面\n"
-        "---------------------\n"
+        "---------------------\n\n"
         "关于工作的一些帮助\n"+
         "首先，外出需要准备足够的体力，1份足够维持体力的食物，和1个你要派遣的madeline"+
         "每次外出都会消耗大量的时间和体力，并且外出完成后你所派遣的madeline不会回来。"+
@@ -594,22 +644,21 @@ async def work_help_handle(bot: Bot, Bot_event: GroupMessageEvent):
         "目前可以工作的区域如下:\n"+
         "丛林: 消耗200体力，耗时3小时\n7d: 消耗325体力，耗时4小时\nmauve: 消耗1200体力，耗时8小时\nlxvi:消耗4500体力，耗时12小时\n"+
         "每次完成工作后，你都将获得一定的工作经验，工作经验越高，你在结束工作时能获得的额外奖励越多。\n加油吧，各位madeline~\n"+
-        "---------------------\n"+
+        "---------------------\n\n"+
         "下面是不同区域单次普通工作可获得的收益:\n"+
         "丛林: 随机数量的草莓、急救包、弹弓、海星\n"+
         "7d: 随机数量的草莓、急救包、弹弓、一次性小手枪、海星、水母\n"+
         "mauve: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、海星、水母、胖头鱼\n"+
         "lxvi: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、胡萝卜、madeline提取器、时间秒表、海星、水母、胖头鱼、胖头鱼罐头、水晶胖头鱼、星鱼")
-    # 构建转发的消息内容
-    msg_list = [
-        {
-            "type": "node",
-            "data": {
-                "name": "工作帮助",
-                "uin": Bot_event.self_id,
-                "content": msg
-            }
-        }
-    ]
-
-    await bot.call_api("send_group_forward_msg", group_id=Bot_event.group_id, messages=msg_list)
+    
+    # 使用转发消息发送长帮助文本
+    await send_image_or_text_forward(
+        work_help,
+        msg,
+        "工作帮助",
+        bot,
+        Bot_event.self_id,
+        Bot_event.group_id,
+        30,
+        True
+    )

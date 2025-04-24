@@ -8,6 +8,7 @@ from .whitelist import whitelist_rule
 from pathlib import Path
 from .function import open_data, save_data
 from .token_rewards import token_rewards
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 # 定义图片路径
 jiemi31_image_path = Path() / "data" / "Image" / "jiemi31.png"
@@ -65,7 +66,7 @@ async def handle_link(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     user_data = open_data(user_path)
 
     if user_id not in user_data:
-        await passwd_command.finish("请先抓一次madeline在解密哦！")
+        await send_image_or_text(passwd_command, "请先抓一次madeline在解密哦！", True, None)
     if "berry" not in user_data[user_id]:
         user_data[user_id]["berry"] = 0  # 初始化用户的 berry 字段
 
@@ -98,7 +99,7 @@ async def handle_link(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     else:
         result = default_msg
 
-    await passwd_command.finish(result, at_sender=True)
+    await send_image_or_text(passwd_command, result, True, None)
 
 #其他谜题
 puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -224,21 +225,18 @@ async def puzzle_command_handle(event: Event, bot: Bot):
         "解出答案后用 .password 来输入\n"
         "---------------------------------------"
      )
-    # 发送进度消息
-    msg_list = [
-        {
-            "type": "node",
-            "data": {
-                "name": "other",
-                "uin": event.self_id,
-                "content": puzzle_message
-            }
-        }
-    ]
+    await send_image_or_text_forward(
+        puzzle_command,
+        puzzle_message,
+        "other",
+        bot,
+        event.self_id,
+        event.group_id,
+        30,
+        True
+    )
 
-    await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=msg_list)
-
-#confr1ngo谜题
+#confr1ngo谜题 这个不改
 puzzle_confr1ngo_command = on_fullmatch(['.puzzle confr1ngo', '。puzzle confr1ngo','.puzzle confringo', '。puzzle confringo'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @puzzle_confr1ngo_command.handle()
 async def confr1ngo_handle(event: Event, bot: Bot):

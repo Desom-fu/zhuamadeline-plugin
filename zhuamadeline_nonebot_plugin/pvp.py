@@ -5,13 +5,14 @@ import time
 import math
 from pathlib import Path
 from nonebot.adapters.onebot.v11 import MessageSegment, Bot, GroupMessageEvent, GROUP
-from .function import open_data, save_data, print_zhua, time_decode
+from .function import open_data, save_data, print_zhua, time_decode, get_nickname
 from .list1 import madeline_data1
 from .list2 import madeline_data2
 from .list3 import madeline_data3
 from .list4 import madeline_data4
 from .config import *
-from nonebot import get_bots, on_fullmatch
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message
+from nonebot import get_bot, on_fullmatch
 from nonebot.log import logger
 
 #导入定时任务库
@@ -384,10 +385,10 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     # 调用开放时间检查模块
     is_open, close_text = pvp_opening(current_time)
     if not is_open:
-        await message.finish(close_text, at_sender=True)
+        await send_image_or_text(message, close_text, True)
     # 当前时间戳
     if (user_id in ban):
-        await message.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", at_sender=True)
+        await send_image_or_text(message, "很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", True)
     if (pvp_coldtime_data != {}):
         last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
         current_time2 = int(time.time())
@@ -397,21 +398,19 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             remaining_seconds = 1800 - cooldown_seconds  # 计算剩余冷却时间
             remaining_minutes = remaining_seconds // 60  # 剩余分钟数
             remaining_seconds = remaining_seconds % 60  # 剩余秒数
-            await message.finish(f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", at_sender=True)
+            await send_image_or_text(message, f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
     user_list1 = Path() / "data" / "UserList" / "UserList1.json"
     kc_data1 = open_data(user_list1)
     #如果没有注册
     if(not str(user_id) in user_data):
-        await message.finish("你还没有抓过madeline哦~", at_sender=True)
+        await send_image_or_text(message, "你还没有抓过Madeline哦~", True)
     #检测1号猎场madeline是否足够
     check1 = check_liechang(user_id, kc_data1)
     if check1 == False:
-        await message.finish("请在1猎成功解锁30个1级和2级，4个4级，1个5级的madeline哦！", at_sender=True)
+        await send_image_or_text(message, "请在1猎成功解锁\n- 30个1级和2级\n- 4个4级\n- 1个5级\n的Madeline哦！", True)
     # if str(user_id) not in bot_owner_id:
         # await message.finish("现在madeline竞技场暂未开放哦，敬请期待！", at_sender=True)
     # 当前时间戳
-    if (user_id in ban):
-        await message.finish("很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", at_sender=True)
     timestamp = int(current_time.timestamp())
     #检测回想之核
     dream = user_data[str(user_id)].get('collections',{}).get("回想之核", 0)
@@ -566,47 +565,47 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     # 各种回复
     if stat == 5:
         pk_text = (
-            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (win)\n"
-            f"- 你的madeline被打败了！\n(｡•́︿•̀｡)"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (win)"
+            f"- 你的madeline被打败了！(｡•́︿•̀｡)"
         )
     elif stat == 4:
         pk_text = (
-            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
             f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (draw/lose)\n"
-            f"- 你的madeline的进攻战力和擂主的madeline的防守战力相等，但由于你是挑战者，所以你赢了！\nヽ(o^ ^o)ﾉ"
+            f"- 你的madeline的进攻战力和擂主的madeline的防守战力相等，但由于你是挑战者，所以你赢了！`(o^ ^o)ﾉ"
         )
     elif stat == 3:
         pk_text = (
-            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
             f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (lose)\n"
-            f"- 你的madeline获胜了！\nヽ(o^ ^o)ﾉ"
+            f"- 你的madeline获胜了！`(o^ ^o)ﾉ"
         )
     elif stat == 2:
         pk_text = (
-            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，"
             f"但综合公式计算后不如之前你放入的本擂台的madeline，所以替换失败！"
         )
     elif stat == 1:
         pk_text = (
-            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！"
         )
     elif stat == 0:
         pk_text = ''
         if len(list_current) == 1:
             pk_text += (
-                f"\n本场pvp竞技开始！"
+                f"本场pvp竞技开始！\n"
                 )
         pk_text += (
-            f"\n总回合数：{totalCount}\n"
+            f"总回合数：{totalCount}\n"
             f"本次回合奖励：{inreward}草莓\n"
             f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你成功把madeline放入了一个空擂台，该madeline现在守卫着 [擂台{len(list_current)}]！"
@@ -619,7 +618,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     if stat in (3, 4):  # 挑战成功或平战力胜利
         # 确保列表不为空
         if list_current:
-            pk_text += "\n- 啊呀，" + MessageSegment.at(kicked_user_id) + "被踢下了擂台了！"
+            pk_text += f"\n- 啊呀， [{nicknameb}] 被踢下了擂台了！"
             # 如果被踢下的玩家的战力大于 60，发放安慰奖
             if ranb >= 60:
                 anwei = 10
@@ -644,11 +643,15 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     #公布结果(回合数达到totalCount决出胜负)
     set_final, total, reward, timeReward = process_results(list_current, pvp_data)
     if set_final:
+        # 初始化
+        at_text = ''
         text = "恭喜"
         for v in set_final:
-            text += MessageSegment.at(v)
+            user_nickname = await get_nickname(bot, v)
+            text += f' [{user_nickname}] '  # 获取中奖者的昵称
+            at_text += MessageSegment.at(v)
             user_data[v]['berry'] += total
-        text += f"在这场角逐中取得胜利,全员获得{reward}+{timeReward}={total}草莓奖励！"
+        text += f"在这场角逐中取得胜利，全员获得{reward}+{timeReward}={total}颗草莓奖励！"
         pvp_data.clear()
         timestamp3 = int(time.time())
         guess_end_text = pvp_guess_end()
@@ -659,11 +662,26 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     save_data(pvp_path,pvp_data)
     save_data(user_path,user_data)
     save_data(pvp_coldtime_path, pvp_coldtime_data)
+    # 初始化被at的人
+    forward_text = ''
+    if kicked_user_id:
+        forward_text += MessageSegment.at(kicked_user_id)
     # 发送挑战结果
-    await message.send(message=pk_text, at_sender=True)
+    pvp_result = generate_image_with_text(
+        text1=pk_text,
+        image_path=None,
+        text2=None,
+        max_chars=35,
+        center=False
+    )
+    if pvp_result:
+        await message.send(forward_text + MessageSegment.image(pvp_result), at_sender = True)
+    else:
+        await message.send(forward_text + pk_text, at_sender = True)    
+
     # 发送结束结果（如果有）
     if set_final:
-        await bot.call_api("send_group_msg", group_id=zhuama_group, message=text)  
+        await send_image_or_text(message, text, False, at_text)
         
     
 
@@ -695,7 +713,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
     # 调用开放时间检查模块
     is_open, close_text = pvp_opening(current_time_2)
     if not is_open:
-        await jjc.finish(close_text, at_sender=True)
+        await send_image_or_text(jjc, close_text, True)
     if pvp_data == {}:
         if (pvp_coldtime_data != {}):
             last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
@@ -705,8 +723,10 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
                 remaining_seconds = 1800 - cooldown_seconds  # 计算剩余冷却时间
                 remaining_minutes = remaining_seconds // 60  # 剩余分钟数
                 remaining_seconds = remaining_seconds % 60  # 剩余秒数
-                await jjc.finish(f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", at_sender=True)
-        await jjc.finish("madeline竞技场尚未开启！")
+                
+                await send_image_or_text(jjc, f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
+        
+        await send_image_or_text(jjc, "madeline竞技场尚未开启！", True)
 
     i = 0
     text = f"总回合数：{totalCount}\n"
@@ -763,24 +783,16 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
             f"本擂台是否有人鼓励：[{has_game}]"
         )
 
-    # 创建转发消息
-    forward_message = [
-        {
-            "type": "node",
-            "data": {
-                "name": "Madeline竞技场擂台详情",
-                "uin": event.self_id,  # 设置为机器人的 QQ 号
-                "content": text
-            }
-        }
-    ]
-
-    # 转发消息
-    if forward_message:
-        await bot.send_group_forward_msg(
-            group_id=event.group_id,  # 转发到当前群组
-            messages=forward_message
-        )
+    # 使用转发消息格式发送图片
+    await send_image_or_text_forward(
+        jjc,
+        text,
+        "Madeline竞技场擂台详情",
+        bot,
+        event.self_id,
+        event.group_id
+    )
+    
 
 # 22:00 - 22:30 检查是否需要执行结算任务
 @scheduler.scheduled_job(
@@ -791,11 +803,11 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
     timezone="Asia/Shanghai"
 )
 async def check_pvp_end_job():
-    bots = get_bots()
-    if not bots:
+    bot = get_bot()
+    if not bot:
         logger.error("没有可用的 Bot 实例，无法执行任务！")
         return
-    bot = list(bots.values())[0]  # 获取第一个 Bot 实例
+
     group_id = zhuama_group    # 目标群号
 
     # 读取用户数据
@@ -825,9 +837,12 @@ async def check_pvp_end_job():
     total_reward = reward + timeReward
 
     # 发放奖励给所有在擂台上的玩家
+    at_text = ''
     text = "恭喜以下玩家获得奖励：\n"
     for v in set_final:
-        text += MessageSegment.at(v)  # @玩家
+        user_nickname = await get_nickname(bot, v)
+        text += f' [{user_nickname}] '  # 获取中奖者的昵称
+        at_text += MessageSegment.at(v)
         user_data[v]['berry'] += total_reward  # 给玩家增加奖励
 
     # 竞猜结束
@@ -841,5 +856,5 @@ async def check_pvp_end_job():
     save_data(pvp_path, pvp_data)
     
     # 发送奖励公告消息
-    text += f"\n22：00了，时间太晚了，madeline竞技场已经关闭，本局游戏强制结束！\n擂台上的玩家将获得{reward}+{timeReward}={total_reward}草莓的奖励，明天见哦！\n（＾∀＾●）ﾉｼ"
-    await bot.send_group_msg(group_id=group_id, message=text+guess_end_text)
+    text += f"\n22：00了，时间太晚了，Madeline竞技场已经关闭，本局游戏强制结束！\n擂台上的玩家将获得{reward}+{timeReward}={total_reward}草莓的奖励！\n明天见哦！（＾∀＾●）ﾉｼ"
+    await auto_send_message(text + guess_end_text, bot, group_id, forward_text = at_text, max_chars = 30)
