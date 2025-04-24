@@ -76,14 +76,14 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         await send_image_or_text(rule, msg, True, None, 30)
     elif game_type == '3':
         msg = (
-            "游戏3：Madeline竞技场鼓励\n" +
+            "游戏3：Madeline竞技场竞猜\n" +
             "- 本游戏入场费为150草莓\n" +
-            "- 用 `.bet 3/擂台号码` 鼓励一个擂台，当该擂台的玛德琳被踢下或替换时，你会得到（120-原擂主常驻战力）*原擂主存活回合数*1/6的奖励。\n" +
-            "- 如果本局擂台结束，将给所有参与鼓励的玩家发对应的草莓，并存储在仓库里！请通过 `.ck` 查看哦！\n" + 
+            "- 用 `.bet 3/擂台号码` 竞猜一个擂台，当该擂台的玛德琳被踢下或替换时，你会得到（120-原擂主常驻战力）*原擂主存活回合数*1/6的奖励。\n" +
+            "- 如果本局擂台结束，将给所有参与竞猜的玩家发对应的草莓，并存储在仓库里！请通过 `.ck` 查看哦！\n" + 
             "- 可以使用命令 `.bank take 数量/all` 从仓库中提取草莓哦！\n"+
-            "- 你在给其他Madeline鼓励的时候\n同时也能玩其他游戏哦！\n" +
-            "- 注意1：每局Madeline竞技场\n只能鼓励Madeline一次！\n" +
-            "- 注意2：不能鼓励在场超过5回合的玛德琳"
+            "- 你在给其他Madeline竞猜的时候\n同时也能玩其他游戏哦！\n" +
+            "- 注意1：每局Madeline竞技场\n只能竞猜Madeline一次！\n" +
+            "- 注意2：不能竞猜在场超过5回合的玛德琳"
         )
         await send_image_or_text(rule, msg, True, None, 30)
     elif game_type == '4':

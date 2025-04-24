@@ -836,7 +836,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 final_berry_reward = berry_reward - tax  # 计算税后收益
 
                 message += (
-                    f"\n• 本场Madeline竞技\n你鼓励的是[{pos+1}]号擂台的Madeline，\n"
+                    f"\n• 本场Madeline竞技\n你竞猜的是[{pos+1}]号擂台的Madeline，\n"
                     f"该擂台擂主为[{choose_nickname}]，\n上台回合为[{choose_turn}]，\n"
                     f"所选占擂Madeline的战力为[{choose_rank}]！\n"
                     f"截至目前第[{turn}]轮的草莓收益为：\n[{berry_reward}]颗草莓，\n"

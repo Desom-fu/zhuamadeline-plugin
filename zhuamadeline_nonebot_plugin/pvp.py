@@ -128,7 +128,7 @@ def pvp_guess(pos):
                 value["pvp_guess"]["choose_nickname"] = "暂无数据"
                 value['last_pvp_guess_berry'] = final_berry_reward
                 value['bank'] += final_berry_reward
-                text = f'鼓励本擂台的奖励已发放，发放了{berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！鼓励本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
+                text = f'竞猜本擂台的奖励已发放，发放了{berry_reward}颗草莓！扣税{tax}颗后最终获得{final_berry_reward}颗草莓！竞猜本擂台的玩家可以通过 `.ck all` 来进行查看是否到账！'
 
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
@@ -180,7 +180,7 @@ def pvp_guess_end():
     # 保存数据
     save_data(bar_path, bar_data)  # 保存 bar 数据
     if back_text:
-        text = "\n\n本轮Madeline竞技场已结束，已经向鼓励擂台的玩家发放对应的税后草莓，详情请输入 `.ck all` 查看。"
+        text = "\n\n本轮Madeline竞技场已结束，已经向竞猜擂台的玩家发放对应的税后草莓，详情请输入 `.ck all` 查看。"
         
     return text
 
@@ -780,7 +780,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
             f"该madeline的常驻战力：[{rank}]\n"
             f"所在猎场：[{liechang_number}]号猎场\n"
             f"加入回合数：[{join_count}]\n"
-            f"本擂台是否有人鼓励：[{has_game}]"
+            f"本擂台是否有人竞猜：[{has_game}]"
         )
 
     # 使用转发消息格式发送图片
