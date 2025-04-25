@@ -568,7 +568,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (win)"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}] 的防守战力为 {zhanli_text} (win)\n"
             f"- 你的madeline被打败了！(｡•́︿•̀｡)"
         )
     elif stat == 4:
@@ -590,13 +590,13 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     elif stat == 2:
         pk_text = (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，"
+            f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，\n"
             f"但综合公式计算后不如之前你放入的本擂台的madeline，所以替换失败！"
         )
     elif stat == 1:
         pk_text = (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！"
+            f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！\n"
         )
     elif stat == 0:
         pk_text = ''
