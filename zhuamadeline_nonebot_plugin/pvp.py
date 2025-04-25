@@ -780,7 +780,8 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
         "Madeline竞技场擂台详情",
         bot,
         event.self_id,
-        event.group_id
+        event.group_id,
+        50
     )
     
 
