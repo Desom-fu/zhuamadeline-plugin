@@ -158,9 +158,8 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         data[str(user_id)]['compulsion_count'] = 0
     
     # 一堆事件的判定
-    if data[str(user_id)]['event'] != 'nothing' and not (
-        data[str(user_id)]['event'] == 'compulsion_bet1' and game_type not in ("1", "2")
-    ):
+    if not (data[str(user_id)]['event'] == 'nothing' or 
+           (data[str(user_id)]['event'] == 'compulsion_bet1' and game_type == "1")):
         await send_image_or_text(bet, "你还有正在进行中的事件", True, None, 25)
         return
             

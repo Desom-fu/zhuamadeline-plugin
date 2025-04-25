@@ -569,8 +569,6 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         await send_image_or_text(ck, "你还没尝试抓过Madeline……", True)
     
     all_judge = str(arg).strip().lower()
-    # 新版回复是图片，所以直接就是一直all
-    all_judge = "all"
     
     current_time = datetime.datetime.now()
     user_data = data[user_id]
