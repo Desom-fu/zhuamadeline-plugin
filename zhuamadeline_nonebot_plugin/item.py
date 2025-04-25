@@ -2040,7 +2040,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         #没到下一次抓的时间
                         if(current_time < next_time):
                             text = time_text(str(next_time-current_time))
-                            await send_image_or_text(daoju, f"别抓啦，{text}后再来吧！", at_sender = True)
+                            await send_image_or_text(daoju, f"别抓啦，\n{text}后再来吧！！", at_sender = True)
 
                         #延长下次抓的cd
                         next_time = current_time + datetime.timedelta(minutes=60)

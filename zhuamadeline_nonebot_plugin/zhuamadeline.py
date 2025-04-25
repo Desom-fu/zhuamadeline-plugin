@@ -257,7 +257,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
     #----------给出回应-----------
     if(answer == 0):
         text = time_text(str(delta_time))
-        await send_image_or_text(catch, f"别抓啦，{text}后再来吧", True, None)
+        await send_image_or_text(catch, f"别抓啦，\n{text}后再来吧！", True, None)
         return
     elif(answer == 1):
         #第一次抓
