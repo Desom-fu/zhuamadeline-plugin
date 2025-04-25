@@ -788,7 +788,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         message += (f"\n- 当前累计抓取次数：{spare_chance}/{hourglass_max}")
         
     # 显示下次抓取的时间（若有）
-    message += (f"\n- 下次可抓取时间：\n{next_time}") if current_time < next_time else ''
+    message += (f"\n- 下次可抓取时间\n{next_time}") if current_time < next_time else ''
 
     if all_judge == 'all':   
 
@@ -796,26 +796,26 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
         message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_game1'] else ''
 
         # 显示下次钓鱼的时间（若有）
-        message += (f"\n• 下次可钓鱼时间：\n{next_fishing_time}") if current_time < next_fishing_time else ''
+        message += (f"\n• 下次可钓鱼时间\n{next_fishing_time}") if current_time < next_fishing_time else ''
 
         # 判断是否进入时间秒表冷却（若有）
-        message += (f"\n• 时间秒表冷却结束时间：\n{next_clock_time}") if current_time < next_clock_time else ''
+        message += (f"\n• 时间秒表冷却结束时间\n{next_clock_time}") if current_time < next_clock_time else ''
         
         # 判断外出工作时间（若有）
-        message += (f"\n• madeline工作预计完成时间：\n{working_endtime}") if current_time < working_endtime else ''
+        message += (f"\n• madeline工作预计完成时间\n{working_endtime}") if current_time < working_endtime else ''
 
         # 显示debuff时间（若有）
-        message += (f"\n• debuff {debuff_messages.get(debuff, '')} 的持续时间至：\n{next_recover_time}") if debuff != 'normal' else ''
+        message += (f"\n• debuff {debuff_messages.get(debuff, '')} 的持续时间至\n{next_recover_time}") if debuff != 'normal' else ''
 
         if ball_ifplay == 1:
             # 显示双色球以及本场门票
             message += (f"\n• 本场洞窟探险费用：{ticket_cost}颗草莓")
         
-            message += (f"\n• 本场洞窟探险选择按钮（{user_date}期）：\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}")
+            message += (f"\n• 本场洞窟探险选择按钮（{user_date}期）\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}")
             
         elif ball_ifplay == 0:
             # 显示常态双色球
-            message += (f"\n• 上次洞窟石门密码（{user_date}期）：\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}") if user_red>0 and user_blue>0 and user_yellow>0 else ''
+            message += (f"\n• 上次洞窟石门密码（{user_date}期）\n红 {user_red} | 蓝 {user_blue} | 黄 {user_yellow}") if user_red>0 and user_blue>0 and user_yellow>0 else ''
         # if history and ball_ifplay == 0:
         #     latest_draw = history[-1]  # 取列表最后一个元素
         #     latest_red = latest_draw["red"]
