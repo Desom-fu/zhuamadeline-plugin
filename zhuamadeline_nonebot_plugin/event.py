@@ -267,7 +267,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
             # 发送消息
-            msg = "你在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhuamadeline指令)"+diamond_text+hourglass_text
+            msg = "你在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhua)"+diamond_text+hourglass_text
             await send_image_or_text(message, msg, True, None, 20)
             return
 

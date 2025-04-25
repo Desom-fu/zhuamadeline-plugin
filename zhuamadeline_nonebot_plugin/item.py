@@ -237,7 +237,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
                 stuck_data[user_id] = '5'
                 save_data(full_path, data)
                 save_data(stuck_path, stuck_data)
-                text = "你在闭眼祈愿的过程中，没有任何madeline响应你，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好祈愿失败不消耗能量……"
+                text = "你在闭眼祈愿的过程中，没有任何Madeline响应你，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好祈愿失败不消耗能量……"
                 await send_image_or_text(pray, text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", True, None)
                 return
     
@@ -294,7 +294,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             stuck_data[user_id] = '2'
             save_data(user_path / file_name, data)
             save_data(stuck_path, stuck_data)
-            await send_image_or_text(pray, "你在祈愿的时候，不小心在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhuamadeline指令)", True, None)
+            await send_image_or_text(pray, "你在祈愿的时候，不小心在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhua)", True, None)
             return
     # 强制修复受伤bug
     data[str(user_id)]['buff'] = 'normal'
@@ -1186,7 +1186,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 在进du局前使用这个道具可以查看该局是否有人想狙你的某个madeline
                 """
                 await send_image_or_text(daoju, f"du局都封了，\n你用这个干什么？", at_sender=True)
-            # 检查是否是药水使用命令
+                
+                
+            # 检查是否是药水使用命令(目前有幸运药水、迅捷药水)
             for potion_name, effect in potion_effects.items():
                 if use_item_name.startswith(potion_name):
                     # 解析使用数量
@@ -1756,7 +1758,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #写入森林被困名单
                                 save_data(stuck_path, stuck_data)   
                                 #发送消息
-                                await send_image_or_text(daoju, "你在使用道具的时候，\n一不小心在森林里迷路了，\n不知道何时才能走出去……\n(请在你觉得可能找到路的时候使用zhuamadeline指令)", at_sender=True)
+                                await send_image_or_text(daoju, "你在使用道具的时候，\n一不小心在森林里迷路了，\n不知道何时才能走出去……\n(请在你觉得可能找到路的时候使用zhua)", at_sender=True)
                 
                 # 3猎掉坑    
                 if liechang_number=='3':
