@@ -3,6 +3,7 @@ from pathlib import Path
 import textwrap  
 import uuid
 import re
+import math
 from .config import save_dir, font_path
 from nonebot.adapters.onebot.v11 import MessageSegment
 
@@ -16,6 +17,40 @@ MAX_IMAGE_HEIGHT = 600    # 图片最大高度（像素）
 PADDING = 30              # 四周留白（像素）
 LINE_SPACING = 5          # 行间距（像素）
 CACHE_LIMIT = 40          # 缓存文件保留数量
+
+def create_gradient_background(width, height):
+    """创建圆形渐变背景"""
+    # 创建RGBA模式的图像
+    bg = Image.new('RGBA', (width, height), (255, 255, 255, 255))
+    draw = ImageDraw.Draw(bg)
+    
+    center_x, center_y = width // 2, height // 2
+    max_radius = int(math.sqrt(center_x**2 + center_y**2)) * 1.2  # 扩大半径
+    
+    # 渐变颜色
+    start_color = (247, 219, 255, 255)  # #F7DBFF
+    end_color = (255, 255, 255, 255)     # 白色
+    
+    steps = 100  # 增加渐变步数使过渡更平滑
+    for i in range(steps, 0, -1):  # 从外向内绘制
+        radius = int(max_radius * i / steps)
+        ratio = i / steps
+        
+        # 计算当前颜色（带缓动效果使渐变更自然）
+        ease_ratio = ratio * 0.7  # 缓动函数调整渐变速度
+        r = int(start_color[0] + (end_color[0] - start_color[0]) * ease_ratio)
+        g = int(start_color[1] + (end_color[1] - start_color[1]) * ease_ratio)
+        b = int(start_color[2] + (end_color[2] - start_color[2]) * ease_ratio)
+        a = 255  # 保持完全不透明
+        
+        draw.ellipse(
+            [(center_x - radius, center_y - radius), 
+             (center_x + radius, center_y + radius)],
+            fill=(r, g, b, a),
+            outline=None
+        )
+    
+    return bg
 
 # 愚人节特供！
 # def wrap_text(text, max_chars=20):
@@ -192,69 +227,66 @@ def calculate_content_size(draw, lines, image_size=None):
     return max_width, total_height
 
 def generate_frame(text1, text2, base_image=None, center=True, max_chars=20):
-    """
-    生成单帧图像（核心逻辑）
-    
-    参数：
-    - text1: 顶部文本
-    - text2: 底部文本
-    - base_image: PIL图像对象（可选）
-    - center: 是否居中
-    
-    返回：
-    - 生成的PIL图像对象
-    """
-    # 创建临时画布用于测量
+    """生成单帧图像"""
+    # 文本预处理
     dummy = Image.new("RGB", (1, 1))
     draw = ImageDraw.Draw(dummy)
     
-    # 文本预处理
     lines1 = wrap_text(text1, max_chars) if text1 else [] 
     lines2 = wrap_text(text2, max_chars) if text2 else []
     
     # 图片尺寸计算
     img_size = None
     if base_image:
-        # 动态计算最大图片宽度（考虑中文字符宽度）
         max_img_width = min(MAX_WIDTH - 2 * PADDING, font_size * 20)
-        
-        # 保持宽高比的缩放计算
         orig_w, orig_h = base_image.size
-        scale = min(
-            MAX_IMAGE_HEIGHT / orig_h,
-            max_img_width / orig_w,
-            1.0  # 不放大
-        )
+        scale = min(MAX_IMAGE_HEIGHT / orig_h, max_img_width / orig_w, 1.0)
         img_size = (int(orig_w * scale), int(orig_h * scale))
     
     # 计算内容总尺寸
-    content_width, content_height = calculate_content_size(
-        draw, lines1 + lines2, img_size
-    )
-    
-    # 确定画布尺寸（不超过最大限制）
+    content_width, content_height = calculate_content_size(draw, lines1 + lines2, img_size)
     canvas_width = min(content_width + 2 * PADDING, MAX_WIDTH)
     canvas_height = content_height + 2 * PADDING
     
-    # 创建实际画布
-    canvas = Image.new("RGBA", (canvas_width, canvas_height), "white")
-    draw = ImageDraw.Draw(canvas)
-    y = PADDING  # 初始Y坐标
+    # 1. 首先创建渐变背景
+    bg = create_gradient_background(canvas_width, canvas_height)
     
-    # 绘制顶部文本
+    # 2. 创建主画布（RGBA模式）
+    canvas = Image.new('RGBA', (canvas_width, canvas_height))
+    
+    # 3. 将渐变背景粘贴到主画布
+    canvas.paste(bg, (0, 0), bg)  # 使用bg作为mask确保透明度
+    
+    # 4. 创建文本和图片层（透明背景）
+    content_layer = Image.new('RGBA', (canvas_width, canvas_height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(content_layer)
+    y = PADDING
+    
+    # 绘制文本
     y = draw_text(draw, lines1, y, canvas_width, center)
     
     # 绘制图片（如果有）
     if base_image and img_size:
-        y += font_size  # 图片前间距
+        y += font_size
         img_w, img_h = img_size
         img_x = (canvas_width - img_w) // 2 if center else PADDING
-        resized_img = base_image.resize(img_size, Image.LANCZOS)
-        canvas.paste(resized_img, (img_x, y), resized_img)
-        y += img_h + font_size  # 图片高度+后间距
+        
+        # 确保图片是RGBA模式
+        resized_img = base_image.resize(img_size, Image.LANCZOS).convert('RGBA')
+        
+        # 创建图片层（带透明背景）
+        img_layer = Image.new('RGBA', (img_w, img_h), (0, 0, 0, 0))
+        img_layer.paste(resized_img, (0, 0), resized_img)
+        
+        # 将图片粘贴到内容层
+        content_layer.paste(img_layer, (img_x, y), img_layer)
+        y += img_h + font_size
     
     # 绘制底部文本
     y = draw_text(draw, lines2, y, canvas_width, center)
+    
+    # 5. 合并渐变背景和内容层
+    canvas = Image.alpha_composite(canvas, content_layer)
     
     return canvas
 
