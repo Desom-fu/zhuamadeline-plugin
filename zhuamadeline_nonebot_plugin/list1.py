@@ -195,7 +195,7 @@ madeline_data1 = {
         '11':{
             'name': 'c',
             'description':
-            '©️'
+            '©'
         },
         '12':{
             'name': '按钮',
