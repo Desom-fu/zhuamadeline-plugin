@@ -669,7 +669,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 统一保存数据
                 save_data(user_path / file_name, data)
                 # 发送消息
-                await send_image_or_text(daoju, message, at_sender=True)
+                await send_image_or_text(daoju, message, True, None, 20)
 
             # if(use_item_name=="充能箱"):
             #     if(data.get(user_id).get('collections').get('充能箱',0) > 0):
