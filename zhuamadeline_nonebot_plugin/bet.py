@@ -1156,16 +1156,16 @@ async def shoot(stp, group_id, msg_handle, args):
         demon_data[group_id]['atk'] = 0
         demon_data[group_id]['add_atk'] = False
         if atk != 0:
-            msg += f"- 这颗子弹伤害为……{atk+1}点！"
+            msg += f"- 这颗子弹的伤害为……{atk+1}点！\n"
         if atk in [3, 4]:
-            msg += '\n- 癫狂屠戮！'
+            msg += '- 癫狂屠戮！\n'
         if atk >= 5:
-            msg += '\n- 无双，万军取首！'
-        msg += f'- 你开枪了，子弹 *【击中了】* {args}！{args}剩余hp：{str(hp[pl-stp])}/{hp_max}\n'
+            msg += '- 无双，万军取首！\n'
+        msg += f'- 你开枪了，子弹 *【击中了】* {args}！\n- {args}剩余hp：{str(hp[pl-stp])}/{hp_max}\n'
     else:
         demon_data[group_id]['atk'] = 0
         demon_data[group_id]['add_atk'] = False
-        msg += f'- 你开枪了，子弹未击中{args}！{args}剩余hp：{str(hp[pl-stp])}/{hp_max}\n'
+        msg += f'- 你开枪了，子弹未击中{args}！\n- {args}剩余hp：{str(hp[pl-stp])}/{hp_max}\n'
     del clip[-1]
     
     if len(clip) == 0 or clip.count(1) == 0:
