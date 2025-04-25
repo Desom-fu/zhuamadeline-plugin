@@ -187,8 +187,8 @@ async def ranking_handle(bot: Bot, event: GroupMessageEvent, args: Message = Com
     user_nickname = await get_nickname(bot, user_id)
     rank_msg += (
         f"{user_nickname}的排名为：{user_rank}，\n"
-        f"拥有【存有{user_berry}+仓库{user_bank_berry}+果酱{user_jam_berry}+鱼类{user_fish_value}】\n"
-        f"= {user_berry + user_bank_berry + user_jam_berry + user_fish_value}颗草莓"
+        f"拥有【存有{user_berry}+仓库{user_bank_berry}+果酱{user_jam_berry}+鱼类{user_fish_value}】"
+        f"={user_berry + user_bank_berry + user_jam_berry + user_fish_value}颗草莓"
     )
 
     # 发送图片
