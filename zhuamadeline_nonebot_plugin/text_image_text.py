@@ -57,24 +57,27 @@ CACHE_LIMIT = 40          # 缓存目录中保留最近生成的文件数
 #             lines.append("".join(current_line))
     
 #     return lines
-import re
-
-import re
 
 def wrap_text(text, max_chars=20):
     """
-    改进版换行函数：
+    换行函数：
     - 英文单词（含撇号，如 "it's"）视为 1 个单元
-    - 连续数字视为 1 个单元
-    - 中文字符（包括中文标点）视为 1 个单元
-    - 其他字符（如空格、换行、标点）按原样处理
+    - 数字+符号混合（如 "123!"）视为 1 个单元
+    - 纯符号（如 "!@#"）视为 1 个单元
+    - 连续数字（如 "123"）视为 1 个单元
+    - 中文字符（含标点）视为 1 个单元
+    - 其他字符（如空格、换行）按原样处理
     """
     lines = []
     paragraphs = text.split("\n")
     
-    # 匹配：英文单词（含撇号）| 数字 | 中文字符 | 其他字符
+    # 匹配优先级：
+    # 1. 英文单词（含撇号）| 数字+符号混合 | 纯符号
+    # 2. 连续数字
+    # 3. 中文字符
+    # 4. 空格、换行、其他字符
     token_pattern = re.compile(
-        r"([a-zA-Z]+(?:'[a-zA-Z]+)*|\d+|[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|\s|[^\w\s])"
+        r"([a-zA-Z]+(?:'[a-zA-Z]+)*|[\d[^\w\s]]+|[^\w\s]+|\d+|[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|\s)"
     )
     
     for paragraph in paragraphs:
@@ -87,7 +90,7 @@ def wrap_text(text, max_chars=20):
         current_length = 0
         
         for token in tokens:
-            token_length = len(token)  # 中文每个字算 1 个长度
+            token_length = len(token)
             
             # 如果当前行 + 新 token 不超过 max_chars，则加入当前行
             if current_length + token_length <= max_chars:
