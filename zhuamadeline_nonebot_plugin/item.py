@@ -713,7 +713,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
                         if current_time < work_end_time:
                             text = time_text(str(work_end_time-current_time))
-                            send_image_or_text(daoju, f"你正在维护草莓加工器，还需要{text}！\n维护加工器的过程不能使用秒表哦！", at_sender=True)
+                            await send_image_or_text(daoju, f"你正在维护草莓加工器，还需要{text}！\n维护加工器的过程不能使用秒表哦！", at_sender=True)
                         #时间过了自动恢复正常
                         else:
                             data[str(user_id)]['status'] = 'normal'
@@ -737,7 +737,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         
                         if time_since_last_sleep < datetime.timedelta(hours=4):
                             remaining_time = datetime.timedelta(hours=4) - time_since_last_sleep
-                            send_image_or_text(daoju, 
+                            await send_image_or_text(daoju, 
                                 f"好好休息吧，{remaining_time.seconds // 3600}小时"
                                 f"{(remaining_time.seconds % 3600) // 60}分钟"
                                 f"{remaining_time.seconds % 60}秒内\n不要使用时间秒表了……", at_sender=True)
@@ -903,7 +903,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     for p in sim_results:
                         sim_summary[p] = sim_summary.get(p, 0) + 1
                     sim_msg = "模拟一万连抽奖结果：\n" + "\n".join(f"{k} x{v}" for k, v in sim_summary.items())
-                    send_image_or_text(daoju, sim_msg, at_sender=True)
+                    await send_image_or_text(daoju, sim_msg, at_sender=True)
 
                 # 合并单抽、五连、十连：确定抽奖次数
                 draw_count = 1 if user_choice == "单抽" else (5 if user_choice == "五连抽" else 10)
@@ -933,7 +933,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     if info["msg"]:
                         output_lines.append(info["msg"])
                 output_msg = "\n".join(output_lines)
-                send_image_or_text(daoju, output_msg, at_sender=True)
+                await send_image_or_text(daoju, output_msg, at_sender=True)
 
 
             if use_item_name.startswith("急救包"): 
@@ -1001,7 +1001,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         save_data(user_path / file_name, data)
 
                         remaining_kits = data[user_id]["item"].get("急救包", 0)
-                        send_image_or_text(daoju, 
+                        await send_image_or_text(daoju, 
                             f"恭喜你自救成功，你的伤势得到了治疗！\n你消耗了{used_count}个急救包，还剩{remaining_kits}个。",
                             at_sender=True
                         )
@@ -1019,13 +1019,13 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 根据模式返回结果
                 remaining_kits = data[user_id]["item"].get("急救包", 0)
                 if auto_mode and auto_reply:
-                    send_image_or_text(daoju, 
+                    await send_image_or_text(daoju, 
                         f"你的急救包已经用完，但仍然没有自救成功...\n"
                         f"你一共消耗了{used_count}个急救包，\n还剩{remaining_kits}个。",
                         at_sender=True
                     )
                 elif not auto_mode:
-                    send_image_or_text(daoju, 
+                    await send_image_or_text(daoju, 
                         f"似乎是自救失败了，\n也许你可以再试一次，\n亦或继续等待救援。你还剩{remaining_kits}个急救包。",
                         at_sender=True
                     )
@@ -1411,7 +1411,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 
                 if time_since_last_sleep < datetime.timedelta(hours=4):
                     remaining_time = datetime.timedelta(hours=4) - time_since_last_sleep
-                    send_image_or_text(daoju, 
+                    await send_image_or_text(daoju, 
                         f"好好休息吧，{remaining_time.seconds // 3600}小时"
                         f"{(remaining_time.seconds % 3600) // 60}分钟"
                         f"{remaining_time.seconds % 60}秒内\n不要试图使用抓捕类道具了……", at_sender=True)
@@ -1810,7 +1810,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #随机事件文本
                                 text = "你在使用道具的过程中，\n没有任何madeline被道具吸引，\n结果一不小心你就撞到了山洞上！\n不过幸好道具没消耗……"
                                 #发送消息
-                                send_image_or_text(daoju, text+"你需要原地等待90分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)
+                                await send_image_or_text(daoju, text+"你需要原地等待90分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)
                 # 4猎必须要有黄球才能使用消耗类道具
                 if liechang_number == "4":
                     if not use_item_name.startswith("madeline飞升器"):
@@ -1861,7 +1861,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #随机事件文本
                                 text = "你在使用道具的过程中，没有任何madeline被道具吸引，\n结果一不小心你就撞到了悬崖峭壁上！\n不过幸好道具没消耗……"
                                 #发送消息
-                                send_image_or_text(daoju, text+"你需要原地等待120分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)                      
+                                await send_image_or_text(daoju, text+"你需要原地等待120分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)                      
 
                 if(use_item_name=="胡萝卜"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
@@ -2166,7 +2166,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     #写入文件
                     save_data(user_path / file_name, data)
 
-                    send_image_or_text(daoju, fail_text, at_sender=True)
+                    await send_image_or_text(daoju, fail_text, at_sender=True)
                     
                 # # 最后检查道具名称是否在商品列表中
                 # if use_item_name not in item or use_item_name not in all_collections:
