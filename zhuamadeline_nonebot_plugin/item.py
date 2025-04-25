@@ -925,9 +925,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 根据抽奖次数确定输出头部文案
                 output_lines = []
                 if draw_count == 1:
-                    output_lines.append("\n你打开了道具盲盒，获得了：")
+                    output_lines.append("你打开了道具盲盒，获得了：")
                 else:
-                    output_lines.append(f"\n你连续打开了{draw_count}个道具盲盒，结果如下:")
+                    output_lines.append(f"你连续打开了{draw_count}个道具盲盒，结果如下:")
                 for blindbox_item, info in result_summary.items():
                     output_lines.append(f"· {blindbox_item} x {info['count']}")
                     if info["msg"]:
