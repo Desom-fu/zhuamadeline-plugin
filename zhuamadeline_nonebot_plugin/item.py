@@ -1084,9 +1084,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     #写入文件
                     save_data(user_path / file_name, data)
                     if berry_bonus_all != 0:
-                        await send_image_or_text(daoju, f"恭喜！{str(num_of_sell)}瓶草莓果酱卖出了\n{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}颗草莓！", at_sender=True)
+                        await send_image_or_text(daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}颗草莓！", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"恭喜！{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！", at_sender=True)
+                        await send_image_or_text(daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！", at_sender=True)
                 else:
                     await send_image_or_text(daoju, f"你现在没有这么多{use_name}。", at_sender=True)
                 

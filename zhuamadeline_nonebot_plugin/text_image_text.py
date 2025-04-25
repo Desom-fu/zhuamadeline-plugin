@@ -66,26 +66,21 @@ def wrap_text(text, max_chars=20):
     - 英文单词（含下划线，如 hello_world）视为 1 个单元
     - 数学表达式（如 [1+2]）视为 1 个单元
     - 中文、数字、空格等按原规则处理
+    
+    每个匹配到的 token 都视为 1 个字符单位，无论其实际长度
     """
     lines = []
     paragraphs = text.split("\n")
     
-    # 正则匹配优先级（从高到低）：
-    # 1. 数学表达式（如 [1+2]）
-    # 2. 英文单词（含下划线、撇号，如 hello_world, it's）
-    # 3. 连续数字
-    # 4. 符号组合（全角/半角，如 @# ！？）
-    # 5. 单独符号（如 _ @ # ！）
-    # 6. 中文字符
-    # 7. 空格、换行
+    # 修正后的正则表达式模式
     token_pattern = re.compile(
-        r"($$[\d+\-*/=]+$$|[\d+[\-*/=]]+|"  # 数学表达式
-        r"[a-zA-Z_]+(?:'[a-zA-Z_]+)*|"      # 英文单词（含下划线和撇号）
-        r"\d+|"                             # 连续数字
-        r"[^\w\s\u4e00-\u9fff]{2,}|"        # 符号组合（2个及以上符号）
-        r"[^\w\s\u4e00-\u9fff]|"            # 单独符号
-        r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|"  # 中文字符
-        r"\s)"                              # 空格、换行
+        r"($$[\d+\-*/=]+$$|[\d+[\-*/=]]+|"   # 数学表达式如 [1+2]
+        r"[a-zA-Z_]+(?:'[a-zA-Z_]+)*|"  # 英文单词（含下划线和撇号）
+        r"\d+|"  # 连续数字
+        r"[^\w\s\u4e00-\u9fff]{2,}|"  # 符号组合（2个及以上符号）
+        r"[^\w\s\u4e00-\u9fff]|"  # 单独符号
+        r"[\u4e00-\u9fff]|"  # 单个中文字符
+        r"\s)"  # 空格、换行
     )
     
     for paragraph in paragraphs:
@@ -98,7 +93,9 @@ def wrap_text(text, max_chars=20):
         current_length = 0
         
         for token in tokens:
-            token_length = len(token)
+            # 每个 token 都视为 1 个字符单位
+            token_length = 1
+            
             if current_length + token_length <= max_chars:
                 current_line.append(token)
                 current_length += token_length

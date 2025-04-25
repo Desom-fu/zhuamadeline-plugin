@@ -565,38 +565,38 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     # 各种回复
     if stat == 5:
         pk_text = (
-            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
-            f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}]\n的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
             f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为 {zhanli_text} (win)\n"
-            f"- 你的madeline被打败了！(｡•́︿•̀｡)"
+            f"- 你的Madeline被打败了！(｡•́︿•̀｡)"
         )
     elif stat == 4:
         pk_text = (
-            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
-            f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为\n[{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
             f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为{zhanli_text} (draw/lose)\n"
-            f"- 你的madeline的进攻战力和擂主的madeline的防守战力相等，但由于你是挑战者，所以你赢了！`(o^ ^o)ﾉ"
+            f"- 你的Madeline的进攻战力和擂主的Madeline的防守战力相等，但由于你是挑战者，所以你赢了！`(o^ ^o)ﾉ"
         )
     elif stat == 3:
         pk_text = (
-            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为[{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
-            f"- 你的madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该madeline的常驻战力为 [{ranb}]\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个Madeline的常驻战力为[{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}]\n的进攻战力为[{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
             f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为{zhanli_text} (lose)\n"
-            f"- 你的madeline获胜了！`(o^ ^o)ﾉ"
+            f"- 你的Madeline获胜了！`(o^ ^o)ﾉ"
         )
     elif stat == 2:
         pk_text = (
-            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，\n"
-            f"但综合公式计算后不如之前你放入的本擂台的madeline，所以替换失败！"
+            f"但综合公式计算后不如之前你放入的本擂台的Madeline，所以替换失败！"
         )
     elif stat == 1:
         pk_text = (
-            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！"
         )
     elif stat == 0:
         pk_text = ''
@@ -607,8 +607,8 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         pk_text += (
             f"总回合数：{totalCount}\n"
             f"本次回合奖励：{inreward}草莓\n"
-            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你成功把madeline放入了一个空擂台，该madeline现在守卫着 [擂台{len(list_current)}]！"
+            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你成功把madeline放入了一个空擂台，该Madeline现在守卫着 [擂台{len(list_current)}]！"
         )
 
     # #发送信息
@@ -625,7 +625,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
                 if ranb >=70:
                     anwei = ranb-60 
                 user_data[kicked_user_id]['berry'] += anwei  # 给被踢玩家发放 10 草莓作为安慰奖
-                pk_text += f"\n- 因为 [{nicknameb}] 被踢下擂台的madeline的常驻战力达到了 [{ranb}]≥60，所以获得了{anwei}草莓的安慰奖！"
+                pk_text += f"\n- 因为 [{nicknameb}] 被踢下擂台的Madeline的常驻战力达到了 [{ranb}]≥60，所以获得了{anwei}草莓的安慰奖！"
         else:
             pk_text += "\n- 当前没有玩家被踢下擂台。"
             
@@ -635,7 +635,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             if rana >= 75:
                 anwei = rana - 55
                 user_data[user_id]['berry'] += anwei  # 失败玩家发放 20 草莓作为安慰奖
-                pk_text += f"\n- 因为 [{nickname}] 未能攻擂成功的madeline的战力 [{rana}]≥75，所以获得了{anwei}草莓的安慰奖！"
+                pk_text += f"\n- 因为 [{nickname}] 未能攻擂成功的Madeline的战力 [{rana}]≥75，所以获得了{anwei}草莓的安慰奖！"
         else:
             pk_text += "\n- 当前没有玩家被踢下擂台。"
     if pvp_guess_text:
@@ -714,7 +714,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
                 remaining_minutes = remaining_seconds // 60  # 剩余分钟数
                 remaining_seconds = remaining_seconds % 60  # 剩余秒数
                 
-                await send_image_or_text(jjc, f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
+                await send_image_or_text(jjc, f"啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
         
         await send_image_or_text(jjc, "madeline竞技场尚未开启！", True)
 
@@ -767,7 +767,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
         text += (
             f"擂台{i}：\n"
             f"[{nickname}] 的 [{level}级{name}]\n"
-            f"该madeline的常驻战力：[{rank}]\n"
+            f"该Madeline的常驻战力：[{rank}]\n"
             f"所在猎场：[{liechang_number}]号猎场\n"
             f"加入回合数：[{join_count}]\n"
             f"本擂台是否有人竞猜：[{has_game}]"

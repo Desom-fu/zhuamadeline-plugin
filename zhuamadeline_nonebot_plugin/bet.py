@@ -327,11 +327,11 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             msg += f"\n- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
             pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
             pid_nickname = await get_nickname(bot, pid)
-            msg += f"- 当前是[{pid_nickname}]的回合"
+            turn_msg = f"\n当前是[{pid_nickname}]的回合"
             save_data(full_path, data)
             save_data(bar_path, bar_data)
             save_data(demon_path, demon_data)
-            await send_image_or_text(bet, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1), 25)
+            await send_image_or_text(bet, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
         else:
             await send_image_or_text(bet, "游戏已开始，无法加入！", True, None, 25)
     elif game_type == '3' and len(game_type_split) == 2:
@@ -1206,6 +1206,8 @@ async def shoot(stp, group_id, msg_handle, args):
     demon_data[group_id]['hp'] = hp
     # 刷新时间
     demon_data[group_id]['turn_start_time'] = int(time.time())
+    # 初始化turn_msg
+    turn_msg = ''
     if demon_data[group_id]['hp'][0] <= 0: 
         winner = demon_data[group_id]['pl'][1]
         end_msg, bar_data, demon_data = await handle_game_end(
@@ -1229,10 +1231,11 @@ async def shoot(stp, group_id, msg_handle, args):
     else:
         pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
         pid_nickname = await get_nickname(bot, pid)
-        msg += '- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))+"\n" + f"- 当前是[{pid_nickname}]的回合"
+        msg += '- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))
+        turn_msg = f"\n当前是[{pid_nickname}]的回合"
     save_data(bar_path, bar_data)
     save_data(demon_path, demon_data)
-    await send_image_or_text(msg_handle, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1), 25)
+    await send_image_or_text(msg_handle, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
 
 # 开枪命令
 fire = on_command("开枪",aliases={"射击"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1753,9 +1756,9 @@ async def check_handle(bot: Bot, event: GroupMessageEvent):
     user_id = str(event.user_id)
     demon_data = open_data(demon_path)
     if demon_data[group_id]['start'] == False:
-        await send_image_or_text(check, "当前并没有开始任何一局恶魔轮盘哦！", True, None, 8)
+        await send_image_or_text(check, "当前并没有开始任何一局恶魔轮盘哦！", True, None, 10)
     if user_id not in demon_data[group_id]['pl']:
-        await send_image_or_text(check, "只有当前局内玩家能查看局势哦！", True, None, 8)
+        await send_image_or_text(check, "只有当前局内玩家能查看局势哦！", True, None, 10)
     # 生成玩家信息
     player0 = str(demon_data[group_id]['pl'][0])
     player1 = str(demon_data[group_id]['pl'][1])
@@ -1807,11 +1810,11 @@ async def check_handle(bot: Bot, event: GroupMessageEvent):
         msg += f"- 本颗子弹伤害为：{atk+1}点\n"
     msg += f"\n[{p0_nick_name}]\nhp：{hp0}/{hp_max}\n" + f"道具({len(items_0)}/{item_max})：" +f"\n{item_0}\n\n"
     msg += f"[{p1_nick_name}]\nhp：{hp1}/{hp_max}\n" + f"道具({len(items_1)}/{item_max})：" +f"\n{item_1}\n\n"
-    msg += f"- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
+    msg += f"- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}"
     pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
     pid_nickname = await get_nickname(bot, pid)
-    msg += f"- 当前是[{pid_nickname}]的回合"
-    await send_image_or_text(check, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1),25)
+    turn_msg = f"\n当前是[{pid_nickname}]的回合"
+    await send_image_or_text(check, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}',25)
         
 
 # 恶魔投降指令：随时投降

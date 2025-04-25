@@ -168,7 +168,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
                 if current_time < work_end_time:
                     text = time_text(str(work_end_time-current_time))
-                    await send_image_or_text(catch, f"你正在维护草莓加工器，还需要{text}！", True, None)
+                    await send_image_or_text(catch, f"你正在维护草莓加工器，\n还需要{text}！", True, None)
                     return
                 #时间过了自动恢复正常
                 else:

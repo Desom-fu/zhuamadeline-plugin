@@ -9,7 +9,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
-from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status
+from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status, get_nickname
 from .config import ban, bot_owner_id, connect_bot_id
 from .whitelist import whitelist_rule
 from .shop import item
@@ -295,8 +295,10 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             del stuck_data[save_id]
             save_data(user_path, user_data)
             save_data(stuck_path, stuck_data)
-            msg = f"恭喜你救出了森林里的" + MessageSegment.at(save_id) + "。\n本次奖励75草莓"+ diamond_text+hourglass_text
-            await send_image_or_text(message, msg, True, None, 20)
+            rescue_nickname = await get_nickname(bot, save_id)
+            save_msg = MessageSegment.at(save_id)
+            msg = f"恭喜你救出了森林里的[{rescue_nickname}]。\n本次奖励75草莓"+ diamond_text+hourglass_text
+            await send_image_or_text(message, msg, True, save_msg, 20)
             return
         else:
             return
@@ -776,8 +778,10 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             save_data(user_path, user_data)
             #写入被困名单
             save_data(stuck_path, stuck_data)
-            msg = f"恭喜你救出了矿洞里的"+ MessageSegment.at(save_id) +"。\n本次奖励100草莓"+ diamond_text+hourglass_text
-            await send_image_or_text(message, msg, True, None, 20)
+            rescue_nickname = await get_nickname(bot, save_id)
+            save_msg = MessageSegment.at(save_id)
+            msg = f"恭喜你救出了矿洞里的[{rescue_nickname}]。\n本次奖励100草莓"+ diamond_text+hourglass_text
+            await send_image_or_text(message, msg, True, save_msg, 20)
             return
         else:
             #没有需要救的人就结束事件，正常抓madeline
