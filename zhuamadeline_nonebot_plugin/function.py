@@ -729,11 +729,11 @@ def data2_count(user_id = '121096913', level = '1', num = '1', lc = '1') -> list
     new_print = ""
     if(str(user_id) in data2):
         if(not (str(level)+'_'+str(num)) in data2[str(user_id)]):
-            new_print = "\n恭喜你抓出来一个新madeline！\n"  #如果出新就添加文本
+            new_print = "恭喜你抓出来一个新madeline！\n"  #如果出新就添加文本
             data2[str(user_id)][str(level)+'_'+str(num)] = 0
         data2[str(user_id)][str(level)+'_'+str(num)] += 1  #数量+1
     else:
-        new_print = "\n恭喜你抓出来一个新madeline！\n"  #如果出新就添加文本
+        new_print = "恭喜你抓出来一个新madeline！\n"  #如果出新就添加文本
         data2[str(user_id)] = {}
         data2[str(user_id)][str(level)+'_'+str(num)] = 1  
     result = []
