@@ -845,7 +845,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
             else:
                 message += f"\n• 本次Madeline竞技场已结算"
     # 发送图片     
-    await send_image_or_text(ck, message, True, "", 25)
+    await send_image_or_text(ck, message, True, "", 50)
 
 
 # 转账 - 1000以下150手续费，1000上15%
