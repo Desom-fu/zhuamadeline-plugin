@@ -157,17 +157,18 @@ def draw_text(draw, lines, y, canvas_width, center=True):
     
     return y
 
-def calculate_content_size(draw, lines, image_size=None):
+def calculate_content_size(draw, lines, image_size=None, extra_padding=PADDING):
     """
-    计算内容总尺寸（文本+图片）
+    计算内容总尺寸（文本+图片），可额外增加padding
     
     参数：
-    - draw: 用于测量的ImageDraw对象
+    - draw: ImageDraw对象
     - lines: 文本行列表
-    - image_size: 图片尺寸（宽,高），可选
+    - image_size: 图片尺寸(宽,高)，可选
+    - extra_padding: 要额外增加的padding值
     
     返回：
-    - (总宽度, 总高度)
+    - (总宽度+额外padding, 总高度+额外padding)
     """
     max_width = 0
     total_height = 0
@@ -187,9 +188,10 @@ def calculate_content_size(draw, lines, image_size=None):
     if image_size:
         img_w, img_h = image_size
         max_width = max(max_width, img_w)
-        total_height += img_h + 2 * font_size  # 图片前后间距
+        total_height += img_h + 2 * font_size
     
-    return max_width, total_height
+    # 返回时额外增加padding
+    return max_width + extra_padding, total_height + extra_padding
 
 def generate_frame(text1, text2, base_image=None, center=True, max_chars=20):
     """
