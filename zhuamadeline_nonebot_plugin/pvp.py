@@ -591,7 +591,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         pk_text = (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，\n"
-            f"但综合公式计算后不如之前你放入的本擂台的Madeline，所以替换失败！"
+            f"但综合公式计算后不如之前你放入的本擂台的Madeline，\n所以替换失败！"
         )
     elif stat == 1:
         pk_text = (
