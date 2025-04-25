@@ -59,10 +59,12 @@ CACHE_LIMIT = 40          # 缓存目录中保留最近生成的文件数
 #     return lines
 import re
 
+import re
+
 def wrap_text(text, max_chars=20):
     """
     改进版换行函数：
-    - 英文单词（连续字母）视为 1 个单元
+    - 英文单词（含撇号，如 "it's"）视为 1 个单元
     - 连续数字视为 1 个单元
     - 中文字符（包括中文标点）视为 1 个单元
     - 其他字符（如空格、换行、标点）按原样处理
@@ -70,9 +72,9 @@ def wrap_text(text, max_chars=20):
     lines = []
     paragraphs = text.split("\n")
     
-    # 匹配：英文单词 | 数字 | 中文字符 | 其他字符（如空格、标点）
+    # 匹配：英文单词（含撇号）| 数字 | 中文字符 | 其他字符
     token_pattern = re.compile(
-        r'([a-zA-Z]+|\d+|[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|\s|[^\w\s])'
+        r"([a-zA-Z]+(?:'[a-zA-Z]+)*|\d+|[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|\s|[^\w\s])"
     )
     
     for paragraph in paragraphs:
