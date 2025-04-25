@@ -667,7 +667,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     if kicked_user_id:
         forward_text += MessageSegment.at(kicked_user_id)
     # 发送挑战结果
-    await send_image_or_text(message, pk_text, True, forward_text, 20)
+    await send_image_or_text(message, pk_text, True, forward_text, 25)
 
     # 发送结束结果（如果有）
     if set_final:

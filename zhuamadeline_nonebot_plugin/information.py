@@ -19,7 +19,7 @@ help = on_fullmatch(
 @help.handle()
 async def zhua_help():
     text1 = (
-        "游戏玩法及全部命令请前往抓Madeline wiki\n"
+        "\n游戏玩法及全部命令请前往抓Madeline wiki\n"
         "https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O\n"
         "进行查看\n")
     text = (
@@ -36,7 +36,7 @@ async def zhua_help():
         "- .buy (数量)（道具名): 购买道具/藏品\n"
         "- .use (道具名): 使用道具/藏品"
     )
-    await send_image_or_text(help, text, text1)
+    await send_image_or_text(help, text, True, text1)
 
 # 更新公告
 gong_gao = on_fullmatch(
