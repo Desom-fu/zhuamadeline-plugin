@@ -61,33 +61,31 @@ CACHE_LIMIT = 40          # 缓存目录中保留最近生成的文件数
 def wrap_text(text, max_chars=20):
     """
     换行函数：
-    - 数学表达式（如 "[52]+[81]=[133]"）视为 1 个单元
-    - 全角/半角符号（如 "，。!?"）视为 1 个单元
-    - 特殊符号（如 "@#$%"）视为 1 个单元
-    - 英文单词（含撇号，如 "it's"）视为 1 个单元
-    - 连续数字（如 "123"）视为 1 个单元
-    - 中文字符（含标点）视为 1 个单元
-    - 空格、换行按原样处理
+    - 单独符号（如 _ @ # ！）视为 1 个单元
+    - 符号组合（如 @# ！？）视为 1 个单元
+    - 英文单词（含下划线，如 hello_world）视为 1 个单元
+    - 数学表达式（如 [1+2]）视为 1 个单元
+    - 中文、数字、空格等按原规则处理
     """
     lines = []
     paragraphs = text.split("\n")
     
     # 正则匹配优先级（从高到低）：
-    # 1. 数学表达式（如 [52]+[81]=[133]）
-    # 2. 英文单词（含撇号）
-    # 3. 数字+符号混合（如 123!）
-    # 4. 纯符号（全角/半角/特殊符号，如 @#$%^&*，。！？）
-    # 5. 连续数字
+    # 1. 数学表达式（如 [1+2]）
+    # 2. 英文单词（含下划线、撇号，如 hello_world, it's）
+    # 3. 连续数字
+    # 4. 符号组合（全角/半角，如 @# ！？）
+    # 5. 单独符号（如 _ @ # ！）
     # 6. 中文字符
-    # 7. 空格、换行、其他字符
+    # 7. 空格、换行
     token_pattern = re.compile(
-        r"($$[\d+\-*/=]+$$|[\d+[\-*/=]]+|"  # 数学表达式（如 [52]+[81]=[133]）
-        r"[a-zA-Z]+(?:'[a-zA-Z]+)*|"         # 英文单词（含撇号）
-        r"[\d[^\w\s]]+|"                     # 数字+符号混合（如 123!）
-        r"[^\w\s\u4e00-\u9fff]+|"            # 纯符号（全角/半角/特殊符号）
-        r"\d+|"                              # 连续数字
-        r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|"  # 中文字符（含标点）
-        r"\s)"                               # 空格、换行
+        r"($$[\d+\-*/=]+$$|[\d+[\-*/=]]+|"  # 数学表达式
+        r"[a-zA-Z_]+(?:'[a-zA-Z_]+)*|"      # 英文单词（含下划线和撇号）
+        r"\d+|"                             # 连续数字
+        r"[^\w\s\u4e00-\u9fff]{2,}|"        # 符号组合（2个及以上符号）
+        r"[^\w\s\u4e00-\u9fff]|"            # 单独符号
+        r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|"  # 中文字符
+        r"\s)"                              # 空格、换行
     )
     
     for paragraph in paragraphs:
@@ -101,24 +99,19 @@ def wrap_text(text, max_chars=20):
         
         for token in tokens:
             token_length = len(token)
-            
-            # 如果当前行 + 新 token 不超过 max_chars，则加入当前行
             if current_length + token_length <= max_chars:
                 current_line.append(token)
                 current_length += token_length
             else:
-                # 否则，换行
                 if current_line:
                     lines.append("".join(current_line))
                 current_line = [token]
                 current_length = token_length
         
-        # 添加最后一行
         if current_line:
             lines.append("".join(current_line))
     
     return lines
-
 
 def draw_text(draw, lines, y, canvas_width, line_spacing=5, center=True):
     """
