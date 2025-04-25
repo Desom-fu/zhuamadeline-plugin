@@ -327,7 +327,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             "走着走着，树上的金草莓落下来砸到你身上，爆炸了，把你炸伤了！",
             "你走进一个山洞，可此地暗得你完全找不着北，你一不小心就被山洞里的石头刮伤了！"
         ]
-        msg = random.choice(text) + "你需要原地等待一个小时，或者使用急救包自救，又或者等待他人来救你……"+diamond_text+hourglass_text
+        msg = random.choice(text) + "\n你需要原地等待一个小时，或者使用急救包自救，又或者等待他人来救你……"+diamond_text+hourglass_text
         await send_image_or_text(message, msg, True, None, 20)
         return
 
@@ -663,7 +663,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             "你在移动的板子上没站稳，掉下去被刺儿扎得满身疮痍！"
         ]
         #发送消息
-        msg = random.choice(text)+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……"+diamond_text+hourglass_text
+        msg = random.choice(text)+"\n你需要原地等待一个半小时，或者使用急救包自救，又或者等待他人来救你……"+diamond_text+hourglass_text
         await send_image_or_text(message, msg, True, None, 20)
         return
         
@@ -1047,7 +1047,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             "你站在移动方块上面，突然踉跄了一下没站稳，掉到下面的酸液里去了！酸液把你烫的嗷嗷直叫！"
         ]
         #发送消息
-        msg = random.choice(text)+"你需要原地疗伤120分钟，或者使用急救包自救……" + diamond_text+hourglass_text
+        msg = random.choice(text)+"\n你需要原地疗伤两个小时，或者使用急救包自救……" + diamond_text+hourglass_text
         await send_image_or_text(message, msg, True, None, 20)
         return
         
