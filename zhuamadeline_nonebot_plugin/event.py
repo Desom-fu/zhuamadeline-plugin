@@ -1174,7 +1174,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             complusion_count = random.randint(1,5)
             bad_event_text = "抽卡"
         else:
-            user_info['event'] = 'compulsion_game1'
+            user_info['event'] = 'compulsion_bet1'
             # game1为1-3次随机，如果是有事件则没有冷却
             complusion_count = random.randint(1,3)
             bad_event_text = "预言大师"

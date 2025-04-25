@@ -664,7 +664,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     liability_message = "失约"
     # 事件
     status_messages = {
-        "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_game1": "强制预言大师", "working": "维护加工器中", "getspider": "神秘事件1", "getbomb": "神秘事件2"
+        "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_bet1": "强制预言大师", "working": "维护加工器中", "getspider": "神秘事件1", "getbomb": "神秘事件2"
     }
     # debuff
     debuff_messages = {
@@ -793,7 +793,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     if all_judge == 'all':   
 
         # 显示事件（若有）
-        message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_game1'] else ''
+        message += (f"\n• 事件 {status_messages.get(event, '')} 的剩余次数：{compulsion_count}次") if event in ['compulsion_ggl', 'compulsion_bet1'] else ''
 
         # 显示下次钓鱼的时间（若有）
         message += (f"\n• 下次可钓鱼时间\n{next_fishing_time}") if current_time < next_fishing_time else ''

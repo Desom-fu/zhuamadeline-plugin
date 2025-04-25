@@ -158,24 +158,25 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         data[str(user_id)]['compulsion_count'] = 0
     
     # 一堆事件的判定
-    if(data[str(user_id)]['event']!='nothing' and game_type != "1" and game_type != "2"):
-        if data[str(user_id)]['event']!='compulsion_game1':
-            await send_image_or_text(bet, "你还有正在进行中的事件", True, None, 25)
-            return
+    if data[str(user_id)]['event'] != 'nothing' and not (
+        data[str(user_id)]['event'] == 'compulsion_bet1' and game_type not in ("1", "2")
+    ):
+        await send_image_or_text(bet, "你还有正在进行中的事件", True, None, 25)
+        return
             
-    if(data[str(user_id)].get('buff','normal')=='lost') and game_type != "1" and game_type != "2": 
-        await send_image_or_text(bet, "你现在正在迷路中，\n连路都找不到，\n怎么能玩游戏呢？", True, None, 25)
+    if (data[str(user_id)].get('buff','normal')=='lost') and game_type not in ("1", "2"):
+        await send_image_or_text(bet, "你现在正在迷路中，\n连路都找不到，怎么能玩游戏呢？", True, None, 25)
         return
         
-    if(data[str(user_id)].get('buff','normal')=='confuse') and game_type not in ["1","2","4"]: 
-        await send_image_or_text(bet, "你现在正在找到了个碎片，\n疑惑着呢，\n不能玩游戏。", True, None, 25)
+    if (data[str(user_id)].get('buff','normal')=='confuse') and game_type not in ["1","2","4"]: 
+        await send_image_or_text(bet, "你现在正在找到了个碎片，\n疑惑着呢，不能玩游戏。", True, None, 25)
         return
 
-    if(data[str(user_id)].get('debuff','normal')=='tentacle'): 
+    if (data[str(user_id)].get('debuff','normal')=='tentacle'): 
         await send_image_or_text(bet, "你刚被触手玩弄到失神，\n没有精力玩游戏！", True, None, 25)
         return
         
-    if(data[str(user_id)].get('buff','normal')=='hurt') and game_type != "1" and game_type != "2": 
+    if (data[str(user_id)].get('buff','normal')=='hurt') and game_type != "1" and game_type != "2": 
         await send_image_or_text(bet, "你现在受伤了，\n没有精力玩游戏！", True, None, 25)
         return
         
@@ -192,7 +193,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         # 检查是否有冷却时间记录
         cooldown_time = 2 * 60  # 2 分钟冷却时间
         # 事件中game1无冷却
-        if data[str(user_id)]['event']=='compulsion_game1' and data[str(user_id)]['compulsion_count']!= 0:
+        if data[str(user_id)]['event']=='compulsion_bet1' and data[str(user_id)]['compulsion_count']!= 0:
             cooldown_time = 0
         else:
             last_game_time = data[user_id].get('last_game_time', 0)
@@ -581,7 +582,7 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
         else:
             msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
     
-    if data[str(user_id)]['event']=='compulsion_game1' and data[str(user_id)]['compulsion_count']!= 0:
+    if data[str(user_id)]['event']=='compulsion_bet1' and data[str(user_id)]['compulsion_count']!= 0:
         data[str(user_id)]['compulsion_count'] -= 1
         if data[str(user_id)]['compulsion_count']!= 0:
             msg_text += f"\n你现在仍需强制进行预言大师{data[str(user_id)]['compulsion_count']}次。"
@@ -601,7 +602,7 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
     if data[user_id]['berry'] < 0:
         data[user_id]['berry'] -= 250
         msg_text += f"\n\n哎呀，你没有草莓了却又进行了预言大师，并且没有赚回来！\n现在作为惩罚我要再扣除你250草莓，\n并且在抓回正数之前\n你无法使用道具，无法祈愿，无法进行pvp竞技！\n买卖蓝莓也是不允许的！"
-        if data[str(user_id)]['event']=='compulsion_game1' and data[str(user_id)]['compulsion_count']!= 0:
+        if data[str(user_id)]['event']=='compulsion_bet1' and data[str(user_id)]['compulsion_count']!= 0:
             data[str(user_id)]['event']='nothing'
             data[str(user_id)]['compulsion_count']= 0
             data[user_id]['berry'] -= 300
