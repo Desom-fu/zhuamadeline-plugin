@@ -158,7 +158,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
         if current_time < next_time_r:
             delta_time = next_time_r - current_time
-            await send_image_or_text(pray, f"你受伤了，需要等{time_text(delta_time)}才能继续！", True, None)
+            await send_image_or_text(pray, f"你受伤了，\n需要等{time_text(delta_time)}才能继续！", True, None)
             return
         else:
             outofdanger(data, str(user_id), pray, current_time, next_time_r)

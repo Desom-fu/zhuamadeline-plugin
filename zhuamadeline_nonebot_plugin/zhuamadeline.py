@@ -179,7 +179,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if(data[str(user_id)].get("buff")=="hurt"): 
                 if(current_time < next_time_r):
                     delta_time = next_time_r - current_time
-                    await send_image_or_text(catch, f"你受伤了，需要等{time_text(delta_time)}后才能抓", True, None)
+                    await send_image_or_text(catch, f"你受伤了，\n需要等{time_text(delta_time)}后才能抓", True, None)
                     return
                     
             #有其他正在进行的事件未完成
