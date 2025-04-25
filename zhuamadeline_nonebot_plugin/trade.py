@@ -96,7 +96,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
             save_data(madeline_path, data2)
             await send_image_or_text(confirm, f"交易成功！你获得了{berry}草莓。\n商人很喜欢与你的这一次交易，他期待着下次与你见面", True, None)
         else:
-            await send_image_or_text(confirm, f"你没有足够多的{name}，你需要{amount}个，但你目前只拥有{keepNum}个", True, None)
+            await send_image_or_text(confirm, f"你没有足够多的{name}，你需要{amount}个，\n但你目前只拥有{keepNum}个", True, None)
 
 #取消一些事件
 deny = on_fullmatch(['.deny', '。deny'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)

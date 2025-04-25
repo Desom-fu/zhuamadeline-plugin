@@ -245,7 +245,8 @@ def generate_frame(text1, text2, base_image=None, center=True, max_chars=20):
     
     # 计算内容总尺寸
     content_width, content_height = calculate_content_size(draw, lines1 + lines2, img_size)
-    canvas_width = min(content_width + 2 * PADDING, MAX_WIDTH)
+    # canvas_width = min(content_width + 2 * PADDING, MAX_WIDTH)
+    canvas_width = content_width + 2 * PADDING
     canvas_height = content_height + 2 * PADDING
     
     # 1. 首先创建渐变背景
