@@ -327,7 +327,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             msg += f"\n- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
             pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
             pid_nickname = await get_nickname(bot, pid)
-            turn_msg = f"\n当前是[{pid_nickname}]的回合"
+            turn_msg = f"当前是[{pid_nickname}]的回合"
             save_data(full_path, data)
             save_data(bar_path, bar_data)
             save_data(demon_path, demon_data)
@@ -1232,7 +1232,7 @@ async def shoot(stp, group_id, msg_handle, args):
         pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
         pid_nickname = await get_nickname(bot, pid)
         msg += '- 本局总弹数为'+str(len(demon_data[group_id]['clip']))+'，实弹数为'+str(demon_data[group_id]['clip'].count(1))
-        turn_msg = f"\n当前是[{pid_nickname}]的回合"
+        turn_msg = f"当前是[{pid_nickname}]的回合"
     save_data(bar_path, bar_data)
     save_data(demon_path, demon_data)
     await send_image_or_text(msg_handle, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
@@ -1813,7 +1813,7 @@ async def check_handle(bot: Bot, event: GroupMessageEvent):
     msg += f"- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}"
     pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
     pid_nickname = await get_nickname(bot, pid)
-    turn_msg = f"\n当前是[{pid_nickname}]的回合"
+    turn_msg = f"当前是[{pid_nickname}]的回合"
     await send_image_or_text(check, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}',25)
         
 
