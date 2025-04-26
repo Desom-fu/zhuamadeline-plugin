@@ -18,36 +18,50 @@ LINE_SPACING = 5          # 行间距（像素）
 CACHE_LIMIT = 40          # 缓存文件保留数量
 
 def create_gradient_background(width, height):
-    """创建带高斯模糊的圆形渐变背景"""
+    """创建绝对平滑的圆形渐变背景"""
     bg = Image.new('RGBA', (width, height), (255, 255, 255, 255))
     draw = ImageDraw.Draw(bg)
     
     center_x, center_y = width // 2, height // 2
-    radius_factor = 0.8  # 半径系数
-    max_radius = int(math.sqrt((center_x)**2 + (center_y)**2)) * radius_factor
+    max_radius = math.sqrt(center_x**2 + center_y**2)
     
-    start_color = (250, 233, 255, 255)
-    end_color = (255, 255, 255, 255)
+    # 渐变颜色配置
+    start_color = (250, 233, 255, 255)  # 淡紫色
+    end_color = (255, 255, 255, 255)    # 白色
     
-    steps = 100
+    # 使用三次贝塞尔缓动函数控制渐变速度
+    def cubic_bezier(t, p0, p1, p2, p3):
+        """三次贝塞尔缓动函数"""
+        u = 1 - t
+        return u**3*p0 + 3*u**2*t*p1 + 3*u*t**2*p2 + t**3*p3
+    
+    steps = 256  # 增加采样点使过渡更平滑
     for i in range(steps, 0, -1):
-        radius = int(max_radius * i / steps)
-        ratio = i / steps
+        # 使用贝塞尔曲线控制渐变进度（参数可调整）
+        t = i / steps
+        progress = cubic_bezier(t, 0, 0.2, 0.8, 1.0)  # 自定义缓动曲线
         
-        ease_ratio = ratio * 0.7
-        r = int(start_color[0] + (end_color[0] - start_color[0]) * ease_ratio)
-        g = int(start_color[1] + (end_color[1] - start_color[1]) * ease_ratio)
-        b = int(start_color[2] + (end_color[2] - start_color[2]) * ease_ratio)
+        radius = int(max_radius * progress)
         
-        draw.ellipse(
-            [(center_x - radius, center_y - radius), 
-             (center_x + radius, center_y + radius)],
-            fill=(r, g, b, 255),
-            outline=None
-        )
+        # 颜色插值（使用HSL色彩空间会更平滑）
+        r = int(start_color[0] + (end_color[0] - start_color[0]) * progress)
+        g = int(start_color[1] + (end_color[1] - start_color[1]) * progress)
+        b = int(start_color[2] + (end_color[2] - start_color[2]) * progress)
+        
+        # 绘制渐变圆环
+        if radius > 0:  # 避免绘制半径为0的圆
+            draw.ellipse(
+                [(center_x - radius, center_y - radius),
+                 (center_x + radius, center_y + radius)],
+                fill=(r, g, b, 255),
+                outline=None
+            )
     
-    # 应用高斯模糊
-    return bg.filter(ImageFilter.GaussianBlur(radius=3))
+    # 应用精细的高斯模糊（半径减小但多次应用效果更好）
+    for _ in range(3):
+        bg = bg.filter(ImageFilter.GaussianBlur(radius=1))
+    
+    return bg
 
 # 愚人节特供！
 # def wrap_text(text, max_chars=20):
