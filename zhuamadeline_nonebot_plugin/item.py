@@ -1703,7 +1703,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 if (bombbag >= 1):
                                     noHitRate += 5
                                 if hitNumber > noHitRate:
-                                    cd_time = random.randint(int(nums[0])*45, int(nums[0])*45+45)
+                                    cd_time = random.randint(int(nums[0])*45, (int(nums[0])+1)*45)
                                     current_time = datetime.datetime.now()
                                     #检测回想之核
                                     dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
