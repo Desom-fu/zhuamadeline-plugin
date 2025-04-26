@@ -62,7 +62,7 @@ liechang_bonus_rewards = {
     "2": (1, 1, 1),  # 对应 2 猎，(guding_rank 增加 1, hunt_bonus 增加 1, bonus_rank_max 增加 1)
     "3": (2, 2, 2),  # 对应 3 猎，(guding_rank 增加 2, hunt_bonus 增加 2, bonus_rank_max 增加 2)
     "4": (3, 3, 5),  # 对应 4 猎，(guding_rank 增加 3, hunt_bonus 增加 3, bonus_rank_max 增加 5)
-    "5": (4, 4, 4),  # 对应 5 猎，(guding_rank 增加 4, hunt_bonus 增加 4, bonus_rank_max 增加 4)
+    "5": (4, 4, 3),  # 对应 5 猎，(guding_rank 增加 4, hunt_bonus 增加 4, bonus_rank_max 增加 3)
 }
 
 # 定义不同猎场的概率分布，键是解锁的最高猎场，值是各个猎场的概率
@@ -71,7 +71,7 @@ liechang_probabilities = {
     2: {1: 50, 2: 100},  # 只解锁了 1 猎和 2 猎时，概率均等
     3: {1: 45, 2: 75, 3: 100},  # 解锁 3 猎后，1猎45%，2猎30%，3猎25%
     4: {1: 30, 2: 60, 3: 90, 4: 100},  # 解锁 4 猎后
-    # 5: {1: 35, 2: 25, 3: 20, 4: 10, 5: 10}  # 解锁 5 猎后
+    5: {1: 25, 2: 50, 3: 70, 4: 85, 5: 100}  # 解锁 5 猎后
 }
 
 # 时间奖励
@@ -215,6 +215,8 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
     #有就加2点随机下限
     data = open_data(user_path)
     shengshi = data[qqb]['collections'].get("圣十字架", 0)
+    # 这里要判断自己有逆十字架才起效果
+    nishi = data[user_id]['collections'].get("逆十字架", 0)
 
     # 判定血刃和残片和机器人加对面固定战力上限
     blood = data[qqb]['collections'].get("鲜血之刃", 0)
@@ -227,6 +229,8 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
     
     # 加战力下限
     add_rank_min += 3 if shengshi >= 1 else 0
+    # 减战力下限
+    add_rank_min -= 3 if nishi >= 1 else 0
     
     # 计算战力加成
     hunt_bonusb += 2 if blood >= 1 else 0
@@ -563,8 +567,26 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         else:
             zhanli_text = f"[{ranb}]+[{ranbrank-ranb}]=[{ranbrank}]"
     # 各种回复
+    # 初始化，方便加东西
+    pk_text = ''
+
+    user_collections = user_data.get(str(user_id), {}).get('collections', {})
+    horn = int(user_collections.get("宝藏号角", 0))
+    if horn > 0 and random.randint(1, 100) <= 10:
+        reward = levela * 2
+        # 虽然不太可能，但是我还是setdefault
+        user_data[str(user_id)].setdefault("energy", 0)
+        user_data[str(user_id)].setdefault("item", {}).setdefault("体力", 0)
+        # 安全增加奖励
+        if random.randint(1, 10) <= 5:
+            user_data[str(user_id)]["energy"] = int(user_data[str(user_id)].get("energy", 0)) + reward
+            pk_text += f"随着宝藏号角的吹起，你充满了能量！你的能量增加了{reward}点，现在一共有{user_data[str(user_id)]["energy"]}点。\n\n"
+        else:
+            user_data[str(user_id)]["item"]["体力"] = int(user_data[str(user_id)]["item"].get("体力", 0)) + reward
+            pk_text += f"随着宝藏号角的吹起，你恢复了体力！你的体力增加了{reward}点，现在一共有{user_data[str(user_id)]["item"]["体力"]}点。\n\n"
+
     if stat == 5:
-        pk_text = (
+        pk_text += (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}]\n的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
@@ -572,7 +594,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你的Madeline被打败了！(｡•́︿•̀｡)"
         )
     elif stat == 4:
-        pk_text = (
+        pk_text += (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为\n[{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
@@ -580,7 +602,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你的Madeline的进攻战力和擂主的Madeline的防守战力相等，但由于你是挑战者，所以你赢了！`(o^ ^o)ﾉ"
         )
     elif stat == 3:
-        pk_text = (
+        pk_text += (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为[{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的{madelinenamea}]\n的进攻战力为[{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
@@ -588,18 +610,17 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你的Madeline获胜了！`(o^ ^o)ﾉ"
         )
     elif stat == 2:
-        pk_text = (
+        pk_text += (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，\n"
             f"但综合公式计算后不如之前你放入的本擂台的Madeline，\n所以替换失败！"
         )
     elif stat == 1:
-        pk_text = (
+        pk_text += (
             f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！"
         )
     elif stat == 0:
-        pk_text = ''
         if len(list_current) == 1:
             pk_text += (
                 f"本场pvp竞技开始！\n"
