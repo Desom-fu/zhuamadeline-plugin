@@ -1338,3 +1338,67 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     else:
         return
     
+#五号猎场事件
+async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
+    # 初始化默认值
+    user_id = str(user_id)
+    bar_data = open_data(bar_path)
+    user_info = user_data.setdefault(user_id, {})
+    bar_info = bar_data.setdefault(user_id, {})
+    bank = bar_info.setdefault('bank', 0)
+    berry = user_info.setdefault('berry', 0)
+    collections = user_info.setdefault("collections", {})
+    items = user_info.setdefault("item", {})
+    user_info.setdefault("buff2", "normal")
+    user_info.setdefault("compulsion_count", 0)
+    user_info.setdefault("event", "nothing")
+    user_info.setdefault("trade", {})
+    boss = user_info.setdefault("boss", {})
+    energy = user_info.setdefault("energy", 0)
+    liechang_number = user_info.get('lc', '1')
+    # 5猎最重要的两个东西：exp和等级
+    exp = user_info.setdefault("exp", 0)
+    grade = user_info.setdefault("grade", 1)
+    current_time = datetime.datetime.now()
+
+    # 检测是否已拥有经验储存装置
+    if "入场券" not in collections:
+        # 处理buff2状态逻辑
+        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+        user_data = buff2_change_status(user_data, user_id, "speed", 1)
+        user_info = user_data.get(user_id,{})
+        
+        if berry < 10000 and bank < 20000:
+            user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            save_data(user_path, user_data)
+            save_data(user_path, user_data)
+            msg = (
+                "位于山脚湖泊下方的洞穴入口，洞壁上布满随时间推移而形成的蓝色水晶结晶。\n"
+                "标志着呼吸困难的潮湿地带的入口，但湖水却异常清澈透明。\n"
+                "因光线不足，只有非常少量的荧光苔藓附着在水晶根部。\n\n"
+                "要进入深渊内部，需要消耗10000颗草莓和仓库里的20000颗草莓激活水晶共鸣。\n"
+                f"当前持有草莓数量：{berry}/10000\n"
+                f"当前仓库草莓数量：{bank}/10000\n"
+            )
+            await send_image_or_text(message, msg, True, None, 20)
+            return
+
+        # 扣除草莓并添加经验储存装置
+        user_info["berry"] -= 10000
+        bar_info["bank"] -= 20000
+        collections["入场券"] = 1
+        # 不加时间
+        next_time = current_time
+        user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        # 写入数据
+        save_data(user_path, user_data)
+
+        msg = (
+            "湖底的水晶突然发出低沉共鸣，你投入的草莓在清澈的湖水中溶解重组。\n"
+            "蓝色水晶的脉络开始流动，最终凝结成一张半透明的结晶薄片——入场券。\n"
+            "券面上的纹路如同年轮般记载着时间，触摸时能感受到细微的电流震颤。\n"
+            "洞穴深处传来水流扰动的声音，似乎有什么东西正在苏醒。\n"
+            "输入 .cp 入场券 以查看具体效果"
+        )
+        await send_image_or_text(message, msg, True, None, 20)
+        return
