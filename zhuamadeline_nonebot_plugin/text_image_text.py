@@ -26,7 +26,7 @@ def create_gradient_background(width, height):
     max_radius = math.sqrt(center_x**2 + center_y**2)
     
     # 渐变颜色配置
-    start_color = (250, 233, 255, 255)  # 淡紫色
+    start_color = (247, 219, 255, 255)  # 淡紫色
     end_color = (255, 255, 255, 255)    # 白色
     
     # 使用三次贝塞尔缓动函数控制渐变速度
