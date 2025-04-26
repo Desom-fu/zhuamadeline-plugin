@@ -23,7 +23,8 @@ def create_gradient_background(width, height):
     draw = ImageDraw.Draw(bg)
     
     center_x, center_y = width // 2, height // 2
-    max_radius = int(math.sqrt((center_x)**2 + (center_y)**2))
+    radius_factor = 0.7  # 半径系数
+    max_radius = int(math.sqrt((center_x)**2 + (center_y)**2)) * radius_factor
     
     start_color = (250, 233, 255, 255)
     end_color = (255, 255, 255, 255)
