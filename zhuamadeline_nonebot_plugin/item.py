@@ -1611,7 +1611,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     update_failure_count(current_guarantee, level, target_level)
 
                             # 返回结果
-                            item_text += f"- 你随机选择了以下这三位{level}级Madeline进行飞升："
+                            item_text += f"- 你随机选择了以下三位{level}级Madeline进行飞升：\n"
                             item_text += "\n————————————————\n\n"
                             item_text += f"{'\n'.join(selected_madelines)}"
                             item_text += "\n————————————————\n\n"
