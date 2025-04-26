@@ -55,7 +55,10 @@ async def backup_user_data(bot: Bot = None, group_id: int = None):
 
         if bot and group_id:
             backups = sorted(backup_path.glob("Backup_*"), key=lambda x: x.stat().st_ctime)
-            message = f"用户数据备份已完成\n当前备份数量: {len(backups)}/100"
+            message = f"用户数据备份已完成"
+            # 备份数量达到100不显示
+            if len(backups) == 100:
+                message += f"\n当前备份数量: {len(backups)}/100"
             await bot.send_group_msg(group_id=group_id, message=message)
         
         return True
