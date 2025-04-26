@@ -1,16 +1,11 @@
-from pathlib import Path
 import datetime
 from nonebot import require, get_driver, on_command
-from nonebot.adapters import Message
-from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent
 from .config import user_path, backup_path, zhuama_group, bot_owner_id
 from nonebot.log import logger
-from .whitelist import whitelist_rule
 from nonebot import get_bot
 import asyncio
 import shutil
-from nonebot.exception import FinishedException
 
 require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
@@ -57,7 +52,7 @@ async def backup_user_data(bot: Bot = None, group_id: int = None):
             backups = sorted(backup_path.glob("Backup_*"), key=lambda x: x.stat().st_ctime)
             message = f"用户数据备份已完成"
             # 备份数量达到100不显示
-            if len(backups) == 100:
+            if int(len(backups)) < 100:
                 message += f"\n当前备份数量: {len(backups)}/100"
             await bot.send_group_msg(group_id=group_id, message=message)
         
