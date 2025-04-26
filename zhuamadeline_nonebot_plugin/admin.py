@@ -656,24 +656,12 @@ async def ck_admin_history_handle(bot: Bot, event: GroupMessageEvent, arg: Messa
     if(os.path.exists(bili)):
         data_bili = open_data(bili)
 
-        text = f"{today}\n"
+        text = f"{today}\n日账单列表\n"
         for v in data_bili['list']:
             text += f"{v}\n"
-            
-        # 创建转发消息
-        forward_messages = [
-            {
-                "type": "node",
-                "data": {
-                    "name": "商品列表",
-                    "uin": event.self_id,  # 设置为机器人的QQ号
-                    "content": text.strip()
-                }
-            }
-        ]
         
-        # 转发消息
-        await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=forward_messages)
+        # 图片（转发函数）
+        await send_image_or_text_forward(ck_admin_history, text.strip(), f'{today}日账单列表', bot, event.self_id, event.group_id, 50, True)
         # await ck_admin_history.finish(text, at_sender=True)
     else:
         await ck_admin_history.finish("没有找到该日期的账单！", at_sender=True)
