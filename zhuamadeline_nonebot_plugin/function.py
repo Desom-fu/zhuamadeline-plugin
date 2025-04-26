@@ -264,10 +264,10 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         
         # 使用字典存储特殊等级消息
         special_grades = {
-            6: f"恭喜升到{grade}级，现在你可以在神庙里面抓到2级的Madeline了！",
-            11: f"恭喜升到{grade}级，现在你可以在神庙里面抓到3级的Madeline了！",
-            16: f"恭喜升到{grade}级，现在你可以在神庙里面抓到4级的Madeline了！",
-            21: f"恭喜升到{grade}级，现在你可以在神庙里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
+            6: f"恭喜升到{grade}级，现在你可以在深渊里面抓到2级的Madeline了！",
+            11: f"恭喜升到{grade}级，现在你可以在深渊里面抓到3级的Madeline了！",
+            16: f"恭喜升到{grade}级，现在你可以在深渊里面抓到4级的Madeline了！",
+            21: f"恭喜升到{grade}级，现在你可以在深渊里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
         }
 
         if grade in special_grades:
