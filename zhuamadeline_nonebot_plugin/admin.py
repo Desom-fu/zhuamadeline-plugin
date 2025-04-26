@@ -2045,7 +2045,7 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
         # 查找指定日期的开奖信息
         result = next((draw for draw in history if draw["date"] == query_date), None)
         if not result:
-            await ssq_query.finish(f"\n未找到 {query_date} 的洞窟探险获奖信息，请检查日期是否正确。", at_sender=True)
+            await ssq_query.finish(f"未找到 {query_date} 的洞窟探险获奖信息，请检查日期是否正确。", at_sender=True)
             return
 
     else:  # 如果用户没有输入日期，则返回最近一期开奖数据
@@ -2053,7 +2053,7 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
 
     # 构建消息
     msg = await build_result_message(bot, event.group_id, result)
-    await send_image_or_text(ssq_query, msg)
+    await send_image_or_text(ssq_query, msg, False, None, 20)
 
 async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
     """构建开奖结果消息"""
@@ -2071,7 +2071,7 @@ async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
     single_match_users_nicknames = await get_nicknames(bot, group_id, single_match_users)
 
     # 构建消息
-    msg = f"\n{date} 的洞窟探险石门密码为：\n红: {red_ball} | 蓝: {blue_ball} | 黄: {yellow_ball}"
+    msg = f"{date} 的洞窟探险石门密码为：\n红: {red_ball} | 蓝: {blue_ball} | 黄: {yellow_ball}"
     msg += build_winner_message("终极宝藏", big_winners_nicknames, date)
     msg += build_winner_message("次极宝藏", winners_nicknames, date)
     msg += build_winner_message("探险补给", single_match_users_nicknames, date)

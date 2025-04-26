@@ -608,7 +608,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"总回合数：{totalCount}\n"
             f"本次回合奖励：{inreward}草莓\n"
             f"\n- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你成功把madeline放入了一个空擂台，该Madeline现在守卫着 [擂台{len(list_current)}]！"
+            f"- 你成功把Madeline放入了一个空擂台，\n该Madeline现在守卫着 [擂台{len(list_current)}]！"
         )
 
     # #发送信息

@@ -25,10 +25,11 @@ def create_gradient_background(width, height):
     draw = ImageDraw.Draw(bg)
     
     center_x, center_y = width // 2, height // 2
-    max_radius = int(math.sqrt(center_x**2 + center_y**2)) * 1.2  # 扩大半径
+    max_radius = int(math.sqrt(center_x**2 + center_y**2)) * 1  # 扩大半径
     
     # 渐变颜色
-    start_color = (247, 219, 255, 255)  # #F7DBFF
+    # start_color = (247, 219, 255, 255)  # # F7DBFF
+    start_color = (250, 233, 255, 255)   # FAE9FF
     end_color = (255, 255, 255, 255)     # 白色
     
     steps = 100  # 增加渐变步数使过渡更平滑
