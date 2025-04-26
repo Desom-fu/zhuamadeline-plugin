@@ -966,7 +966,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         10800: 15,
                         14400: 10
                     }
-                    success_rate = next((rate for time, rate in success_rate_map.items() if hurt_time <= time), 3)
+                    success_rate = next((rate for time, rate in success_rate_map.items() if hurt_time <= time), 5)
 
                     # 消耗一个急救包
                     data[user_id]["item"]["急救包"] -= 1
@@ -1703,7 +1703,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 if (bombbag >= 1):
                                     noHitRate += 5
                                 if hitNumber > noHitRate:
-                                    cd_time = random.randint(int(nums[0])*60, int(nums[0])*60+120)
+                                    cd_time = random.randint(int(nums[0])*45, int(nums[0])*45+45)
                                     current_time = datetime.datetime.now()
                                     #检测回想之核
                                     dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
