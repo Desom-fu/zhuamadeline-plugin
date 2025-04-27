@@ -9,6 +9,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status, get_nickname
 from .config import ban, bot_owner_id, connect_bot_id, user_path1, user_path2, user_path3, user_path4, user_path5, stuck_path, bar_path, full_path
 from .whitelist import whitelist_rule
@@ -1277,56 +1278,91 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
-        
+
+        # 决定是收购玛德琳还是鱼类（50%概率）
+        trade_type = random.choice(["madeline", "fish"])
+
         #变更事件为交易中
         user_info['event'] = 'trading'
         #交易物品可以是本猎场的madeline或藏品(藏品没写，因为没什么人有)
         #在该用户拥有的madeline列表里抽取一个拥有的madeline
-        k1 = random.choice(list(data4[user_id].keys()))
-        k = k1.split('_')
-        level = int(k[0]) #抽取的madeline等级
-        num = k[1] #抽取的madeline的ID
-        #胡萝卜池的madeline低价收购
-        if [level, int(num)] in rabbit_madeline4:
-            priceRate = 0.8
-        else:
-            priceRate = 1
-        name = madeline_data4.get(str(level)).get(num).get('name') #获取该madeline的名称
-        #规定单价和数量
-        if level == 1:
-            price = random.randint(15,40)
-            amount = random.randint(1,5)
-        elif level == 2:
-            price = random.randint(20,50)
-            amount = random.randint(1,4)
-        elif level == 3:
-            price = random.randint(30,70)
-            amount = random.randint(1,3)
-        elif level == 4:
-            price = random.randint(80,200)
-            amount = random.randint(1,2)
-        elif level == 5:
-            price = random.randint(200,400)
-            amount = 1
-        else:
-            raise KeyError("Invalid level number")
         
-        price = math.floor(price * priceRate)
-        #交易属性栏要加入3个键值对：交易数量，交易单价，交易物品
-        user_info['trade']['数量'] = amount
-        user_info['trade']['单价'] = price
-        user_info['trade']['物品'] = [int(liechang_number),k1] #存储为[猎场号，madeline属性]
+        if trade_type == "madeline":
+            # 玛德琳交易逻辑（保持原样）
+            k1 = random.choice(list(data4[user_id].keys()))
+            k = k1.split('_')
+            level = int(k[0]) #抽取的madeline等级
+            num = k[1] #抽取的madeline的ID
+            #胡萝卜池的madeline低价收购
+            if [level, int(num)] in rabbit_madeline4:
+                priceRate = 0.8
+            else:
+                priceRate = 1
+            name = madeline_data4.get(str(level)).get(num).get('name') #获取该madeline的名称
+            #规定单价和数量
+            if level == 1:
+                price = random.randint(15,40)
+                amount = random.randint(1,5)
+            elif level == 2:
+                price = random.randint(20,50)
+                amount = random.randint(1,4)
+            elif level == 3:
+                price = random.randint(30,70)
+                amount = random.randint(1,3)
+            elif level == 4:
+                price = random.randint(80,200)
+                amount = random.randint(1,2)
+            elif level == 5:
+                price = random.randint(200,400)
+                amount = 1
+            else:
+                raise KeyError("Invalid level number")
+            
+            price = math.floor(price * priceRate)
+            #交易属性栏要加入3个键值对：交易数量，交易单价，交易物品
+            user_info['trade']['数量'] = amount
+            user_info['trade']['单价'] = price
+            user_info['trade']['物品'] = [int(liechang_number),k1] #存储为[猎场号，madeline属性]
+            user_info['trade']['类型'] = 'madeline' # 添加交易类型标识
+            
+        else:
+            # 鱼类交易逻辑
+            available_fish = [fish for fish in fish_prices.keys() if items.get(fish, 0) > 0]
+            
+            if not available_fish:
+                return  # 没有鱼可交易，直接返回
+                
+            fish_name = random.choice(available_fish)
+            fish_count = items[fish_name]
+            amount = random.randint(1, fish_count)
+            base_price = fish_prices[fish_name]
+            price = math.floor(base_price * random.uniform(1.5, 2.0))
+            
+            user_info['trade']['数量'] = amount
+            user_info['trade']['单价'] = price
+            user_info['trade']['物品'] = [-2, fish_name]  # -2表示鱼类交易
+            user_info['trade']['类型'] = 'fish'  # 添加交易类型标识
+        
         user_info['event'] = 'trading'
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         #写入主数据表
         save_data(full_path, user_data)
-        msg = (
-            f"你遇到了一位流浪商人，他似乎想从你这里买点东西\n"+
-            f"“你好啊，我在收集一些madeline。\n现在我需要{amount}个{name}，\n我听说这好像是个{level}级的madeline，\n所以我愿意以每个madeline {price}草莓的价格收购，\n不知你是否愿意。”\n"+
-            "只有拥有足够的该madeline才可确定交易，\n并且只能一次性卖完，不支持分批出售\n"+
-            "输入.confirm 确定出售，输入.deny 拒绝本次交易"
-        )
+        
+        if trade_type == "madeline":
+            msg = (
+                f"你遇到了一位流浪商人，他似乎想从你这里买点东西\n"+
+                f"“你好啊，我在收集一些madeline。\n现在我需要{amount}个{name}，\n我听说这好像是个{level}级的madeline，\n所以我愿意以每个madeline {price}草莓的价格收购，\n不知你是否愿意。”\n"+
+                "只有拥有足够的该madeline才可确定交易，\n并且只能一次性卖完，不支持分批出售\n"+
+                "输入.confirm 确定出售，输入.deny 拒绝本次交易"
+            )
+        else:
+            msg = (
+                f"你遇到了一位流浪商人，他似乎对鱼类很感兴趣\n"+
+                f"“你好啊，我需要购买一些鱼类。\n现在我需要{amount}条{fish_name}，\n我愿意以每条{price}草莓的价格收购，\n不知你是否愿意。”\n"+
+                "鱼类售卖不支持分批出售\n"+
+                "输入.confirm 确定出售，输入.deny 拒绝本次交易"
+            )
         await send_image_or_text(message, msg, True, None, 50)
         return
     else:
@@ -1635,7 +1671,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 priceRate = 0.8
             else:
                 priceRate = 1
-            name = madeline_data4.get(str(level)).get(num).get('name') #获取该madeline的名称
+            name = madeline_data5.get(str(level)).get(num).get('name') #获取该madeline的名称
             #规定单价和数量
             if level == 1:
                 price = random.randint(15,40)
