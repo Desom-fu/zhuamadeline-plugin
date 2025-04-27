@@ -1679,7 +1679,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             fish_count = items[fish_name]
             amount = random.randint(1, min(4, fish_count))
             base_price = fish_prices[fish_name]
-            price = math.floor(base_price * random.uniform(1.5, 2.0))
+            price = math.floor(base_price * random.uniform(1.0, 1.5))
             
             user_info['trade']['数量'] = amount
             user_info['trade']['单价'] = price
