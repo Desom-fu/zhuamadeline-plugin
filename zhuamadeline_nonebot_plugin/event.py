@@ -1476,7 +1476,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         await send_image_or_text(message, msg, True, None, 20)
         return
     #遇到被困人员
-    elif(rnd <= 225): # 5%
+    elif(rnd <= 250): # 7.5%
         if(len(stuck_data) >= 1):
             save_id = random.choice(list(stuck_data.keys()))
             if(stuck_data[save_id]!='5'): return
@@ -1500,7 +1500,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             return
         
     # 鱼事件
-    elif rnd <= 325: # 10% 
+    elif rnd <= 350: # 10% 
         # 负面buff检测
         debuff = user_info.setdefault("debuff", "normal")
         if debuff == "notfish":
@@ -1578,7 +1578,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         return
     
     #debuff事件
-    elif(rnd<=400): # 7.5%
+    elif(rnd<=425): # 7.5%
         #首先玩家没有buff/debuff时才会随机触发
         #有药水状态正常抓
         if user_info['buff2'] != 'normal':
@@ -1686,8 +1686,8 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             
             await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
             await send_image_or_text(message, msg, True, None, 30)
-    
-    elif(rnd<=465):
+
+    elif rnd <= 525: #10%
         # 失约遇不到这个事件
         if user_info['berry'] < 0:
             return
@@ -1726,8 +1726,67 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         msg = f"糟糕，一群黑衣人把你强制拉进了一个黑色酒馆，似乎你不满足他们的目标是出不来了！他们现在让你强制进行{bad_event_text}{complusion_count}次！"
         await send_image_or_text(message, msg, True, None, 20)
         return
+
+    # 逆十字架 - 遗忘神庙
+    elif rnd <= 535: # 1%
+        if '逆十字架' not in collections:
+            collections['逆十字架'] = 1
+            save_data(full_path, user_data)
+            msg = (
+                "在探索遗忘神庙时，你触碰了祭坛上倒置的黑色石碑。\n"
+                "石缝中突然渗出暗红色液体，凝结成悬挂的十字架形态。\n"
+                "当你想取下它时，发现这金属竟像从你皮肤里生长出来一般温热。\n"
+                "输入 .cp 逆十字架 以查看具体效果" + diamond_text + hourglass_text
+            )
+            await send_image_or_text(message, msg, True, None, 25)
+            return
+
+    # 暴击指套 - 水淹裂谷 
+    elif rnd <= 545: # 1%
+        if '暴击指套' not in collections:
+            collections['暴击指套'] = 1
+            save_data(full_path, user_data)
+            msg = (
+                "当你在裂谷的岩壁上攀爬时，指尖突然陷入一处隐藏的孔洞。\n"
+                "洞穴里嵌着副锈蚀的金属指套，绿宝石接触到你血液的瞬间，\n"
+                "所有锈迹剥落，露出锋利如新的刃口，仿佛在渴望战斗。\n"
+                "输入 .cp 暴击指套 以查看具体效果" + diamond_text + hourglass_text
+            )
+            await send_image_or_text(message, msg, True, None, 25)
+            return
+
+    # 幸运戒指 - 水晶洞窟
+    elif rnd <= 550: # 0.5%
+        if '幸运戒指' not in collections:
+            collections['幸运戒指'] = 1
+            save_data(full_path, user_data)
+            msg = (
+                "你注意到洞窟水晶簇的根部闪烁着不自然的绿光。\n"
+                "扒开层层结晶后，发现一枚戒指被包裹在千年形成的晶柱中心，\n"
+                "翡翠四叶草在脱离水晶的刹那，叶脉突然开始流动液态金光。\n"
+                "输入 .cp 幸运戒指 以查看具体效果" + diamond_text + hourglass_text
+            )
+            await send_image_or_text(message, msg, True, None, 25)
+            return
+
+    # 宝藏号角 - 深层地界
+    elif rnd <= 555: # 0.5%
+        if '宝藏号角' not in collections:
+            collections['宝藏号角'] = 1
+            save_data(full_path, user_data)
+            msg = (
+                "在拨开地界茂盛的荧光植物时，你的手杖突然戳中了硬物。\n"
+                "泥土下埋着支象牙号角，当你拂去表面孢子般的尘埃时，\n"
+                "它自动发出低沉鸣响，震落周围所有植物的发光粉末。\n"
+                "输入 .cp 宝藏号角 以查看具体效果" + diamond_text + hourglass_text
+            )
+            await send_image_or_text(message, msg, True, None, 25)
+            return
+
+    elif rnd <= 605: # 5% boss事件暂未写 
+        return
     
-    elif(rnd<=600):
+    elif rnd <= 655:
         data5 = open_data(user_path5)
         if user_id not in data5:
             return
