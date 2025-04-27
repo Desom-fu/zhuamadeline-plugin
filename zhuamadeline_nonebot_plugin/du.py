@@ -109,15 +109,58 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
     berry_real = berry - tax
     get_berry = berry_real - MENPIAO_COST
     
-    user_data['berry'] += get_berry
-    bar_data["pots"] = bar_data.get("pots", 0) + tax
-
-    # 构建消息内容
-    msg = f"【抽卡结果】\n\n"
-    msg += f"- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n"
-    msg += f"- 你卖出抽出来的卡后获得了{berry}颗草莓！\n"
-    msg += f"- 但是由于草莓税法的实行，需要上交10%，所以你\n最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+    # 幸运戒指检查 - 只在亏损时触发
+    has_lucky_ring = '幸运戒指' in user_data.get('collections', {})
+    original_berry = user_data['berry']
+    original_pots = bar_data.get("pots", 0)
     
+    if get_berry < 0 and has_lucky_ring and random.random() <= 0.05:
+        # 重新抽卡
+        new_rnd = random.randint(1, 100)
+        new_berry = next((v for max_p, v in BERRY_PROBABILITY if new_rnd <= max_p), 666)
+        new_tax = int(new_berry * TAX_RATE)
+        new_berry_real = new_berry - new_tax
+        new_get_berry = new_berry_real - MENPIAO_COST
+        
+        # 恢复原始数据
+        user_data['berry'] = original_berry
+        bar_data["pots"] = original_pots
+        
+        # 应用新结果
+        user_data['berry'] += new_get_berry
+        bar_data["pots"] += new_tax
+        
+        # 构建消息
+        msg = f"【抽卡结果】\n\n"
+        msg += f"- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n"
+        msg += f"- 你卖出抽出来的卡后获得了{berry}颗草莓！（净收益：{get_berry}）\n"
+        msg += f"\n【幸运戒指触发】\n"
+        msg += f"四叶草翡翠闪耀！命运被重置了！\n"
+        msg += f"- 卡包里面的卡片重新变换了！\n"
+        msg += f"- 你卖出抽出来的卡后获得了{new_berry}颗草莓！\n"
+        msg += f"- 但是由于草莓税法的实行，需要上交10%，所以你\n最终获得{new_berry_real}颗草莓，上交了{new_tax}颗草莓税！"
+        
+        # 更新变量用于后续处理
+        berry = new_berry
+        tax = new_tax
+        berry_real = new_berry_real
+        get_berry = new_get_berry
+        
+    else:
+        # 正常处理
+        user_data['berry'] += get_berry
+        bar_data["pots"] += tax
+        
+        # 构建消息内容
+        msg = f"【抽卡结果】\n\n"
+        msg += f"- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n"
+        msg += f"- 你卖出抽出来的卡后获得了{berry}颗草莓！\n"
+        msg += f"- 但是由于草莓税法的实行，需要上交10%，所以你\n最终获得{berry_real}颗草莓，上交了{tax}颗草莓税！"
+        
+        # 如果触发了幸运戒指检查但没有重置
+        if get_berry < 0 and has_lucky_ring:
+            msg += f"\n\n(幸运戒指微微发光，但这次没有触发效果...)"
+
     # 强制抽卡处理
     if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:
         user_data['compulsion_count'] -= 1
