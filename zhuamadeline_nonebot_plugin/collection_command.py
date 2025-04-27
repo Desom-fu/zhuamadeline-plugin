@@ -27,7 +27,7 @@ async def ckcp_handle(arg: Message = CommandArg()):
     cp_name = str(arg)
     standard_collection = get_alias_name(cp_name, collections, collection_aliases)
     if(standard_collection in collections):
-        await send_image_or_text(ckcp, standard_collection+":\n"+collections[standard_collection][3], '', 20)
+        await send_image_or_text(ckcp, standard_collection+":\n"+collections[standard_collection][3], True, None, 25)
     else:
         await send_image_or_text(ckcp, '请输入正确的藏品名称哦！')
 

@@ -533,6 +533,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 debuff_cost = {
                     "forbidguess": 2,  # forbidguess需要2瓶
                     "notjam": 2,  # notjam需要2瓶
+                    "notfish": 2,  # notfish需要2瓶
                     "weaken": 2,  # weaken需要2瓶
                     "clumsy": 2,  # clumsy需要2瓶
                     "tentacle": 2,  # tentacle需要2瓶

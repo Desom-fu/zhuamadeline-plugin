@@ -662,11 +662,13 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     liability_message = "失约"
     # 事件
     status_messages = {
-        "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_bet1": "强制预言大师", "working": "维护加工器中", "getspider": "神秘事件1", "getbomb": "神秘事件2"
+        "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_bet1": "强制预言大师", "working": "维护加工器中", 
+        "getspider": "神秘事件1", "getbomb": "神秘事件2"
     }
     # debuff
     debuff_messages = {
-        "illusory": "缺氧", "poisoned": "中毒", "poisoned_2": "剧毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神/生气的小小卒"
+        "illusory": "缺氧", "poisoned": "中毒", "poisoned_2": "剧毒", "unlucky": "不幸", "weaken": "虚弱", "notjam": "通缉", 
+        "forbidguess": "生气的小小卒", "clumsy": "笨拙", "tentacle": "失神/生气的小小卒", "notfish": "禁渔"
     }
     # buff
     buff_messages = {"hurt": "受伤", "lost": "迷路"}

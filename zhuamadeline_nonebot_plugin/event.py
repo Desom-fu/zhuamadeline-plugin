@@ -1105,7 +1105,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # debuff不加时间
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-        rnd_debuff = random.randint(1,4)
+        rnd_debuff = random.randint(1,5)
         #设定恢复时长为3-6小时后
         recover_hour = random.randint(3,6)
         if rnd_debuff==1:
@@ -1144,6 +1144,26 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             msg = f"突然，一股神秘的力量侵入了你的身体，除了万能解药以外的几乎全部能够主动使用的道具/藏品都失效了！接下来{recover_hour}小时内你无法使用任何道具了！。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
             await send_image_or_text(message, msg, True, None, 20)
             return
+        elif rnd_debuff == 5:  # 合并5和6的效果
+            # 设定恢复时长为3-6小时后
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'tentacle'
+
+            # 给小小卒发消息通信
+            text_rec = f"*forbid_guess {user_id} {recover_hour}"
+            save_data(full_path, user_data)
+            
+            msg = (
+                f"你遭遇了双重不幸！先是被机械触手绑走玩弄到浑身疲软，"
+                f"又不小心把小小卒推到橙色激光上惹她生气了！\n"
+                f"接下来{recover_hour}小时内你将：\n"
+                f"1. 无法进行任何bet/ggl/竞技场等行动\n"
+                f"2. 无法进行guess/roulette\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。")
+            
+            await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
+            await send_image_or_text(message, msg, True, None, 30)
     
     elif(rnd<=465):
         # 失约遇不到这个事件
@@ -1421,7 +1441,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
     ######其他事件#####
     rnd = random.randint(1,1000)
-    if(rnd<=175):
+    if(rnd<=175): # 17.5%
         #有迅捷正常抓
         if user_info['buff2'] == 'speed':
             return
@@ -1447,20 +1467,20 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         #随机事件文本
         text = [
             "你在神庙里大战红蓝绿三颜色的冲刺块时，一不小心搓了一个hyper，直接机关加速一头撞到了刺儿上！",
-            "你在穿越橙色激光的时候，一不小心没冲刺，橙色激光把你烧的浑身发烫！",
-            "你在撞那些移动方块的时候，突然其中的一个方块长出了刺儿，你被扎的头破血流！",
-            "你站在移动方块上面，突然踉跄了一下没站稳，掉到下面的酸液里去了！酸液把你烫的嗷嗷直叫！"
+            "你在峡谷里面借助气泡呼吸之时，突然气泡破裂，你因为缺氧而晕厥过去了！幸运的是，你浮到了水面上了！",
+            "你在地界深处进行移动的时候，突然一只胖头鱼从你身边穿了过来，一个超级弹把你弹到圆刺上了！",
+            "你在水晶洞窟里面借助红泡泡移动的时候，因为地形错综复杂迷了路，在你走神的时候吃到了羽毛，自动撞到了刺儿上！"
         ]
         #发送消息
         msg = random.choice(text)+"\n你需要原地疗伤两个小时，或者使用急救包自救，或者等待别人来救你……" + diamond_text+hourglass_text
         await send_image_or_text(message, msg, True, None, 20)
         return
     #遇到被困人员
-    elif(rnd <= 225): #60
+    elif(rnd <= 225): # 5%
         if(len(stuck_data) >= 1):
             save_id = random.choice(list(stuck_data.keys()))
             if(stuck_data[save_id]!='5'): return
-            # 发放100草莓
+            # 发放125草莓
             user_info['berry'] += 125
             # 确保被救者也存在于主数据中
             rescue_user = user_data.setdefault(save_id, {})
@@ -1472,45 +1492,93 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             save_data(stuck_path, stuck_data)
             rescue_nickname = await get_nickname(bot, save_id)
             save_msg = MessageSegment.at(save_id)
-            msg = f"恭喜你救出了矿洞里的[{rescue_nickname}]。\n本次奖励125草莓"+ diamond_text+hourglass_text
+            msg = f"恭喜你救出了深渊里的[{rescue_nickname}]。\n本次奖励125草莓"+ diamond_text+hourglass_text
             await send_image_or_text(message, msg, True, save_msg, 20)
             return
         else:
             #没有需要救的人就结束事件，正常抓madeline
             return
         
-    # 草莓酱事件
-    elif rnd <= 175: 
-        # 初始化草莓果酱数量
-        items.setdefault("草莓果酱", 0)
+    # 鱼事件
+    elif rnd <= 325: # 10% 
         # 负面buff检测
         debuff = user_info.setdefault("debuff", "normal")
-        if debuff == "notjam":
+        if debuff == "notfish":
             return
-        # 生成草莓果酱数量
-        rnd_jam = random.randint(1, 100)
-        jam_data = [
-            (50, 1, "你在终端内探险的时候，发现了一个小型实验室。你在实验室里面发现了别人没有带走的一瓶果酱"),
-            (75, 2, "你在终端内探险的时候，发现了一个中型发电厂。你从发电厂里面偷偷拿走了两瓶果酱"),
-            (90, 3, "你在终端内探险的时候，发现了一个大型保险柜。你费劲千辛万苦从保险柜里面拿出了三瓶果酱"),
-            (100, 4, "你在终端内探险的时候，发现了一个巨型研究所。在你（被自愿）帮助研究所里的人们做完研究后，他们慷慨的送给你了四瓶果酱"),
-        ]
-        for threshold, count, text in jam_data:
-            if rnd_jam <= threshold:
-                jam_count, jam_text = count, text
-                break
 
-        # 增加果酱数量
-        items["草莓果酱"] += jam_count
+        # 决定获得多少“份”（1-4份，概率与草莓果酱一致）
+        rnd_count = random.random() * 100
+        if rnd_count <= 50:
+            count = 1  # 50%概率1份（目标250±50）
+        elif rnd_count <= 75:
+            count = 2  # 25%概率2份（目标500±50）
+        elif rnd_count <= 90:
+            count = 3  # 15%概率3份（目标750±50）
+        else:
+            count = 4  # 10%概率4份（目标1000±50）
 
-        # 保存数据
+        target_min = 250 * count - 50  # 最低允许价值
+        target_max = 250 * count + 50  # 最高允许价值
+
+        # 完全随机生成鱼类组合（种类和数量均随机）
+        collected_fish = []
+        for _ in range(random.randint(1, 5)):  # 随机1~5条鱼
+            fish_name = random.choice(list(fish_prices.keys()))
+            collected_fish.append(fish_name)
+
+        # 计算当前总价值
+        current_value = sum(fish_prices[fish] for fish in collected_fish)
+
+        # 动态调整鱼类组合，使价值落在目标范围内
+        while True:
+            if current_value < target_min:
+                # 价值过低：随机添加一条鱼（优先选高价值鱼补足）
+                candidates = [fish for fish in fish_prices if fish_prices[fish] <= (target_max - current_value)]
+                if not candidates:
+                    candidates = ["海星"]  # 保底用海星
+                new_fish = random.choice(candidates)
+                collected_fish.append(new_fish)
+                current_value += fish_prices[new_fish]
+            elif current_value > target_max:
+                # 价值过高：随机删除一条鱼（优先删高价值鱼）
+                candidates = sorted(collected_fish, key=lambda x: -fish_prices[x])  # 按价值降序
+                removed_fish = candidates[0]
+                collected_fish.remove(removed_fish)
+                current_value -= fish_prices[removed_fish]
+            else:
+                break  # 价值在范围内，退出调整
+
+        # 更新库存
+        for fish in collected_fish:
+            items[fish] = items.get(fish, 0) + 1
+
+        # 生成事件描述文本
+        fish_texts = {
+            "海星": "你在水晶洞窟里散步时，发现潜水里躺着一只闪闪发光的海星",
+            "水母": "你在水晶洞窟的一个小池塘里面捡到了一个巨大的水母！没准能带你滑翔？",
+            "胖头鱼": "你在峡谷边垂钓时，一条胖头鱼咬钩了",
+            "胖头鱼罐头": "你在裂谷深处找到了一个密封的胖头鱼罐头",
+            "水晶胖头鱼": "月光下，你在峡谷里钓到了一条通体透明的水晶胖头鱼",
+            "星鱼": "在峡谷里夜潜时，你遇到了传说中如星河般闪耀的星鱼",
+            # 虽然不可能出现阿拉胖头鱼，但是我还是加上了
+            "阿拉胖头鱼": "风暴中，一条巨大的阿拉胖头鱼跃出水面，落在你的手里"
+        }
+
+        # 7. 组合描述文本
+        if len(collected_fish) == 1:
+            msg = "你在探险的时候发现了一条鱼：\n" + fish_texts[collected_fish[0]] + f"（价值{current_value}草莓）"
+        else:
+            msg = "你在一次探险中找到了多种鱼类：\n" + \
+                  "\n".join([f"- {fish}（价值{fish_prices[fish]}草莓）" for fish in collected_fish]) + \
+                  f"\n总计价值：{current_value}草莓。"
+
+        # 8. 保存数据并发送消息
         save_data(full_path, user_data)
-        msg = jam_text + diamond_text+hourglass_text
-        await send_image_or_text(message, msg, True, None, 20)
+        await send_image_or_text(message, msg + diamond_text + hourglass_text, True, None, 20)
         return
     
     #debuff事件
-    elif(rnd<=350):
+    elif(rnd<=400): # 7.5%
         #首先玩家没有buff/debuff时才会随机触发
         #有药水状态正常抓
         if user_info['buff2'] != 'normal':
@@ -1534,7 +1602,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # debuff不加时间
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-        rnd_debuff = random.randint(1,4)
+        rnd_debuff = random.randint(1,5)
         #设定恢复时长为3-6小时后
         recover_hour = random.randint(3,6)
         if rnd_debuff==1:
@@ -1543,16 +1611,26 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'weaken'
             save_data(full_path, user_data)
-            msg = f"你在摧毁机器人进行灵魂转移的时候，一不小心灵魂进入虚弱状态了，接下来{recover_hour}小时内你只能抓到1级的Madeline了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            msg = (
+                f"在神庙深处的灵魂转移仪式中，你的意识突然被水晶共振干扰。\n"
+                f"灵魂能量像渗入多孔水晶般不断流失，接下来的{recover_hour}小时内，\n"
+                "你只能感知到最微弱的Madeline存在痕迹（1级）。\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            )
             await send_image_or_text(message, msg, True, None, 20)
             return
         elif rnd_debuff==2:
             #设定恢复时长为3-6小时后
             next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
-            user_info['debuff'] = 'notjam'
+            user_info['debuff'] = 'notfish'
             save_data(full_path, user_data)
-            msg = f"你在帮助研究所里的人做实验的时候逃跑了，接下里的{recover_hour}h内他们对你进行通缉，你似乎没办法从本猎场拿到果酱了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            msg = (
+                f"当你试图在探险时捕捉鱼类时，遗忘深渊里的所有鱼类突然化作透明水晶消散。\n"
+                f"接下来的{recover_hour}小时内，\n"
+                "遗忘深渊里的任何水生物都会在你接触时瞬间结晶化。\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            )
             await send_image_or_text(message, msg, True, None, 20)
             return
         elif rnd_debuff==3:
@@ -1561,7 +1639,13 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'poisoned_2'
             save_data(full_path, user_data)
-            msg = f"你在路过毒水池的时候，一不小心有毒气体吸入过多，你中毒了，接下来{recover_hour}h内抓Madeline获得不了任何草莓了。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            msg = (
+                f"裂谷深处的毒水突然翻涌，紫色雾霭缠绕着你的采集袋。\n"
+                f"接下来的{recover_hour}小时内，所有收获的草莓都会在触碰时\n"
+                "溶解成无价值的粘液。\n"
+                "纯净水域暂时隔绝了更致命的毒素入侵。\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            )
             await send_image_or_text(message, msg, True, None, 20)
             return
         elif rnd_debuff==4:
@@ -1570,9 +1654,38 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
             user_info['debuff'] = 'clumsy'
             save_data(full_path, user_data)
-            msg = f"突然，一股神秘的力量侵入了你的身体，除了万能解药以外的几乎全部能够主动使用的道具/藏品都失效了！接下来{recover_hour}小时内你无法使用任何道具了！。\n不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            msg = (
+                f"来自深渊的惰性能量包裹了你的所有工具，\n"
+                f"接下来的{recover_hour}小时内，道具表面都覆盖着\n"
+                "一层拒绝回应的水晶薄膜。\n"
+                "唯有万能解药和部分特殊道具不受这层封印影响。\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。"
+            )
             await send_image_or_text(message, msg, True, None, 20)
             return
+        
+        elif rnd_debuff == 5:  # 合并5和6的效果
+            # 设定恢复时长为3-6小时后
+            next_recover_time = current_time + datetime.timedelta(hours=recover_hour)
+            user_info['next_recover_time'] = next_recover_time.strftime("%Y-%m-%d %H:%M:%S")
+            user_info['debuff'] = 'tentacle'
+
+            # 给小小卒发消息通信
+            text_rec = f"*forbid_guess {user_id} {recover_hour}"
+            save_data(full_path, user_data)
+            
+            msg = (
+                f"当你在遗忘神庙调查那些沉睡的机关时，\n"
+                "石像突然活化，从基座下伸出机械触手将你缠住。\n"
+                "挣扎中你不小心撞到小小卒，让她跌入深渊中——\n\n"
+                f"接下来{recover_hour}小时内你将：\n"
+                f"1. 无法进行任何bet/ggl/竞技场等行动\n"
+                f"2. 无法进行guess/roulette\n"
+                f"不过幸运地，这{recover_hour}小时内你应该不会获得其他debuff了。\n\n"
+                "那些触手最终缩回石像基座，但惩罚效果仍在持续。")
+            
+            await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
+            await send_image_or_text(message, msg, True, None, 30)
     
     elif(rnd<=465):
         # 失约遇不到这个事件
@@ -1701,9 +1814,9 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             )
         else:
             msg = (
-                f"你遇到了一位流浪商人，他似乎对鱼类很感兴趣\n"+
-                f"“你好啊，我需要购买一些鱼类。\n现在我需要{amount}条{fish_name}，\n我愿意以每条{price}草莓的价格收购，\n不知你是否愿意。”\n"+
-                "鱼类售卖不支持分批出售\n"+
+                f"你遇到了一位流浪商人，他似乎对鱼很感兴趣\n"+
+                f"“你好啊，我需要购买一些鱼。\n现在我需要{amount}条{fish_name}，\n我愿意以每条{price}草莓的价格收购，\n不知你是否愿意。”\n"+
+                "鱼售卖不支持分批出售\n"+
                 "输入.confirm 确定出售，输入.deny 拒绝本次交易"
             )
         await send_image_or_text(message, msg, True, None, 50)
