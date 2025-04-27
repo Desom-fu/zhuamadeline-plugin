@@ -56,9 +56,9 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         collections_list.sort(key=lambda x: x[1], reverse=True)
 
         # 构建藏品列表文本
-        text = f"【{nickname}的藏品列表】\n\n"
+        text = f"【{nickname}的藏品列表】\n"
         for k, v in collections_list:
-            text += f"· {k} ×{v}\n"
+            text += f"\n· {k} ×{v}"
         
         await send_image_or_text_forward(ckcplist, text, '藏品库存室', bot, event.self_id, event.group_id, 30, True)
 

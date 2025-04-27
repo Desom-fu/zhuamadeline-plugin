@@ -26,6 +26,8 @@ __all__ = [
     'user_path2',
     'user_path3',
     'user_path4',
+    'user_path5',
+    'stuck_path',
     'max_grade',
     'exp_growth',
     'backup_path',
@@ -85,6 +87,8 @@ user_path1 = Path() / "data" / "UserList" / "UserList1.json"
 user_path2 = Path() / "data" / "UserList" / "UserList2.json"
 user_path3 = Path() / "data" / "UserList" / "UserList3.json"
 user_path4 = Path() / "data" / "UserList" / "UserList4.json"
+user_path5 = Path() / "data" / "UserList" / "UserList4.json"
+stuck_path = Path() / "data" / "UserList" / "Struct.json"
 #5猎相关经验
 max_grade = 30 # 满级固定30
 # 经验增长规则字典
