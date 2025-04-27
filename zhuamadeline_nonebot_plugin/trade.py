@@ -17,6 +17,8 @@ from .config import *
 from .list1 import *
 from .list2 import *
 from .list3 import *
+from .list4 import *
+from .list5 import *
 #加载商店信息和商店交互
 from .collection import collections
 from .function import *
@@ -24,14 +26,6 @@ from .event import *
 from .pvp import *
 from .whitelist import whitelist_rule
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
-
-user_path = Path() / "Data" / "UserList"
-file_name = "UserData.json"
-full_path = user_path / file_name
-user_path1 = Path() / "data" / "UserList" / "UserList1.json"
-user_path2 = Path() / "data" / "UserList" / "UserList2.json"
-user_path3 = Path() / "data" / "UserList" / "UserList3.json"
-user_path4 = Path() / "data" / "UserList" / "UserList4.json"
 
 #确定一些事件
 confirm = on_fullmatch(['.confirm', '。confirm'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -52,51 +46,70 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
         return
 
     elif data[user_id]['event'] == 'trading':
-        kind = data[user_id]['trade']['物品'][0] # -1为藏品，其他是猎场
-        good = data[user_id]['trade']['物品'][1]
+        trade_type = data[user_id]['trade'].get('类型', 'madeline')  # 默认为玛德琳交易
         amount = data[user_id]['trade']['数量']
         price = data[user_id]['trade']['单价']
-
-        #对于高等级猎场madeline的交易判断
-        madeline_dict = {
-            1: (user_path1, madeline_data1),
-            2: (user_path2, madeline_data2),
-            3: (user_path3, madeline_data3),
-            4: (user_path4, madeline_data4),
-        }
+        item_info = data[user_id]['trade']['物品']
         
-        kind = int(kind)
-        if kind in madeline_dict:
-            madeline_path, chaxun = madeline_dict[kind]
-        else:
-            raise KeyError("不存在该猎场！")
+        if trade_type == 'madeline':
+            # 原有玛德琳交易逻辑
+            kind = item_info[0] # -1为藏品，-2为鱼类，其他是猎场
+            good = item_info[1]
             
-        data2 = open_data(madeline_path)
-        if user_id not in data2:
-            data2[user_id] = {}
-        if good not in data2[user_id]:
-            data2[user_id][good] = 0
+            # 开新猎场要改
+            madeline_dict = {
+                1: (user_path1, madeline_data1),
+                2: (user_path2, madeline_data2),
+                3: (user_path3, madeline_data3),
+                4: (user_path4, madeline_data4),
+                5: (user_path5, madeline_data5),
+            }
             
-        keepNum = data2[user_id][good] #你目前拥有的该madeline数量
-        k = good.split('_')
-        level = int(k[0]) #抽取的madeline等级
-        num = k[1] #抽取的madeline的ID
-        name = chaxun.get(str(level)).get(num).get('name') #获取该madeline的名称
+            kind = int(kind)
+            if kind in madeline_dict:
+                madeline_path, chaxun = madeline_dict[kind]
+            else:
+                raise KeyError("不存在该猎场！")
+                
+            data2 = open_data(madeline_path)
+            if user_id not in data2:
+                data2[user_id] = {}
+            if good not in data2[user_id]:
+                data2[user_id][good] = 0
+                
+            keepNum = data2[user_id][good] #你目前拥有的该madeline数量
+            k = good.split('_')
+            level = int(k[0]) #抽取的madeline等级
+            num = k[1] #抽取的madeline的ID
+            name = chaxun.get(str(level)).get(num).get('name') #获取该madeline的名称
+            
+            if keepNum >= amount:
+                data2[user_id][good] -= amount
+                berry = amount * price
+                data[user_id]['berry'] = data.get(user_id, {}).get('berry', 1000) + berry
+                data[user_id]['event'] = 'nothing'
+                save_data(full_path, data)
+                save_data(madeline_path, data2)
+                await send_image_or_text(confirm, f"交易成功！你获得了{berry}草莓。\n商人很喜欢与你的这一次交易，他期待着下次与你见面", True, None)
+            else:
+                await send_image_or_text(confirm, f"你没有足够多的{name}，你需要{amount}个，\n但你目前只拥有{keepNum}个", True, None)
         
-        if keepNum >= amount:
-            data2[user_id][good] -= amount
-            #这应该不会发生吧...但我还是加上了这个判断
-            if 'berry' not in data[user_id]:
-                data[user_id]['berry'] = 1000
-            berry = amount * price
-            data[user_id]['berry'] += berry
-            data[user_id]['event'] = 'nothing'
-            #写入主数据表
-            save_data(full_path, data)
-            save_data(madeline_path, data2)
-            await send_image_or_text(confirm, f"交易成功！你获得了{berry}草莓。\n商人很喜欢与你的这一次交易，他期待着下次与你见面", True, None)
-        else:
-            await send_image_or_text(confirm, f"你没有足够多的{name}，你需要{amount}个，\n但你目前只拥有{keepNum}个", True, None)
+        elif trade_type == 'fish':
+            # 鱼类交易逻辑
+            fish_name = item_info[1]
+            items = data.setdefault(user_id, {}).setdefault('item', {})
+            keepNum = items.get(fish_name, 0)
+            
+            if keepNum >= amount:
+                items[fish_name] -= amount
+                
+                berry = amount * price
+                data[user_id]['berry'] = data.get(user_id, {}).get('berry', 1000) + berry
+                data[user_id]['event'] = 'nothing'
+                save_data(full_path, data)
+                await send_image_or_text(confirm, f"交易成功！你出售了{amount}条{fish_name}，获得了{berry}草莓。\n商人很喜欢这些新鲜的鱼，他期待着下次与你交易", True, None)
+            else:
+                await send_image_or_text(confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
 
 #取消一些事件
 deny = on_fullmatch(['.deny', '。deny'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
