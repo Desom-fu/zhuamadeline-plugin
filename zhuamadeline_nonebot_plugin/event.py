@@ -1696,7 +1696,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         else:
             msg = (
                 f"你遇到了一位流浪商人，他似乎对鱼类很感兴趣\n"+
-                f"“你好啊，我在收集一些鱼类。\n现在我需要{amount}条{fish_name}，\n我愿意以每条{price}草莓的价格收购，\n不知你是否愿意。”\n"+
+                f"“你好啊，我需要购买一些鱼类。\n现在我需要{amount}条{fish_name}，\n我愿意以每条{price}草莓的价格收购，\n不知你是否愿意。”\n"+
                 "鱼类售卖不支持分批出售\n"+
                 "输入.confirm 确定出售，输入.deny 拒绝本次交易"
             )
