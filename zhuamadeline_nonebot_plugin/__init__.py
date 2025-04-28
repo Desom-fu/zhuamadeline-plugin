@@ -40,6 +40,8 @@ from .work import *
 driver = get_driver()
 @driver.on_startup
 async def _():
+    # 初始化创建文件
+    init_data()
     logger.info("抓madeline系统已经开启...")
     
 # # 0:00 - 0:30 不进行事件的预处理钩子函数

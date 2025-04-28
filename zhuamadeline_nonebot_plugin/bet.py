@@ -33,12 +33,6 @@ __all__ = [
     "demon_default"
 ]
 
-# 用户数据文件路径
-full_path = Path() / "data" / "UserList" / "UserData.json"
-bar_path = Path() / "data" / "UserList" / "bar.json"
-demon_path = Path() / "data" / "UserList" / "demon.json"
-pvp_path = Path() / "data" / "UserList" / "pvp.json"
-
 #--------------------game游戏-------------------------
 
 # 游戏规则命令

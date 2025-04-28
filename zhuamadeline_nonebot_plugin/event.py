@@ -10,8 +10,8 @@ from .list2 import *
 from .list3 import *
 from .list4 import *
 from .list5 import *
-from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status, get_nickname
-from .config import ban, bot_owner_id, connect_bot_id, user_path1, user_path2, user_path3, user_path4, user_path5, stuck_path, bar_path, full_path
+from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status, get_nickname, spawn_boss, spawn_world_boss
+from .config import ban, bot_owner_id, connect_bot_id, user_path1, user_path2, user_path3, user_path4, user_path5, stuck_path, bar_path, full_path, world_boss_data_path, boss_data_path
 from .whitelist import whitelist_rule
 from .shop import item, fish_prices
 from .pvp import check_liechang
@@ -1440,6 +1440,16 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         return
 
     ######其他事件#####
+    # 检查世界Boss
+    world_boss_data = open_data(world_boss_data_path)
+    if world_boss_data.get("active", False):
+        return
+    
+    # 检查个人Boss
+    boss_data = open_data(boss_data_path)
+    if user_id in boss_data:
+        return
+
     rnd = random.randint(1,1000)
     if(rnd<=175): # 17.5%
         #有迅捷正常抓
@@ -1783,7 +1793,59 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             await send_image_or_text(message, msg, True, None, 25)
             return
 
-    elif rnd <= 605: # 5% boss事件暂未写 
+    elif rnd <= 605:  # 5%几率触发Boss事件
+        # 检查玩家等级决定Boss类型
+        if grade < 6:
+            # 6级以下只能遇到迷你Boss
+            boss_type = "mini"
+        elif grade < 11:
+            # 6-10级可以遇到迷你或普通Boss
+            boss_type = random.choice(["mini", "normal"])
+        else:
+            # 11级以上可以遇到所有类型Boss
+            boss_type = random.choice(["mini", "normal", "hard"])
+
+        # 10%几率触发世界Boss（需要11级以上）
+        if grade >= 11 and random.randint(1, 10) == 1:
+            if not open_data(world_boss_data_path).get("active", False):
+                world_boss_data = spawn_world_boss()
+                msg = (
+                    f"世界Boss警报\n"
+                    f"恐怖的[{world_boss_data['name']}]已然苏醒……诶？怎么是你？\n"
+                    f"生命值: {world_boss_data['hp']}/{world_boss_data['max_hp']}\n"
+                    "额，来都来了，全体在5猎的玩家要不要打一下？\n"
+                    "每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）"
+                )
+                await send_image_or_text(message, msg, True, None, 20)
+                return
+
+        # 生成个人Boss
+        boss_data = spawn_boss(user_id, grade, boss_type)
+        if boss_type == "mini":
+            msg = (
+                f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！\n"
+                f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
+                "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
+                "击败Boss后才能继续正常抓取Madeline！"
+            )
+        elif boss_type == "normal":
+            msg = (
+                f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！不是，为什么技巧是boss啊喂！\n"
+                f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
+                "等下，如果我能熟练掌握这个技巧是不是不用打？不行？好吧……"
+                "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
+                "击败Boss后才能继续正常抓取Madeline！"
+            )
+        elif boss_type == "hard":
+            msg = (
+                f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！等等……似乎有点不对？\n"
+                f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
+                "真的要打吗？\n"
+                "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
+                "击败Boss后才能继续正常抓取Madeline！"
+            )
+
+        await send_image_or_text(message, msg, True, None, 20)
         return
     
     elif rnd <= 655:

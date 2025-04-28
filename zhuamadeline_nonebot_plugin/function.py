@@ -7,11 +7,12 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 from .shop import item
 from .collection import collections
-from .config import madeline_path_lc1, madeline_path_lc2, madeline_path_lc3, madeline_path_lc4 , liechang_count
 from .config import *
 import random
+import math
 import re
 import datetime
 import json
@@ -56,7 +57,12 @@ __all__ = [
     'get_nickname',
     'calculate_spare_chance',
     'calculate_level_and_exp',
-    'buff2_change_status'
+    'buff2_change_status',
+    'init_data',
+    'spawn_boss',
+    'attack_boss',
+    'get_boss_rewards',
+    'get_world_boss_rewards'
 ]
 
 #madeline图鉴
@@ -75,6 +81,7 @@ file_names = {
     '2': "UserList2.json",
     '3': "UserList3.json",
     '4': "UserList4.json",
+    '5': "UserList5.json",
 }
 # 字典映射来选择不同的 madeline_data
 madeline_data_mapping = {
@@ -82,6 +89,7 @@ madeline_data_mapping = {
     '2': madeline_data2,
     '3': madeline_data3,
     '4': madeline_data4,
+    '5': madeline_data5,
 }
 
 # 获取 NoneBot2 配置对象
@@ -91,6 +99,51 @@ url_emoji_msg = f'http://localhost:9635/set_msg_emoji_like'
 
 # 创建同步锁
 lock = threading.Lock()
+
+def init_data():
+    """初始化全部数据文件"""
+    if not boss_data_path.exists():
+        with open(boss_data_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not world_boss_data_path.exists():
+        with open(world_boss_data_path, 'w', encoding='utf-8') as f:
+            json.dump({"active": False, "hp": 0, "contributors": {}}, f)
+    if not pvp_path.exists():
+        with open(full_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not pvp_coldtime_path.exists():
+        with open(pvp_coldtime_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not user_path1.exists():
+        with open(user_path1, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not user_path2.exists():
+        with open(user_path2, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not user_path3.exists():
+        with open(user_path3, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not user_path4.exists():
+        with open(user_path4, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not user_path5.exists():
+        with open(user_path5, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not garden_path.exists():
+        with open(garden_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not bar_path.exists():
+        with open(bar_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not demon_path.exists():
+        with open(demon_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not stuck_path.exists():
+        with open(stuck_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not cd_path.exists():
+        with open(cd_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
 
 # 获取QQ昵称
 async def get_nickname(bot: Bot, user_id: str) -> str:
@@ -213,6 +266,7 @@ def calculate_spare_chance(data, user_id):
         return 0
 
 # 5猎经验值计算
+# 5猎经验值计算
 def calculate_level_and_exp(data, user_id, level, isitem):
     """
     计算等级和经验值的增长
@@ -238,17 +292,14 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         return exp_msg, grade_msg, data
         
     if isitem == 1:
-        # 是道具就加levle//2的经验
-        exp += level//2
+        # 是道具就加level//2的经验
+        exp += level // 2
     else:
         # 加等级点经验
         exp += level
         
-    if exp > 0:
-        # exp>0才加上消息
-        exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
-
-    if exp >= max_exp:
+    # 处理可能的多级升级情况
+    while exp >= max_exp and grade < max_grade:
         # 计算升级
         exp -= max_exp
         grade += 1
@@ -259,15 +310,12 @@ def calculate_level_and_exp(data, user_id, level, isitem):
                 max_exp += increment
                 break
         
-        exp_msg = f'\n本次抓Madeline获得{level}点经验，当前经验：{exp}/{max_exp}'
-        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}'
-        
         # 使用字典存储特殊等级消息
         special_grades = {
-            6: f"恭喜升到{grade}级，现在你可以在深渊里面抓到2级的Madeline了！",
-            11: f"恭喜升到{grade}级，现在你可以在深渊里面抓到3级的Madeline了！",
-            16: f"恭喜升到{grade}级，现在你可以在深渊里面抓到4级的Madeline了！",
-            21: f"恭喜升到{grade}级，现在你可以在深渊里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
+            6: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到2级的Madeline了！",
+            11: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到3级的Madeline了！",
+            16: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到4级的Madeline了！",
+            21: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
         }
 
         if grade in special_grades:
@@ -275,10 +323,23 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         
         if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
             collections['时隙沙漏'] = 1
-            grade_msg += f"你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
-
+            grade_msg += f"\n你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
+    
+    # 更新经验消息（只在有经验变化时显示）
+    if level > 0:
+        exp_msg = f'\n本次获得{level}点经验，当前经验：{exp}/{max_exp}'
+    
+    # 如果有升级才显示升级消息
+    if grade > user_data.get("grade", 1):
+        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}' + grade_msg
+    
     # 更新数据
-    user_data.update({"exp": exp, "grade": grade, "max_exp": max_exp})
+    user_data.update({
+        "exp": exp, 
+        "grade": grade, 
+        "max_exp": max_exp,
+        "collections": collections
+    })
     
     save_data(full_path, data)
     
@@ -789,3 +850,164 @@ def tool_zhuamadeline(information, data, user_id) -> list:
     result = information
     result.append(new_print)
     return result
+
+# boss相关
+
+def spawn_boss(user_id, grade, boss_type=None):
+    """生成Boss，可以指定类型"""
+    if not boss_type:
+        if grade < 6:
+            boss_type = "mini"
+        elif grade < 11:
+            boss_type = random.choice(["mini", "normal"])
+        else:
+            boss_type = random.choice(["mini", "normal", "hard"])
+    
+    if boss_type == "mini":
+        hp = random.randint(10, 20)
+    elif boss_type == "normal":
+        hp = random.randint(30, 50)
+    else:  # hard
+        hp = random.randint(60, 80)
+    
+    name = random.choice(boss_names[boss_type])
+    
+    boss_data = {
+        "type": boss_type,
+        "name": name,
+        "hp": hp,
+        "max_hp": hp,
+        "spawn_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    data = open_data(boss_data_path)
+    data[user_id] = boss_data
+    save_data(boss_data_path, data)
+    return boss_data
+
+def spawn_world_boss():
+    """生成世界Boss"""
+    hp = random.randint(500, 1000)
+    name = random.choice(boss_names["world"])
+    
+    boss_data = {
+        "active": True,
+        "name": name,
+        "hp": hp,
+        "max_hp": hp,
+        "spawn_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "contributors": {}
+    }
+    
+    save_data(world_boss_data_path, boss_data)
+    return boss_data
+
+def attack_boss(user_id, damage, is_world_boss=False):
+    """攻击Boss"""
+    if is_world_boss:
+        data = open_data(world_boss_data_path)
+        boss_data = data
+    else:
+        data = open_data(boss_data_path)
+        boss_data = data.get(user_id, {})
+    
+    if not boss_data:
+        return False, "没有找到Boss"
+    
+    boss_data["hp"] -= damage
+    if boss_data["hp"] <= 0:
+        boss_data["hp"] = 0
+    
+    # 记录贡献
+    if is_world_boss:
+        boss_data["contributors"][user_id] = boss_data["contributors"].get(user_id, 0) + damage
+        if boss_data["hp"] <= 0:
+            boss_data["active"] = False
+    else:
+        if boss_data["hp"] <= 0:
+            del data[user_id]
+    
+    save_data(world_boss_data_path if is_world_boss else boss_data_path, data)
+    return True, boss_data
+
+def get_boss_rewards(boss_data, user_id, grade):
+    """获取击败Boss的奖励
+    返回: (奖励字典, 经验值, 奖励消息)"""
+    is_max_grade = grade >= max_grade
+    reward_msg = ""
+    
+    if boss_data["type"] == "mini":
+        exp = math.floor(boss_data["max_hp"] * 1.2)
+        berry = random.randint(100, 200)
+        if is_max_grade:
+            berry *= 2
+            reward_msg = f"你已击败迷你Boss {boss_data['name']}！由于已满级，获得双倍奖励：{berry}颗草莓"
+            return {"berry": berry}, exp, reward_msg
+        reward_msg = f"你已击败迷你Boss {boss_data['name']}！获得{berry}颗草莓"
+        return {"berry": berry}, exp, reward_msg
+        
+    elif boss_data["type"] == "normal":
+        exp = math.floor(boss_data["max_hp"] * 1.3)
+        items = {
+            "迅捷药水": random.randint(1, 2),
+            "幸运药水": random.randint(1, 2),
+        }
+        if is_max_grade:
+            items["迅捷药水"] *= 2
+            items["幸运药水"] *= 2
+            reward_msg = f"你已击败普通Boss {boss_data['name']}！由于已满级，获得双倍奖励："
+        else:
+            reward_msg = f"你已击败普通Boss {boss_data['name']}！获得："
+        
+        item_list = [f"{k}x{v}" for k, v in items.items() if v > 0]
+        reward_msg += "、".join(item_list)
+        return {"items": items}, exp, reward_msg
+        
+    elif boss_data["type"] == "hard":
+        exp = math.floor(boss_data["max_hp"] * 1.5)
+        berry = random.randint(200, 400)
+        items = {
+            "迅捷药水": random.randint(1, 2),
+            "幸运药水": random.randint(1, 2),
+            "道具盲盒": random.randint(5, 10),
+        }
+        if is_max_grade:
+            berry *= 2
+            for k in items:
+                items[k] *= 2
+            reward_msg = f"你已击败精英Boss {boss_data['name']}！由于已满级，获得双倍奖励：{berry}颗草莓、"
+        else:
+            reward_msg = f"你已击败精英Boss {boss_data['name']}！获得{berry}颗草莓、"
+        
+        item_list = [f"{k}x{v}" for k, v in items.items() if v > 0]
+        reward_msg += "、".join(item_list)
+        return {"berry": berry, "items": items}, exp, reward_msg
+    
+    return {}, 0, ""
+
+def get_world_boss_rewards():
+    """获取世界Boss奖励
+    返回: (排行榜奖励列表, 全员奖励字典, 空字符串)"""
+    data = open_data(world_boss_data_path)
+    contributors = sorted(data["contributors"].items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    # 排行榜奖励配置
+    rank_rewards = [
+        {"berry": 500, "items": {"草莓果酱": 5, "时间秒表": 2}},  # 第一名
+        {"berry": 400, "items": {"草莓果酱": 4, "时间秒表": 1}},  # 第二名
+        {"berry": 300, "items": {"草莓果酱": 3}},              # 第三名
+        {"berry": 200, "items": {"草莓果酱": 2}},              # 第四名
+        {"berry": 100, "items": {"草莓果酱": 1}}               # 第五名
+    ]
+    
+    # 构建排行榜数据
+    rewards = []
+    for i, (user_id, damage) in enumerate(contributors):
+        rewards.append((user_id, rank_rewards[i], f"{i+1}名奖励"))
+    
+    # 全员奖励 (伤害x2)
+    all_rewards = {}
+    for user_id, damage in data["contributors"].items():
+        all_rewards[user_id] = {"exp": damage * 2}
+    
+    return rewards, all_rewards, ""

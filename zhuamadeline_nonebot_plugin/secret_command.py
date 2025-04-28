@@ -7,6 +7,7 @@ from datetime import datetime
 from .whitelist import whitelist_rule
 from pathlib import Path
 from .function import open_data, save_data
+from .config import full_path, berry_path
 from .token_rewards import token_rewards
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
@@ -50,8 +51,6 @@ huati3_image_path = Path() / "data" / "Image" / "huati3.png"
 huati4_image_path = Path() / "data" / "Image" / "huati4.png"
 huati5_image_path = Path() / "data" / "Image" / "huati5.png"
 huati6_image_path = Path() / "data" / "Image" / "huati6.png"
-berry_path = Path() / "data" / "Userlist" / "secret.json"
-user_path = Path() / "data" / "UserList" / "UserData.json"
 
 # 密码主入口
 passwd_command = on_command('password', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -63,7 +62,7 @@ async def handle_link(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     # 加载用户和草莓数据
     berry_data = open_data(berry_path)
-    user_data = open_data(user_path)
+    user_data = open_data(full_path)
 
     if user_id not in user_data:
         await send_image_or_text(passwd_command, "请先抓一次madeline在解密哦！", True, None)
@@ -314,7 +313,7 @@ async def confr1ngo_handle(event: Event, bot: Bot):
     '{"n":3,"m":5,"map":["6....",".....","2...3"],"watcher":[-1,2,-1,-1,-1,2,1,3]}\n'
     '{"n":4,"m":4,"map":["1...","2..6",".4..","...."],"watcher":[2,2,2,3,2,2,3,2]}\n'
     '{"n":10,"m":10,"map":["AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA","AAAAAAAAAA"],"watcher":[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]}\n'
-    '{"n":5,"m":5,"map":["**7**","****3","*****","*****","***6*"]}\n'
+    '{"n":5,"m":5,"map":["**7**","****3","Desom","Desom","***6*"]}\n'
     '{"n":3,"m":3,"map":["o.4","4wo",".4."]}\n'
     '{"n":5,"m":5,"map":["2oooo","oooo2","ooooo","o2ooo","ooo4o"]}\n'
     '{"n":3,"m":4,"map":["***o","***o","o***"]}\n'
@@ -546,7 +545,7 @@ async def handle_set_quality(bot: Bot, event: GroupMessageEvent, arg: Message = 
     berry_data[answer]["quality"] = quality  # 记录质量草莓奖励
 
     # 读取 user_data
-    user_data = open_data(user_path)
+    user_data = open_data(full_path)
 
     # 给予答对者草莓
     user_data[str(user_id)]['berry'] += jiangli
@@ -558,7 +557,7 @@ async def handle_set_quality(bot: Bot, event: GroupMessageEvent, arg: Message = 
     # 标记奖励已发放
     berry_data[answer]["paid"] = True
     save_data(berry_path, berry_data)
-    save_data(user_path, user_data)
+    save_data(full_path, user_data)
 
     result_message = (f"成功设定题目 [{answer}] 的质量草莓为 {quality}！\n" +
                       f"已向回答者 " + MessageSegment.at(user_id) + f"发放 {dif}+{quality}={jiangli} 颗草莓！")
@@ -583,7 +582,7 @@ def decrypt_new(user_id, berry_data, user_data, chu_user_id, dif, quality, answe
         user_data[user_id]['berry'] += jiangli
         berry_data[answer].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {dif}+{quality}={jiangli} 草莓！\n" + "已经向出题者"+MessageSegment.at(chu_user_id)+f"发放了 {quality}*1.5={chu_jiangli} 草莓！"
     else:
         if user_id not in berry_data[answer]:
@@ -604,7 +603,7 @@ def decrypt_all(user_id, berry_data, user_data, chu_user_id, jiangli, answer):
         user_data[user_id]['berry'] += jiangli
         berry_data[answer].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！\n" + "已经向出题者"+MessageSegment.at(chu_user_id)+f"发放了 {chu_jiangli} 草莓！"
     else:
         if user_id not in berry_data[answer]:
@@ -631,7 +630,7 @@ def decrypt_7(args, user_id,berry_data, user_data, token_rewards):
         berry_data["bilattice"][args] = user_id
         user_data[user_id]['berry'] += reward
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {reward} 草莓！"
     else:
         # 检查当前 token 是否是该用户解密的
@@ -655,7 +654,7 @@ def decrypt_6(user_id, berry_data, user_data):
         user_data[user_id]['berry'] += jiangli
         berry_data["Pointless_Machines"].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return "答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！"
     else:
         if user_id not in berry_data["Pointless_Machines"]:
@@ -673,7 +672,7 @@ def decrypt_8(user_id, berry_data, user_data):
         user_data[user_id]['berry'] += jiangli
         berry_data["kaisa"].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！"
     else:
         if user_id not in berry_data["kaisa"]:
@@ -690,7 +689,7 @@ def decrypt_9(user_id, berry_data, user_data):
         user_data[user_id]['berry'] += jiangli
         berry_data["zui"].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！"
     else:
         if user_id not in berry_data["zui"]:
@@ -708,7 +707,7 @@ def decrypt_10(user_id, berry_data, user_data):
         user_data[user_id]['berry'] += jiangli
         berry_data["rainbow"].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！"
     else:
         if user_id not in berry_data["rainbow"]:
@@ -724,7 +723,7 @@ def decrypt_10_1(user_id, berry_data, user_data):
             user_data[user_id]['berry'] += jiangli
             berry_data["rainbow_2"].append(user_id)
             save_data(berry_path, berry_data)
-            save_data(user_path, user_data)
+            save_data(full_path, user_data)
             return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！"
         else:
             if user_id not in berry_data["rainbow_2"]:
@@ -753,7 +752,7 @@ def math_3(user_id, berry_data, user_data):
         user_data[user_id]['berry'] += jiangli
         berry_data["math3"].append(user_id)
         save_data(berry_path, berry_data)
-        save_data(user_path, user_data)
+        save_data(full_path, user_data)
         return f"答案正确！已经向"+MessageSegment.at(user_id)+f"发放了 {jiangli} 草莓！"
     else:
         if user_id not in berry_data["math3"]:

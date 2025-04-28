@@ -363,6 +363,103 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         grade_msg = ''
 
         if liechang_number == "5":
+            world_boss_at_text = ''  # 用来世界boss结束at别人的
+
+            # 优先处理世界Boss
+            world_boss_data = open_data(world_boss_data_path)
+            if world_boss_data.get("active", False):
+                damage = level
+                success, result = attack_boss(user_id, damage, is_world_boss=True)
+
+                if success:
+                    msg = f"\n你对世界Boss[{result['name']}]造成了{damage}点伤害！"
+                    msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
+
+                    if result["hp"] <= 0:
+                        # 发放世界Boss奖励
+                        rewards, all_rewards, _ = get_world_boss_rewards()
+
+                        # 发放排行榜奖励（显示1-5名排名）
+                        top5_msg = []
+                        for i, (uid, reward, _) in enumerate(rewards):
+                            if str(uid) in data:
+                                nickname = await get_nickname(bot, uid)
+
+                                # 发放奖励
+                                if "berry" in reward:
+                                    data[str(uid)]["berry"] += reward["berry"]
+                                if "items" in reward:
+                                    for item, count in reward["items"].items():
+                                        data[str(uid)].setdefault("item", {})[item] = data[str(uid)]["item"].get(item, 0) + count
+
+                                rank_text = f"第{i+1}名 {nickname}: {reward['berry']}草莓"
+                                if "items" in reward:
+                                    items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
+                                    rank_text += f" + {items_text}"
+                                world_boss_at_text += MessageSegment.at(uid)
+                                top5_msg.append(rank_text)
+
+                        # 发放全员经验奖励（其他玩家）
+                        other_count = 0
+                        for uid, reward in all_rewards.items():
+                            if uid not in [x[0] for x in rewards]:  # 跳过前五名
+                                if str(uid) in data:
+                                    exp = reward["exp"]
+                                    current_grade = data[str(uid)].get("grade", 1)
+                                    max_grade = data[str(uid)].get("max_grade", 30)
+
+                                    if current_grade >= max_grade:
+                                        berry = exp * 2  # 满级转换：1经验=2草莓
+                                        data[str(uid)]["berry"] += berry
+                                    else:
+                                        calculate_level_and_exp(data, uid, exp, 0)
+                                    other_count += 1
+
+                        # 构建最终消息
+                        msg += f"\n\n世界Boss[{result['name']}]已被击败！"
+                        msg += "\n\n伤害排行榜：\n" + "\n".join(top5_msg)
+                        msg += f"\n\n另有{other_count}位参与者获得奖励（exp = 伤害值*2，若已满级则获得草莓 = 伤害值*4）"
+
+                    msg += hourglass_text + diamond_text
+                    save_data(full_path, data)
+                    await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None, 20)
+                    return
+
+            # 处理个人Boss
+            boss_data = open_data(boss_data_path).get(user_id, {})
+            if boss_data:
+                damage = level
+                success, result = attack_boss(user_id, damage)
+
+                if success:
+                    msg = f"\n你对[{result['name']}]造成了{damage}点伤害！"
+                    msg += f"\nBoss剩余HP: {result['hp']}/{result['max_hp']}"
+
+                    if result["hp"] <= 0:
+                        # 发放个人Boss奖励
+                        rewards, exp, defeat_msg = get_boss_rewards(result, user_id, grade)
+
+                        # 实际发放奖励代码
+                        if "berry" in rewards:
+                            data[str(user_id)]["berry"] += rewards["berry"]
+                        if "items" in rewards:
+                            for item, count in rewards["items"].items():
+                                data[str(user_id)].setdefault("item", {})[item] = data[str(user_id)]["item"].get(item, 0) + count
+
+                        # 计算经验
+                        exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, exp, 0)
+
+                        msg += f"\n{defeat_msg}"
+                        msg += f"\n经验值: {exp}"
+                        msg += exp_msg if exp_msg else ""
+                        msg += grade_msg if grade_msg else ""
+
+                    msg += hourglass_text + diamond_text
+                    save_data(full_path, data)
+                    await send_image_or_text(catch, msg, True, None, 20)
+                    return
+
+            # 没有Boss时的正常经验计算
             exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)
         
         #奖励草莓
@@ -636,6 +733,9 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     working_endtime = datetime.datetime.strptime(working_endtime_r, "%Y-%m-%d %H:%M:%S")
     next_time = max(get_time_from_data(user_data), work_end_time)
     
+    # 两个boss相关的data
+    boss_data = open_data(boss_data_path).get(user_id, {})
+    world_boss_data = open_data(world_boss_data_path)
     # 获取pvp数据
     turn = pvp_data.get('count', 100)  # 获取当前轮数
     
@@ -770,6 +870,52 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 f"\n- 当前等级：{grade}/{max_grade}")
         else:
             message += f'- 您已升到满级：{grade}/{max_grade}'
+
+        # 这里是世界boss信息（如果有）
+        if world_boss_data.get("active", False):
+            # 获取当前玩家的伤害贡献
+            contributors = sorted(world_boss_data["contributors"].items(), 
+                                 key=lambda x: x[1], reverse=True)
+
+            # 查找当前玩家排名
+            player_rank = None
+            player_damage = world_boss_data["contributors"].get(str(user_id), 0)
+
+            for i, (uid, damage) in enumerate(contributors):
+                if uid == str(user_id):
+                    player_rank = i + 1
+                    break
+                
+            # 构建排名信息
+            rank_info = ""
+            if player_rank is not None:
+                # 当前排名信息
+                rank_info = f"\n你的排名: 第{player_rank}名 (伤害: {player_damage})"
+
+                # 与前一名差距
+                if player_rank > 1:
+                    higher_damage = contributors[player_rank-2][1]
+                    diff = higher_damage - player_damage
+                    rank_info += f"\n距离上一名还差: {diff}伤害"
+
+                # 与后一名差距
+                if player_rank < len(contributors):
+                    lower_damage = contributors[player_rank][1]
+                    diff = player_damage - lower_damage
+                    rank_info += f"\n领先下一名: {diff}伤害"
+
+            message += (
+                f"\n- 世界Boss事件"
+                f"\n全体玩家正在与{world_boss_data['name']}战斗！"
+                f"\n世界Boss生命值: {world_boss_data['hp']}/{world_boss_data['max_hp']}"
+                f"{rank_info}"
+            )
+
+        # 然后展示Boss信息
+        message += (
+            f"\n- 你正在与{boss_data['name']}（{boss_data['type']}级Boss）战斗！"
+            f"\nBoss生命值: {boss_data['hp']}/{boss_data['max_hp']}"
+        ) if boss_data else ''
 
     if all_judge == 'all':
         # 处理“身份徽章”和“充能箱”状态

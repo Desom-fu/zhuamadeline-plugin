@@ -10,6 +10,7 @@ from .list1 import madeline_data1
 from .list2 import madeline_data2
 from .list3 import madeline_data3
 from .list4 import madeline_data4
+from .list5 import madeline_data5
 from .config import *
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message
 from nonebot import get_bot, on_fullmatch
@@ -27,14 +28,6 @@ scheduler = require("nonebot_plugin_apscheduler").scheduler
 #事件系统
 #在道具使用和普通的抓madeline中会触发
 
-pvp_path = Path() / "data" / "UserList" / "pvp.json"
-user_path = Path() / "data" / "UserList" / "UserData.json"
-user_list1 = Path() / "data" / "UserList" / "UserList1.json"
-user_list2 = Path() / "data" / "UserList" / "UserList2.json"
-user_list3 = Path() / "data" / "UserList" / "UserList3.json"
-user_list4 = Path() / "data" / "UserList" / "UserList4.json"
-pvp_coldtime_path = Path() / "data" / "UserList" / "pvp_coldtime.json"
-bar_path = Path() / "data" / "UserList" / "bar.json"
 
 __all__ = [
     "madeline_pvp_event",
@@ -213,7 +206,7 @@ def pk_combat(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
     max_ranb = ranb + 15
     #读取一下是否有圣十字架
     #有就加2点随机下限
-    data = open_data(user_path)
+    data = open_data(full_path)
     shengshi = data[qqb]['collections'].get("圣十字架", 0)
     # 这里要判断自己有逆十字架才起效果
     nishi = data[user_id]['collections'].get("逆十字架", 0)
@@ -278,7 +271,7 @@ def pvp_logic(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
             # 根据 hunt_bonusb 计算 oppo_liechang
             oppo_liechang = hunt_bonusb_to_oppo_liechang.get(hunt_bonusb, 1)  # 默认值为 1
             
-            data = open_data(user_path)
+            data = open_data(full_path)
             # 判定血刃、残片、灵魂机器人加固定战力上限
             blood = data[user_id]['collections'].get("鲜血之刃", 0)
             canpian = data[user_id]['item'].get("残片", 0)
@@ -392,7 +385,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         await send_image_or_text(message, close_text, True)
     # 当前时间戳
     if (user_id in ban):
-        await send_image_or_text(message, "很抱歉，0猎不让使用脚本，您已经被封禁，请联系*****-**哦~", True)
+        await send_image_or_text(message, "很抱歉，0猎不让使用脚本，您已经被封禁，请联系Desom-fu哦~", True)
     if (pvp_coldtime_data != {}):
         last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
         current_time2 = int(time.time())
@@ -403,8 +396,8 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             remaining_minutes = remaining_seconds // 60  # 剩余分钟数
             remaining_seconds = remaining_seconds % 60  # 剩余秒数
             await send_image_or_text(message, f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
-    user_list1 = Path() / "data" / "UserList" / "UserList1.json"
-    kc_data1 = open_data(user_list1)
+    user_path1 = Path() / "data" / "UserList" / "UserList1.json"
+    kc_data1 = open_data(user_path1)
     #如果没有注册
     if(not str(user_id) in user_data):
         await send_image_or_text(message, "你还没有抓过Madeline哦~", True)
@@ -420,15 +413,17 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     dream = user_data[str(user_id)].get('collections',{}).get("回想之核", 0)
     user_data[user_id]['next_time'] = time_decode(datetime.datetime.now()+datetime.timedelta(minutes=10-dream))
     #开新猎场要改
-    kc_data1 = open_data(user_list1)
-    kc_data2 = open_data(user_list2)
-    kc_data3 = open_data(user_list3)
-    kc_data4 = open_data(user_list4)
+    kc_data1 = open_data(user_path1)
+    kc_data2 = open_data(user_path2)
+    kc_data3 = open_data(user_path3)
+    kc_data4 = open_data(user_path4)
+    kc_data5 = open_data(user_path5)
     user_datas = {
         "1": kc_data1,
         "2": kc_data2,
         "3": kc_data3,
         "4": kc_data4,
+        "5": kc_data5,
     }
     
     #提前设置rana、hunt_bonus和oppo_liechang
@@ -682,7 +677,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         pvp_coldtime_data['last_pvp_end_time'] = timestamp3  # 保存当前时间戳
     # 保存数据
     save_data(pvp_path,pvp_data)
-    save_data(user_path,user_data)
+    save_data(full_path,user_data)
     save_data(pvp_coldtime_path, pvp_coldtime_data)
     # 初始化被at的人
     forward_text = ''
@@ -774,6 +769,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
             '2': madeline_data2,
             '3': madeline_data3,
             '4': madeline_data4,
+            '5': madeline_data5,
         }
 
         name = madeline_data.get(liechang_number, {}).get(level, {}).get(num, {}).get('name', "未知名称")
@@ -824,7 +820,7 @@ async def check_pvp_end_job():
     group_id = zhuama_group    # 目标群号
 
     # 读取用户数据
-    user_data = open_data(user_path)
+    user_data = open_data(full_path)
 
     # 打开 PVP 数据文件
     pvp_data = open_data(pvp_path)
@@ -865,7 +861,7 @@ async def check_pvp_end_job():
     pvp_data.clear()
 
     # 保存清空后的 PVP 数据和用户数据
-    save_data(user_path, user_data)
+    save_data(full_path, user_data)
     save_data(pvp_path, pvp_data)
     
     # 发送奖励公告消息
