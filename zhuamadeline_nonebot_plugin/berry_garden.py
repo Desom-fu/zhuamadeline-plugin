@@ -247,7 +247,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"\n施肥能耗: {level_config['fert_energy']} 基础产量: {level_config['basic_reward']}"
             f"\n偷取范围: {level_config['steal_min']}-{level_config['steal_max']}"
         )
-        await send_image_or_text(berry_garden, reply_msg, True, 20)
+        await send_image_or_text(berry_garden, reply_msg, True)
     
     # 收菜操作
     elif operation == "收菜":
