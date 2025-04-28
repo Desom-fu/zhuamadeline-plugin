@@ -1751,16 +1751,16 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             await send_image_or_text(message, msg, True, None, 25)
             return
 
-    # 暴击指套 - 水淹裂谷 
+    # 暴击指虎 - 水淹裂谷 
     elif rnd <= 545: # 1%
-        if '暴击指套' not in collections:
-            collections['暴击指套'] = 1
+        if '暴击指虎' not in collections:
+            collections['暴击指虎'] = 1
             save_data(full_path, user_data)
             msg = (
                 "当你在裂谷的岩壁上攀爬时，指尖突然陷入一处隐藏的孔洞。\n"
-                "洞穴里嵌着副锈蚀的金属指套，绿宝石接触到你血液的瞬间，\n"
+                "洞穴里嵌着副锈蚀的金属指虎，绿宝石接触到你血液的瞬间，\n"
                 "所有锈迹剥落，露出锋利如新的刃口，仿佛在渴望战斗。\n"
-                "输入 .cp 暴击指套 以查看具体效果" + diamond_text + hourglass_text
+                "输入 .cp 暴击指虎 以查看具体效果" + diamond_text + hourglass_text
             )
             await send_image_or_text(message, msg, True, None, 25)
             return
@@ -1817,7 +1817,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                     "每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                     "全体在5猎的玩家都必须打世界Boss哦！\n"
                     "打完之后按造成伤害的贡献分发奖励，前五名有巨额奖励哦！（如果造成伤害相同，按照开打Boss的时间进行排名）\n"
-                    "没进入前五名的也不必担心，每人也能获得100草莓！\n"
+                    "没进入前五名的也不必担心，每人也能获得300颗草莓！\n"
                     "除此之外，全体玩家还能获得造成伤害量*2的经验哦！"
                 )
                 await send_image_or_text(message, msg, True, None, 20)

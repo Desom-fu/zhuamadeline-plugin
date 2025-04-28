@@ -784,7 +784,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
     # 第一阶段消息：显示获得的经验和当前状态（包含溢出经验）
     if gained_exp > 0:
         temp_exp = exp + gained_exp  # 临时计算包含本次获得的经验
-        exp_msg = f'\n本次获得{gained_exp}点经验，当前经验：{temp_exp}/{max_exp}'
+        exp_msg = f'\n\n本次获得{gained_exp}点经验，当前经验：{temp_exp}/{max_exp}'
     
     # 2. 实际增加经验
     exp += gained_exp
@@ -821,8 +821,8 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         if grade < max_grade:
             grade_msg += f'\n升级后经验：{exp}/{max_exp}'
     # 如果没有升级但经验有变化，也显示最终状态
-    elif gained_exp > 0:
-        exp_msg += f'\n当前经验：{exp}/{max_exp}'
+    # elif gained_exp > 0:
+        # exp_msg += f'\n当前经验：{exp}/{max_exp}'
 
     # 提添加藏品
     if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
@@ -900,11 +900,13 @@ def attack_boss(user_id, damage, is_world_boss=False):
         data = open_data(boss_data_path)
         boss_data = data.get(user_id, {})
     
-    # 指套伤害翻倍
+    # 指虎伤害翻倍
+    big_damage_msg = ''
     user_data = open_data(full_path)
-    big_attack = user_data[user_id]['collections'].get("暴击指套", 0)
-    if big_attack >= 1 and random.randint(1, 100) <= 5:
+    big_attack = user_data[user_id]['collections'].get("暴击指虎", 0)
+    if big_attack >= 1 and random.randint(1, 100) <= 10:
         damage *= 2
+        big_damage_msg += '尖锐的指虎狠狠地扎进了boss的要害，本次攻击造成的伤害翻倍！\n'
     
     if not boss_data:
         return False, "没有找到Boss"
@@ -923,7 +925,7 @@ def attack_boss(user_id, damage, is_world_boss=False):
             del data[user_id]
     
     save_data(world_boss_data_path if is_world_boss else boss_data_path, data)
-    return True, boss_data
+    return True, boss_data, big_damage_msg, damage
 
 def get_boss_rewards(boss_data, user_id, grade):
     """获取击败Boss的奖励
@@ -988,11 +990,11 @@ def get_world_boss_rewards():
     
     # 排行榜奖励配置
     rank_rewards = [
-        {"berry": 500, "items": {"迅捷药水": 5, "幸运药水": 5, "道具盲盒": 10}},  # 第一名
-        {"berry": 450, "items": {"迅捷药水": 4, "幸运药水": 4, "道具盲盒": 9}},  # 第二名
-        {"berry": 400, "items": {"迅捷药水": 3, "幸运药水": 3, "道具盲盒": 8}},  # 第三名
-        {"berry": 350, "items": {"迅捷药水": 2, "幸运药水": 2, "道具盲盒": 7}},  # 第四名
-        {"berry": 300, "items": {"迅捷药水": 1, "幸运药水": 1, "道具盲盒": 6}}   # 第五名
+        {"berry": 600, "items": {"迅捷药水": 5, "幸运药水": 5, "道具盲盒": 10}},  # 第一名
+        {"berry": 550, "items": {"迅捷药水": 4, "幸运药水": 4, "道具盲盒": 9}},  # 第二名
+        {"berry": 500, "items": {"迅捷药水": 3, "幸运药水": 3, "道具盲盒": 8}},  # 第三名
+        {"berry": 450, "items": {"迅捷药水": 2, "幸运药水": 2, "道具盲盒": 7}},  # 第四名
+        {"berry": 400, "items": {"迅捷药水": 1, "幸运药水": 1, "道具盲盒": 6}}   # 第五名
     ]
     
     # 构建排行榜数据

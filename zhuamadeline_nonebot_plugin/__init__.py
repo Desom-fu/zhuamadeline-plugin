@@ -63,7 +63,7 @@ async def check_cooldown(bot:Bot ,event: Event, matcher: Matcher):
         message_content = event.get_message().extract_plain_text()  # 提取纯文本内容
         if message_content.startswith(("。/", "./", "。、", ".、")): # 匹配这四个组合直接return
             return
-        if message_content.startswith(("。", ".")):
+        if message_content.startswith("#"):
             current_time = datetime.datetime.now()  #读取当前系统时间
             user_id = str(event.get_user_id())
             group_id = str(event.group_id)

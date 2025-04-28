@@ -21,6 +21,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 #加载抓madeline相关的函数
 from .function import *
 from .shop import buff2_config
@@ -369,13 +370,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             world_boss_data = open_data(world_boss_data_path)
             if world_boss_data.get("active", False):
                 damage = level
-                success, result = attack_boss(user_id, damage, is_world_boss=True)
+                success, result, big_damage_msg, damage = attack_boss(user_id, damage, is_world_boss=True)
 
                 if success:
                     # 打boss不消耗buff次数
                     data = buff2_change_status(data, user_id, "lucky", 1)
                     data = buff2_change_status(data, user_id, "speed", 1)
-                    msg = f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
+                    msg = big_damage_msg
+                    msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
 
                     if result["hp"] <= 0:
@@ -409,8 +411,8 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                                 if str(uid) in data:
                                     exp = reward["exp"]
                                     current_grade = data[str(uid)].get("grade", 1)
-                                    # 每人获得100草莓
-                                    data[str(uid)]["berry"] += 100
+                                    # 每人获得250草莓
+                                    data[str(uid)]["berry"] += 300
 
                                     if current_grade >= max_grade:
                                         berry = exp * 2  # 满级转换：1经验=2草莓
@@ -433,13 +435,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             boss_data = open_data(boss_data_path).get(user_id, {})
             if boss_data:
                 damage = level
-                success, result = attack_boss(user_id, damage)
+                success, result, big_damage_msg, damage = attack_boss(user_id, damage)
 
                 if success:
                     # 打boss不消耗buff次数
                     data = buff2_change_status(data, user_id, "lucky", 1)
                     data = buff2_change_status(data, user_id, "speed", 1)
-                    msg = f"你对Boss[{result['name']}]造成了{damage}点伤害！"
+                    msg = big_damage_msg
+                    msg += f"你对Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\nBoss剩余HP: {result['hp']}/{result['max_hp']}"
 
                     if result["hp"] <= 0:

@@ -10,7 +10,7 @@ __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
 
 # 查看帮助菜单和更新信息
 help = on_command(
-    '.help', 
+    'help', 
     permission=GROUP, 
     priority=1, 
     block=True, rule=whitelist_rule
@@ -40,7 +40,7 @@ async def zhua_help():
 
 # 更新公告
 gong_gao = on_command(
-    '.公告', 
+    '公告', 
     permission=GROUP, 
     priority=1, 
     block=True, rule=whitelist_rule
@@ -118,9 +118,10 @@ async def cklc_handle(arg: Message = CommandArg()):
 · 猎场加成：裸抓加成5草莓''',
         
         5: '''· 猎场名称：遗忘深渊
-· 危险等级：？
-· 描述：这座深藏于山下的寺庙似乎昏昏欲睡，仿佛赋予它生命的魔法已经消耗殆尽。但这个地方仍在散发着一种奇怪的气息，表明了它隐藏的秘密比人们想象的更多。
-· 准入需求：？？？''',
+· 危险等级：5
+· 描述：一个由古老水晶矿脉与失落文明遗迹构成的复合型猎场。地下湖泊与荧光植被交织的潮湿环境中，时间流速似乎与外界不同。机械残骸与生物结晶随处可见，空气中飘荡着矿物粉尘。最深处沉睡着一座神庙，似乎有什么生物于里面沉睡着……
+· 准入需求：持有10000颗草莓，仓库至少20000颗草莓（消耗，一次性）；满足前3个猎场的Madeline竞技场的准入需求
+· 猎场加成：裸抓加成5草莓''',
         
         999: '''· 猎场名称：？？？
 · 警告，警告，本猎场极度危险！
@@ -140,7 +141,7 @@ async def cklc_handle(arg: Message = CommandArg()):
 · 4号猎场：地下终端
 危险等级：4
 · 5号猎场：遗忘深渊
-危险等级：？"""
+危险等级：4"""
 
     args = str(arg).strip().lower()
     
