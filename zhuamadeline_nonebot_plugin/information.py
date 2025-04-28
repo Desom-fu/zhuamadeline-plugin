@@ -1,4 +1,4 @@
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import GROUP, Message, MessageSegment
 from .npc import npc_da
@@ -9,8 +9,8 @@ from .text_image_text import send_image_or_text
 __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
 
 # 查看帮助菜单和更新信息
-help = on_fullmatch(
-    ['.help', '。help'], 
+help = on_command(
+    '.help', 
     permission=GROUP, 
     priority=1, 
     block=True, rule=whitelist_rule
@@ -39,8 +39,8 @@ async def zhua_help():
     await send_image_or_text(help, text, True, text1)
 
 # 更新公告
-gong_gao = on_fullmatch(
-    ['.公告', '。公告'], 
+gong_gao = on_command(
+    '.公告', 
     permission=GROUP, 
     priority=1, 
     block=True, rule=whitelist_rule
@@ -162,8 +162,8 @@ async def cklc_handle(arg: Message = CommandArg()):
     await send_image_or_text(cklc, text)
 
 # 竞技场细则
-pvpck = on_fullmatch(
-    ['.0场细则', '。0场细则'], 
+pvpck = on_command(
+    '0场细则', 
     permission=GROUP, 
     priority=1, 
     block=True, rule=whitelist_rule

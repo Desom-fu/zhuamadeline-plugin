@@ -1,7 +1,7 @@
 from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.log import logger
 from nonebot.params import CommandArg
 from pathlib import Path
@@ -561,7 +561,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         await catch.finish(message, at_sender=True)
 
 ## 每日签到
-qd = on_fullmatch(['.签到', '.qd', '。签到', '。qd'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+qd = on_command("qd", aliases={"签到"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @qd.handle()
 async def dailyqd(event: GroupMessageEvent):

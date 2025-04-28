@@ -2,7 +2,7 @@
 from nonebot.adapters.onebot.v11 import GROUP, Bot, Event
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.log import logger
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 #加载文件操作系统
 import json
@@ -32,7 +32,7 @@ async def ckcp_handle(arg: Message = CommandArg()):
         await send_image_or_text(ckcp, '请输入正确的藏品名称哦！')
 
 #查看自身所持有的藏品
-ckcplist = on_fullmatch(['.mycp', '。mycp'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+ckcplist = on_command('mycp', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @ckcplist.handle()
 async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
     # 打开文件
@@ -67,7 +67,7 @@ async def ckcplist_handle(bot: Bot, event: GroupMessageEvent):
         await send_image_or_text(ckcplist, msg, True)
 
 # # 获得喵喵呜呜纪念藏品
-# mewmewwuwu = on_fullmatch(['.喵喵呜呜', '。喵喵呜呜'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+# mewmewwuwu = on_command('喵喵呜呜', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 # @mewmewwuwu.handle()
 # async def mewmewwuwu_handle(bot: Bot, event: GroupMessageEvent):
 #     # 打开文件

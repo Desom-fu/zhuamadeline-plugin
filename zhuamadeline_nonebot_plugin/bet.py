@@ -1,7 +1,7 @@
 from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
-from nonebot import on_command, on_fullmatch, get_bots, get_bot
+from nonebot import on_command, get_bots, get_bot
 from nonebot.params import CommandArg
 from nonebot.log import logger
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message
@@ -1819,7 +1819,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     await send_image_or_text(prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1), 25)
 
 # 查看局势
-check = on_fullmatch(['.查看局势', '。查看局势'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+check = on_command("查看局势", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @check.handle()
 async def check_handle(bot: Bot, event: GroupMessageEvent):
     group_id = str(event.group_id)
@@ -1959,7 +1959,7 @@ async def prop_demon_query_handle(bot: Bot, event: Event, arg: Message = Command
             return
 
 # 恶魔帮助
-prop_demon_help = on_fullmatch(['.恶魔帮助', '。恶魔帮助'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+prop_demon_help = on_command('恶魔帮助', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @prop_demon_help.handle()
 async def prop_demon_help_handle():
     await send_image_or_text(prop_demon_help, help_msg, True)

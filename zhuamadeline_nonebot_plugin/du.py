@@ -1,7 +1,7 @@
 from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 #加载读取系统时间相关
 import time
@@ -26,7 +26,7 @@ __all__ = [
 ########赌场系统#######
 
 #买卡包
-ticket = on_fullmatch(['.ggl', '。ggl', '.抽卡', '。抽卡'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+ticket = on_command('.ggl', aliases={"抽卡"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @ticket.handle()
 async def ticket_handle(bot: Bot, event: GroupMessageEvent):

@@ -13,7 +13,7 @@ from .list4 import madeline_data4
 from .list5 import madeline_data5
 from .config import *
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message
-from nonebot import get_bot, on_fullmatch
+from nonebot import get_bot, on_command
 from nonebot.log import logger
 
 #导入定时任务库
@@ -693,7 +693,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     
 
 # .jjc内容
-jjc = on_fullmatch(['.jjc','。jjc'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+jjc = on_command('jjc', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @jjc.handle()
 async def jjc_handle(bot: Bot, event: GroupMessageEvent):
     pvp_data = open_data(pvp_path)

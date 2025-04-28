@@ -2,7 +2,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP, Bot, Event
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.log import logger
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 #加载文件操作系统
 import json
@@ -51,7 +51,7 @@ pvp_coldtime_path = Path() / "data" / "UserList" / "pvp_coldtime.json"
 all_collections = collections
 
 # 查看道具库存
-myitem = on_fullmatch(['.myitem', '。myitem'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+myitem = on_command('myitem', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @myitem.handle()
 async def myitem_handle(bot: Bot, event: GroupMessageEvent):

@@ -2,7 +2,7 @@
 from nonebot.adapters.onebot.v11 import GROUP, Bot, Event
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.log import logger
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 #加载文件操作系统
 import json
@@ -28,7 +28,7 @@ from .whitelist import whitelist_rule
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text
 
 #确定一些事件
-confirm = on_fullmatch(['.confirm', '。confirm'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+confirm = on_command('confirm', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @confirm.handle()
 async def confirm_handle(bot: Bot, event: GroupMessageEvent):
     # 打开文件
@@ -112,7 +112,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                 await send_image_or_text(confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
 
 #取消一些事件
-deny = on_fullmatch(['.deny', '。deny'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+deny = on_command('deny', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @deny.handle()
 async def deny_handle(bot: Bot, event: GroupMessageEvent):
     # 打开文件

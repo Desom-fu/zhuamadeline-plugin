@@ -1,7 +1,7 @@
 from .config import user_path, file_name, bot_owner_id, shop_database, other
 from nonebot.adapters.onebot.v11 import GROUP, Event
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment
-from nonebot import on_command, on_fullmatch, get_bot
+from nonebot import on_command, get_bot
 from nonebot.params import CommandArg
 from nonebot.log import logger
 from nonebot.exception import FinishedException  # 新增导入
@@ -1896,7 +1896,7 @@ async def fafang_buchang_handle(event: GroupMessageEvent, arg: Message = Command
 # 原插件作者：昨夜惊梦
 # 原插件地址：https://forum.olivos.run/d/397 服务器运行状态查看(文字版）
 # 原插件平台：Olivos
-status = on_fullmatch(['.状态', '。状态', '.status', '。status', '.运行状态', '。运行状态'], priority=5)
+status = on_command('状态', aliases={"status", "运行状态"}, priority=5)
 
 def format_timedelta(t: timedelta):
     # 计算天数、小时、分钟和秒

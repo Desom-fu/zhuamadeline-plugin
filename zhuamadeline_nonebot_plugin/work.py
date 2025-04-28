@@ -2,7 +2,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP, Bot, Event
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.log import logger
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 #加载文件操作系统
 import json
@@ -623,7 +623,7 @@ async def skip_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
         await send_image_or_text(skip_work, "你暂时没有派遣任何madeline外出工作", True, None)
 
 # 查看帮助菜单和更新信息
-work_help = on_fullmatch(['.工作帮助', '。工作帮助', '。workhelp', '.workhelp'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+work_help = on_command("workhelp", aliases={"工作帮助"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @work_help.handle()
 async def work_help_handle(bot: Bot, Bot_event: GroupMessageEvent):
     msg = (

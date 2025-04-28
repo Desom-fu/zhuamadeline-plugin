@@ -3,7 +3,7 @@ from nonebot.adapters.onebot.v11 import GROUP
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
 from nonebot.params import CommandArg
 from nonebot.log import logger
-from nonebot import on_command, on_fullmatch, require
+from nonebot import on_command, require
 import datetime
 #加载文件操作系统
 import os
@@ -31,7 +31,7 @@ __all__ = [
 ]
 
 #商店商品查看
-shop = on_fullmatch(['.shop', '。shop'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+shop = on_command('shop', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @shop.handle()
 async def madeline_shop(bot: Bot, event: Event):
     logger.info("商店系统开启成功")  #日志

@@ -1,6 +1,6 @@
 from nonebot.adapters.onebot.v11 import GROUP, Event
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageSegment
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.params import CommandArg
 from pathlib import Path
 from .function import save_data, open_data
