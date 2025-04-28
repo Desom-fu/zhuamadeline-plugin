@@ -1831,7 +1831,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
-                "击败Boss后你能获得Boss血量*1.2倍的经验和若干草莓！\n"
+                "击败Boss后你能获得Boss血量*1.3倍的经验和若干草莓！\n"
                 "若已满级则在当前草莓基础上再翻倍！"
             )
         elif boss_type == "normal":
@@ -1841,7 +1841,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 "等下，如果我能熟练掌握这个技巧是不是不用打？不行？好吧……"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
-                "击败Boss后你能获得Boss血量*1.3倍的经验和若干道具！\n"
+                "击败Boss后你能获得Boss血量*1.4倍的经验和若干道具！\n"
                 "若已满级则获得的道具数量翻倍！"
             )
         elif boss_type == "hard":

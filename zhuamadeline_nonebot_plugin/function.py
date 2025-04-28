@@ -934,7 +934,7 @@ def get_boss_rewards(boss_data, user_id, grade):
     reward_msg = ""
     
     if boss_data["type"] == "mini":
-        exp = math.floor(boss_data["max_hp"] * 1.2)
+        exp = math.floor(boss_data["max_hp"] * 1.3)
         berry = random.randint(100, 200)
         if is_max_grade:
             berry *= 2
@@ -944,7 +944,7 @@ def get_boss_rewards(boss_data, user_id, grade):
         return {"berry": berry}, exp, reward_msg
         
     elif boss_data["type"] == "normal":
-        exp = math.floor(boss_data["max_hp"] * 1.3)
+        exp = math.floor(boss_data["max_hp"] * 1.4)
         items = {
             "迅捷药水": random.randint(1, 2),
             "幸运药水": random.randint(1, 2),
