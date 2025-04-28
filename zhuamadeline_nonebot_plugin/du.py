@@ -26,7 +26,7 @@ __all__ = [
 ########赌场系统#######
 
 #买卡包
-ticket = on_command('.ggl', aliases={"抽卡"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+ticket = on_command('ggl', aliases={"抽卡"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @ticket.handle()
 async def ticket_handle(bot: Bot, event: GroupMessageEvent):

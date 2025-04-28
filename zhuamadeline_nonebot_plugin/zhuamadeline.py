@@ -372,12 +372,12 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 success, result = attack_boss(user_id, damage, is_world_boss=True)
 
                 if success:
-                    msg = f"\n你对世界Boss[{result['name']}]造成了{damage}点伤害！"
+                    msg = f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
 
                     if result["hp"] <= 0:
                         # 发放世界Boss奖励
-                        rewards, all_rewards, _ = get_world_boss_rewards()
+                        rewards, all_rewards = get_world_boss_rewards()
 
                         # 发放排行榜奖励（显示1-5名排名）
                         top5_msg = []
@@ -406,7 +406,8 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                                 if str(uid) in data:
                                     exp = reward["exp"]
                                     current_grade = data[str(uid)].get("grade", 1)
-                                    max_grade = data[str(uid)].get("max_grade", 30)
+                                    # 每人获得100草莓
+                                    data[str(uid)]["berry"] += 100
 
                                     if current_grade >= max_grade:
                                         berry = exp * 2  # 满级转换：1经验=2草莓
@@ -418,7 +419,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                         # 构建最终消息
                         msg += f"\n\n世界Boss[{result['name']}]已被击败！"
                         msg += "\n\n伤害排行榜：\n" + "\n".join(top5_msg)
-                        msg += f"\n\n另有{other_count}位参与者获得奖励（exp = 伤害值*2，若已满级则获得草莓 = 伤害值*4）"
+                        msg += f"\n\n另有{other_count}位参与者获得奖励（exp = 伤害值*2；草莓 = 100，若已满级则获得草莓 = 伤害值*4 + 100）"
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
@@ -432,7 +433,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 success, result = attack_boss(user_id, damage)
 
                 if success:
-                    msg = f"\n你对[{result['name']}]造成了{damage}点伤害！"
+                    msg = f"你对Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\nBoss剩余HP: {result['hp']}/{result['max_hp']}"
 
                     if result["hp"] <= 0:
@@ -450,7 +451,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                         exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, exp, 0)
 
                         msg += f"\n{defeat_msg}"
-                        msg += f"\n经验值: {exp}"
                         msg += exp_msg if exp_msg else ""
                         msg += grade_msg if grade_msg else ""
 
@@ -906,14 +906,14 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 
             message += (
                 f"\n- 世界Boss事件"
-                f"\n全体玩家正在与{world_boss_data['name']}战斗！"
+                f"\n全体玩家正在与[{world_boss_data['name']}]战斗！"
                 f"\n世界Boss生命值: {world_boss_data['hp']}/{world_boss_data['max_hp']}"
                 f"{rank_info}"
             )
 
         # 然后展示Boss信息
         message += (
-            f"\n- 你正在与{boss_data['name']}（{boss_data['type']}级Boss）战斗！"
+            f"\n- 你正在与[{boss_data['name']}]（{boss_data['type']}级Boss）战斗！"
             f"\nBoss生命值: {boss_data['hp']}/{boss_data['max_hp']}"
         ) if boss_data else ''
 

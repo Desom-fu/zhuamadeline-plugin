@@ -1404,9 +1404,8 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
         
-        if berry < 10000 and bank < 20000:
+        if berry < 10000 or bank < 20000:
             user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            save_data(full_path, user_data)
             save_data(full_path, user_data)
             msg = (
                 "位于山脚湖泊下方的洞穴入口，洞壁上布满随时间推移而形成的蓝色水晶结晶。\n"
@@ -1414,7 +1413,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 "因光线不足，只有非常少量的荧光苔藓附着在水晶根部。\n\n"
                 "要进入深渊内部，需要消耗10000颗草莓和仓库里的20000颗草莓激活水晶共鸣。\n"
                 f"当前持有草莓数量：{berry}/10000\n"
-                f"当前仓库草莓数量：{bank}/20000\n"
+                f"当前仓库草莓数量：{bank}/20000"
             )
             await send_image_or_text(message, msg, True, None, 30)
             return
@@ -1428,6 +1427,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         # 写入数据
         save_data(full_path, user_data)
+        save_data(bar_path, bar_data)
 
         msg = (
             "湖底的水晶突然发出低沉共鸣，你投入的10000+20000颗草莓在清澈的湖水中溶解重组。\n"
@@ -1579,7 +1579,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             msg = "你在探险的时候发现了一条鱼：\n" + fish_texts[collected_fish[0]] + f"（价值{current_value}草莓）"
         else:
             msg = "你在一次探险中找到了多种鱼类：\n" + \
-                  "\n".join([f"- {fish}（价值{fish_prices[fish]}草莓）" for fish in collected_fish]) + \
+                  "\n".join([f"- {fish_texts[fish]}\n获得：{fish}（价值{fish_prices[fish]}草莓）" for fish in collected_fish]) + \
                   f"\n总计价值：{current_value}草莓。"
 
         # 8. 保存数据并发送消息

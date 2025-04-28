@@ -265,86 +265,6 @@ def calculate_spare_chance(data, user_id):
         logger.error(f"时隙沙漏计算错误: {e}")
         return 0
 
-# 5猎经验值计算
-# 5猎经验值计算
-def calculate_level_and_exp(data, user_id, level, isitem):
-    """
-    计算等级和经验值的增长
-    参数:
-        data: 用户数据字典
-        user_id: 用户ID
-        level: 本次获得的等级点数
-        isitem: 是不是道具
-    返回:
-        tuple: (经验消息，等级消息，data主数据)
-    """
-    user_data = data[user_id]
-    exp = user_data.get("exp", 0)
-    grade = user_data.get("grade", 1)
-    max_exp = user_data.get("max_exp", 10)
-    collections = user_data.get("collections", {})
-    
-    exp_msg = ''
-    grade_msg = ''
-    
-    # 如果满级直接返回
-    if grade == max_grade:
-        return exp_msg, grade_msg, data
-        
-    if isitem == 1:
-        # 是道具就加level//2的经验
-        exp += level // 2
-    else:
-        # 加等级点经验
-        exp += level
-        
-    # 处理可能的多级升级情况
-    while exp >= max_exp and grade < max_grade:
-        # 计算升级
-        exp -= max_exp
-        grade += 1
-
-        # 查找对应的经验增长值
-        for level_range, increment in exp_growth.items():
-            if grade in level_range:
-                max_exp += increment
-                break
-        
-        # 使用字典存储特殊等级消息
-        special_grades = {
-            6: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到2级的Madeline了！",
-            11: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到3级的Madeline了！",
-            16: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到4级的Madeline了！",
-            21: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
-        }
-
-        if grade in special_grades:
-            grade_msg += special_grades[grade]
-        
-        if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
-            collections['时隙沙漏'] = 1
-            grade_msg += f"\n你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
-    
-    # 更新经验消息（只在有经验变化时显示）
-    if level > 0:
-        exp_msg = f'\n本次获得{level}点经验，当前经验：{exp}/{max_exp}'
-    
-    # 如果有升级才显示升级消息
-    if grade > user_data.get("grade", 1):
-        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}' + grade_msg
-    
-    # 更新数据
-    user_data.update({
-        "exp": exp, 
-        "grade": grade, 
-        "max_exp": max_exp,
-        "collections": collections
-    })
-    
-    save_data(full_path, data)
-    
-    return exp_msg, grade_msg, data
-
 #------------mymadeline相关指令----------------
 
 # 获取猎场文件和对应数据
@@ -825,8 +745,100 @@ def tool_zhuamadeline(information, data, user_id) -> list:
     result.append(new_print)
     return result
 
-# boss相关
+# 5猎相关
+# 5猎经验值计算
+def calculate_level_and_exp(data, user_id, level, isitem):
+    """
+    计算等级和经验值的增长（显示溢出经验的版本）
+    参数:
+        data: 用户数据字典
+        user_id: 用户ID
+        level: 本次获得的等级点数
+        isitem: 是不是道具
+    返回:
+        tuple: (经验消息，等级消息，data主数据)
+    """
+    user_data = data[user_id]
+    original_exp = user_data.get("exp", 0)
+    original_grade = user_data.get("grade", 1)
+    original_max_exp = user_data.get("max_exp", 10)
+    
+    exp = original_exp
+    grade = original_grade
+    max_exp = original_max_exp
+    collections = user_data.get("collections", {})
+    
+    exp_msg = ''
+    grade_msg = ''
+    
+    # 如果满级直接返回
+    if grade == max_grade:
+        return exp_msg, grade_msg, data
+        
+    # 1. 计算获得的经验值
+    if isitem == 1:
+        gained_exp = level // 2  # 道具获得一半经验
+    else:
+        gained_exp = level
+    
+    # 第一阶段消息：显示获得的经验和当前状态（包含溢出经验）
+    if gained_exp > 0:
+        temp_exp = exp + gained_exp  # 临时计算包含本次获得的经验
+        exp_msg = f'\n本次获得{gained_exp}点经验，当前经验：{temp_exp}/{max_exp}'
+    
+    # 2. 实际增加经验
+    exp += gained_exp
+    
+    # 处理可能的多级升级情况
+    upgraded = False
+    while exp >= max_exp and grade < max_grade:
+        upgraded = True
+        # 计算升级
+        exp -= max_exp
+        grade += 1
 
+        # 查找对应的经验增长值
+        for level_range, increment in exp_growth.items():
+            if grade in level_range:
+                max_exp += increment
+                break
+        
+        # 特殊等级消息
+        special_grades = {
+            6: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到2级的Madeline了！",
+            11: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到3级的Madeline了！",
+            16: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到4级的Madeline了！",
+            21: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
+        }
+
+        if grade in special_grades:
+            grade_msg += special_grades[grade]
+        
+        if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
+            collections['时隙沙漏'] = 1
+            grade_msg += f"\n你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
+    
+    # 3. 如果有升级，添加升级后的状态
+    if upgraded:
+        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}' + grade_msg
+        grade_msg += f'\n升级后经验：{exp}/{max_exp}'
+    # 如果没有升级但经验有变化，也显示最终状态
+    elif gained_exp > 0:
+        exp_msg += f'\n当前经验：{exp}/{max_exp}'
+    
+    # 更新数据
+    user_data.update({
+        "exp": exp, 
+        "grade": grade, 
+        "max_exp": max_exp,
+        "collections": collections
+    })
+    
+    save_data(full_path, data)
+    
+    return exp_msg, grade_msg, data
+
+# boss相关
 def spawn_boss(user_id, grade, boss_type=None):
     """生成Boss，可以指定类型"""
     if not boss_type:
@@ -921,9 +933,9 @@ def get_boss_rewards(boss_data, user_id, grade):
         berry = random.randint(100, 200)
         if is_max_grade:
             berry *= 2
-            reward_msg = f"你已击败迷你Boss {boss_data['name']}！由于已满级，获得双倍奖励：{berry}颗草莓"
+            reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！由于已满级，获得双倍奖励：{berry}颗草莓"
             return {"berry": berry}, exp, reward_msg
-        reward_msg = f"你已击败迷你Boss {boss_data['name']}！获得{berry}颗草莓"
+        reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！获得{berry}颗草莓"
         return {"berry": berry}, exp, reward_msg
         
     elif boss_data["type"] == "normal":
@@ -935,9 +947,9 @@ def get_boss_rewards(boss_data, user_id, grade):
         if is_max_grade:
             items["迅捷药水"] *= 2
             items["幸运药水"] *= 2
-            reward_msg = f"你已击败普通Boss {boss_data['name']}！由于已满级，获得双倍奖励："
+            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！由于已满级，获得双倍奖励："
         else:
-            reward_msg = f"你已击败普通Boss {boss_data['name']}！获得："
+            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！获得："
         
         item_list = [f"{k}x{v}" for k, v in items.items() if v > 0]
         reward_msg += "、".join(item_list)
@@ -955,9 +967,9 @@ def get_boss_rewards(boss_data, user_id, grade):
             berry *= 2
             for k in items:
                 items[k] *= 2
-            reward_msg = f"你已击败精英Boss {boss_data['name']}！由于已满级，获得双倍奖励：{berry}颗草莓、"
+            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！由于已满级，获得双倍奖励：{berry}颗草莓、"
         else:
-            reward_msg = f"你已击败精英Boss {boss_data['name']}！获得{berry}颗草莓、"
+            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！获得{berry}颗草莓、"
         
         item_list = [f"{k}x{v}" for k, v in items.items() if v > 0]
         reward_msg += "、".join(item_list)
@@ -967,7 +979,7 @@ def get_boss_rewards(boss_data, user_id, grade):
 
 def get_world_boss_rewards():
     """获取世界Boss奖励
-    返回: (排行榜奖励列表, 全员奖励字典, 空字符串)"""
+    返回: (排行榜奖励列表, 全员奖励字典)"""
     data = open_data(world_boss_data_path)
     contributors = sorted(data["contributors"].items(), key=lambda x: x[1], reverse=True)[:5]
     
@@ -990,4 +1002,4 @@ def get_world_boss_rewards():
     for user_id, damage in data["contributors"].items():
         all_rewards[user_id] = {"exp": damage * 2}
     
-    return rewards, all_rewards, ""
+    return rewards, all_rewards
