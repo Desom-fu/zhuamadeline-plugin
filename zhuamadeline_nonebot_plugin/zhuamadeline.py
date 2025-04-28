@@ -372,6 +372,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 success, result = attack_boss(user_id, damage, is_world_boss=True)
 
                 if success:
+                    # 打boss不消耗buff次数
+                    data = buff2_change_status(data, user_id, "lucky", 1)
+                    data = buff2_change_status(data, user_id, "speed", 1)
                     msg = f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
 
@@ -433,6 +436,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 success, result = attack_boss(user_id, damage)
 
                 if success:
+                    # 打boss不消耗buff次数
+                    data = buff2_change_status(data, user_id, "lucky", 1)
+                    data = buff2_change_status(data, user_id, "speed", 1)
                     msg = f"你对Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\nBoss剩余HP: {result['hp']}/{result['max_hp']}"
 

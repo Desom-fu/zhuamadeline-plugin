@@ -1814,7 +1814,11 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                     f"恐怖的[{world_boss_data['name']}]已然苏醒……诶？怎么是你？\n"
                     f"生命值: {world_boss_data['hp']}/{world_boss_data['max_hp']}\n"
                     "额，来都来了，全体在5猎的玩家要不要打一下？\n"
-                    "每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）"
+                    "每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
+                    "全体在5猎的玩家都必须打世界Boss哦！\n"
+                    "打完之后按造成伤害的贡献分发奖励，前五名有巨额奖励哦！（如果造成伤害相同，按照开打Boss的时间进行排名）\n"
+                    "没进入前五名的也不必担心，每人也能获得100草莓！\n"
+                    "除此之外，全体玩家还能获得造成伤害量*2的经验哦！"
                 )
                 await send_image_or_text(message, msg, True, None, 20)
                 return
@@ -1826,7 +1830,9 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
-                "击败Boss后才能继续正常抓取Madeline！"
+                "击败Boss后才能继续正常抓取Madeline！\n"
+                "击败Boss后你能获得Boss血量*1.2倍的经验和若干草莓！\n"
+                "若已满级则在当前草莓基础上再翻倍！"
             )
         elif boss_type == "normal":
             msg = (
@@ -1834,7 +1840,9 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "等下，如果我能熟练掌握这个技巧是不是不用打？不行？好吧……"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
-                "击败Boss后才能继续正常抓取Madeline！"
+                "击败Boss后才能继续正常抓取Madeline！\n"
+                "击败Boss后你能获得Boss血量*1.3倍的经验和若干道具！\n"
+                "若已满级则获得的道具数量翻倍！"
             )
         elif boss_type == "hard":
             msg = (
@@ -1842,7 +1850,9 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "真的要打吗？\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
-                "击败Boss后才能继续正常抓取Madeline！"
+                "击败Boss后才能继续正常抓取Madeline！\n"
+                "击败Boss后你能获得Boss血量*1.5倍的经验和若干草莓和道具！\n"
+                "若已满级则在当前草莓基础上翻倍，并且道具数量翻倍！"
             )
 
         await send_image_or_text(message, msg, True, None, 20)

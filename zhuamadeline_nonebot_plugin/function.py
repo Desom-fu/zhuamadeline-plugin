@@ -813,18 +813,21 @@ def calculate_level_and_exp(data, user_id, level, isitem):
 
         if grade in special_grades:
             grade_msg += special_grades[grade]
-        
-        if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
-            collections['时隙沙漏'] = 1
-            grade_msg += f"\n你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
     
     # 3. 如果有升级，添加升级后的状态
     if upgraded:
         grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}' + grade_msg
-        grade_msg += f'\n升级后经验：{exp}/{max_exp}'
+        # 没有满级才显示升级后经验
+        if grade < max_grade:
+            grade_msg += f'\n升级后经验：{exp}/{max_exp}'
     # 如果没有升级但经验有变化，也显示最终状态
     elif gained_exp > 0:
         exp_msg += f'\n当前经验：{exp}/{max_exp}'
+
+    # 提添加藏品
+    if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
+        collections['时隙沙漏'] = 1
+        grade_msg += f"\n你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
     
     # 更新数据
     user_data.update({
@@ -873,7 +876,7 @@ def spawn_boss(user_id, grade, boss_type=None):
 
 def spawn_world_boss():
     """生成世界Boss"""
-    hp = random.randint(500, 1000)
+    hp = random.randint(200, 500)
     name = random.choice(boss_names["world"])
     
     boss_data = {
@@ -933,9 +936,9 @@ def get_boss_rewards(boss_data, user_id, grade):
         berry = random.randint(100, 200)
         if is_max_grade:
             berry *= 2
-            reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！由于已满级，获得双倍奖励：{berry}颗草莓"
+            reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励：{berry}颗草莓"
             return {"berry": berry}, exp, reward_msg
-        reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！获得{berry}颗草莓"
+        reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n获得{berry}颗草莓"
         return {"berry": berry}, exp, reward_msg
         
     elif boss_data["type"] == "normal":
@@ -947,9 +950,9 @@ def get_boss_rewards(boss_data, user_id, grade):
         if is_max_grade:
             items["迅捷药水"] *= 2
             items["幸运药水"] *= 2
-            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！由于已满级，获得双倍奖励："
+            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励："
         else:
-            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！获得："
+            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！\n获得："
         
         item_list = [f"{k}x{v}" for k, v in items.items() if v > 0]
         reward_msg += "、".join(item_list)
@@ -967,9 +970,9 @@ def get_boss_rewards(boss_data, user_id, grade):
             berry *= 2
             for k in items:
                 items[k] *= 2
-            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！由于已满级，获得双倍奖励：{berry}颗草莓、"
+            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励：{berry}颗草莓、"
         else:
-            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！获得{berry}颗草莓、"
+            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！\n获得{berry}颗草莓、"
         
         item_list = [f"{k}x{v}" for k, v in items.items() if v > 0]
         reward_msg += "、".join(item_list)
