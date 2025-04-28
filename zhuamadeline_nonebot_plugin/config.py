@@ -97,7 +97,7 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 garden_path = Path() / "data" / "UserList" / "garden.json"
 pvp_path = Path() / "data" / "UserList" / "pvp.json"
 pvp_coldtime_path = Path() / "data" / "UserList" / "pvp_coldtime.json"
-#猎场path 开新猎场要改
+# 猎场path 开新猎场要改
 user_path1 = Path() / "data" / "UserList" / "UserList1.json"
 user_path2 = Path() / "data" / "UserList" / "UserList2.json"
 user_path3 = Path() / "data" / "UserList" / "UserList3.json"

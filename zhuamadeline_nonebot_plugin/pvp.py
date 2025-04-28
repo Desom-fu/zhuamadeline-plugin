@@ -39,7 +39,7 @@ __all__ = [
     "process_results"
 ]
 
-# 开新要改
+# 开新猎场要改
 # 使用字典映射 hunt_bonusb 和 oppo_liechang 的关系
 # 左边的是战力增加，右边的是int猎场号
 hunt_bonusb_to_oppo_liechang = {
@@ -267,7 +267,6 @@ def pvp_logic(list_current, pos, user_id, madeline, nickname, rana, hunt_bonus, 
             levelb, numb = int(madelineb[0]), int(madelineb[1])
             ranb, hunt_bonusb = list_current[pos][3], list_current[pos][4]
 
-            # 开新要改
             # 根据 hunt_bonusb 计算 oppo_liechang
             oppo_liechang = hunt_bonusb_to_oppo_liechang.get(hunt_bonusb, 1)  # 默认值为 1
             

@@ -16,6 +16,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 from .function import *
 from .whitelist import whitelist_rule
 from .shop import fish_prices
@@ -30,22 +31,14 @@ __all__ = [
     "count_madeline",
 ]
 
-user_path = Path() / "data" / "UserList"
-file_name = "UserData.json"
-bar_path = Path() / "data" / "UserList" / "bar.json"
-
 # 开新猎场要改
 file_names = {
     '1': "UserList1.json",
     '2': "UserList2.json",
     '3': "UserList3.json",
     '4': "UserList4.json",
+    '5': "UserList5.json",
 }
-
-user_list1 = Path() / "data" / "UserList" / "UserList1.json"
-user_list2 = Path() / "data" / "UserList" / "UserList2.json"
-user_list3 = Path() / "data" / "UserList" / "UserList3.json"
-user_list4 = Path() / "data" / "UserList" / "UserList4.json"
 
 # 查看所有玩家所在猎场数
 ckqflc = on_command('ckqflc', aliases={"猎场人数统计", "查看全服猎场", 'qfcklc', '全服查看猎场'}, 
@@ -386,7 +379,6 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
         rank_msg += f"\n🔹 {user_nickname}的排名为：{user_rank}，总进度：{user_progress}%"
 
     # **猎场进度排名**
-    # 开新猎场要改
     elif 0 < arg <= liechang_count:
         title_msg = f'全服{arg}号猎场进度排名'
         rank_msg = f"全服 {arg} 号猎场进度排名\n\n"

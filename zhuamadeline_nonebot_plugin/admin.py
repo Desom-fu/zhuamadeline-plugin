@@ -17,7 +17,6 @@ import psutil
 import random
 import platform
 from .madelinejd import display_liechang_inventory, display_all_liechang_inventory
-from .config import zhuama_group
 from .shop import item, item_aliases
 from .collection import collections, collection_aliases
 from .list1 import *
@@ -62,25 +61,16 @@ __all__ = [
     "restock_shop"
 ]
 
-pvp_path = Path() / "data" / "UserList" / "pvp.json"
-pvp_coldtime_path = Path() / "data" / "UserList" / "pvp_coldtime.json"
-user_path = Path() / "data" / "UserList"
-file_name = "UserData.json"
+
 # 开新猎场要改
 file_names = {
     '1': "UserList1.json",
     '2': "UserList2.json",
     '3': "UserList3.json",
     '4': "UserList4.json",
+    '5': "UserList5.json",
 }
-full_path = Path() / "data" / "UserList" / "UserData.json"
-bar_path = Path() / "data" / "UserList" / "bar.json"
-garden_path = Path() / "data" / "UserList" / "garden.json"
-demon_path = Path() / "data" / "UserList" / "demon.json"
-# user_list1 = Path() / "data" / "UserList" / "UserList1.json"
-# user_list2 = Path() / "data" / "UserList" / "UserList2.json"
-# user_list3 = Path() / "data" / "UserList" / "UserList3.json"
-# user_list4 = Path() / "data" / "UserList" / "UserList4.json"
+
 # 用户数据文件路径
 
 #查看神权命令    

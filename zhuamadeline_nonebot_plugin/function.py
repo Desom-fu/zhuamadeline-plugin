@@ -75,7 +75,7 @@ madeline_level5 = "madeline5"
 #madeline名字
 madeline_filename = "madeline{index}"
 
-#开新猎场要改
+# 开新猎场要改
 file_names = {
     '1': "UserList1.json",
     '2': "UserList2.json",
@@ -398,8 +398,8 @@ def madelinejd(user_id, target_level=None, nickname=None):
     total_progress = None # 初始化防报错
     progress = None # 初始化防报错
     # 计算每个猎场的最大数量
-    for lc, madeline_data in enumerate(madeline_data_mapping.values()):  # 开新猎场时要改
-        if lc + 1 >= liechang_count+1:  # 忽略不存在的猎场 开新猎场时要改
+    for lc, madeline_data in enumerate(madeline_data_mapping.values()):
+        if lc + 1 >= liechang_count+1:  # 忽略不存在的猎场
             continue
         for k, v in madeline_data.items():
             max_count[lc][int(k) - 1] = len(v)
@@ -407,7 +407,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
     # 读取用户数据
     user_data = {}
     for lc, file_name in enumerate(file_names.values()):
-        if lc + 1 >= liechang_count+1:  # 忽略不存在的猎场 开新猎场时要改
+        if lc + 1 >= liechang_count+1:  # 忽略不存在的猎场
             continue
         try:
             data = open_data(user_path / file_name)
@@ -417,8 +417,8 @@ def madelinejd(user_id, target_level=None, nickname=None):
             continue
 
     # 计算收集数量
-    for lc, madeline_data in enumerate(madeline_data_mapping.values()): # 开新猎场要改
-        if lc + 1 >= liechang_count+1:  # 忽略不存在的猎场 开新猎场时要改
+    for lc, madeline_data in enumerate(madeline_data_mapping.values()): 
+        if lc + 1 >= liechang_count+1:  # 忽略不存在的猎场
             continue
         if lc not in user_data:
             continue
@@ -429,7 +429,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
 
     # 生成进度消息
     if target_level:
-        if target_level > liechang_count:  # 忽略超过开放的猎场 开新猎场时要改
+        if target_level > liechang_count:  # 忽略超过开放的猎场
             return f"{target_level}号猎场暂未开放，无法查看进度。"
         target_idx = target_level - 1
         total_captured = sum(count[target_idx])
@@ -451,7 +451,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
         total_max_all = 0
 
         # 计算总进度
-        for lc in range(liechang_count):  # 遍历 开新猎场时要改
+        for lc in range(liechang_count):  # 遍历
             total_captured = sum(count[lc])
             total_max = sum(max_count[lc])
             total_captured_all += total_captured
@@ -474,7 +474,7 @@ def madelinejd(user_id, target_level=None, nickname=None):
                 f"\n- {level + 1}级Madeline：{total_level_count[level]}/{total_level_max[level]}"
             )
         # 逐级显示每个猎场的数量
-        for lc in range(liechang_count):  # 遍历 开新猎场时要改
+        for lc in range(liechang_count):  # 遍历 
             total_captured = sum(count[lc])
             total_max = sum(max_count[lc])
             hunt_progress = round((total_captured / total_max) * 100, 2) if total_max > 0 else 0.0
@@ -699,36 +699,10 @@ def shop_list(item_list):
         ("\n————————————\n" if len(parts) > 1 else "")
     )
 
-# def decode_buy_text(item_name_list, text):
-#     a = text.split(" ")
-#     item_name_lower = {name.lower(): name for name in item_name_list}  # 创建映射，保留原始大小写
-#     item_key = a[0].lower()  # 用户输入的商品名转换为小写
-    
-#     # 检查两个参数的情况
-#     if len(a) == 2:
-#         if item_key in item_name_lower:
-#             try:
-#                 num = int(a[1])  # 检查数量是否是数字
-#                 return [item_name_lower[item_key], num]  # 返回原始大小写的商品名
-#             except ValueError:
-#                 return None  # 第二个参数不是数字
-#         else:
-#             return None  # 商品名无效
-#     # 只有一个参数时，默认数量为 1
-#     elif len(a) == 1:
-#         if item_key in item_name_lower:
-#             return [item_name_lower[item_key], 1]  # 默认返回原始大小写的商品名
-#         else:
-#             return None
-#     # 参数不符合预期
-#     return None
-
-
-
 #根据名字查找madeline的所在的猎场和等级和位置[等级，编号，几号猎场]
 def find_madeline(value):
-    # 遍历猎场编号1到4，开新猎场要改
-    for lc in ['1', '2', '3', '4']:
+    # 开新猎场要改
+    for lc in ['1', '2', '3', '4', "5"]:
         # 动态获取对应的 madeline_data
         data = globals().get(f"madeline_data{lc}")
         if data is None:
@@ -911,6 +885,12 @@ def attack_boss(user_id, damage, is_world_boss=False):
         data = open_data(boss_data_path)
         boss_data = data.get(user_id, {})
     
+    # 指套伤害翻倍
+    user_data = open_data(full_path)
+    big_attack = user_data[user_id]['collections'].get("暴击指套", 0)
+    if big_attack >= 1 and random.randint(1, 100) <= 5:
+        damage *= 2
+    
     if not boss_data:
         return False, "没有找到Boss"
     
@@ -993,11 +973,11 @@ def get_world_boss_rewards():
     
     # 排行榜奖励配置
     rank_rewards = [
-        {"berry": 500, "items": {"草莓果酱": 5, "时间秒表": 2}},  # 第一名
-        {"berry": 400, "items": {"草莓果酱": 4, "时间秒表": 1}},  # 第二名
-        {"berry": 300, "items": {"草莓果酱": 3}},              # 第三名
-        {"berry": 200, "items": {"草莓果酱": 2}},              # 第四名
-        {"berry": 100, "items": {"草莓果酱": 1}}               # 第五名
+        {"berry": 500, "items": {"迅捷药水": 5, "幸运药水": 5, "道具盲盒": 10}},  # 第一名
+        {"berry": 450, "items": {"迅捷药水": 4, "幸运药水": 4, "道具盲盒": 9}},  # 第二名
+        {"berry": 400, "items": {"迅捷药水": 3, "幸运药水": 3, "道具盲盒": 8}},  # 第三名
+        {"berry": 350, "items": {"迅捷药水": 2, "幸运药水": 2, "道具盲盒": 7}},  # 第四名
+        {"berry": 300, "items": {"迅捷药水": 1, "幸运药水": 1, "道具盲盒": 6}}   # 第五名
     ]
     
     # 构建排行榜数据

@@ -1848,7 +1848,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         await send_image_or_text(message, msg, True, None, 20)
         return
     
-    elif rnd <= 655:
+    elif rnd <= 655: # 5%
         data5 = open_data(user_path5)
         if user_id not in data5:
             return
