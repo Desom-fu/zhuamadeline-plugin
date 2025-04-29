@@ -1832,7 +1832,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         boss_data = spawn_boss(user_id, grade, boss_type)
         if boss_type == "mini":
             msg = (
-                f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！\n"
+                f"你遭遇了[{boss_data['name']}]（迷你级Boss）！\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
@@ -1841,7 +1841,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             )
         elif boss_type == "normal":
             msg = (
-                f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！不是，为什么技巧是boss啊喂！\n"
+                f"你遭遇了[{boss_data['name']}]（普通级Boss）！不是，为什么技巧是boss啊喂！\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "等下，如果我能熟练掌握这个技巧是不是不用打？不行？好吧……"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
@@ -1851,7 +1851,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             )
         elif boss_type == "hard":
             msg = (
-                f"你遭遇了[{boss_data['name']}]（{boss_data['type']}级Boss）！等等……似乎有点不对？\n"
+                f"你遭遇了[{boss_data['name']}]（精英级Boss）！等等……似乎有点不对？\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "真的要打吗？\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
