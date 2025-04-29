@@ -383,7 +383,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                     # 更新当前伤害数据（包含本次攻击）
                     world_boss_data["contributors"][str(user_id)] = world_boss_data["contributors"].get(str(user_id), 0) + damage
-                    save_data(world_boss_data_path, world_boss_data)
 
                     # 获取实时伤害排行榜
                     contributors = sorted(world_boss_data["contributors"].items(), 
@@ -402,7 +401,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     if result["hp"] <= 0:
                         # 先更新伤害数据（包含当前回合的伤害）
                         world_boss_data["contributors"][str(user_id)] = world_boss_data["contributors"].get(str(user_id), 0) + damage
-                        save_data(world_boss_data_path, world_boss_data)
                         
                         # 获取更新后的排行榜数据
                         contributors = sorted(world_boss_data["contributors"].items(), 
@@ -474,7 +472,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
-                    await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None)
+                    await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None, 30)
                     return
 
             # 处理个人Boss
@@ -511,7 +509,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
-                    await send_image_or_text(catch, msg, True, None)
+                    await send_image_or_text(catch, msg, True, None, 30)
                     return
 
             # 没有Boss时的正常经验计算
