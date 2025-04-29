@@ -10,14 +10,16 @@ from .function import calculate_level_and_exp
 from .config import bot_owner_id, max_grade
 from .whitelist import whitelist_rule
 
-simu_5 = on_command("simu_5", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
-
 async def simulate_event(user_data, current_time):
     """模拟事件系统的影响"""
     # 初始化事件结果
     bonus_exp_multiplier = 1.0
     bonus_catches = 0
     delay_hours = 0
+    
+    # 10%概率无效事件（什么都不发生，类比抓到鱼类之类的，救人没加，因为我想大概率没人能救）
+    if random.random() < 0.10:
+        return 1.0, 0, 0  # 无加成，无额外抓取，无延迟
     
     # 17.5%概率掉坑（冷却2小时）
     if random.random() < 0.175:
@@ -87,17 +89,23 @@ async def run_single_simulation(max_grade):
     total_delay_hours = 0
     boss_events = 0
     pit_events = 0
+    null_events = 0
     
     while user_data["grade"] < max_grade:
         current_time = datetime.datetime.now() + total_time
         
         # 模拟事件
         exp_multiplier, bonus_catches, delay_hours = await simulate_event(user_data, current_time)
-        total_delay_hours += delay_hours
+        
+        # 统计事件类型
         if delay_hours > 0:
             pit_events += 1
-        if bonus_catches > 0:
+        elif bonus_catches > 0:
             boss_events += 1
+        elif exp_multiplier == 1.0 and bonus_catches == 0 and delay_hours == 0:
+            null_events += 1
+        
+        total_delay_hours += delay_hours
         
         # 确定概率分布
         star_add = 100 if user_data["collections"].get("星辰碎屑", 0) >= 1 else 0
@@ -154,9 +162,12 @@ async def run_single_simulation(max_grade):
         "total_time": total_time,
         "boss_events": boss_events,
         "pit_events": pit_events,
-        "total_delay": total_delay_hours
+        "total_delay": total_delay_hours,
+        "null_events": null_events  # 新增：返回无效事件次数
     }
 
+# 主函数
+simu_5 = on_command("simu_5", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
 @simu_5.handle()
 async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg()):
     if str(event.user_id) not in bot_owner_id:
@@ -183,11 +194,33 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
     
     # 运行多次模拟
     results = []
-    individual_results = []  # 新增：存储每次模拟的单独结果
+    individual_results = []
     for i in range(simulations):
         result = await run_single_simulation(max_grade)
         results.append(result)
-        individual_results.append(f"第{i+1}次: {result['total_catches']}次")  # 新增：记录每次结果
+        individual_results.append(f"第{i+1}次: {result['total_catches']}次")
+    
+    # 平均获得经验
+    total_exp_required = 0
+    current_max_exp = 10
+
+    # 计算从1级升到max_grade需要的总经验
+    for grade in range(1, max_grade):
+        if grade < 6:
+            total_exp_required += current_max_exp
+            current_max_exp += 5
+        elif grade < 11:
+            total_exp_required += current_max_exp
+            current_max_exp += 10
+        elif grade < 16:
+            total_exp_required += current_max_exp
+            current_max_exp += 15
+        elif grade < 21:
+            total_exp_required += current_max_exp
+            current_max_exp += 20
+        else:
+            total_exp_required += current_max_exp
+            current_max_exp += 25
     
     # 计算统计数据
     avg_catches = sum(r["total_catches"] for r in results) / simulations
@@ -195,6 +228,9 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
     avg_boss = sum(r["boss_events"] for r in results) / simulations
     avg_pit = sum(r["pit_events"] for r in results) / simulations
     avg_delay = sum(r["total_delay"] for r in results) / simulations
+    avg_null_events = sum(r.get("null_events", 0) for r in results) / simulations
+    # 平均经验
+    avg_exp_per_catch = total_exp_required / avg_catches
     
     # 格式化时间
     avg_time = datetime.timedelta(seconds=avg_time)
@@ -210,10 +246,11 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
         f"平均结果（升到{max_grade}级）:\n"
         f"- 平均抓取次数: {avg_catches:.1f} 次\n"
         f"- 平均耗时: {days}天 {hours}小时 {minutes}分钟\n"
+        f"- 平均无效事件（鱼类）: {avg_null_events:.1f} 次\n"
         f"- 平均Boss事件: {avg_boss:.1f} 次\n"
         f"- 平均掉坑事件: {avg_pit:.1f} 次\n"
         f"- 平均延迟时间: {avg_delay:.1f} 小时\n"
-        f"- 平均每次获得经验: {max_grade*10/avg_catches:.2f}\n"
+        f"- 平均每次获得经验: {avg_exp_per_catch:.2f}\n"
         f"概率分布变化:\n"
         f"默认持有星辰碎屑\n"
         f"6级后: 可抓2级 | 11级后: 可抓3级\n"
