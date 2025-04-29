@@ -841,7 +841,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         "collections": collections
     })
     
-    save_data(full_path, data)
+    # save_data(full_path, data)
     
     return exp_msg, grade_msg, data
 

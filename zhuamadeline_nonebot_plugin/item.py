@@ -213,7 +213,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     # 5猎要求等级超过21
     if liechang_number == '5':
         if data[user_id].get("grade", 1) <= 20:
-            await send_image_or_text(pray, "你的等级不够，祈愿仍然被封印……\n请21级后再来试试吧！", True, None)
+            await send_image_or_text(pray, "你的等级不够，无法完全摆脱水晶粉尘的影响，祈愿仍然被封印……\n请21级后再来试试吧！", True, None)
             return
         
         # 迅捷药水防止掉坑
@@ -1830,7 +1830,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         pass
                     else:
                         if data[user_id].get("grade", 1) <= 20:
-                            await send_image_or_text(daoju, "你的等级不够，道具仍然被封印……\n请21级后再来试试吧！", at_sender=True)
+                            await send_image_or_text(daoju, "你的等级不够，无法完全摆脱脱水晶粉尘的影响，道具仍然被封印……\n请21级后再来试试吧！", at_sender=True)
                         # 迅捷药水防止掉坑放这里
                         current_buff2 = data[str(user_id)].get('buff2', 'normal')
                         if current_buff2 == "speed":
