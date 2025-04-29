@@ -124,6 +124,8 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".qdmn 数量 0/1",
         ".结束游戏 (游戏编号)",
         ".无视冷却 QQ号",
+        ".全服无视冷却",
+        ".全服取消无视冷却",
         ".查询双球开奖 (日期)",
         ".备份"
     ]
@@ -1844,6 +1846,46 @@ async def coolclear_handle(bot:Bot, event: GroupMessageEvent, arg: Message = Com
     data[str(user_id)]['coolclear'] = new_status
     save_data(full_path ,data)
     await coolclear.finish('玩家'+MessageSegment.at(user_id) + f"已经成功切换至{status_text}", at_sender=True)
+
+coolclear_all_on = on_command("全服无视冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@coolclear_all_on.handle()
+async def coolclear_all_on_handle(event: GroupMessageEvent):
+    # 判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    # 打开数据文件
+    data = open_data(full_path)
+
+    # 遍历所有用户，强制设置 coolclear=True
+    for user_id, user_data in data.items():
+        if isinstance(user_data, dict):
+            user_data['coolclear'] = True
+
+    # 保存数据
+    save_data(full_path, data)
+    
+    await coolclear_all_on.finish("已为全服开启无视冷却！", at_sender=True)
+
+coolclear_all_off = on_command("全服取消无视冷却", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@coolclear_all_off.handle()
+async def coolclear_all_off_handle(event: GroupMessageEvent):
+    # 判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+
+    # 打开数据文件
+    data = open_data(full_path)
+
+    # 遍历所有用户，强制设置 coolclear=False
+    for user_id, user_data in data.items():
+        if isinstance(user_data, dict):
+            user_data['coolclear'] = False
+
+    # 保存数据
+    save_data(full_path, data)
+    
+    await coolclear_all_off.finish("已为全服关闭无视冷却！", at_sender=True)
 
 #全服补偿发放草莓
 fafang_buchang = on_command("全服补偿发放草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
