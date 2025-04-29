@@ -1,8 +1,7 @@
 from nonebot.log import logger
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11 import Bot
-from operator import itemgetter
-from pathlib import Path
+from nonebot.adapters.onebot.v11 import MessageSegment
 # 开新猎场要改
 from .list1 import *
 from .list2 import *
@@ -63,7 +62,11 @@ __all__ = [
     'spawn_boss',
     'attack_boss',
     'get_boss_rewards',
-    'get_world_boss_rewards'
+    'get_world_boss_rewards',
+    'get_world_boss_ranking',
+    'handle_world_boss_defeat',
+    'handle_personal_boss',
+    
 ]
 
 #madeline图鉴
@@ -1009,3 +1012,138 @@ def get_world_boss_rewards():
         all_rewards[user_id] = {"exp": damage * 2}
     
     return rewards, all_rewards
+
+async def get_world_boss_ranking(bot, user_id, world_boss_data):
+    """获取世界Boss排行榜信息（不修改data，无需返回）"""
+    contributors = sorted(world_boss_data["contributors"].items(), 
+                         key=lambda x: x[1], reverse=True)
+    
+    top5_damage = "\n\n当前伤害排行榜："
+    for i, (uid, dmg) in enumerate(contributors[:5]):
+        nickname = await get_nickname(bot, uid)
+        top5_damage += f"\n第{i+1}名 [{nickname}]: {dmg}伤害"
+        if uid == str(user_id):
+            top5_damage += "\n↑ 你"
+    
+    return top5_damage
+
+async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, msg):
+    """处理世界Boss被击败（需要返回修改后的data）"""
+    # 先更新伤害数据（包含当前回合的伤害）
+    damage = world_boss_data["contributors"].get(str(user_id), 0)
+    world_boss_data["contributors"][str(user_id)] = damage + result["damage"]
+    save_data(world_boss_data_path, world_boss_data)
+    
+    # 获取更新后的排行榜数据
+    contributors = sorted(world_boss_data["contributors"].items(), 
+                         key=lambda x: x[1], reverse=True)
+    
+    # 发放世界Boss奖励
+    rewards, all_rewards = get_world_boss_rewards()
+    
+    # 发放排行榜奖励
+    top5_msg = []
+    player_exp_info = ""
+    world_boss_at_text = ''
+    for i, (uid, reward, _) in enumerate(rewards):
+        if str(uid) in data:
+            nickname = await get_nickname(bot, uid)
+            damage_done = world_boss_data["contributors"].get(uid, 0)
+
+            # 发放奖励
+            if "berry" in reward:
+                data[str(uid)]["berry"] += reward["berry"]
+            if "items" in reward:
+                for item, count in reward["items"].items():
+                    data[str(uid)].setdefault("item", {})[item] = data[str(uid)]["item"].get(item, 0) + count
+
+            # 发放经验
+            exp = damage_done * 2
+            current_grade = data[str(uid)].get("grade", 1)
+            max_grade = data[str(uid)].get("max_grade", 30)
+
+            if current_grade >= max_grade:
+                berry = exp * 2
+                data[str(uid)]["berry"] += berry
+                if uid == str(user_id):
+                    player_exp_info = f"\n\n你获得了{berry}草莓（经验转换）"
+            else:
+                exp_msg, grade_msg, data = calculate_level_and_exp(data, uid, exp, 0)
+                if uid == str(user_id):
+                    player_exp_info = ""
+                    if exp_msg:
+                        player_exp_info += f"\n\n{exp_msg.strip()}"
+                    if grade_msg:
+                        player_exp_info += f"\n{grade_msg.strip()}"
+                    if not player_exp_info:
+                        player_exp_info = f"\n\n你获得了{exp}点经验"
+
+            # 构建排名信息
+            rank_text = f"第{i+1}名 [{nickname}]（造成{damage_done}点伤害）: {reward['berry']}草莓"
+            if "items" in reward:
+                items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
+                rank_text += f" + {items_text}"
+            
+            world_boss_at_text += MessageSegment.at(uid)
+            top5_msg.append(rank_text)
+
+    # 发放全员奖励
+    other_count = 0
+    for uid, reward in all_rewards.items():
+        if uid not in [x[0] for x in rewards]:
+            if str(uid) in data:
+                exp = reward["exp"]
+                current_grade = data[str(uid)].get("grade", 1)
+                max_grade = data[str(uid)].get("max_grade", 30)
+
+                data[str(uid)]["berry"] += 300
+                if current_grade >= max_grade:
+                    berry = exp * 2
+                    data[str(uid)]["berry"] += berry
+                else:
+                    _, _, data = calculate_level_and_exp(data, uid, exp, 0)
+                other_count += 1
+
+    # 构建最终消息
+    msg += f"\n\n世界Boss[{result['name']}]已被击败！"
+    msg += "\n\n最终奖励排行榜：\n" + "\n\n".join(top5_msg)
+    msg += player_exp_info
+    if other_count > 0:
+        msg += f"\n\n另有{other_count}位参与者获得奖励（300草莓）"
+    msg += "\n\n除此之外，所有玩家都能获得[伤害值*2]点exp哦！（若已满级则会获得[伤害值*4]颗草莓！）"
+    
+    return msg, world_boss_at_text, data  # 返回修改后的data
+
+async def handle_personal_boss(bot, user_id, level, data):
+    """处理个人Boss（需要返回修改后的data）"""
+    grade = data[user_id].setdefault("grade", 1)
+    boss_data = open_data(boss_data_path).get(user_id, {})
+    if not boss_data:
+        return None, data
+    
+    damage = level
+    success, result, big_damage_msg, damage = attack_boss(user_id, damage)
+    
+    if not success:
+        return None, data
+    
+    msg = big_damage_msg
+    msg += f"你对Boss[{result['name']}]造成了{damage}点伤害！"
+    msg += f"\nBoss剩余HP: {result['hp']}/{result['max_hp']}"
+    
+    if result["hp"] <= 0:
+        rewards, exp, defeat_msg = get_boss_rewards(result, user_id, grade)
+        
+        if "berry" in rewards:
+            data[str(user_id)]["berry"] += rewards["berry"]
+        if "items" in rewards:
+            for item, count in rewards["items"].items():
+                data[str(user_id)].setdefault("item", {})[item] = data[str(user_id)]["item"].get(item, 0) + count
+        
+        exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, exp, 0)
+        
+        msg += f"\n{defeat_msg}"
+        msg += exp_msg if exp_msg else ""
+        msg += grade_msg if grade_msg else ""
+    
+    return msg, data
