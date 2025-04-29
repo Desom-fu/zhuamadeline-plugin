@@ -25,7 +25,7 @@ async def simulate_event(user_data, current_time):
     if random.random() < 0.175:
         delay_hours = 1.5
         user_data["buff"] = "hurt"
-        user_data["next_time"] = (current_time + datetime.timedelta(horses=delay_hours)).strftime("%Y-%m-%d %H:%M:%S")
+        user_data["next_time"] = (current_time + datetime.timedelta(hour=delay_hours)).strftime("%Y-%m-%d %H:%M:%S")
         return bonus_exp_multiplier, bonus_catches, delay_hours
     
     # 判断是否触发Boss事件（5%概率，世界boss解锁后4.5%+0.5%）
