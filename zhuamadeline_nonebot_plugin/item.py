@@ -20,6 +20,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 #加载商店信息和商店交互
 from .shop import item, item_aliases, trap_item, potion_effects, buff2_config
 from .collection import collection_aliases, collections

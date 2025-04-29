@@ -19,6 +19,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 #加载商店信息和商店交互
 from .collection import collections
 from .function import *

@@ -23,6 +23,7 @@ from .list1 import *
 from .list2 import *
 from .list3 import *
 from .list4 import *
+from .list5 import *
 from .function import *
 from .whitelist import whitelist_rule
 from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message
