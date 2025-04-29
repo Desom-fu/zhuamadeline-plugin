@@ -201,19 +201,19 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             # 增加一个参数，用来触发时隙沙漏后跳过后续的冷却检查
             hourglass_used = 0
             
-            if collections.get("时隙沙漏", 0) != 0 and liechang_number != "0":
-                # 动态计算当前可累积次数
-                added_chance = calculate_spare_chance(data, str(user_id))
-                current_chance = data[str(user_id)].get('spare_chance', 0)
+            if collections.get("时隙沙漏", 0) != 0 :
+                # 计算并更新存储次数（函数内部会保存data）
+                data, added_chance = calculate_spare_chance(data, str(user_id))  # 解构返回值
+                current_chance = int(data[str(user_id)].get('spare_chance', 0))  # 确保是整数
                 data[str(user_id)]['spare_chance'] = min(current_chance + added_chance, hourglass_max)
 
-                # 优先使用存储次数
-                if data[str(user_id)]['spare_chance'] > 0:
+                # 优先使用存储次数（主函数只负责扣除）
+                if data[str(user_id)]['spare_chance'] > 0 and liechang_number != "0":
                     data[str(user_id)]['spare_chance'] -= 1
                     hourglass_used = 1
                     answer = 1
                     hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{data[str(user_id)]['spare_chance']}/{hourglass_max}"
-                    save_data(user_path / file_name, data)
+                    save_data(user_path / file_name, data)  # 这里可以去掉，如果calculate_spare_chance已经保存
 
             if hourglass_used == 0:
                 #正常抓的逻辑
@@ -671,10 +671,10 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     get_ball_value = get_user_data(data, user_id, "get_ball_value", 0)
     power = item.get("体力", 0)
     if collections.get("时隙沙漏", 0) != 0:
-        # 动态计算当前可累积次数
-        added_chance = calculate_spare_chance(data, str(user_id))
+        # 动态计算当前可累积次数（现在返回 (data, added_chance)）
+        data, added_chance = calculate_spare_chance(data, str(user_id))  # 解构返回值
         current_chance = data[str(user_id)].get('spare_chance', 0)
-        spare_chance = min(current_chance + added_chance, hourglass_max)
+        spare_chance = min(current_chance + added_chance, hourglass_max)  # 更新到data中
     
     # 获取酒店数据
     bank = bar_data.get("bank", 0)

@@ -361,7 +361,7 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
         return None
 
 
-# 以下为消息发送相关函数（保持原样）
+# 以下为消息发送相关函数
 async def send_image_or_text(handler, text, at_sender=False, forward_text=None, max_chars=30):
     """发送图文消息的便捷函数"""
     img = generate_image_with_text(
@@ -373,6 +373,18 @@ async def send_image_or_text(handler, text, at_sender=False, forward_text=None, 
     )
     message = (forward_text or "") + (MessageSegment.image(img) if img else text)
     await handler.finish(message, at_sender=at_sender)
+
+async def not_finish_send_image_or_text(handler, text, at_sender=False, forward_text=None, max_chars=30):
+    """发送图文消息的便捷函数(非finish)"""
+    img = generate_image_with_text(
+        text1=text,
+        image_path=None,
+        text2=None,
+        max_chars=max_chars,
+        center=False
+    )
+    message = (forward_text or "") + (MessageSegment.image(img) if img else text)
+    await handler.send(message, at_sender=at_sender)
 
 async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id, group_id, max_chars=30, at_sender=False):
     """通过转发消息发送图文"""

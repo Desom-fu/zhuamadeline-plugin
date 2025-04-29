@@ -12,7 +12,7 @@ from .list3 import madeline_data3
 from .list4 import madeline_data4
 from .list5 import madeline_data5
 from .config import *
-from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message
+from .text_image_text import generate_image_with_text, send_image_or_text_forward, send_image_or_text, auto_send_message, not_finish_send_image_or_text
 from nonebot import get_bot, on_command
 from nonebot.log import logger
 
@@ -394,7 +394,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             remaining_seconds = 1800 - cooldown_seconds  # 计算剩余冷却时间
             remaining_minutes = remaining_seconds // 60  # 剩余分钟数
             remaining_seconds = remaining_seconds % 60  # 剩余秒数
-            await send_image_or_text(message, f"\n啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
+            await send_image_or_text(message, f"啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
     user_path1 = Path() / "data" / "UserList" / "UserList1.json"
     kc_data1 = open_data(user_path1)
     #如果没有注册
@@ -683,13 +683,12 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     if kicked_user_id:
         forward_text += MessageSegment.at(kicked_user_id)
     # 发送挑战结果
-    await send_image_or_text(message, pk_text, True, forward_text, 28)
+    await not_finish_send_image_or_text(message, pk_text, True, forward_text, 28)
 
     # 发送结束结果（如果有）
     if set_final:
-        await send_image_or_text(message, text, False, at_text)
+        await send_image_or_text(message, text, False, at_text, 20)
         
-    
 
 # .jjc内容
 jjc = on_command('jjc', permission=GROUP, priority=1, block=True, rule=whitelist_rule)

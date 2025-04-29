@@ -230,9 +230,10 @@ def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
     return data
 
 # 时隙沙漏相关计算
+# 修改后的计算函数（负责计算并保存data）
 def calculate_spare_chance(data, user_id):
     if user_id not in data:
-        return 0
+        return data, 0  # 返回原data，避免外部data被None覆盖
 
     try:
         current_time = datetime.datetime.now()
@@ -253,7 +254,7 @@ def calculate_spare_chance(data, user_id):
         # 计算有效时间差
         time_diff = current_time - last_limit
         if time_diff.total_seconds() <= 0:
-            return 0
+            return data, 0  # 无新增次数，返回原data
 
         # 计算可累积次数
         interval_mins = 29 if collections.get("回想之核") else 30
@@ -262,13 +263,13 @@ def calculate_spare_chance(data, user_id):
         # 更新记录时间（仅当确实有时间积累时）
         if intervals > 0:
             data[user_id]['last_valid_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            save_data(user_path / file_name, data)  # 在这里保存，确保数据持久化
         
-        return min(intervals, hourglass_max)
+        return data, min(intervals, hourglass_max)
         
     except Exception as e:
         logger.error(f"时隙沙漏计算错误: {e}")
-        return 0
-
+        return data, 0  # 出错时返回原data
 #------------mymadeline相关指令----------------
 
 # 获取猎场文件和对应数据

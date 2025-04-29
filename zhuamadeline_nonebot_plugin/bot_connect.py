@@ -9,7 +9,7 @@ from .whitelist import whitelist_rule2
 user_path = Path() / "data" / "UserList"
 file_name = "UserData.json"
 full_path = user_path / file_name
-prefix_list = ["/","~","!",'@',"*","%","^","$","#",",","-","=","./","|","+"]
+prefix_list = ["/","~","!",'@',"*","%","^","$","#",",","-","=","./","|","+","//"]
 
 # 检查别人传过来的berry门槛是否足够
 berry = on_command('berry_check', permission=GROUP, priority=1, block=True, rule=whitelist_rule2)
