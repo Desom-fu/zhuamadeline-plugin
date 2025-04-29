@@ -424,7 +424,8 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                         # 构建最终消息
                         msg += f"\n\n世界Boss[{result['name']}]已被击败！"
                         msg += "\n\n伤害排行榜：\n" + "\n".join(top5_msg)
-                        msg += f"\n\n另有{other_count}位参与者获得奖励（exp = 伤害值*2；草莓 = 100，若已满级则获得草莓 = 伤害值*4 + 100）"
+                        if other_count > 0:
+                            msg += f"\n\n另有{other_count}位参与者获得奖励（exp = 伤害值*2；草莓 = 100，若已满级则获得草莓 = 伤害值*4 + 100）"
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
