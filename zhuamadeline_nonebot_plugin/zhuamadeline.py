@@ -452,14 +452,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                         # 构建最终消息
                         msg += f"\n\n世界Boss[{result['name']}]已被击败！"
-                        msg += "\n\n最终奖励排行榜：\n" + "\n".join(top5_msg)
+                        msg += "\n\n最终奖励排行榜：" + "\n\n".join(top5_msg)
                         if other_count > 0:
                             msg += f"\n\n另有{other_count}位参与者获得奖励（300草莓）"
                         msg += "\n\n除此之外，所有玩家都能获得[伤害值*2]点exp哦！（若已满级则会获得[伤害值*4]颗草莓！）"
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
-                    await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None, 20)
+                    await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None)
                     return
 
             # 处理个人Boss
@@ -496,7 +496,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
-                    await send_image_or_text(catch, msg, True, None, 20)
+                    await send_image_or_text(catch, msg, True, None)
                     return
 
             # 没有Boss时的正常经验计算
