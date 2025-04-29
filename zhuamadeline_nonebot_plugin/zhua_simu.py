@@ -25,7 +25,7 @@ async def simulate_event(user_data, current_time):
     if random.random() < 0.175:
         delay_hours = 1.5
         user_data["buff"] = "hurt"
-        user_data["next_time"] = (current_time + datetime.timedelta(hours=delay_hours)).strftime("%Y-%m-%d %H:%M:%S")
+        user_data["next_time"] = (current_time + datetime.timedelta(horses=delay_hours)).strftime("%Y-%m-%d %H:%M:%S")
         return bonus_exp_multiplier, bonus_catches, delay_hours
     
     # 判断是否触发Boss事件（5%概率，世界boss解锁后4.5%+0.5%）
@@ -69,7 +69,8 @@ async def run_single_simulation(max_grade):
         "berry": 0,
         "collections": {
             "星辰碎屑": 1,
-            "音矿": 5000
+            "音矿": 5000,
+            "回想之核": 1  # 新增：默认持有回想之核
         },
         "item": {},
         "lc": "5",
@@ -85,7 +86,9 @@ async def run_single_simulation(max_grade):
     
     total_catches = 0
     total_time = datetime.timedelta()
-    catch_interval = datetime.timedelta(minutes=30)
+    # 根据是否持有回想之核决定冷却时间
+    base_catch_interval = 29 if user_data["collections"].get("回想之核", 0) >= 1 else 30
+    catch_interval = datetime.timedelta(minutes=base_catch_interval)
     total_delay_hours = 0.0
     boss_events = 0
     pit_events = 0
@@ -119,7 +122,7 @@ async def run_single_simulation(max_grade):
             continue
 
         # 如果是无效事件，直接跳过
-        if is_pit_event:
+        if is_null_event:
             total_time += catch_interval  # 消耗一次抓取机会
             total_catches += 1
             continue
@@ -260,6 +263,7 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
         f"模拟完成！{simulations}次模拟结果:\n"
         f"各次模拟抓取次数:\n"
         f"{' | '.join(individual_results)}\n\n"
+        f"默认持有星辰碎屑和回想之核\n"
         f"平均结果（升到{max_grade}级）:\n"
         f"- 平均抓取次数: {avg_catches:.1f} 次\n"
         f"- 平均耗时: {days}天 {hours}小时 {minutes}分钟\n"
@@ -267,9 +271,8 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
         f"- 平均Boss事件: {avg_boss:.1f} 次\n"
         f"- 平均掉坑事件: {avg_pit:.1f} 次\n"
         f"- 平均延迟时间: {avg_delay:.1f} 小时\n"
-        f"- 平均每次获得经验: {avg_exp_per_catch:.2f}\n"
+        f"- 平均每次获得经验: {avg_exp_per_catch:.2f}\n\n"
         f"概率分布变化:\n"
-        f"默认持有星辰碎屑\n"
         f"6级后: 可抓2级 | 11级后: 可抓3级\n"
         f"16级后: 可抓4级 | 21级后: 可抓5级+音矿生效（满音矿）"
     )
