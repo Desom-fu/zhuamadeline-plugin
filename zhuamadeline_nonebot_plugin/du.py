@@ -135,7 +135,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
         # 构建消息
         msg = f"【抽卡结果】\n\n"
         msg += f"- 你花费{MENPIAO_COST}颗草莓，购买了一包卡包！\n"
-        msg += f"- 你卖出抽出来的卡后获得了{berry}颗草莓！（净收益：{get_berry}）\n"
+        msg += f"- 你卖出抽出来的卡后获得了{berry}颗草莓！\n"
         msg += f"\n【幸运戒指触发】\n"
         msg += f"四叶草翡翠闪耀！命运被重置了！\n"
         msg += f"- 卡包里面的卡片重新变换了！\n"
