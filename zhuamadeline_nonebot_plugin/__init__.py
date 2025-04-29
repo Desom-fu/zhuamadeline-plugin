@@ -35,6 +35,7 @@ from .berry_garden import *
 from .whitelist import allowed_groups, allowed_groups2
 from .garage_kit import *
 from .work import *
+from .zhua_simu import *
 
 # 初始化
 driver = get_driver()
