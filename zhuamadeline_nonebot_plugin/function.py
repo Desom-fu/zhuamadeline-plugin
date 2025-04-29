@@ -877,7 +877,7 @@ def spawn_boss(user_id, grade, boss_type=None):
 
 def spawn_world_boss():
     """生成世界Boss"""
-    hp = random.randint(300, 500)
+    hp = random.randint(200, 400)
     name = random.choice(boss_names["world"])
     
     boss_data = {
