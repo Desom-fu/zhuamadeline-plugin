@@ -378,31 +378,46 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     data = buff2_change_status(data, user_id, "lucky", 1)
                     data = buff2_change_status(data, user_id, "speed", 1)
                     msg = big_damage_msg
-                    msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
+                    msg += f"\n你对世界Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
 
-                    # 获取当前伤害排行榜
+                    # 更新当前伤害数据（包含本次攻击）
+                    world_boss_data["contributors"][str(user_id)] = world_boss_data["contributors"].get(str(user_id), 0) + damage
+                    save_data(world_boss_data_path, world_boss_data)
+
+                    # 获取实时伤害排行榜
                     contributors = sorted(world_boss_data["contributors"].items(), 
                                         key=lambda x: x[1], reverse=True)
 
-                    # 显示前五名伤害
+                    # 显示前五名伤害（实时数据）
                     top5_damage = "\n\n当前伤害排行榜："
                     for i, (uid, dmg) in enumerate(contributors[:5]):
                         nickname = await get_nickname(bot, uid)
                         top5_damage += f"\n第{i+1}名 [{nickname}]: {dmg}伤害"
+                        if uid == str(user_id):
+                            top5_damage += " ← 你"
 
                     msg += top5_damage
-
+                    
                     if result["hp"] <= 0:
+                        # 先更新伤害数据（包含当前回合的伤害）
+                        world_boss_data["contributors"][str(user_id)] = world_boss_data["contributors"].get(str(user_id), 0) + damage
+                        save_data(world_boss_data_path, world_boss_data)
+                        
+                        # 获取更新后的排行榜数据
+                        contributors = sorted(world_boss_data["contributors"].items(), 
+                                             key=lambda x: x[1], reverse=True)
+                        
                         # 发放世界Boss奖励
                         rewards, all_rewards = get_world_boss_rewards()
-
-                        # 发放排行榜奖励（显示1-5名排名和伤害值）
+                    
+                        # 发放排行榜奖励（使用实时伤害数据）
                         top5_msg = []
                         for i, (uid, reward, _) in enumerate(rewards):
                             if str(uid) in data:
                                 nickname = await get_nickname(bot, uid)
-                                damage_done = world_boss_data["contributors"].get(uid, 0)  # 获取实际伤害值
+                                # 使用更新后的伤害数据
+                                damage_done = world_boss_data["contributors"].get(uid, 0)
 
                                 # 发放奖励
                                 if "berry" in reward:
