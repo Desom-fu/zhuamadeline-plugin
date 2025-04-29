@@ -225,7 +225,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     next_time = current_time + datetime.timedelta(minutes=30-dream)
                     #检测星钻
                     if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
-                        diamond_text = "\n\n星光闪烁，你包里的星钻突然绽放光芒，瞬间你的伤势和疲惫感如星尘般消散！"
+                        diamond_text = "\n\n星光闪烁，你包里的星钻突然绽放光芒，\n瞬间你的伤势和疲惫感如星尘般消散！"
                         next_time = current_time  # 立即重置冷却时间
 
                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
