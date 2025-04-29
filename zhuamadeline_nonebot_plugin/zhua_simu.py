@@ -7,7 +7,7 @@ import math
 import datetime
 from pathlib import Path
 from .function import calculate_level_and_exp
-from .config import bot_owner_id
+from .config import bot_owner_id, max_grade
 from .whitelist import whitelist_rule
 
 simu_5 = on_command("simu_5", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
@@ -174,8 +174,8 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
         await simu_5.finish("参数必须是数字！格式：\n.simu_5 最高等级 模拟次数")
         return
     
-    if max_grade < 1 or max_grade > 30:
-        await simu_5.finish("最高等级必须在1-30之间")
+    if max_grade < 1 or max_grade > max_grade:
+        await simu_5.finish(f"最高等级必须在1-{max_grade}之间")
         return
     if simulations < 1 or simulations > 100:
         await simu_5.finish("模拟次数必须在1-100之间")
