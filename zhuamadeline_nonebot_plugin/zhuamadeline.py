@@ -380,15 +380,28 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
 
+                    # 获取当前伤害排行榜
+                    contributors = sorted(world_boss_data["contributors"].items(), 
+                                        key=lambda x: x[1], reverse=True)
+
+                    # 显示前五名伤害
+                    top5_damage = "\n\n当前伤害排行榜："
+                    for i, (uid, dmg) in enumerate(contributors[:5]):
+                        nickname = await get_nickname(bot, uid)
+                        top5_damage += f"\n第{i+1}名 {nickname}: {dmg}伤害"
+
+                    msg += top5_damage
+
                     if result["hp"] <= 0:
                         # 发放世界Boss奖励
                         rewards, all_rewards = get_world_boss_rewards()
 
-                        # 发放排行榜奖励（显示1-5名排名）
+                        # 发放排行榜奖励（显示1-5名排名和伤害值）
                         top5_msg = []
                         for i, (uid, reward, _) in enumerate(rewards):
                             if str(uid) in data:
                                 nickname = await get_nickname(bot, uid)
+                                damage_done = world_boss_data["contributors"].get(uid, 0)  # 获取实际伤害值
 
                                 # 发放奖励
                                 if "berry" in reward:
@@ -397,21 +410,36 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                                     for item, count in reward["items"].items():
                                         data[str(uid)].setdefault("item", {})[item] = data[str(uid)]["item"].get(item, 0) + count
 
-                                rank_text = f"第{i+1}名 {nickname}: {reward['berry']}草莓"
+                                # 发放经验（所有参与者都加经验）
+                                exp = damage_done * 2  # 伤害x2
+                                current_grade = data[str(uid)].get("grade", 1)
+                                max_grade = data[str(uid)].get("max_grade", 30)
+
+                                if current_grade >= max_grade:
+                                    berry = exp * 2  # 满级转换：1经验=2草莓
+                                    data[str(uid)]["berry"] += berry
+                                else:
+                                    calculate_level_and_exp(data, uid, exp, 0)
+
+                                # 构建排名信息（包含伤害值）
+                                rank_text = f"第{i+1}名 {nickname}（造成{damage_done}点伤害）: {reward['berry']}草莓"
                                 if "items" in reward:
                                     items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
                                     rank_text += f" + {items_text}"
+
                                 world_boss_at_text += MessageSegment.at(uid)
                                 top5_msg.append(rank_text)
 
-                        # 发放全员经验奖励（其他玩家）
+                        # 发放全员奖励（其他玩家）
                         other_count = 0
                         for uid, reward in all_rewards.items():
                             if uid not in [x[0] for x in rewards]:  # 跳过前五名
                                 if str(uid) in data:
                                     exp = reward["exp"]
                                     current_grade = data[str(uid)].get("grade", 1)
-                                    # 每人获得250草莓
+                                    max_grade = data[str(uid)].get("max_grade", 30)
+
+                                    # 每人额外获得300草莓
                                     data[str(uid)]["berry"] += 300
 
                                     if current_grade >= max_grade:
@@ -423,9 +451,10 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                         # 构建最终消息
                         msg += f"\n\n世界Boss[{result['name']}]已被击败！"
-                        msg += "\n\n伤害排行榜：\n" + "\n".join(top5_msg)
+                        msg += "\n\n最终奖励排行榜：\n" + "\n".join(top5_msg)
                         if other_count > 0:
-                            msg += f"\n\n另有{other_count}位参与者获得奖励（exp = 伤害值*2；草莓 = 100，若已满级则获得草莓 = 伤害值*4 + 100）"
+                            msg += f"\n\n另有{other_count}位参与者获得奖励（300草莓）"
+                        msg += "\n\n除此之外，所有玩家都能获得[伤害值*2]点exp哦！（若已满级则会获得[伤害值*4]颗草莓！）"
 
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
