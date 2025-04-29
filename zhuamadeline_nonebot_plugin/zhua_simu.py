@@ -14,16 +14,16 @@ async def simulate_event(user_data, current_time):
     """模拟事件系统的影响"""
     # 初始化事件结果
     bonus_exp_multiplier = 1.0
-    bonus_catches = 0
-    delay_hours = 0
+    bonus_catches = 1
+    delay_hours = 0.0
     
     # 10%概率无效事件（什么都不发生，类比抓到鱼类之类的，救人没加，因为我想大概率没人能救）
     if random.random() < 0.10:
-        return 1.0, 0, 0  # 无加成，无额外抓取，无延迟
+        return 1.0, 1, 0  # 无加成，有抓取，无延迟
     
     # 17.5%概率掉坑（冷却2小时）
     if random.random() < 0.175:
-        delay_hours = 2
+        delay_hours = 1.5
         user_data["buff"] = "hurt"
         user_data["next_time"] = (current_time + datetime.timedelta(hours=delay_hours)).strftime("%Y-%m-%d %H:%M:%S")
         return bonus_exp_multiplier, bonus_catches, delay_hours
@@ -86,7 +86,7 @@ async def run_single_simulation(max_grade):
     total_catches = 0
     total_time = datetime.timedelta()
     catch_interval = datetime.timedelta(minutes=30)
-    total_delay_hours = 0
+    total_delay_hours = 0.0
     boss_events = 0
     pit_events = 0
     null_events = 0
@@ -98,14 +98,31 @@ async def run_single_simulation(max_grade):
         exp_multiplier, bonus_catches, delay_hours = await simulate_event(user_data, current_time)
         
         # 统计事件类型
-        if delay_hours > 0:
+        is_pit_event = delay_hours >= 0.5
+        is_boss_event = bonus_catches > 1
+        is_null_event = exp_multiplier == 1.0 and bonus_catches == 1 and delay_hours == 0
+        
+        if is_pit_event:
             pit_events += 1
-        elif bonus_catches > 0:
+        elif is_boss_event:
             boss_events += 1
-        elif exp_multiplier == 1.0 and bonus_catches == 0 and delay_hours == 0:
+        elif is_null_event:
             null_events += 1
         
         total_delay_hours += delay_hours
+
+        # 如果是掉坑事件，只增加时间不计算经验
+        if is_pit_event:
+            total_time += catch_interval  # 消耗一次抓取机会
+            total_time += datetime.timedelta(hours=delay_hours)  # 增加延迟时间
+            total_catches += 1
+            continue
+
+        # 如果是无效事件，直接跳过
+        if is_pit_event:
+            total_time += catch_interval  # 消耗一次抓取机会
+            total_catches += 1
+            continue
         
         # 确定概率分布
         star_add = 100 if user_data["collections"].get("星辰碎屑", 0) >= 1 else 0
@@ -127,7 +144,7 @@ async def run_single_simulation(max_grade):
             }
         
         # 计算本次抓取
-        catches_in_this_round = bonus_catches if bonus_catches > 0 else 1
+        catches_in_this_round = max(bonus_catches, 1)
         total_exp_in_round = 0
         
         for _ in range(catches_in_this_round):
@@ -246,7 +263,7 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
         f"平均结果（升到{max_grade}级）:\n"
         f"- 平均抓取次数: {avg_catches:.1f} 次\n"
         f"- 平均耗时: {days}天 {hours}小时 {minutes}分钟\n"
-        f"- 平均无效事件（鱼类）: {avg_null_events:.1f} 次\n"
+        # f"- 平均无效事件（鱼类）: {avg_null_events:.1f} 次\n"
         f"- 平均Boss事件: {avg_boss:.1f} 次\n"
         f"- 平均掉坑事件: {avg_pit:.1f} 次\n"
         f"- 平均延迟时间: {avg_delay:.1f} 小时\n"
