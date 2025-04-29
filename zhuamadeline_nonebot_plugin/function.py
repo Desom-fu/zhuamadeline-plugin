@@ -3,6 +3,7 @@ from nonebot import get_driver
 from nonebot.adapters.onebot.v11 import Bot
 from operator import itemgetter
 from pathlib import Path
+# 开新猎场要改
 from .list1 import *
 from .list2 import *
 from .list3 import *
@@ -777,7 +778,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         
     # 1. 计算获得的经验值
     if isitem == 1:
-        gained_exp = level // 2  # 道具获得一半经验
+        gained_exp = math.ceil(level / 2)  # 道具获得一半经验
     else:
         gained_exp = level
     

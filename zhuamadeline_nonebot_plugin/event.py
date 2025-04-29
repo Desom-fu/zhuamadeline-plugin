@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot import get_bot
+# 开新猎场要改
 from .list1 import *
 from .list2 import *
 from .list3 import *

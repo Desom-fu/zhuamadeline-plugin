@@ -14,6 +14,7 @@ import time
 #加载madeline档案信息
 from .madelinejd import *
 from .config import *
+# 开新猎场要改
 from .list1 import *
 from .list2 import *
 from .list3 import *
@@ -34,7 +35,7 @@ class MadelineConfig:
     user_path: str
     name_list: Dict
 
-# 全局配置
+# 全局配置 开新猎场要改
 MADELINE_CONFIGS = {
     1: MadelineConfig(
         data=madeline_data1,
@@ -55,6 +56,11 @@ MADELINE_CONFIGS = {
         data=madeline_data4,
         user_path=user_path4,
         name_list=madeline_name_list4
+    ),
+    5: MadelineConfig(
+        data=madeline_data5,
+        user_path=user_path5,
+        name_list=madeline_name_list5
     )
 }
 

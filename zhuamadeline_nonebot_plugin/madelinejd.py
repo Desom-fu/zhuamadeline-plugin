@@ -12,6 +12,7 @@ import asyncio
 import datetime
 from .madelinejd import *
 from .config import *
+# 开新猎场要改
 from .list1 import *
 from .list2 import *
 from .list3 import *
