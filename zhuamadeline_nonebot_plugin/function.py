@@ -907,7 +907,7 @@ def attack_boss(user_id, damage, is_world_boss=False):
     big_attack = user_data[user_id]['collections'].get("暴击指虎", 0)
     if big_attack >= 1 and random.randint(1, 100) <= 10:
         damage *= 2
-        big_damage_msg += '尖锐的指虎狠狠地扎进了Boss的要害，本次攻击造成的伤害翻倍！\n'
+        big_damage_msg += '尖锐的指虎狠狠地扎进了Boss的要害\n本次攻击造成的伤害翻倍！\n'
     
     if not boss_data:
         return False, "没有找到Boss"
