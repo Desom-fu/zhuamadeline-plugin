@@ -116,7 +116,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
     original_berry = user_data['berry']
     original_pots = bar_data.get("pots", 0)
     
-    if get_berry < 0 and has_lucky_ring and random.random() <= 0.05:
+    if get_berry < 0 and has_lucky_ring and random.random() <= 0.1:
         # 重新抽卡
         new_rnd = random.randint(1, 100)
         new_berry = next((v for max_p, v in BERRY_PROBABILITY if new_rnd <= max_p), 666)
@@ -161,7 +161,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
         
         # 如果触发了幸运戒指检查但没有重置
         if get_berry < 0 and has_lucky_ring:
-            msg += f"\n\n(幸运戒指微微发光，但这次没有触发效果...)"
+            msg += f"\n\n(幸运戒指微微发光，但是毫无反应……)"
 
     # 强制抽卡处理
     if user_data['event'] == 'compulsion_ggl' and user_data['compulsion_count'] > 0:

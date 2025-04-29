@@ -511,6 +511,7 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
     original_berry = data[user_id]['berry']
     original_pots = bar_data.get("pots", 0)
     has_lucky_ring = '幸运戒指' in data[user_id].get('collections', {})
+    msg_text = "【预言大师结果】\n\n"
     
     # 第一次结果处理
     if len(guess_type) == 1:
@@ -522,9 +523,9 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             is_loss = card_value <= 7
             if not is_loss:
                 data[user_id]['berry'] += reward
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于7，\n你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
+                msg_text += f"- 你抽到的牌是{card_type}{card_name}，点数大于7，\n你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
             else:
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于等于7，\n你的猜测失败了！"
+                msg_text += f"- 你抽到的牌是{card_type}{card_name}，点数小于等于7，\n你的猜测失败了！"
         elif guess_type == "小于7":
             original_reward = int(REWARD_MAPPING[guess_type])
             tax = int(original_reward * 0.1)
@@ -532,9 +533,9 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             is_loss = card_value >= 7
             if not is_loss:
                 data[user_id]['berry'] += reward
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数小于7，\n你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
+                msg_text += f"- 你抽到的牌是{card_type}{card_name}，点数小于7，\n你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
             else:
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，点数大于等于7，\n你的猜测失败了！"
+                msg_text += f"- 你抽到的牌是{card_type}{card_name}，点数大于等于7，\n你的猜测失败了！"
         elif guess_type in ["梅花", "方片", "黑桃", "红桃"]:
             send_guess_type = "花色"
             original_reward = int(REWARD_MAPPING[send_guess_type])
@@ -543,9 +544,9 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
             is_loss = card_type != guess_type
             if not is_loss:
                 data[user_id]['berry'] += reward
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，\n你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
+                msg_text += f"- 你抽到的牌是{card_type}{card_name}，\n你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n- 但是由于草莓税法的实行，需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
             else:
-                msg_text = f"- 你抽到的牌是{card_type}{card_name}，\n你的猜测失败了！"
+                msg_text += f"- 你抽到的牌是{card_type}{card_name}，\n你的猜测失败了！"
         else:
             return "请输入一个正确的猜测值"
     elif len(guess_type) == 2:
@@ -579,74 +580,77 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
                 #如果没有，则添加
                 if(not '奇想扑克' in data[str(user_id)]['collections']):
                     data[str(user_id)]['collections']['奇想扑克'] = 1
-                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n你在酒馆的桌子地下看到了一副奇怪的白色扑克，\n你将这副扑克捡了起来\n输入.cp 奇想扑克 以查看具体效果"
+                    msg_text += f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n你在酒馆的桌子地下看到了一副奇怪的白色扑克，\n你将这副扑克捡了起来\n输入.cp 奇想扑克 以查看具体效果"
                 else:
                     data[user_id]['berry'] += reward
-                    msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n但是由于草莓税法的实行，\n需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"    
+                    msg_text += f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n但是由于草莓税法的实行，\n需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"    
             else:                
                 data[user_id]['berry'] += reward
-                msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n但是由于草莓税法的实行，\n需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
+                msg_text += f"你抽到的牌是{card_type}{card_name}，你的猜测成功了！\n获得{original_reward}颗草莓奖励！\n但是由于草莓税法的实行，\n需要上交10%，\n所以你最终获得了{reward}颗草莓，\n上交了{tax}颗草莓税！"
         else:
-            msg_text = f"你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
+            msg_text += f"你抽到的牌是{card_type}{card_name}，你的猜测失败了！"
     
     # 幸运戒指检查 - 只在亏损时触发
-    if is_loss and has_lucky_ring and random.random() <= 0.05:
-        # 重置数据
-        data[user_id]['berry'] = original_berry - TICKET_COST
-        bar_data["pots"] = original_pots
-        
-        # 重新抽牌
-        new_card_value = random.choice(card_collection)
-        new_card_type = random.choice(["梅花", "方片", "黑桃", "红桃"])
-        
-        # 处理特殊牌值
-        if new_card_value == 1:
-            new_card_name = "A"
-        elif new_card_value == 11:
-            new_card_name = "J"
-        elif new_card_value == 12:
-            new_card_name = "Q"
-        elif new_card_value == 13:
-            new_card_name = "K"
-        else:
-            new_card_name = str(new_card_value)
-            
-        # 构建新的结果消息
-        msg_text += f"\n\n【幸运戒指触发】\n"
-        msg_text += f"四叶草翡翠闪耀！命运被重置了！\n"
-        msg_text += f"新的牌是：{new_card_type}{new_card_name}\n"
-        
-        # 重新判断结果
-        if len(guess_type) == 1:
-            if guess_type[0] == "大于7":
-                if new_card_value > 7:
-                    data[user_id]['berry'] += reward
-                    msg_text += f"新的结果：点数大于7，猜测成功！获得{reward}颗草莓！"
-                else:
-                    msg_text += f"新的结果：点数不大于7，猜测仍然失败..."
-            elif guess_type[0] == "小于7":
-                if new_card_value < 7:
-                    data[user_id]['berry'] += reward
-                    msg_text += f"新的结果：点数小于7，猜测成功！获得{reward}颗草莓！"
-                else:
-                    msg_text += f"新的结果：点数不小于7，猜测仍然失败..."
-            else:  # 花色
-                if new_card_type == guess_type[0]:
-                    data[user_id]['berry'] += reward
-                    msg_text += f"新的结果：花色匹配，猜测成功！获得{reward}颗草莓！"
-                else:
-                    msg_text += f"新的结果：花色不匹配，猜测仍然失败..."
-        else:  # 点数
-            if new_card_value in guess_type:
-                rnd = random.randint(1,15)
-                if rnd <= 2 and '奇想扑克' not in data[str(user_id)].get('collections', {}):
-                    data[str(user_id)].setdefault('collections', {})['奇想扑克'] = 1
-                    msg_text += f"新的结果：点数匹配，猜测成功！\n你在酒馆的桌子地下看到了一副奇怪的白色扑克！"
-                else:
-                    data[user_id]['berry'] += reward
-                    msg_text += f"新的结果：点数匹配，猜测成功！获得{reward}颗草莓！"
+    if is_loss and has_lucky_ring:
+        if random.random() <= 0.1:
+            # 重置数据
+            data[user_id]['berry'] = original_berry - TICKET_COST
+            bar_data["pots"] = original_pots
+
+            # 重新抽牌
+            new_card_value = random.choice(card_collection)
+            new_card_type = random.choice(["梅花", "方片", "黑桃", "红桃"])
+
+            # 处理特殊牌值
+            if new_card_value == 1:
+                new_card_name = "A"
+            elif new_card_value == 11:
+                new_card_name = "J"
+            elif new_card_value == 12:
+                new_card_name = "Q"
+            elif new_card_value == 13:
+                new_card_name = "K"
             else:
-                msg_text += f"新的结果：点数不匹配，猜测仍然失败..."
+                new_card_name = str(new_card_value)
+
+            # 构建新的结果消息
+            msg_text += f"\n\n【幸运戒指触发】\n"
+            msg_text += f"四叶草翡翠闪耀！命运被重置了！\n"
+            msg_text += f"新的牌是：{new_card_type}{new_card_name}\n"
+
+            # 重新判断结果
+            if len(guess_type) == 1:
+                if guess_type[0] == "大于7":
+                    if new_card_value > 7:
+                        data[user_id]['berry'] += reward
+                        msg_text += f"新的结果：点数大于7，猜测成功！获得{reward}颗草莓！"
+                    else:
+                        msg_text += f"新的结果：点数不大于7，猜测仍然失败……"
+                elif guess_type[0] == "小于7":
+                    if new_card_value < 7:
+                        data[user_id]['berry'] += reward
+                        msg_text += f"新的结果：点数小于7，猜测成功！获得{reward}颗草莓！"
+                    else:
+                        msg_text += f"新的结果：点数不小于7，猜测仍然失败……"
+                else:  # 花色
+                    if new_card_type == guess_type[0]:
+                        data[user_id]['berry'] += reward
+                        msg_text += f"新的结果：花色匹配，猜测成功！获得{reward}颗草莓！"
+                    else:
+                        msg_text += f"新的结果：花色不匹配，猜测仍然失败……"
+            else:  # 点数
+                if new_card_value in guess_type:
+                    rnd = random.randint(1,15)
+                    if rnd <= 2 and '奇想扑克' not in data[str(user_id)].get('collections', {}):
+                        data[str(user_id)].setdefault('collections', {})['奇想扑克'] = 1
+                        msg_text += f"新的结果：点数匹配，猜测成功！\n你在酒馆的桌子地下看到了一副奇怪的白色扑克！"
+                    else:
+                        data[user_id]['berry'] += reward
+                        msg_text += f"新的结果：点数匹配，猜测成功！获得{reward}颗草莓！"
+                else:
+                    msg_text += f"新的结果：点数不匹配，猜测仍然失败……"
+        else:
+            msg_text += f"\n\n(幸运戒指微微发光，但是毫无反应……)"
         
         # 更新奖池
         if "获得" in msg_text:
