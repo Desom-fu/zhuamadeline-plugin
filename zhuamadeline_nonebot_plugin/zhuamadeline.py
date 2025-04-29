@@ -389,7 +389,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     top5_damage = "\n\n当前伤害排行榜："
                     for i, (uid, dmg) in enumerate(contributors[:5]):
                         nickname = await get_nickname(bot, uid)
-                        top5_damage += f"\n第{i+1}名 {nickname}: {dmg}伤害"
+                        top5_damage += f"\n第{i+1}名 [{nickname}]: {dmg}伤害"
 
                     msg += top5_damage
 
@@ -423,7 +423,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                                     calculate_level_and_exp(data, uid, exp, 0)
 
                                 # 构建排名信息（包含伤害值）
-                                rank_text = f"第{i+1}名 {nickname}（造成{damage_done}点伤害）: {reward['berry']}草莓"
+                                rank_text = f"第{i+1}名 [{nickname}]（造成{damage_done}点伤害）: {reward['berry']}草莓"
                                 if "items" in reward:
                                     items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
                                     rank_text += f" + {items_text}"
