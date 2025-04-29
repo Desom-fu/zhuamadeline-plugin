@@ -394,9 +394,37 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                         nickname = await get_nickname(bot, uid)
                         top5_damage += f"\n第{i+1}名 [{nickname}]: {dmg}伤害"
                         if uid == str(user_id):
-                            top5_damage += " ← 你"
+                            top5_damage += "\n↑ 你"
 
                     msg += top5_damage
+
+                    # 添加玩家个人排名信息
+                    player_rank = None
+                    player_damage = world_boss_data["contributors"].get(str(user_id), 0)
+                    
+                    # 查找当前玩家排名
+                    for i, (uid, dmg) in enumerate(contributors):
+                        if uid == str(user_id):
+                            player_rank = i + 1
+                            break
+                        
+                    # 构建个人排名信息
+                    if player_rank is not None:
+                        rank_info = f"\n\n你的排名: 第{player_rank}名 (总伤害: {player_damage})"
+                        
+                        # 与前一名差距
+                        if player_rank > 1:
+                            higher_damage = contributors[player_rank-2][1]
+                            diff = higher_damage - player_damage
+                            rank_info += f"\n距离上一名还差: {diff}伤害"
+                        
+                        # 与后一名差距
+                        if player_rank < len(contributors):
+                            lower_damage = contributors[player_rank][1]
+                            diff = player_damage - lower_damage
+                            rank_info += f"\n领先下一名: {diff}伤害"
+                        
+                        msg += rank_info
                     
                     if result["hp"] <= 0:
                         # 先更新伤害数据（包含当前回合的伤害）
@@ -411,6 +439,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     
                         # 发放排行榜奖励（使用实时伤害数据）
                         top5_msg = []
+                        player_exp_info = ""  # 用于存储当前玩家的完整经验信息
                         for i, (uid, reward, _) in enumerate(rewards):
                             if str(uid) in data:
                                 nickname = await get_nickname(bot, uid)
@@ -432,10 +461,20 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                                 if current_grade >= max_grade:
                                     berry = exp * 2  # 满级转换：1经验=2草莓
                                     data[str(uid)]["berry"] += berry
+                                    if uid == str(user_id):
+                                        player_exp_info = f"\n\n你获得了{berry}颗草莓（经验转换）"
                                 else:
-                                    calculate_level_and_exp(data, uid, exp, 0)
+                                    exp_msg, grade_msg, data = calculate_level_and_exp(data, uid, exp, 0)
+                                    if uid == str(user_id):
+                                        player_exp_info = ""
+                                        if exp_msg:  # 添加经验消息
+                                            player_exp_info += f"\n\n{exp_msg.strip()}"
+                                        if grade_msg:  # 添加升级消息
+                                            player_exp_info += f"\n{grade_msg.strip()}"
+                                        if not player_exp_info:  # 如果没有消息，至少显示获得了多少经验
+                                            player_exp_info = f"\n\n你获得了{exp}点经验"
 
-                                # 构建排名信息（包含伤害值）
+                                # 构建排名信息
                                 rank_text = f"第{i+1}名 [{nickname}]（造成{damage_done}点伤害）: {reward['berry']}草莓"
                                 if "items" in reward:
                                     items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
@@ -466,6 +505,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                         # 构建最终消息
                         msg += f"\n\n世界Boss[{result['name']}]已被击败！"
                         msg += "\n\n最终奖励排行榜：\n" + "\n\n".join(top5_msg)
+                        msg += player_exp_info  # 添加玩家完整的经验/升级信息
                         if other_count > 0:
                             msg += f"\n\n另有{other_count}位参与者获得奖励（300草莓）"
                         msg += "\n\n除此之外，所有玩家都能获得[伤害值*2]点exp哦！（若已满级则会获得[伤害值*4]颗草莓！）"
@@ -922,7 +962,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 f"\n- 当前经验：{exp}/{max_exp}"
                 f"\n- 当前等级：{grade}/{max_grade}")
         else:
-            message += f'- 你已升到满级：{grade}/{max_grade}'
+            message += f'\n- 你已升到满级：{grade}/{max_grade}'
 
         # 这里是世界boss信息（如果有）
         if world_boss_data.get("active", False):
