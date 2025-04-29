@@ -909,7 +909,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 f"\n- 当前经验：{exp}/{max_exp}"
                 f"\n- 当前等级：{grade}/{max_grade}")
         else:
-            message += f'- 您已升到满级：{grade}/{max_grade}'
+            message += f'- 你已升到满级：{grade}/{max_grade}'
 
         # 这里是世界boss信息（如果有）
         if world_boss_data.get("active", False):
