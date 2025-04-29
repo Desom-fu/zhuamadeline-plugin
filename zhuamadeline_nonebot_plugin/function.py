@@ -827,7 +827,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
     # 提添加藏品
     if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
         collections['时隙沙漏'] = 1
-        grade_msg += f"\n你已经达到最大等级{max_grade}，恭喜获得满级藏品奖励：时隙沙漏！这件由时之砂与虚空水晶制成的沙漏，能将你未使用的等待时间储存为抓取机会。输入.cp 时隙沙漏 以查看具体效果"
+        grade_msg += f"\n你已经达到最大等级{max_grade}！\n倏然，你手中入场券的那一点金色光芒突然闪烁起来！\n你慢慢的看着它融化，重组，最后在你手中变成了散发着淡金色光芒的蓝色沙漏。\n输入.cp 时隙沙漏 以查看具体效果"
     
     # 更新数据
     user_data.update({

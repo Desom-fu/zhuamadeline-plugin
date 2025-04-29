@@ -118,7 +118,7 @@ async def cklc_handle(arg: Message = CommandArg()):
 · 猎场加成：裸抓加成5草莓''',
         
         5: '''· 猎场名称：遗忘深渊
-· 危险等级：5
+· 危险等级：4
 · 描述：一个由古老水晶矿脉与失落文明遗迹构成的复合型猎场。地下湖泊与荧光植被交织的潮湿环境中，时间流速似乎与外界不同。机械残骸与生物结晶随处可见，空气中飘荡着矿物粉尘。最深处沉睡着一座神庙，似乎有什么生物于里面沉睡着……
 · 准入需求：持有10000颗草莓，仓库至少20000颗草莓（消耗，一次性）；满足前3个猎场的Madeline竞技场的准入需求
 · 猎场加成：裸抓加成5草莓''',
@@ -145,6 +145,7 @@ async def cklc_handle(arg: Message = CommandArg()):
 
     args = str(arg).strip().lower()
     
+    # cklc？返回999
     if args in ['?', '？']:
         number_arg = 999
     else:
@@ -154,9 +155,14 @@ async def cklc_handle(arg: Message = CommandArg()):
             await send_image_or_text(cklc, DEFAULT_TEXT)
             return
 
-    if 0 <= number_arg <= liechang_count or number_arg == 999:
+    # 可以看已开放猎场+1的信息
+    if 0 <= number_arg <= liechang_count + 1 or number_arg == 999:
         detail = LC_INFO.get(number_arg, "")
-        text = f"####### {number_arg}号猎场 #######\n{detail}" if number_arg != 999 else f"####### 危险…… #######\n{detail}"
+        # 没有信息就返回默认值
+        if not detail:
+            text = DEFAULT_TEXT
+        else:
+            text = f"####### {number_arg}号猎场 #######\n{detail}" if number_arg != 999 else f"####### 危险…… #######\n{detail}"
     else:
         text = DEFAULT_TEXT
 
