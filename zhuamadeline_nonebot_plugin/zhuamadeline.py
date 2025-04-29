@@ -946,7 +946,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 
             message += (
                 f"\n- 世界Boss事件"
-                f"\n全体玩家正在与[{world_boss_data['name']}]战斗！"
+                f"\n全体5猎玩家正在与[{world_boss_data['name']}]战斗！"
                 f"\n世界Boss生命值: {world_boss_data['hp']}/{world_boss_data['max_hp']}"
                 f"{rank_info}"
             )
