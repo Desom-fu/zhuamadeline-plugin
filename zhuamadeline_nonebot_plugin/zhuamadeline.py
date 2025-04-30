@@ -211,7 +211,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     hourglass_count -= 1
                     data[str(user_id)]["hourglass_count"] -= 1
                     hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{hourglass_count}/{hourglass_max}"
-                    data[str(user_id)]['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['next_time'] = hourglass_time
                     answer = 1
                     
             if not hourglass_text:

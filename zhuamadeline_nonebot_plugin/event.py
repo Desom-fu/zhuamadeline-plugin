@@ -300,7 +300,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             return
 
     # 受伤事件
-    elif rnd <= 250 + rnd_regu:
+    elif rnd <= 250 + rnd_regu and not hourglass_text:
         #有迅捷正常抓
         if user_info['buff2'] == 'speed':
             return
@@ -330,7 +330,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
         return
 
     # 神秘碎片事件
-    elif rnd <= 270 + rnd_regu:
+    elif rnd <= 270 + rnd_regu and not hourglass_text:
         # 确保道具栏存在（已提前setdefault items）
         if items.get('神秘碎片', 0) < 5:
             next_time = current_time + datetime.timedelta(minutes=59 if collections.get("回想之核", 0) >= 1 else 60)
@@ -620,7 +620,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             return
             
     #受伤事件
-    elif(rnd<=250):
+    elif(rnd<=250 and not hourglass_text):
         helmat = collections.get('矿工头盔', 0)
         rnd_safe = 3 if helmat < 1 else random.randint(1, 3)
         if rnd_safe <= 1:
@@ -994,7 +994,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
     ######其他事件#####
     rnd = random.randint(1,1000)
-    if(rnd<=75):
+    if(rnd<=75 and not hourglass_text):
         #有迅捷正常抓
         if user_info['buff2'] == 'speed':
             return
@@ -1421,7 +1421,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         return
 
     rnd = random.randint(1,1000)
-    if(rnd<=175): # 17.5%
+    if(rnd<=175 and not hourglass_text): # 17.5%
         #有迅捷正常抓
         if user_info['buff2'] == 'speed':
             return

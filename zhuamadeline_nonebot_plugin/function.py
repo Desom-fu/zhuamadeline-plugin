@@ -230,40 +230,56 @@ def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
     return data
 
 def calculate_hourglass(data, user_id):
-    """计算时隙沙漏的累计次数"""
+    """计算时隙沙漏的累计次数（次数满后强制重置时间）"""
     user_data = data.get(str(user_id), {})
     if "时隙沙漏" not in user_data.get("collections", {}):
         return data, 0, None
     
     # 获取配置参数
     current_time = datetime.datetime.now()
-    hourglass_max = globals().get("hourglass_max", 5)
-    
-    # 计算起始时间
-    next_time = datetime.datetime.strptime(user_data.get("next_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
-    work_end_time = datetime.datetime.strptime(user_data.get("work_end_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
-    start_time = max(next_time, work_end_time)
     
     # 计算间隔时间（有回想之核则29分钟）
     interval = 29 if user_data.get("collections", {}).get("回想之核", 0) > 0 else 30
     interval_delta = datetime.timedelta(minutes=interval)
     
-    # 计算可累计次数
+    # 初始化时间戳
     if "hourglass_next_time" not in user_data:
-        user_data["hourglass_next_time"] = start_time.strftime("%Y-%m-%d %H:%M:%S")
+        user_data["hourglass_next_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
     last_time = datetime.datetime.strptime(user_data["hourglass_next_time"], "%Y-%m-%d %H:%M:%S")
     time_diff = current_time - last_time
     
     if time_diff.total_seconds() > 0:
         add_count = int(time_diff.total_seconds() // interval_delta.total_seconds())
+        past_count = user_data.get("hourglass_count", 0)
         new_count = min(user_data.get("hourglass_count", 0) + add_count, hourglass_max)
         user_data["hourglass_count"] = new_count
         
-        # 更新下次计算时间
-        new_last_time = last_time + (add_count * interval_delta)
-        user_data["hourglass_next_time"] = new_last_time.strftime("%Y-%m-%d %H:%M:%S")
-    
+        # 计算总次数
+        total_count = add_count + past_count
+        
+        # 判断是否需要重置时间
+        need_reset_time = (
+            total_count >= hourglass_max + 1  # 超过最大次数
+            or user_data.get("has_extra_zhua", False)  # 已有额外抓取
+            or (user_data.get("has_extra_zhua", False) and user_data.get("hourglass_count", 0) == 0)  # 有额外抓取但次数为0
+        )
+        
+        if need_reset_time:
+            # 强制设为当前时间的情况
+            user_data["hourglass_next_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            # 更新额外抓取标志
+            if total_count >= hourglass_max + 1:
+                user_data["has_extra_zhua"] = True
+            elif user_data.get("hourglass_count", 0) == 0:
+                user_data["has_extra_zhua"] = False
+                
+        else:
+            # 正常增加时间
+            new_last_time = last_time + ((add_count + 1) * interval_delta)
+            user_data["hourglass_next_time"] = new_last_time.strftime("%Y-%m-%d %H:%M:%S")
+            
     data[str(user_id)] = user_data
     return data, user_data.get("hourglass_count", 0), user_data.get("hourglass_next_time")
 
