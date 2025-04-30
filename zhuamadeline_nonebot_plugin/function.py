@@ -229,7 +229,7 @@ def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
     # 其他数字直接返回
     return data
 
-def calculate_hourglass(data, user_id):
+def calculate_hourglass(data, user_id, liechang_number):
     """计算时隙沙漏的累计次数（次数满后强制重置时间）"""
     user_data = data.get(str(user_id), {})
     if "时隙沙漏" not in user_data.get("collections", {}):
@@ -243,10 +243,14 @@ def calculate_hourglass(data, user_id):
     work_end_time = datetime.datetime.strptime(user_data.get("work_end_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
     hourglass_next_time = datetime.datetime.strptime(user_data.get("hourglass_next_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
     start_time = max(next_time, work_end_time, hourglass_next_time)
+
+    # 兼容0猎
+    liechang_time = 10 if liechang_number == "0" else 30
     
     # 计算间隔时间（有回想之核则29分钟）
     interval = 29 if user_data.get("collections", {}).get("回想之核", 0) > 0 else 30
     interval_delta = datetime.timedelta(minutes=interval)
+    liechang_time_delta = datetime.timedelta(minutes=liechang_time)
     
     # 初始化时间戳
     if "hourglass_next_time" not in user_data:
@@ -283,7 +287,7 @@ def calculate_hourglass(data, user_id):
                 
         else:
             # 正常增加时间
-            new_last_time = last_time + ((add_count + 1) * interval_delta)
+            new_last_time = last_time + (add_count * interval_delta) + liechang_time_delta
             user_data["hourglass_next_time"] = new_last_time.strftime("%Y-%m-%d %H:%M:%S")
             
     data[str(user_id)] = user_data

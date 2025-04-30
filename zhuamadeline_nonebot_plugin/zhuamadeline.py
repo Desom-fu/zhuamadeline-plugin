@@ -203,7 +203,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             
             if "时隙沙漏" in collections:
                 # 计算沙漏次数
-                data, hourglass_count, hourglass_time = calculate_hourglass(data, user_id)
+                data, hourglass_count, hourglass_time = calculate_hourglass(data, user_id, liechang_number)
 
                 # 优先使用沙漏次数
                 if hourglass_count > 0 and liechang_number != "0":
@@ -260,9 +260,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if(data[user_id].get('debuff','normal')=='tentacle' ): 
                 await send_image_or_text(catch, f"你刚被触手玩弄到失神，\n没有精力打Madeline竞技场了！", True, None)
                 return
-            if data[str(user_id)].get("hourglass_count", 0) > 0:
-                await send_image_or_text(catch, f"时隙沙漏的能量只能用于猎场，\n无法用于Madeline竞技场……", True, None)
-                return
+            # if data[str(user_id)].get("hourglass_count", 0) > 0:
+            #     await send_image_or_text(catch, f"时隙沙漏的能量只能用于猎场，\n无法用于Madeline竞技场……", True, None)
+            #     return
             nickname = event.sender.nickname
             await madeline_pvp_event(data,str(user_id),nickname,catch,bot)
             return
