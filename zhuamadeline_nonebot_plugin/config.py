@@ -85,7 +85,7 @@ shop_work_img = Path() / "data" / "Shop" / "营业图.png"
 # 定义猎场数 全局变量 开新猎场要改
 liechang_count = 4
 # 定义时间沙漏最高次数
-hourglass_max = 4
+hourglass_max = 5
 #定义通信群id
 #用户信息
 backup_path = Path() / "Data" / "UserList_Backup"
@@ -135,7 +135,7 @@ berry_path = Path() / "data" / "Userlist" / "secret.json"
 
 # Boss名称库
 boss_names = {
-    "mini": ["暗影怪物", "创世纪", "鸟人像", "古迹守护者"],
+    "mini": ["影怪", "创世纪", "鸟人像", "古迹守护者"],
     "normal": ["凌波微步", "奥歘", "海坡", "酥坡", "蹭墙", "牛抽奖"],
     "hard": ["Confringo", "野生小卒", "Desom-fu", "WaterDrop", "海豚", "prehasb"],
     "world": ["Fhloy", "Foxeline", "Fronia", "Mosed", "pbot", "水滴伯特", "小小卒", "猫猫伯特"]

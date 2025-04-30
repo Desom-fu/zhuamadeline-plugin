@@ -81,6 +81,7 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
     if str(event.user_id) not in bot_owner_id:
         return
     commands = [
+        ".清理冗余字段"
         ".删除账号 QQ号",
         ".全服发放草莓 草莓数量",
         ".全服扣除草莓 草莓数量",
@@ -143,6 +144,39 @@ async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = Comma
     ]
     text = "以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
     await send_image_or_text(notadmin_command, text)
+
+clean_userdata = on_command("清理冗余字段", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+@clean_userdata.handle()
+async def clean_userdata_handle(event: GroupMessageEvent):
+    # 判断是不是管理员账号
+    if str(event.user_id) not in bot_owner_id:
+        return
+    
+    # 打开文件
+    data = open_data(user_path / file_name)
+    
+    # 要删除的冗余字段列表
+    redundant_fields = [
+        'last_sleep_date',
+        'last_valid_time',
+        'items',
+        'max_grade',
+        'next_charge_time',
+        'boss'
+    ]
+    
+    # 遍历所有用户数据
+    for user_data in data.values():
+        if isinstance(user_data, dict):
+            # 删除每个冗余字段
+            for field in redundant_fields:
+                if field in user_data:
+                    del user_data[field]
+    
+    # 写入文件
+    save_data(user_path / file_name, data)
+    
+    await clean_userdata.finish("已清理所有用户数据中的冗余字段", at_sender=True)
 
 # 删除账号
 delete_account = on_command("删除账号", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1901,7 +1935,6 @@ async def fafang_buchang_handle(event: GroupMessageEvent, arg: Message = Command
         return
     
     #打开文件
-    data = {}
     data = open_data(user_path/file_name)
 
     current_time = datetime.datetime.now()

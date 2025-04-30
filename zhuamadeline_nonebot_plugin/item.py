@@ -752,7 +752,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             next_time_r = current_time + datetime.timedelta(seconds=1)
                             next_clock_time_r = current_time + datetime.timedelta(minutes=30-dream)
                             data[str(user_id)]['next_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
-                            data[str(user_id)]['next_charge_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
+
                             data[str(user_id)]['work_end_time'] = next_time_r.strftime("%Y-%m-%d %H:%M:%S")
                             data[str(user_id)]['next_clock_time'] = next_clock_time_r.strftime("%Y-%m-%d %H:%M:%S")
                             # 以下为移除名单

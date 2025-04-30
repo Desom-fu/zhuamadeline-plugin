@@ -197,38 +197,28 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             
             #debuff清除逻辑
             debuff_clear(data,user_id)
+            # 时隙沙漏逻辑（只在非竞技场生效）
+            hourglass_count = 0
+            hourglass_time = None
             
-            # 增加一个参数，用来触发时隙沙漏后跳过后续的冷却检查
-            hourglass_used = 0
-            
-            if collections.get("时隙沙漏", 0) != 0 :
-                # 计算并更新存储次数（函数内部会保存data）
-                data, added_chance = calculate_spare_chance(data, str(user_id))  # 解构返回值
-                current_chance = int(data[str(user_id)].get('spare_chance', 0))  # 确保是整数
-                data[str(user_id)]['spare_chance'] = min(current_chance + added_chance, hourglass_max)
+            if "时隙沙漏" in collections:
+                # 计算沙漏次数
+                data, hourglass_count, hourglass_time = calculate_hourglass(data, user_id)
 
-                # 优先使用存储次数（主函数只负责扣除）
-                if data[str(user_id)]['spare_chance'] > 0 and liechang_number != "0":
-                    data[str(user_id)]['spare_chance'] -= 1
-                    hourglass_used = 1
+                # 优先使用沙漏次数
+                if hourglass_count > 0 and liechang_number != "0":
+                    # 为了方便计数
+                    hourglass_count -= 1
+                    data[str(user_id)]["hourglass_count"] -= 1
+                    hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{hourglass_count}/{hourglass_max}"
+                    data[str(user_id)]['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
                     answer = 1
-                    hourglass_text = f"\n\n时隙能量生效！沙漏剩余存储次数：{data[str(user_id)]['spare_chance']}/{hourglass_max}"
-                    save_data(user_path / file_name, data)  # 这里可以去掉，如果calculate_spare_chance已经保存
-
-            if hourglass_used == 0:
+                    
+            if not hourglass_text:
                 #正常抓的逻辑
                 if(current_time < next_time_r):
-                    delta_time = next_time_r - current_time
                     answer = 0
                 else:
-                    dream = collections.get("回想之核", 0)
-                    next_time = current_time + datetime.timedelta(minutes=30-dream)
-                    #检测星钻
-                    if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
-                        diamond_text = "\n\n星光闪烁，你包里的星钻突然绽放光芒，\n瞬间你的伤势和疲惫感如星尘般消散！"
-                        next_time = current_time  # 立即重置冷却时间
-
-                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                     answer = 1
                     
         else:
@@ -236,11 +226,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             data[str(user_id)] = {}
             collections = data[str(user_id)].setdefault('collections', {})
             items = data[str(user_id)].setdefault('item', {})
-            next_time = current_time + datetime.timedelta(minutes=30)
             # 新人送1000草莓
             if(not 'berry' in data[str(user_id)]):
                 data[str(user_id)]['berry'] = 1000
-            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
             answer = 1
     else:
         ##注册第一个用户
@@ -248,16 +236,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         data[str(user_id)] = {}
         collections = data[str(user_id)].setdefault('collections', {})
         items = data[str(user_id)].setdefault('item', {})
-        current_time = datetime.datetime.now()
-        next_time = current_time + datetime.timedelta(minutes=30)
         # 新人送1000草莓
         if(not 'berry' in data[str(user_id)]):
             data[str(user_id)]['berry'] = 1000
-        data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         answer = 1
 
     #----------给出回应-----------
     if(answer == 0):
+        delta_time = next_time_r - current_time
         text = time_text(str(delta_time))
         await send_image_or_text(catch, f"别抓啦，\n{text}后再来吧！", True, None)
         return
@@ -269,15 +255,29 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         #特殊猎场madeline竞技场内事件
         if(data[str(user_id)]['lc']=='0'):
             if data[user_id]['berry'] < 0:
-                await send_image_or_text(catch, f"你现在仍处于失约状态中……不允许进入竞技场！你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
+                await send_image_or_text(catch, f"你现在仍处于失约状态中……不允许进入竞技场！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
                 return
             if(data[user_id].get('debuff','normal')=='tentacle' ): 
-                await send_image_or_text(catch, f"你刚被触手玩弄到失神，没有精力打Madeline竞技场了！", True, None)
+                await send_image_or_text(catch, f"你刚被触手玩弄到失神，\n没有精力打Madeline竞技场了！", True, None)
+                return
+            if data[str(user_id)].get("hourglass_count", 0) > 0:
+                await send_image_or_text(catch, f"时隙沙漏的能量只能用于猎场，\n无法用于Madeline竞技场……", True, None)
                 return
             nickname = event.sender.nickname
             await madeline_pvp_event(data,str(user_id),nickname,catch,bot)
             return
 
+        # 为了沙漏，把加冷却放到这里
+        if not hourglass_text:
+            collections = data[str(user_id)].get('collections', {})
+            dream = collections.get("回想之核", 0)
+            next_time = current_time + datetime.timedelta(minutes=30-dream)
+            #检测星钻
+            if collections.get("星钻", 0) > 0 and random.randint(1, 100) <= 5:
+                diamond_text = "\n\n星光闪烁，你包里的星钻突然绽放光芒，\n瞬间你的伤势和疲惫感如星尘般消散！"
+                next_time = current_time  # 立即重置冷却时间
+            data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        
         #触发事件
         await event_happen(data,str(user_id),catch,diamond_text,hourglass_text)
 
@@ -670,11 +670,6 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     compulsion_count = get_user_data(data, user_id, "compulsion_count", 0)
     get_ball_value = get_user_data(data, user_id, "get_ball_value", 0)
     power = item.get("体力", 0)
-    if collections.get("时隙沙漏", 0) != 0:
-        # 动态计算当前可累积次数（现在返回 (data, added_chance)）
-        data, added_chance = calculate_spare_chance(data, str(user_id))  # 解构返回值
-        current_chance = data[str(user_id)].get('spare_chance', 0)
-        spare_chance = min(current_chance + added_chance, hourglass_max)  # 更新到data中
     
     # 获取酒店数据
     bank = bar_data.get("bank", 0)
@@ -901,9 +896,11 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
                 message += "\n• “身份”状态：膀胱（急速模式）"
 
         # message += f"\n• 充能箱状态：{'撞开（启用）' if elect_status else '关闭（停用）'}" if collections.get('充能箱', 0) > 0 else ''
-    if collections.get("时隙沙漏", 0) != 0:
-        # 显示下次累计次数（若有）
-        message += (f"\n- 当前累计抓取次数：{spare_chance}/{hourglass_max}")
+    # 时隙沙漏显示
+    if "时隙沙漏" in collections:
+        # 必须要调用函数查看次数，但可以不保存
+        data, hourglass_count, hourglass_time = calculate_hourglass(data, user_id)
+        message += f"\n- 时隙沙漏存储次数: {hourglass_count}/{hourglass_max}"
         
     # 显示下次抓取的时间（若有）
     message += (f"\n- 下次可抓取时间\n{next_time}") if current_time < next_time else ''

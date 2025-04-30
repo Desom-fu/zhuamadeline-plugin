@@ -142,7 +142,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     user_data.setdefault('event', 'nothing')
     energy = user_data.setdefault('energy', 0)
     user_collections = user_data.setdefault('collections', {})
-    user_data.setdefault('items', {})
+    user_data.setdefault('item', {})
 
     # 如果该用户不在酒馆名单中，则先创建数据
     user_bar.setdefault("status","nothing")

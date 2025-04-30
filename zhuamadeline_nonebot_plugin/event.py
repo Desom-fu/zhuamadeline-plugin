@@ -158,7 +158,7 @@ async def PlainStuck(user_data, user_id, message, diamond_text, hourglass_text):
         return
 
     # 遇到流浪商人
-    elif rnd <= 110 + rnd_regu:
+    elif rnd <= 110 + rnd_regu and not hourglass_text:
         data1 = open_data(user_path1)
         if user_id not in data1:
             return
@@ -398,7 +398,7 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             return
 
     # 流浪商人事件
-    elif rnd <= 341 + rnd_regu:
+    elif rnd <= 341 + rnd_regu and not hourglass_text:
         data2 = open_data(user_path2)
         if user_id not in data2:
             return
@@ -480,13 +480,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
     stuck_data = open_data(stuck_path)
     #是否拥有7个碎片
     if(items.get('神秘碎片',0) < 5):
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
-        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        save_data(full_path, user_data)
-        msg = "在远古的水晶矿洞前，风轻轻吹过，岩石间传来阵阵低语。眼前的巨大门扉上镶嵌着神秘的符文，发出幽幽的光辉。你注意到面前门上的部分符文与你手上的碎片相契合\n或许......收集足够的碎片就可以打开这扇门？"
+        msg = "在矿井前，风轻轻吹过，岩石间传来阵阵低语。眼前的巨大门扉上镶嵌着神秘的符文，发出幽幽的光辉。你注意到面前门上的部分符文与你手上的碎片相契合\n或许......收集足够的碎片就可以打开这扇门？"
         await send_image_or_text(message, msg, True, None, 20)
         return
     
@@ -507,7 +501,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         user_info = user_data.get(user_id,{})
         user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
         save_data(full_path, user_data)
-        msg = f"水晶矿洞内传来了强大的灵力，这股力量使你无法前进。或许......多带几个猎场的高等级madeline可以抵御这股力量？\n你目前有{num_of_level5}个5级madeline"
+        msg = f"绿辉石矿井内传来了强大的灵力，这股力量使你无法前进。或许……多带几个猎场的高等级madeline可以抵御这股力量？\n你目前有{num_of_level5}个5级madeline"
         await send_image_or_text(message, msg, True, None, 20)
         return
 
@@ -706,7 +700,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         else:
             return
     #debuff事件
-    elif(rnd<=500+rnd_regu): #50
+    elif(rnd<=500+rnd_regu and not hourglass_text): #50
         #首先玩家没有buff/debuff时才会随机触发
         #有药水状态正常抓
         if user_info['buff2'] != 'normal':
@@ -848,7 +842,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         else:
             return
     #商人
-    elif(rnd<=700+rnd_regu):
+    elif(rnd<=700+rnd_regu and not hourglass_text):
         data3 = open_data(user_path3)
         if user_id not in data3:
             return
@@ -938,12 +932,6 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
     kc_data = [open_data(user_path1), open_data(user_path2), open_data(user_path3)]
     # 检查前三个猎场是否满足 PVP 门槛
     if not all(check_liechang(user_id, data) for data in kc_data):
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
-        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        save_data(full_path, user_data)
         msg = "大门前的激光挡住了你的去路……\n没准，这些激光是检测你是否满足指定的Madeline条件？"
         await send_image_or_text(message, msg, True, None, 20)
         return
@@ -957,12 +945,6 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
                    count_anding * item['安定之音'][0] +
                    count_yinkuang * item['音矿'][0])
     if total_value < 15000:
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
-        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        save_data(full_path, user_data)
         msg = (
             "在地下终端的大门前，你发现门上有三个图案：音符，玻璃碎片和水晶。\n" +
             "你似乎明白这几个图案的意思了，然后把对应的物品放了上去，但是却没有任何动静，或许是你背包里面对应的物品总价值不够？\n"+
@@ -973,14 +955,8 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
     # 检测是否已拥有 madeline 飞升器
     if "madeline飞升器" not in collections:
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
         
         if energy < 50000:
-            user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            save_data(full_path, user_data)
             msg = (
                 f"你打开了大门，突然发现地上有一个巨大的、奇怪的机械装置，上面有三个空位。\n"
                 f"而在机械装置的后面有一道屏障，看起来要激活这个机器才能继续前行。\n"
@@ -994,6 +970,8 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_info["energy"] -= 50000
         collections["madeline飞升器"] = 1
         # 不加时间
+        if hourglass_text:
+            user_info["hourglass_count"] == user_info.get("hourglass_count", 0) + 1
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         # 写入数据
@@ -1082,7 +1060,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         return
     
     #debuff事件
-    elif(rnd<=350):
+    elif(rnd<=350 and not hourglass_text):
         #首先玩家没有buff/debuff时才会随机触发
         #有药水状态正常抓
         if user_info['buff2'] != 'normal':
@@ -1166,7 +1144,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
             await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
             await send_image_or_text(message, msg, True, None, 30)
     
-    elif(rnd<=465):
+    elif(rnd<=465 and not hourglass_text):
         # 失约遇不到这个事件
         if user_info['berry'] < 0:
             return
@@ -1288,7 +1266,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         await send_image_or_text(message, msg, True, None, 20)
         return
         
-    elif(rnd<=600):
+    elif(rnd<=600 and not hourglass_text):
         if(not '黄色球体' in collections):
             return
         data4 = open_data(user_path4)
@@ -1375,7 +1353,6 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
     user_info.setdefault("compulsion_count", 0)
     user_info.setdefault("event", "nothing")
     user_info.setdefault("trade", {})
-    boss = user_info.setdefault("boss", {})
     energy = user_info.setdefault("energy", 0)
     liechang_number = user_info.get('lc', '1')
     # 5猎最重要的两个东西：exp和等级
@@ -1388,26 +1365,13 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
     kc_data = [open_data(user_path1), open_data(user_path2), open_data(user_path3)]
     # 检查前三个猎场是否满足 PVP 门槛
     if not all(check_liechang(user_id, data) for data in kc_data):
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
-        user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        save_data(full_path, user_data)
         msg = "洞窟门口的水幕挡住了你的道路……\n没准，水幕是检测你是否满足指定的Madeline条件？"
         await send_image_or_text(message, msg, True, None, 20)
         return
 
     # 检测是否已拥有入场券
     if "入场券" not in collections:
-        # 处理buff2状态逻辑
-        user_data = buff2_change_status(user_data, user_id, "lucky", 1)
-        user_data = buff2_change_status(user_data, user_id, "speed", 1)
-        user_info = user_data.get(user_id,{})
-        
         if berry < 10000 or bank < 20000:
-            user_info['next_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            save_data(full_path, user_data)
             msg = (
                 "位于山脚湖泊下方的洞穴入口，洞壁上布满随时间推移而形成的蓝色水晶结晶。\n"
                 "标志着呼吸困难的潮湿地带的入口，但湖水却异常清澈透明。\n"
@@ -1426,6 +1390,8 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         # 不加时间
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        if hourglass_text:
+            user_info["hourglass_count"] == user_info.get("hourglass_count", 0) + 1
         # 写入数据
         save_data(full_path, user_data)
         save_data(bar_path, bar_data)
@@ -1491,6 +1457,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         msg = random.choice(text)+"\n你需要原地疗伤两个小时，或者使用急救包自救，或者等待别人来救你……" + diamond_text+hourglass_text
         await send_image_or_text(message, msg, True, None, 20)
         return
+    
     #遇到被困人员
     elif(rnd <= 250): # 7.5%
         if(len(stuck_data) >= 1):
@@ -1594,7 +1561,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         return
     
     #debuff事件
-    elif(rnd<=425): # 7.5%
+    elif(rnd<=425 and not hourglass_text): # 7.5%
         #首先玩家没有buff/debuff时才会随机触发
         #有药水状态正常抓
         if user_info['buff2'] != 'normal':
@@ -1703,7 +1670,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             await bot.send_group_msg(group_id=connect_bot_id, message=text_rec)
             await send_image_or_text(message, msg, True, None, 30)
 
-    elif rnd <= 525: #10%
+    elif rnd <= 525 and not hourglass_text: #10%
         # 失约遇不到这个事件
         if user_info['berry'] < 0:
             return
@@ -1864,7 +1831,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         await send_image_or_text(message, msg, True, None, 20)
         return
     
-    elif rnd <= 655: # 5%
+    elif rnd <= 655 and not hourglass_text: # 5%
         data5 = open_data(user_path5)
         if user_id not in data5:
             return

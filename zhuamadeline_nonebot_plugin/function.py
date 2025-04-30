@@ -55,7 +55,7 @@ __all__ = [
     'get_alias_name',
     'all_cool_time',
     'get_nickname',
-    'calculate_spare_chance',
+    'calculate_hourglass',
     'calculate_level_and_exp',
     'buff2_change_status',
     'init_data',
@@ -229,47 +229,44 @@ def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
     # 其他数字直接返回
     return data
 
-# 时隙沙漏相关计算
-# 修改后的计算函数（负责计算并保存data）
-def calculate_spare_chance(data, user_id):
-    if user_id not in data:
-        return data, 0  # 返回原data，避免外部data被None覆盖
+def calculate_hourglass(data, user_id):
+    """计算时隙沙漏的累计次数"""
+    user_data = data.get(str(user_id), {})
+    if "时隙沙漏" not in user_data.get("collections", {}):
+        return data, 0, None
+    
+    # 获取配置参数
+    current_time = datetime.datetime.now()
+    hourglass_max = globals().get("hourglass_max", 5)
+    
+    # 计算起始时间
+    next_time = datetime.datetime.strptime(user_data.get("next_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
+    work_end_time = datetime.datetime.strptime(user_data.get("work_end_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
+    start_time = max(next_time, work_end_time)
+    
+    # 计算间隔时间（有回想之核则29分钟）
+    interval = 29 if user_data.get("collections", {}).get("回想之核", 0) > 0 else 30
+    interval_delta = datetime.timedelta(minutes=interval)
+    
+    # 计算可累计次数
+    if "hourglass_next_time" not in user_data:
+        user_data["hourglass_next_time"] = start_time.strftime("%Y-%m-%d %H:%M:%S")
+    
+    last_time = datetime.datetime.strptime(user_data["hourglass_next_time"], "%Y-%m-%d %H:%M:%S")
+    time_diff = current_time - last_time
+    
+    if time_diff.total_seconds() > 0:
+        add_count = int(time_diff.total_seconds() // interval_delta.total_seconds())
+        new_count = min(user_data.get("hourglass_count", 0) + add_count, hourglass_max)
+        user_data["hourglass_count"] = new_count
+        
+        # 更新下次计算时间
+        new_last_time = last_time + (add_count * interval_delta)
+        user_data["hourglass_next_time"] = new_last_time.strftime("%Y-%m-%d %H:%M:%S")
+    
+    data[str(user_id)] = user_data
+    return data, user_data.get("hourglass_count", 0), user_data.get("hourglass_next_time")
 
-    try:
-        current_time = datetime.datetime.now()
-        collections = data[user_id].get('collections', {})
-        
-        # 获取并解析时间节点
-        time_nodes = []
-        for time_key in ['work_end_time', 'next_time', 'last_valid_time']:
-            if time_key in data[user_id]:
-                time_nodes.append(datetime.datetime.strptime(
-                    data[user_id][time_key], 
-                    "%Y-%m-%d %H:%M:%S"
-                ))
-        
-        # 计算最后限制时间
-        last_limit = max(time_nodes) if time_nodes else current_time
-        
-        # 计算有效时间差
-        time_diff = current_time - last_limit
-        if time_diff.total_seconds() <= 0:
-            return data, 0  # 无新增次数，返回原data
-
-        # 计算可累积次数
-        interval_mins = 29 if collections.get("回想之核") else 30
-        intervals = int(time_diff.total_seconds() / (interval_mins * 60))
-        
-        # 更新记录时间（仅当确实有时间积累时）
-        if intervals > 0:
-            data[user_id]['last_valid_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            save_data(user_path / file_name, data)  # 在这里保存，确保数据持久化
-        
-        return data, min(intervals, hourglass_max)
-        
-    except Exception as e:
-        logger.error(f"时隙沙漏计算错误: {e}")
-        return data, 0  # 出错时返回原data
 #------------mymadeline相关指令----------------
 
 # 获取猎场文件和对应数据
