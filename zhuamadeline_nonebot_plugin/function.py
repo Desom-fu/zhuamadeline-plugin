@@ -237,6 +237,12 @@ def calculate_hourglass(data, user_id):
     
     # 获取配置参数
     current_time = datetime.datetime.now()
+
+    # 计算起始时间
+    next_time = datetime.datetime.strptime(user_data.get("next_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
+    work_end_time = datetime.datetime.strptime(user_data.get("work_end_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
+    hourglass_next_time = datetime.datetime.strptime(user_data.get("hourglass_next_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
+    start_time = max(next_time, work_end_time, hourglass_next_time)
     
     # 计算间隔时间（有回想之核则29分钟）
     interval = 29 if user_data.get("collections", {}).get("回想之核", 0) > 0 else 30
@@ -246,7 +252,7 @@ def calculate_hourglass(data, user_id):
     if "hourglass_next_time" not in user_data:
         user_data["hourglass_next_time"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
-    last_time = datetime.datetime.strptime(user_data["hourglass_next_time"], "%Y-%m-%d %H:%M:%S")
+    last_time = start_time
     time_diff = current_time - last_time
     
     if time_diff.total_seconds() > 0:
