@@ -1371,21 +1371,19 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
     # 检测是否已拥有入场券
     if "入场券" not in collections:
-        if berry < 10000 or bank < 20000:
+        if berry < 30000:
             msg = (
                 "位于山脚湖泊下方的洞穴入口，洞壁上布满随时间推移而形成的蓝色水晶结晶。\n"
                 "标志着呼吸困难的潮湿地带的入口，但湖水却异常清澈透明。\n"
                 "因光线不足，只有非常少量的荧光苔藓附着在水晶根部。\n\n"
-                "要进入深渊内部，需要消耗10000颗草莓和仓库里的20000颗草莓激活水晶共鸣。\n"
-                f"当前持有草莓数量：{berry}/10000\n"
-                f"当前仓库草莓数量：{bank}/20000"
+                "要进入深渊内部，需要消耗30000颗草莓激活水晶共鸣。\n"
+                f"当前持有草莓数量：{berry}/30000"
             )
             await send_image_or_text(message, msg, True, None, 30)
             return
 
         # 扣除草莓并添加入场券
-        user_info["berry"] -= 10000
-        bar_info["bank"] -= 20000
+        user_info["berry"] -= 30000
         collections["入场券"] = 1
         # 不加时间
         next_time = current_time
@@ -1397,7 +1395,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         save_data(bar_path, bar_data)
 
         msg = (
-            "湖底的水晶突然发出低沉共鸣，你投入的10000+20000颗草莓在清澈的湖水中溶解重组。\n"
+            "湖底的水晶突然发出低沉共鸣，你投入的30000颗草莓在清澈的湖水中溶解重组。\n"
             "蓝色水晶的脉络开始流动，最终凝结成一张半透明的结晶薄片——入场券。\n"
             "券面上的纹路如同年轮般记载着时间，触摸时能感受到细微的电流震颤。\n"
             "突然，仿佛屏障被破开了似的，空气中的水晶粉尘压得你喘不过气，你现在似乎只能抓到1级玛德琳了\n"
