@@ -10,6 +10,7 @@ import json
 import asyncio
 #加载文件操作系统
 import datetime
+import re
 from .madelinejd import *
 from .config import *
 # 开新猎场要改
@@ -502,9 +503,15 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
 
     # 查找 madeline
     nums = find_madeline(name)
-    if nums == 0:
-        await send_image_or_text(show, f"未找到名为[{name}]的Madeline", True)
+    if not nums:
+        if re.match(r'^\d+_\d+_\d+$', name):
+            await send_image_or_text(count_madeline, f"未找到编号为<{name}>的Madeline", True, None)
+        else:
+            await send_image_or_text(count_madeline, f"未找到名为[{name}]的Madeline", True, None)
         return
+    
+    # 获取玛德琳名字
+    madeline_name = print_zhua(int(nums[0]), int(nums[1]), nums[2])[1]
 
     # 检查猎场编号有效性
     if nums[2] not in file_names:
@@ -525,13 +532,13 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
     if key in user_hunt_data:
         madeline = print_zhua(int(nums[0]), int(nums[1]), nums[2])
         await show.finish(
-            f"\n等级：{madeline[0]}\n{madeline[6]} {madeline[1]}\n" + 
+            f"\n等级：{madeline[0]}\n编号{madeline[6]}\n名称：{madeline[1]}\n" + 
             MessageSegment.image(madeline[2]) + 
-            madeline[3],
+            f'描述：{madeline[3]}',
             at_sender=True
         )
     else:
-        await send_image_or_text(show, f"你还没抓到过[{name}]", True)
+        await send_image_or_text(show, f"你还没抓到过[{madeline_name}]", True)
 
 # 查看某 madeline 数量
 count_madeline = on_command('count', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -545,8 +552,14 @@ async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message =
 
     nums = find_madeline(name)
     if not nums:
-        await send_image_or_text(count_madeline, f"未找到名为[{name}]的Madeline", True, None)
+        if re.match(r'^\d+_\d+_\d+$', name):
+            await send_image_or_text(count_madeline, f"未找到编号为<{name}>的Madeline", True, None)
+        else:
+            await send_image_or_text(count_madeline, f"未找到名为[{name}]的Madeline", True, None)
         return
+    
+    # 获取玛德琳名字
+    madeline_name = print_zhua(int(nums[0]), int(nums[1]), nums[2])[1]
 
     # 检查猎场编号有效性
     if nums[2] not in file_names:
@@ -564,12 +577,12 @@ async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message =
         if madeline_key in user_data:
             await send_image_or_text(
                 count_madeline,
-                f"你有[{user_data[madeline_key]}]个[{name}]",
+                f"你有[{user_data[madeline_key]}]个[{madeline_name}]",
                 True,
                 None
             )
         else:
-            await send_image_or_text(count_madeline, f"你还没抓到过[{name}]", True, None)
+            await send_image_or_text(count_madeline, f"你还没抓到过[{madeline_name}]", True, None)
             
     except FileNotFoundError:
         await send_image_or_text(

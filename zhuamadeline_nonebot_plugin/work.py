@@ -4,6 +4,7 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.log import logger
 from nonebot import on_command
 from nonebot.params import CommandArg
+import re
 #加载文件操作系统
 import json
 #加载读取系统时间相关
@@ -131,7 +132,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     data = open_data(full_path)
     
     if user_id not in data:
-        await send_image_or_text(work, "你还没尝试抓过madeline......", True, None)
+        await send_image_or_text(work, "你还没尝试抓过madeline……", True, None)
         return
     
     # 获取当前时间
@@ -210,7 +211,10 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     # 查找 madeline 信息
     madeline_info = find_madeline(madeline)
     if madeline_info == 0:
-        await send_image_or_text(work, "输入不合规，\n你输入了一个不存在的Madeline", True, None)
+        if re.match(r'^\d+_\d+_\d+$', madeline):
+            await send_image_or_text(count_madeline, f"未找到编号为<{madeline}>的Madeline", True, None)
+        else:
+            await send_image_or_text(count_madeline, f"未找到名为[{madeline}]的Madeline", True, None)
         return
     
     # 获取对应猎场数据
