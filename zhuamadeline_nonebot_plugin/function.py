@@ -975,8 +975,6 @@ def attack_boss(user_id, damage, is_world_boss=False):
         return False, "没有找到Boss"
     
     boss_data["hp"] -= damage
-    if boss_data["hp"] <= 0:
-        boss_data["hp"] = 0
     
     # 记录贡献
     if is_world_boss:
