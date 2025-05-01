@@ -64,11 +64,11 @@ help_categories = {
     },
     "game": {
         "name": "游戏类指令",
-        "aliases": ["game", "游戏"],
+        "aliases": ["game", "游戏", "bet"],
         "commands": [
             ".bet {1~4} - 玩游戏",
             ".rule {1~4} - 查看游戏规则",
-            ".ball {日期} - 查看洞窟探险结果"
+            ".ball (日期) - 查看洞窟探险结果"
         ]
     },
     "work": {
@@ -148,37 +148,6 @@ async def zhua_help(args: Message = CommandArg()):
             # 没有匹配的分类，显示错误信息
             await send_image_or_text(help, "没有找到该分类的指令，请输入 .help 查看所有可用分类", False)
 
-# 为每个分类添加单独的命令处理器（保持不变）
-for cat in help_categories.values():
-    for alias in cat["aliases"]:
-        if alias not in ["catch", "check"]:  # 避免重复注册
-            help_alias = on_command(
-                alias, 
-                permission=GROUP, 
-                priority=2, 
-                block=True, 
-                rule=whitelist_rule
-            )
-            
-            @help_alias.handle()
-            async def handle_alias():
-                # 查找对应的分类
-                cmd = list(help_alias.command)[0]
-                matched_cat = None
-                for cat in help_categories.values():
-                    if cmd in cat["aliases"]:
-                        matched_cat = cat
-                        break
-                
-                if matched_cat:
-                    help_text = f"【{matched_cat['name']}】\n══════════════\n"
-                    help_text += "\n".join(matched_cat["commands"])
-                    help_text += "\n══════════════\n输入 .help 查看主菜单"
-                    help_text += ("输入指令时不要带{}或()！\n"
-                                "带有{}为必须，带有()的为非必须~\n"
-                                "更多功能持续开发中……")
-                    
-                    await send_image_or_text(help_alias, help_text, False)
 
 # 更新公告
 gong_gao = on_command(
