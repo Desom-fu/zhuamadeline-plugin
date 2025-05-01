@@ -354,11 +354,12 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         a, b, c, d = probabilities.values()
 
         madeline = zhua_random(a, b, c, d, liechang_number)
-        level       = madeline[0]
-        name        = madeline[1]
-        img         = madeline[2]
-        description = madeline[3]
-        num         = madeline[4]
+        level                = madeline[0]
+        name                 = madeline[1]
+        img                  = madeline[2]
+        description          = madeline[3]
+        num                  = madeline[4]
+        madeline_code        = madeline[6]
         
         # 5猎加经验
         exp_msg = ''
@@ -489,9 +490,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             reward_text = f"{berry_give}+{lucky_give}={berry_give + lucky_give}颗草莓"
 
         if new_print:
-            top_text = f"{new_print}\n等级: {level}\n{name}"
+            top_text = f"{new_print}\n等级: {level}\n{madeline_code} {name}"
         else:
-            top_text = f"等级: {level}\n{name}"
+            top_text = f"等级: {level}\n{madeline_code} {name}"
         bottom_text = f"{description}"
 
         if berry_give != 0:

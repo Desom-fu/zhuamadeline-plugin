@@ -102,6 +102,7 @@ async def handle_garage(bot: Bot, event: MessageEvent, arg: Message = CommandArg
         f"\n你成功从全服手办屋里面抽出来一个Madeline手办！\n"
         f"该Madeline来自：{selected['liechang']}号猎场\n"
         f"等级：{info[0]}\n"
+        f"编号：{info[6]}\n"
         f"名称：{info[1]}\n"
         +MessageSegment.image(info[2])+
         f"描述：{info[3]}"

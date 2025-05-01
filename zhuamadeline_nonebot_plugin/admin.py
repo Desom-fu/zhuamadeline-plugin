@@ -775,7 +775,8 @@ async def admin_work_timeClear_handle(event: GroupMessageEvent, arg: Message = C
         await admin_timeClear.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
     
     current_time = datetime.datetime.now()
-    data[str(user_id)]['last_sleep_time'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    last_sleep_time = current_time - timedelta(hours=4)
+    data[str(user_id)]['last_sleep_time'] = last_sleep_time.strftime("%Y-%m-%d %H:%M:%S")
     data[str(user_id)]['working_endtime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
     #写入文件

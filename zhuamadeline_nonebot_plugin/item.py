@@ -322,7 +322,8 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     name = information[1]    #名字
     img = information[2]     #图片
     description = information[3]  #描述
-    new_print = information[6]    #是否出新
+    madeline_code = information[6] #玛德琳编号
+    new_print = information[7]    #是否出新
     
     # 处理经验获取
     exp_msg = ''
@@ -360,7 +361,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     top_text = (
         (new_print + '\n' if new_print else '') +
         f'等级: {level}\n' +
-        f'{name}'
+        {madeline_code} + f' {name}'
     )
     
     bottom_text = (
@@ -2073,13 +2074,14 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                     information = tool_zhuamadeline(information, data, user_id)
                     #得到madeline信息
-                    level       = information[0]   #等级
-                    name        = information[1]   #名字
-                    img         = information[2]   #图片
-                    description = information[3]   #描述
-                    num         = information[4]   #编号
-                    lc          = information[5]   #所属猎场
-                    new_print   = information[6]   #是否出新
+                    level         = information[0]   #等级
+                    name          = information[1]   #名字
+                    img           = information[2]   #图片
+                    description   = information[3]   #描述
+                    num           = information[4]   #编号
+                    lc            = information[5]   #所属猎场
+                    madeline_code = information[6]   #玛德琳编号
+                    new_print     = information[7]   #是否出新
                     
                     exp_msg = ''
                     grade_msg = ''
@@ -2140,7 +2142,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         item_text +
                         (new_print + '\n' if new_print else '') +
                         f'等级: {level}\n' +
-                        f'{name}'
+                        madeline_code +f' {name}'
                     )
 
                     bottom_text = (

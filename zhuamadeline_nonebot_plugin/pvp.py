@@ -582,38 +582,38 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
 
     if stat == 5:
         pk_text += (
-            f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
-            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级 {madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
-            f"- 你的 [{levela}级的 {madelinenamea}]\n的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的 {madelinenameb[1]}]\n的防守战力为 {zhanli_text} (win)\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
+            f"- 你的 [{levela}级的{madelinenamea}]\n的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为 {zhanli_text} (win)\n"
             f"- 你的Madeline被打败了！(｡•́︿•̀｡)"
         )
     elif stat == 4:
         pk_text += (
-            f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
-            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级 {madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
-            f"- 你的 [{levela}级的 {madelinenamea}] 的进攻战力为\n[{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的 {madelinenameb[1]}]\n的防守战力为{zhanli_text} (draw/lose)\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
+            f"- 你的 [{levela}级的{madelinenamea}] 的进攻战力为\n[{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为{zhanli_text} (draw/lose)\n"
             f"- 你的Madeline的进攻战力和擂主的Madeline的防守战力相等，但由于你是挑战者，所以你赢了！`(o^ ^o)ﾉ"
         )
     elif stat == 3:
         pk_text += (
-            f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为[{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
-            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级 {madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
-            f"- 你的 [{levela}级的 {madelinenamea}]\n的进攻战力为[{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的 {madelinenameb[1]}]\n的防守战力为{zhanli_text} (lose)\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为[{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
+            f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级{madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
+            f"- 你的 [{levela}级的{madelinenamea}]\n的进攻战力为[{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为{zhanli_text} (lose)\n"
             f"- 你的Madeline获胜了！`(o^ ^o)ﾉ"
         )
     elif stat == 2:
         pk_text += (
-            f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级 {madelinenameb[1]}]，\n"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你想替换你放在 [擂台{pos+1}] 上的的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]，\n"
             f"但综合公式计算后不如之前你放入的本擂台的Madeline，\n所以替换失败！"
         )
     elif stat == 1:
         pk_text += (
-            f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
-            f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级 {madelinenameb[1]}]！"
+            f"- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"- 你成功替换了你放在 [擂台{pos+1}] 上的常驻战力为 [{ranb}] 的 [{levelb}级{madelinenameb[1]}]！"
         )
     elif stat == 0:
         if len(list_current) == 1:
@@ -623,7 +623,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         pk_text += (
             f"总回合数：{totalCount}\n"
             f"本次回合奖励：{inreward}草莓\n"
-            f"\n- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
+            f"\n- 你抽出了 [{levela}级的{madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]。\n"
             f"- 你成功把Madeline放入了一个空擂台，\n该Madeline现在守卫着 [擂台{len(list_current)}]！"
         )
 

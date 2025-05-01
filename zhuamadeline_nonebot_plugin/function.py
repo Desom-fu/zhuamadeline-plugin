@@ -325,7 +325,7 @@ async def get_sorted_madelines(file_name: str, user_id: str, liechang_number: st
 
         # 获取对应的madeline名字并添加编号前缀
         madeline_info = madeline_data.get(str(level + 1)).get(num)
-        display_name = f"[{liechang_number}_{level+1}_{num}] {madeline_info.get('name')}"
+        display_name = f"<{liechang_number}_{level+1}_{num}> {madeline_info.get('name')}"
         sorted_madelines[level].append((display_name, v))
 
     # 排序并拼接：从高等级到低等级排列
@@ -534,7 +534,7 @@ def print_zhua(level, num, liechang_number):
     
     # 名字信息（添加编号前缀）
     original_name = current_data.get(str(level)).get(str(num)).get('name')
-    name = f"[{liechang_number}_{level}_{num}] {original_name}"
+    name = f"{original_name}"
     
     # 图片信息
     houzhui = '.png'
@@ -545,9 +545,12 @@ def print_zhua(level, num, liechang_number):
     
     # 描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
+
+    # 编号
+    madeline_code = f"<{liechang_number}_{level}_{num}>"
     
     # 确定该madeline的打印信息
-    madeline = [level, name, img, description, num, liechang_number]
+    madeline = [level, name, img, description, num, liechang_number, madeline_code]
     return madeline
 
 #madeline的抓取函数
@@ -586,8 +589,7 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     num = random.randint(1,length)
     logger.info(f"{level}级madeline，该级共{length}个，选择了{num}号")
     #名字信息
-    name = f"[{liechang_number}_{level}_{num}] "
-    name += current_data.get(str(level)).get(str(num)).get('name')
+    name = current_data.get(str(level)).get(str(num)).get('name')
     #图片信息
     houzhui = '.png'
     if(current_data.get(str(level)).get(str(num)).get('gif',False)): houzhui = '.gif' #自动加后缀名
@@ -596,8 +598,10 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     img = zhua_path / madeline_file_name
     #描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
+    # 编号信息
+    madeline_code = f"<{liechang_number}_{level}_{num}>"
     #确定该madeline的打印信息
-    madeline = [level, name, img, description, num, liechang_number]
+    madeline = [level, name, img, description, num, liechang_number, madeline_code]
     return madeline
 
 ######打印商品信息######
@@ -775,12 +779,13 @@ def tool_zhuamadeline(information, data, user_id) -> list:
     '''
     new_print = ""
     #得到madeline信息
-    level       = information[0]   #等级
-    name        = information[1]   #名字
-    img         = information[2]   #图片
-    description = information[3]   #描述
-    num         = information[4]   #编号
-    lc          = information[5]   #所属猎场
+    level         = information[0]   #等级
+    name          = information[1]   #名字
+    img           = information[2]   #图片
+    description   = information[3]   #描述
+    num           = information[4]   #编号
+    lc            = information[5]   #所属猎场
+    madeline_code = information[6]   #玛德琳完整编号
 
     #打开副表
     data2 = open_data(user_path / f"UserList{lc}.json")
