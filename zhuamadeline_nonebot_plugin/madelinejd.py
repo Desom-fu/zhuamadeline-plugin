@@ -532,7 +532,7 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
     if key in user_hunt_data:
         madeline = print_zhua(int(nums[0]), int(nums[1]), nums[2])
         await show.finish(
-            f"\n等级：{madeline[0]}\n编号{madeline[6]}\n名称：{madeline[1]}\n" + 
+            f"\n等级：{madeline[0]}\n编号：{madeline[6]}\n名称：{madeline[1]}\n" + 
             MessageSegment.image(madeline[2]) + 
             f'描述：{madeline[3]}',
             at_sender=True
