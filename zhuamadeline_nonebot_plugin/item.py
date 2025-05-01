@@ -1670,12 +1670,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             nums = find_madeline(arg2.lower(), only_name = True)
                             # 没有对应的玛德琳
                             if nums == 0:
-                                await send_image_or_text(daoju, "请输入正确的Madeline名称哦！", at_sender=True)                            
+                                await send_image_or_text(daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)                            
                             # 检测是否抓到过对应的玛德琳 
                             check_data = open_data(user_path / list_name)
                             # 检查返回值
                             if not nums or len(nums) < 3:
-                                await send_image_or_text(daoju, "请输入正确的Madeline名称哦！", at_sender=True)
+                                await send_image_or_text(daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)
                             # 判定猎场
                             if str(user_id) not in check_data:
                                 await send_image_or_text(daoju, "请先在本猎场抓到任意一个Madeline\n再使用提取器吧！", at_sender=True)
