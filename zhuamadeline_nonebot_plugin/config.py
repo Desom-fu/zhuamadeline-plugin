@@ -137,6 +137,6 @@ berry_path = Path() / "data" / "Userlist" / "secret.json"
 boss_names = {
     "mini": ["影怪", "创世纪", "鸟人像", "古迹守护者"],
     "normal": ["凌波微步", "奥歘", "海坡", "酥坡", "蹭墙", "牛抽奖"],
-    "hard": ["Confringo", "野生小卒", "Desom-fu", "WaterDrop", "海豚", "prehasb"],
-    "world": ["Fhloy", "Foxeline", "Fronia", "Mosed", "pbot", "水滴伯特", "小小卒", "猫猫伯特"]
+    "hard": ["Confringo", "野生小卒", "Desom-fu", "WaterDrop", "海豚", "prehasb", "azure_bluet"],
+    "world": ["Fhloy", "Foxeline", "Fronia", "Mosed", "pbot", "水滴伯特", "小小卒", "猫猫伯特", "甜浆果爱好者"]
 }
