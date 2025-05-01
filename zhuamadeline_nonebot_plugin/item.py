@@ -1667,11 +1667,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
                             """
                             list_name = f"UserList{liechang_number}.json"
-                            nums = find_madeline(arg2.lower())
+                            nums = find_madeline(arg2.lower(), only_name = True)
                             # 没有对应的玛德琳
                             if nums == 0:
                                 await send_image_or_text(daoju, "请输入正确的Madeline名称哦！", at_sender=True)                            
-                            # 检测是否抓到过对应的玛德琳
+                            # 检测是否抓到过对应的玛德琳 
                             check_data = open_data(user_path / list_name)
                             # 检查返回值
                             if not nums or len(nums) < 3:

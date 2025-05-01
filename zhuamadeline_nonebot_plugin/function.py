@@ -659,13 +659,16 @@ def shop_list(item_list):
         ("\n————————————\n" if len(parts) > 1 else "")
     )
 
-def find_madeline(value):
+def find_madeline(value, only_name=False):
     """
     根据名字或格式 "猎场_等级_编号" 查找Madeline信息
-    返回格式: [等级, 编号, 猎场编号]
+    参数:
+        value: 要查找的值，可以是名字或"猎场_等级_编号"格式
+        only_name: 如果为True，则只能通过名字查找
+    返回格式: [等级, 编号, 猎场编号] 或 0(未找到)
     """
-    # 1. 检查是否是 "猎场_等级_编号" 格式（如 1_5_3）
-    if re.match(r'^\d+_\d+_\d+$', value):
+    # 1. 如果不是仅名字查找，先检查是否是 "猎场_等级_编号" 格式
+    if not only_name and re.match(r'^\d+_\d+_\d+$', value):
         parts = value.split('_')
         lc, level, num = parts[0], parts[1], parts[2]
         
@@ -680,7 +683,7 @@ def find_madeline(value):
         
         return [level, num, lc]  # 返回 [等级, 编号, 猎场]
 
-    # 2. 否则按名字查找 开新猎场要改
+    # 2. 按名字查找
     for lc in ['1', '2', '3', '4', '5']:
         data = globals().get(f"madeline_data{lc}")
         if not data:

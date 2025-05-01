@@ -538,7 +538,10 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
             at_sender=True
         )
     else:
-        await send_image_or_text(show, f"你还没抓到过[{madeline_name}]", True)
+        if re.match(r'^\d+_\d+_\d+$', name):
+            await send_image_or_text(show, f"你还没抓到过编号为<{name}>的Madeline", True)
+        else:
+            await send_image_or_text(show, f"你还没抓到过[{madeline_name}]", True)
 
 # 查看某 madeline 数量
 count_madeline = on_command('count', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -582,7 +585,10 @@ async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message =
                 None
             )
         else:
-            await send_image_or_text(count_madeline, f"你还没抓到过[{madeline_name}]", True, None)
+            if re.match(r'^\d+_\d+_\d+$', name):
+                await send_image_or_text(count_madeline, f"你还没抓到过编号为<{name}>的Madeline", True)
+            else:
+                await send_image_or_text(count_madeline, f"你还没抓到过[{madeline_name}]", True)
             
     except FileNotFoundError:
         await send_image_or_text(
