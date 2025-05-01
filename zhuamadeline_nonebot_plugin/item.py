@@ -361,7 +361,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     top_text = (
         (new_print + '\n' if new_print else '') +
         f'等级: {level}\n' +
-        {madeline_code} + f' {name}'
+        {madeline_code} + f'\n{name}'
     )
     
     bottom_text = (
@@ -2142,7 +2142,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         item_text +
                         (new_print + '\n' if new_print else '') +
                         f'等级: {level}\n' +
-                        madeline_code +f' {name}'
+                        madeline_code +f'\n{name}'
                     )
 
                     bottom_text = (

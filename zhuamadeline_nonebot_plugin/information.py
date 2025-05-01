@@ -8,35 +8,177 @@ from .text_image_text import send_image_or_text
 
 __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
 
+# 命令分类帮助
+help_categories = {
+    "catch": {
+        "name": "抓取类指令",
+        "aliases": ["catch", "抓取", "zhua"],
+        "commands": [
+            f".qhlc (0~{liechang_count}) - 切换猎场",
+            ".zhua - 随机抓取Madeline",
+            ".qd - 每日签到",
+            ".pray - 祈愿抓取(需充能器)",
+            ".sbw - 随机展示Madeline"
+        ]
+    },
+    "check": {
+        "name": "查看类指令",
+        "aliases": ["check", "查看", "ck"],
+        "commands": [
+            ".jrrp - 查看今日人品（签到值）",
+            ".count {madeline名字} - 查看某Madeline数量",
+            ".show {madeline名字} - 查看Madeline详情",
+            f".ck (all) - 查看当前/所有状态",
+            f".cklc (0~{liechang_count}) - 查看猎场信息",
+            f".mymadeline (1~{liechang_count}) - 查看库存",
+            ".myitem - 查看所有道具",
+            ".mycp - 查看所有藏品",
+            ".madelinejd/.jd - 查看总进度",
+            ".qfjd - 查看全服进度",
+            ".qfcklc - 查看全服猎场人数",
+            ".shop - 查看今日商品",
+            ".item {道具名} - 查看道具详情",
+            ".cp {藏品名} - 查看藏品详情"
+        ]
+    },
+    "item": {
+        "name": "道具类指令",
+        "aliases": ["item", "道具"],
+        "commands": [
+            ".buy {道具名} [数量] - 购买道具",
+            ".use {道具名} - 使用道具",
+            ".recycle {道具名} [数量] - 回收道具"
+        ]
+    },
+    "garden": {
+        "name": "果园类指令",
+        "aliases": ["garden", "果园"],
+        "commands": [
+            ".garden ck - 查看果园状态",
+            ".garden seed - 播种",
+            ".garden take - 收菜",
+            ".garden fert - 施肥",
+            ".garden steal - 偷菜",
+            ".garden upgrade - 升级"
+        ]
+    },
+    "game": {
+        "name": "游戏类指令",
+        "aliases": ["game", "游戏"],
+        "commands": [
+            ".bet {1~4} - 玩游戏",
+            ".rule {1~4} - 查看游戏规则",
+            ".ball {日期} - 查看洞窟探险结果"
+        ]
+    },
+    "work": {
+        "name": "工作类指令",
+        "aliases": ["work", "工作"],
+        "commands": [
+            ".workhelp - 工作帮助",
+            ".work 区域/食物/Madeline - 派遣工作",
+            ".workspeed - 加速工作",
+            ".workjd - 查看工作进度",
+            ".worksleep - 休息恢复体力"
+        ]
+    },
+    "berry": {
+        "name": "草莓类指令",
+        "aliases": ["berry", "草莓"],
+        "commands": [
+            ".transfer 目标QQ号 数量 - 转账",
+            ".berryrank - 草莓排行榜",
+            ".bank save/take 数量 - 银行存取"
+        ]
+    }
+}
+
 # 查看帮助菜单和更新信息
 help = on_command(
     'help', 
     permission=GROUP, 
     priority=1, 
-    block=True, rule=whitelist_rule
+    block=True, 
+    rule=whitelist_rule
 )
 
 @help.handle()
-async def zhua_help():
-    text1 = (
-        "\n游戏玩法及全部命令请前往抓Madeline wiki\n"
-        "https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O\n"
-        "进行查看\n")
-    text = (
-        "此处仅列出常用指令，其它指令请看wiki：\n"
-        "- .zhua: 抓一个madeline\n"
-        "- .qd: 每日签到\n"
-        "- .show (madeline名字): 展示抓过的madeline\n"
-        "- .count (madeline名字): 查看该madeline数量\n"
-        "- .ck (all): 查看草莓余额及一些其他状态\n"
-        "- .mymadeline (猎场号): 查询对应猎场拥有的madeline及数量\n"
-        "- .myitem/mycp: 查询自己拥有的道具/藏品\n"
-        f"- .jd (1~{liechang_count}): 查看自己抓madeline进度\n"
-        "- .shop: 查看今日商品\n"
-        "- .buy (数量)（道具名): 购买道具/藏品\n"
-        "- .use (道具名): 使用道具/藏品"
-    )
-    await send_image_or_text(help, text, True, text1)
+async def zhua_help(args: Message = CommandArg()):
+    category = args.extract_plain_text().strip().lower()
+    
+    if not category:
+        # 主帮助菜单 - 只显示分类指引
+        text = "更多详情请查看wiki: https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O"
+        main_help = (
+            "【Madeline帮助系统】\n"
+            "══════════════\n"
+            "输入以下分类指令查看详细帮助：\n"
+            "- .help catch - 抓取类指令\n"
+            "- .help check - 查看类指令\n"
+            "- .help item - 道具类指令\n"
+            "- .help garden - 果园类指令\n"
+            "- .help game - 游戏类指令\n"
+            "- .help work - 工作类指令\n"
+            "- .help berry - 草莓类指令\n"
+            "══════════════\n"
+            "输入指令时不要带{}或()！\n"
+            "带有{}为必须，带有()的为非必须~\n"
+            "更多功能持续开发中……"
+        )
+        await send_image_or_text(help, main_help, False, text)
+    else:
+        # 查找匹配的分类
+        matched_category = None
+        for cat in help_categories.values():
+            if category in cat["aliases"]:
+                matched_category = cat
+                break
+        
+        if matched_category:
+            # 显示特定分类的详细帮助
+            help_text = f"【{matched_category['name']}】\n══════════════\n"
+            help_text += "\n".join(matched_category["commands"])
+            help_text += "\n══════════════\n输入 .help 查看主菜单\n"
+            help_text += ("输入指令时不要带{}或()！\n"
+                        "带有{}为必须，带有()的为非必须~\n"
+                        "更多功能持续开发中……")
+            
+            await send_image_or_text(help, help_text, False)
+        else:
+            # 没有匹配的分类，显示错误信息
+            await send_image_or_text(help, "没有找到该分类的指令，请输入 .help 查看所有可用分类", False)
+
+# 为每个分类添加单独的命令处理器（保持不变）
+for cat in help_categories.values():
+    for alias in cat["aliases"]:
+        if alias not in ["catch", "check"]:  # 避免重复注册
+            help_alias = on_command(
+                alias, 
+                permission=GROUP, 
+                priority=2, 
+                block=True, 
+                rule=whitelist_rule
+            )
+            
+            @help_alias.handle()
+            async def handle_alias():
+                # 查找对应的分类
+                cmd = list(help_alias.command)[0]
+                matched_cat = None
+                for cat in help_categories.values():
+                    if cmd in cat["aliases"]:
+                        matched_cat = cat
+                        break
+                
+                if matched_cat:
+                    help_text = f"【{matched_cat['name']}】\n══════════════\n"
+                    help_text += "\n".join(matched_cat["commands"])
+                    help_text += "\n══════════════\n输入 .help 查看主菜单"
+                    help_text += ("输入指令时不要带{}或()！\n"
+                                "带有{}为必须，带有()的为非必须~\n"
+                                "更多功能持续开发中……")
+                    
+                    await send_image_or_text(help_alias, help_text, False)
 
 # 更新公告
 gong_gao = on_command(

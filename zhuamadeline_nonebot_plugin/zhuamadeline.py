@@ -490,9 +490,9 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             reward_text = f"{berry_give}+{lucky_give}={berry_give + lucky_give}颗草莓"
 
         if new_print:
-            top_text = f"{new_print}\n等级: {level}\n{madeline_code} {name}"
+            top_text = f"{new_print}\n等级: {level}\n{madeline_code}\n{name}"
         else:
-            top_text = f"等级: {level}\n{madeline_code} {name}"
+            top_text = f"等级: {level}\n{madeline_code}\n{name}"
         bottom_text = f"{description}"
 
         if berry_give != 0:
