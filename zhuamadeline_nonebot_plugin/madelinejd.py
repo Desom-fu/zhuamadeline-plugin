@@ -497,11 +497,8 @@ show = on_command('show', permission=GROUP, priority=1, block=True, rule=whiteli
 
 @show.handle()
 async def zhanshi(event: Event, arg: Message = CommandArg()):
-    name = str(arg).lower()  # 获取输入的名字
-    user_id = event.get_user_id()  # 获取用户ID
-
-    # 打开主文件
-    data = open_data(user_path / file_name)
+    name = str(arg).lower()
+    user_id = event.get_user_id()
 
     # 查找 madeline
     nums = find_madeline(name)
@@ -509,110 +506,75 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
         await send_image_or_text(show, f"未找到名为[{name}]的Madeline", True)
         return
 
+    # 检查猎场编号有效性
+    if nums[2] not in file_names:
+        await send_image_or_text(show, "无效的猎场编号", True)
+        return
+
     # 获取对应猎场文件
-    file_path = user_path / f"UserList{nums[2]}.json"
+    file_path = user_path / file_names[nums[2]]
     if not file_path.exists():
         await send_image_or_text(show, "对应的猎场数据文件不存在", True)
         return
 
-    # 打开猎场文件
-    
-    hunt_data = open_data(file_path)
-
     # 查询用户数据
-    if str(user_id) in data:
-        user_hunt_data = hunt_data.get(str(user_id), {})
-        key = f"{nums[0]}_{nums[1]}"
-        if key in user_hunt_data:
-            # 根据等级和编号获取坐标
-            level = int(nums[0])
-            number = int(nums[1])
-
-            madeline = print_zhua(level, number, nums[2])
-            level = madeline[0]
-            name = madeline[1]
-            img = madeline[2]
-            description = madeline[3]
-
-            # 发送图片和描述
-            await show.finish(f"\n等级：{level}\n{name}\n" + MessageSegment.image(img) + description, at_sender=True)
-        else:
-            await send_image_or_text(show, f"你还没抓到过[{name}]", True)
+    hunt_data = open_data(file_path)
+    user_hunt_data = hunt_data.get(str(user_id), {})
+    
+    key = f"{nums[0]}_{nums[1]}"
+    if key in user_hunt_data:
+        madeline = print_zhua(int(nums[0]), int(nums[1]), nums[2])
+        await show.finish(
+            f"\n等级：{madeline[0]}\n{madeline[1]}\n" + 
+            MessageSegment.image(madeline[2]) + 
+            madeline[3],
+            at_sender=True
+        )
     else:
-        await send_image_or_text(show, "你还没尝试抓过Madeline……", True)
+        await send_image_or_text(show, f"你还没抓到过[{name}]", True)
 
 # 查看某 madeline 数量
 count_madeline = on_command('count', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @count_madeline.handle()
 async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
-    # 获取输入的名字
     name = str(arg).strip().lower()
     if not name:
-        await send_image_or_text(
-            count_madeline,
-            "请输入要查询的Madeline名称",
-            True,
-            None
-        )
+        await send_image_or_text(count_madeline, "请输入要查询的Madeline名称", True, None)
         return
 
-    # 查找该名字的 madeline 的图像文件坐标
     nums = find_madeline(name)
     if not nums:
-        await send_image_or_text(
-            count_madeline,
-            f"未找到名为[{name}]的Madeline",
-            True,
-            None
-        )
+        await send_image_or_text(count_madeline, f"未找到名为[{name}]的Madeline", True, None)
         return
 
-    # 获取用户 ID
+    # 检查猎场编号有效性
+    if nums[2] not in file_names:
+        await send_image_or_text(count_madeline, "无效的猎场编号", True, None)
+        return
+
     user_id = str(event.get_user_id())
-
-    # 打开主文件，检查用户是否已注册
-    main_data = open_data(user_path / file_name)
-
-    if user_id not in main_data:
-        await send_image_or_text(
-            count_madeline,
-            "你还没尝试抓过Madeline……",
-            True,
-            None
-        )
-        return
-
-    # 根据猎场号打开对应文件
-    liechang_number = nums[2]
+    file_path = user_path / file_names[nums[2]]
+    
     try:
-        arena_data = open_data(user_path / f"UserList{liechang_number}.json")
+        arena_data = open_data(file_path)
+        user_data = arena_data.get(user_id, {})
+        madeline_key = f"{nums[0]}_{nums[1]}"
+        
+        if madeline_key in user_data:
+            await send_image_or_text(
+                count_madeline,
+                f"你有[{user_data[madeline_key]}]个[{name}]",
+                True,
+                None
+            )
+        else:
+            await send_image_or_text(count_madeline, f"你还没抓到过[{name}]", True, None)
+            
     except FileNotFoundError:
         await send_image_or_text(
             count_madeline,
-            f"猎场{liechang_number}的数据文件缺失，请联系管理员。",
-            True,
-            None
-        )
-        return
-
-    # 检查用户数据
-    user_data = arena_data.get(user_id, {})
-    madeline_key = f"{nums[0]}_{nums[1]}"
-
-    # 查找 madeline 数量并发送结果
-    if madeline_key in user_data:
-        number = user_data[madeline_key]
-        await send_image_or_text(
-            count_madeline,
-            f"你有[{number}]个[{name}]",
-            True,
-            None
-        )
-    else:
-        await send_image_or_text(
-            count_madeline,
-            f"你还没抓到过[{name}]",
+            f"猎场{nums[2]}的数据文件缺失，请联系管理员。",
             True,
             None
         )

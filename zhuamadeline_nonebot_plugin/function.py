@@ -323,15 +323,17 @@ async def get_sorted_madelines(file_name: str, user_id: str, liechang_number: st
         level = int(k[0]) - 1  # 获取等级
         num = k[1]
 
-        # 获取对应的madeline名字并添加到sorted_madelines中
-        sorted_madelines[level].append((madeline_data.get(str(level + 1)).get(num).get('name'), v))
+        # 获取对应的madeline名字并添加编号前缀
+        madeline_info = madeline_data.get(str(level + 1)).get(num)
+        display_name = f"[{liechang_number}_{level+1}_{num}] {madeline_info.get('name')}"
+        sorted_madelines[level].append((display_name, v))
 
     # 排序并拼接：从高等级到低等级排列
     result = []
     for i in range(4, -1, -1):  # 从高到低 (5级到1级)
         if sorted_madelines[i]:
             sorted_madelines[i].sort(key=lambda x: x[1], reverse=True)  # 按数量降序排序
-            result.append(f"\n{level_str[i]}级：\n" + "\n".join(f"- {name} x {v}" for name, v in sorted_madelines[i]))
+            result.append(f"\n{level_str[i]}级：\n" + "\n".join(f"- {name} x {count}" for name, count in sorted_madelines[i]))
     
     return "\n".join(result) if result else "没有库存"
 
@@ -511,35 +513,40 @@ def give_berry(level):
 #给定madeline的文件坐标，输出该madeline相关的信息 [等级，名字，图像路径，描述，编号，猎场编号]
 def print_zhua(level, num, liechang_number):
     madeline_path = current_liechang(liechang_number)
-    #锁定madeline档案
-    # 使用globals()动态获取变量
+    # 锁定madeline档案
     current_data = globals().get(f"madeline_data{liechang_number}")
     if current_data is None:  # 检查变量是否存在
         raise ValueError("错误的猎场号")
 
-    #根据猎场确定路径
+    # 根据猎场确定路径
     madeline_level1_path = madeline_path / madeline_level1
     madeline_level2_path = madeline_path / madeline_level2
     madeline_level3_path = madeline_path / madeline_level3
     madeline_level4_path = madeline_path / madeline_level4
     madeline_level5_path = madeline_path / madeline_level5
-    #根据等级确定坐标
-    if(level == 1): zhua_path = madeline_level1_path
-    if(level == 2): zhua_path = madeline_level2_path
-    if(level == 3): zhua_path = madeline_level3_path
-    if(level == 4): zhua_path = madeline_level4_path
-    if(level == 5): zhua_path = madeline_level5_path
-    #名字信息
-    name = current_data.get(str(level)).get(str(num)).get('name')
-    #图片信息
+    
+    # 根据等级确定坐标
+    if level == 1: zhua_path = madeline_level1_path
+    if level == 2: zhua_path = madeline_level2_path
+    if level == 3: zhua_path = madeline_level3_path
+    if level == 4: zhua_path = madeline_level4_path
+    if level == 5: zhua_path = madeline_level5_path
+    
+    # 名字信息（添加编号前缀）
+    original_name = current_data.get(str(level)).get(str(num)).get('name')
+    name = f"[{liechang_number}_{level}_{num}] {original_name}"
+    
+    # 图片信息
     houzhui = '.png'
-    if(current_data.get(str(level)).get(str(num)).get('gif',False)): houzhui = '.gif' #自动加后缀名
-    if(current_data.get(str(level)).get(str(num)).get('jpg',False)): houzhui = '.jpg' #自动加后缀名
+    if current_data.get(str(level)).get(str(num)).get('gif', False): houzhui = '.gif'
+    if current_data.get(str(level)).get(str(num)).get('jpg', False): houzhui = '.jpg'
     madeline_file_name = madeline_filename.format(index=str(num)) + houzhui
     img = zhua_path / madeline_file_name
-    #描述信息
+    
+    # 描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
-    #确定该madeline的打印信息
+    
+    # 确定该madeline的打印信息
     madeline = [level, name, img, description, num, liechang_number]
     return madeline
 
@@ -579,7 +586,8 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     num = random.randint(1,length)
     logger.info(f"{level}级madeline，该级共{length}个，选择了{num}号")
     #名字信息
-    name = current_data.get(str(level)).get(str(num)).get('name')
+    name = f"[{liechang_number}_{level}_{num}] "
+    name += current_data.get(str(level)).get(str(num)).get('name')
     #图片信息
     houzhui = '.png'
     if(current_data.get(str(level)).get(str(num)).get('gif',False)): houzhui = '.gif' #自动加后缀名
@@ -647,20 +655,39 @@ def shop_list(item_list):
         ("\n————————————\n" if len(parts) > 1 else "")
     )
 
-#根据名字查找madeline的所在的猎场和等级和位置[等级，编号，几号猎场]
 def find_madeline(value):
-    # 开新猎场要改
-    for lc in ['1', '2', '3', '4', "5"]:
-        # 动态获取对应的 madeline_data
+    """
+    根据名字或格式 "猎场_等级_编号" 查找Madeline信息
+    返回格式: [等级, 编号, 猎场编号]
+    """
+    # 1. 检查是否是 "猎场_等级_编号" 格式（如 1_5_3）
+    if re.match(r'^\d+_\d+_\d+$', value):
+        parts = value.split('_')
+        lc, level, num = parts[0], parts[1], parts[2]
+        
+        # 验证猎场是否存在
+        if lc not in madeline_data_mapping:
+            return 0  # 猎场不存在
+        
+        # 验证等级和编号是否有效
+        madeline_data = madeline_data_mapping[lc]
+        if level not in madeline_data or num not in madeline_data[level]:
+            return 0  # 等级或编号无效
+        
+        return [level, num, lc]  # 返回 [等级, 编号, 猎场]
+
+    # 2. 否则按名字查找 开新猎场要改
+    for lc in ['1', '2', '3', '4', '5']:
         data = globals().get(f"madeline_data{lc}")
-        if data is None:
-            continue  # 如果没有找到该猎场的数据，跳过
-        # 遍历数据
-        for k, v in data.items():
-            for i, j in v.items():
-                if j['name'].lower() == value:
-                    return [k, i, lc]  # 返回等级、编号、猎场编号
-    return 0
+        if not data:
+            continue
+        
+        for level, madelines in data.items():
+            for num, info in madelines.items():
+                if info['name'].lower() == value.lower():
+                    return [level, num, lc]  # [等级, 编号, 猎场]
+    
+    return 0  # 未找到
 
 
 #将日期间隔转化成想要表达的形式

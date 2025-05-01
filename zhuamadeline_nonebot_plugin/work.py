@@ -255,8 +255,11 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     # 保存数据
     save_data(full_path, data)
     save_data(config.user_path, madeline_check)
+
+    # 获取Madeline的名字（使用print_zhua函数）
+    madeline_name = print_zhua(madeline_info[0], madeline_info[1], lc)[1]  # [等级,名字,...]
     
-    await send_image_or_text(work, f"你成功派遣[{madeline}]携带着[{food}]去[{area}]工作了！\n预计需要工作{duration}个小时！", True, None)
+    await send_image_or_text(work, f"你成功派遣[{madeline_name}]携带着[{food}]去[{area}]工作了！\n预计需要工作{duration}个小时！", True, None)
 
 
 status_work = on_command('工作进度', aliases={'workjd','jdwork'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
