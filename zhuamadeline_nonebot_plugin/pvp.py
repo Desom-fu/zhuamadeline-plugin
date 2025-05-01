@@ -585,7 +585,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级 {madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的 {madelinenamea}]\n的进攻战力为 [{rana}]+[{bonus_rank}]=[{final_rank}] (lose)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为 {zhanli_text} (win)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的 {madelinenameb[1]}]\n的防守战力为 {zhanli_text} (win)\n"
             f"- 你的Madeline被打败了！(｡•́︿•̀｡)"
         )
     elif stat == 4:
@@ -593,7 +593,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为 [{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级 {madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的 {madelinenamea}] 的进攻战力为\n[{rana}]+[{bonus_rank}]=[{final_rank}] (draw/win)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为{zhanli_text} (draw/lose)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的 {madelinenameb[1]}]\n的防守战力为{zhanli_text} (draw/lose)\n"
             f"- 你的Madeline的进攻战力和擂主的Madeline的防守战力相等，但由于你是挑战者，所以你赢了！`(o^ ^o)ﾉ"
         )
     elif stat == 3:
@@ -601,7 +601,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             f"- 你抽出了 [{levela}级的 {madelinenamea}]，\n这个Madeline的常驻战力为[{rana-guding_rank}]+[{guding_rank}]=[{rana}]\n"
             f"- 你的Madeline遇到了 [擂台{pos+1}] 的擂主 [{nicknameb}] 的 [{levelb}级 {madelinenameb[1]}]，\n该Madeline的常驻战力为 [{ranb}]\n"
             f"- 你的 [{levela}级的 {madelinenamea}]\n的进攻战力为[{rana}]+[{bonus_rank}]=[{final_rank}] (win)\n"
-            f"- [{nicknameb}] 的 [{levelb}级的{madelinenameb[1]}]\n的防守战力为{zhanli_text} (lose)\n"
+            f"- [{nicknameb}] 的 [{levelb}级的 {madelinenameb[1]}]\n的防守战力为{zhanli_text} (lose)\n"
             f"- 你的Madeline获胜了！`(o^ ^o)ﾉ"
         )
     elif stat == 2:
