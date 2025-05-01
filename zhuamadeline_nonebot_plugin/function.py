@@ -229,7 +229,7 @@ def buff2_change_status(data, user_id, buff2_status: str, change_status: int):
     # 其他数字直接返回
     return data
 
-def calculate_hourglass(data, user_id, liechang_number):
+def calculate_hourglass(data, user_id, liechang_number = "1"):
     """计算时隙沙漏的累计次数（次数满后强制重置时间）"""
     user_data = data.get(str(user_id), {})
     if "时隙沙漏" not in user_data.get("collections", {}):
@@ -244,11 +244,12 @@ def calculate_hourglass(data, user_id, liechang_number):
     hourglass_next_time = datetime.datetime.strptime(user_data.get("hourglass_next_time", current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
     start_time = max(next_time, work_end_time, hourglass_next_time)
 
+    huixiang = user_data.get("collections", {}).get("回想之核", 0) > 0
+        
     # 兼容0猎
-    liechang_time = 10 if liechang_number == "0" else 30
-    
+    liechang_time = 10 - huixiang  if liechang_number == "0" else 30 - huixiang
     # 计算间隔时间（有回想之核则29分钟）
-    interval = 29 if user_data.get("collections", {}).get("回想之核", 0) > 0 else 30
+    interval = 30 - huixiang 
     interval_delta = datetime.timedelta(minutes=interval)
     liechang_time_delta = datetime.timedelta(minutes=liechang_time)
     
@@ -258,6 +259,11 @@ def calculate_hourglass(data, user_id, liechang_number):
     
     last_time = start_time
     time_diff = current_time - last_time
+    
+    # 添加判断：如果next_time大于current_time，不进行时间加减
+    if next_time > current_time:
+        user_data["hourglass_next_time"] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+        return data, user_data.get("hourglass_count", 0), user_data.get("hourglass_next_time")
     
     if time_diff.total_seconds() > 0:
         add_count = int(time_diff.total_seconds() // interval_delta.total_seconds())
@@ -996,7 +1002,7 @@ def get_boss_rewards(boss_data, user_id, grade):
     
     if boss_data["type"] == "mini":
         exp = math.floor(boss_data["max_hp"] * 1.3)
-        berry = random.randint(100, 200)
+        berry = boss_data["max_hp"] * 10
         if is_max_grade:
             berry *= 2
             reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励：{berry}颗草莓"
@@ -1007,7 +1013,7 @@ def get_boss_rewards(boss_data, user_id, grade):
     elif boss_data["type"] == "normal":
         exp = math.floor(boss_data["max_hp"] * 1.4)
         items = {
-            "迅捷药水": random.randint(1, 2),
+            "迅捷药水": random.randint(1, 3),
             "幸运药水": random.randint(1, 2),
         }
         if is_max_grade:
@@ -1023,7 +1029,7 @@ def get_boss_rewards(boss_data, user_id, grade):
         
     elif boss_data["type"] == "hard":
         exp = math.floor(boss_data["max_hp"] * 1.5)
-        berry = random.randint(200, 400)
+        berry = boss_data["max_hp"] * 8
         items = {
             "迅捷药水": random.randint(1, 2),
             "幸运药水": random.randint(1, 2),
@@ -1049,13 +1055,13 @@ def get_world_boss_rewards():
     data = open_data(world_boss_data_path)
     contributors = sorted(data["contributors"].items(), key=lambda x: x[1], reverse=True)[:5]
     
-    # 排行榜奖励配置
+    # 排行榜奖励配置（保留道具奖励）
     rank_rewards = [
-        {"berry": 600, "items": {"迅捷药水": 5, "幸运药水": 5, "道具盲盒": 10}},  # 第一名
-        {"berry": 550, "items": {"迅捷药水": 4, "幸运药水": 4, "道具盲盒": 9}},  # 第二名
-        {"berry": 500, "items": {"迅捷药水": 3, "幸运药水": 3, "道具盲盒": 8}},  # 第三名
-        {"berry": 450, "items": {"迅捷药水": 2, "幸运药水": 2, "道具盲盒": 7}},  # 第四名
-        {"berry": 400, "items": {"迅捷药水": 1, "幸运药水": 1, "道具盲盒": 6}}   # 第五名
+        {"items": {"迅捷药水": 5, "幸运药水": 5, "道具盲盒": 20}},  # 第一名
+        {"items": {"迅捷药水": 4, "幸运药水": 4, "道具盲盒": 15}},  # 第二名
+        {"items": {"迅捷药水": 3, "幸运药水": 3, "道具盲盒": 15}},  # 第三名
+        {"items": {"迅捷药水": 2, "幸运药水": 2, "道具盲盒": 10}},  # 第四名
+        {"items": {"迅捷药水": 1, "幸运药水": 1, "道具盲盒": 10}}   # 第五名
     ]
     
     # 构建排行榜数据
@@ -1063,10 +1069,13 @@ def get_world_boss_rewards():
     for i, (user_id, damage) in enumerate(contributors):
         rewards.append((user_id, rank_rewards[i], f"{i+1}名奖励"))
     
-    # 全员奖励 (伤害x2)
+    # 全员奖励 (伤害x10草莓 + 伤害x2经验)
     all_rewards = {}
     for user_id, damage in data["contributors"].items():
-        all_rewards[user_id] = {"exp": damage * 2}
+        all_rewards[user_id] = {
+            "berry": damage * 10,
+            "exp": damage * 2
+        }
     
     return rewards, all_rewards
 
@@ -1107,9 +1116,7 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
             nickname = await get_nickname(bot, uid)
             damage_done = world_boss_data["contributors"].get(uid, 0)
 
-            # 发放奖励
-            if "berry" in reward:
-                data[str(uid)]["berry"] += reward["berry"]
+            # 发放道具奖励
             if "items" in reward:
                 for item, count in reward["items"].items():
                     data[str(uid)].setdefault("item", {})[item] = data[str(uid)]["item"].get(item, 0) + count
@@ -1136,38 +1143,51 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
                         player_exp_info = f"\n\n你获得了{exp}点经验"
 
             # 构建排名信息
-            rank_text = f"第{i+1}名 [{nickname}]（造成{damage_done}点伤害）: {reward['berry']}草莓"
+            rank_text = f"第{i+1}名 [{nickname}]（造成{damage_done}点伤害）: "
             if "items" in reward:
                 items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
-                rank_text += f" + {items_text}"
+                rank_text += f"{items_text}"
             
             world_boss_at_text += MessageSegment.at(uid)
             top5_msg.append(rank_text)
 
-    # 发放全员奖励
+    # 发放全员奖励（伤害x10草莓 + 伤害x2经验）
     other_count = 0
     for uid, reward in all_rewards.items():
-        if uid not in [x[0] for x in rewards]:
-            if str(uid) in data:
-                exp = reward["exp"]
-                current_grade = data[str(uid)].get("grade", 1)
-                max_grade = data[str(uid)].get("max_grade", 30)
+        if str(uid) in data:
+            damage_done = world_boss_data["contributors"].get(uid, 0)
+            berry = reward["berry"]
+            exp = reward["exp"]
+            current_grade = data[str(uid)].get("grade", 1)
+            max_grade = data[str(uid)].get("max_grade", 30)
 
-                data[str(uid)]["berry"] += 300
+            # 发放草莓奖励
+            data[str(uid)]["berry"] += berry
+
+            # 处理经验/满级转换
+            if current_grade >= max_grade:
+                extra_berry = exp * 2
+                data[str(uid)]["berry"] += extra_berry
+            else:
+                _, _, data = calculate_level_and_exp(data, uid, exp, 0)
+            
+            # 如果是当前玩家，添加额外信息
+            if uid == str(user_id):
+                player_exp_info = f"\n\n你获得了{berry}草莓"
                 if current_grade >= max_grade:
-                    berry = exp * 2
-                    data[str(uid)]["berry"] += berry
+                    player_exp_info += f"和{extra_berry}草莓（经验转换）"
                 else:
-                    _, _, data = calculate_level_and_exp(data, uid, exp, 0)
+                    player_exp_info += f"和{exp}点经验"
+            
+            if uid not in [x[0] for x in rewards]:
                 other_count += 1
 
     # 构建最终消息
     msg += f"\n\n世界Boss[{result['name']}]已被击败！"
-    msg += "\n\n最终奖励排行榜：\n" + "\n\n".join(top5_msg)
+    msg += "\n\n前五名额外奖励：\n" + "\n\n".join(top5_msg)
     msg += player_exp_info
-    if other_count > 0:
-        msg += f"\n\n另有{other_count}位参与者获得奖励（300草莓）"
-    msg += "\n\n除此之外，所有玩家都能获得[伤害值*2]点exp哦！（若已满级则会获得[伤害值*4]颗草莓！）"
+    msg += "\n\n所有参与者都获得了[伤害值×10]的草莓奖励！"
+    msg += "\n除此之外，所有玩家都能获得[伤害值×2]点exp哦！（若已满级则会获得[伤害值×4]颗草莓！）"
     
     return msg, world_boss_at_text, data  # 返回修改后的data
 

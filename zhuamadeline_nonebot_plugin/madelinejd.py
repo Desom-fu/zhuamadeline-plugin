@@ -201,7 +201,8 @@ async def mymadeline_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     # 半夜0点整查看库存时，隐藏并返回特殊事件
     if hour == 0 and minute == 0 and 0 <= second <= 30:
         # 发送图片
-        await send_image_or_text_forward(ranking, "please give me your eyes", '藏品库存室', bot, event.self_id, event.group_id, 30, True)
+        await send_image_or_text_forward(mymadeline, "please give me your eyes", '藏品库存室', bot, event.self_id, event.group_id, 30, True)
+        return
     
     # 如果没有输入猎场号，默认展示所有猎场的库存
     if not arg:
@@ -210,14 +211,14 @@ async def mymadeline_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     
     # 获取输入的猎场号
     args = str(arg).split()
-    # 判断是否输入了有效的猎场号（1, 2, 3）
-    if all(liechang not in file_names for liechang in args):
-        await bot.send(event, "输入的猎场号无效，请重新输入！", at_sender=True)
+    # 判断是否输入了有效的猎场号（在file_names中且<=liechang_count）
+    if all(liechang not in file_names or not liechang.isdigit() or int(liechang) > liechang_count for liechang in args):
+        await send_image_or_text(mymadeline, "输入的猎场号无效，请重新输入！", at_sender=True)
         return
 
     # 遍历输入的猎场号，分别显示对应猎场的库存
     for liechang_number in args:
-        if liechang_number in file_names:
+        if liechang_number in file_names and liechang_number.isdigit() and int(liechang_number) <= liechang_count:
             await display_liechang_inventory(bot, event, liechang_number, user_id)
 
 # 查询并展示指定猎场的库存
@@ -227,7 +228,7 @@ async def display_liechang_inventory(bot: Bot, event: GroupMessageEvent, liechan
     # 获取madeline数据
     data = get_madeline_data(file_name, user_id)
     if data is None:
-        await bot.send(event, f"你没有抓到过{liechang_number}号猎场的Madeline", at_sender=True)
+        await send_image_or_text(mymadeline, f"你没有抓到过{liechang_number}号猎场的Madeline", at_sender=True)
         return
     
     # 获取madeline库存并按等级分类
@@ -246,19 +247,21 @@ async def display_all_liechang_inventory(bot: Bot, event: GroupMessageEvent, use
     all_sorted_madelines = []
 
     # 遍历所有猎场，获取每个猎场的库存
+    
     for liechang_number in file_names:
-        file_name = file_names[liechang_number]
+        if int(liechang_number) <= liechang_count:
+            file_name = file_names[liechang_number]
 
-        # 获取madeline数据
-        data = get_madeline_data(file_name, user_id)
-        if data is None:
-            all_sorted_madelines.append(f"你没有抓到过{liechang_number}号猎场的madeline")
-            continue
+            # 获取madeline数据
+            data = get_madeline_data(file_name, user_id)
+            if data is None:
+                all_sorted_madelines.append(f"你没有抓到过{liechang_number}号猎场的madeline")
+                continue
 
-        # 获取madeline库存并按等级分类
-        sorted_madelines = await get_sorted_madelines(file_name, user_id, liechang_number)
-        
-        all_sorted_madelines.append(f"猎场{liechang_number}的madeline库存:\n{sorted_madelines}")
+            # 获取madeline库存并按等级分类
+            sorted_madelines = await get_sorted_madelines(file_name, user_id, liechang_number)
+
+            all_sorted_madelines.append(f"猎场{liechang_number}的madeline库存:\n{sorted_madelines}")
 
     # 合并并发送所有猎场的库存
     user_info = await bot.get_stranger_info(user_id=int(user_id))
