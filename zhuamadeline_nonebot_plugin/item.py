@@ -361,7 +361,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     top_text = (
         (new_print + '\n' if new_print else '') +
         f'等级: {level}\n' +
-        {madeline_code} + f'\n{name}'
+        f'{madeline_code}\n{name}'
     )
     
     bottom_text = (
@@ -1715,6 +1715,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     data[str(user_id)]["buff"] = "hurt"  #受伤
                                     fail_text = f"提取失败！提取器爆炸了，\n你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
                                 else:
+                                    current_time = datetime.datetime.now()
                                     next_time = current_time
                                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     fail_text = f"提取失败！提取器爆炸了，\n但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本

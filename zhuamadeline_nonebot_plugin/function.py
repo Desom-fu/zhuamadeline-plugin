@@ -840,7 +840,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         
     # 1. 计算获得的经验值
     if isitem == 1:
-        gained_exp = math.ceil(level / 2)  # 道具获得一半经验
+        gained_exp = math.floor(level / 2)  # 道具获得一半经验
     else:
         gained_exp = level
     

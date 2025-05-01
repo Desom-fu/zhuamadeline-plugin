@@ -378,7 +378,7 @@ async def rankingjd_handle(bot: Bot, event: GroupMessageEvent, args: Message = C
 
         user_progress = next((entry['total_progress'] for entry in sorted_rank if entry['user_id'] == user_id), 0)
         user_nickname = await get_nickname(bot, user_id)
-        rank_msg += f"\n🔹 {user_nickname}的排名为：{user_rank}，总进度：{user_progress}%"
+        rank_msg += f"\n{user_nickname}的排名为：{user_rank}，总进度：{user_progress}%"
 
     # **猎场进度排名**
     elif 0 < arg <= liechang_count:
