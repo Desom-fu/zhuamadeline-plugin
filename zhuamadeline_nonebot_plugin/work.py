@@ -214,7 +214,10 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
         return
     
     # 获取对应猎场数据
+    level = int(madeline_info[0]) # 等级
+    num = int(madeline_info[1]) # 编号
     lc = madeline_info[2]  # 猎场编号
+    logger.info(f"madeline_info为{madeline_info}，level为{level}，num为{num}，lc为{lc}")
     config = MADELINE_CONFIGS[int(lc)]  # 注意转换为int
     madeline_check = open_data(config.user_path)
     
@@ -257,7 +260,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     save_data(config.user_path, madeline_check)
 
     # 获取Madeline的名字（使用print_zhua函数）
-    madeline_name = print_zhua(madeline_info[0], madeline_info[1], lc)[1]  # [等级,名字,...]
+    madeline_name = print_zhua(level, num, lc)[1]  # [等级,名字,...]
     
     await send_image_or_text(work, f"你成功派遣[{madeline_name}]携带着[{food}]去[{area}]工作了！\n预计需要工作{duration}个小时！", True, None)
 
