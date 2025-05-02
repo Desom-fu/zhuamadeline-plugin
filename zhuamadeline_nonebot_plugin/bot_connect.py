@@ -47,7 +47,8 @@ async def berry_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         check = 200
     else:
         check = 404
-    if berry_check < 0:
+    
+    if berry_check < 0 or user_data[user_id].get("debuff", "normal") == "tentacle":
         check = 502
     await berry.finish(f"{prefix}{command_prefix}_check_finish {user_id} {threshold} {check}")
 
@@ -72,15 +73,18 @@ async def berry_change_handle(event: GroupMessageEvent, arg: Message = CommandAr
     #没有这个玩家
     if user_id not in user_data:
         await berry_change.finish(f"{prefix}{command_prefix}_change_finish {user_id} {num} {check}")
+
     #玩家没有berry
     if 'berry' not in user_data[user_id]:
-        user_data[user_id]['berry'] = 0
+        user_data[user_id]['berry'] = 1000
     berry_num = user_data[user_id]['berry']
-    if berry_num < 0:
+
+    if berry_num < 0 or user_data[user_id].get("debuff", "normal") == "tentacle":
         check = 502
         await berry_change.finish(f"{prefix}{command_prefix}_change_finish {user_id} {num} {check}")
     else:
         check = 200
+
     #有这个玩家
     try:
         user_data[user_id]['berry'] += num
@@ -117,7 +121,8 @@ async def berryck_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     #有这个玩家
     berry = user_data[user_id]['berry']
     check = 200
-    if berry < 0:
+
+    if berry < 0 or user_data[user_id].get("debuff", "normal") == "tentacle":
         check = 502
         berry = 'FORBID'
     await berryck.finish(f"{prefix}{command_prefix}_count_finish {user_id} {berry} {check}")
