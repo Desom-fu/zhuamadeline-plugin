@@ -94,7 +94,7 @@ async def add_interest():
     
     message = "今日报酬已发放，请使用命令 .ck all\n查看今天增加报酬（向下取整）为多少哦~"
 
-    await auto_send_message(message, bot, zhuama_group)
+    await bot.send_group_msg(group_id=zhuama_group, message=message)
 
 scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)
 scheduler.scheduled_job("cron", hour=1, minute=0)(cancel_interest_send)
