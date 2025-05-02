@@ -100,7 +100,7 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         await send_image_or_text(rule, "请输入正确的游戏编号，\n例如 .rule 1", True, None, 25)
 
 # 地下酒馆 - 游戏判定
-bet = on_command('bet', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+bet = on_command('bet', aliases={"game"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @bet.handle()
 async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -660,12 +660,12 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
     if data[str(user_id)]['event']=='compulsion_bet1' and data[str(user_id)]['compulsion_count']!= 0:
         data[str(user_id)]['compulsion_count'] -= 1
         if data[str(user_id)]['compulsion_count']!= 0:
-            msg_text += f"\n你现在仍需强制进行预言大师{data[str(user_id)]['compulsion_count']}次。"
+            msg_text += f"\n\n你现在仍需强制进行预言大师{data[str(user_id)]['compulsion_count']}次。"
         else:
             # 清除状态
             data[str(user_id)]['event'] = "nothing"
             data[str(user_id)]['compulsion_count'] = 0
-            msg_text += '\n你已经完成了黑帮布置的任务……\n现在你可以离开这个酒馆了。'
+            msg_text += '\n\n你已经完成了黑帮布置的任务……\n现在你可以离开这个酒馆了。'
     
     # 写入主数据表
     bar_data[user_id]['status'] = 'nothing'

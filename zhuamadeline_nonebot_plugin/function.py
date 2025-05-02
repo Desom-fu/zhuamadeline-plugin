@@ -889,11 +889,8 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         # 没有满级才显示升级后经验
         if grade < max_grade:
             grade_msg += f'\n升级后经验：{exp}/{max_exp}'
-    # 如果没有升级但经验有变化，也显示最终状态
-    # elif gained_exp > 0:
-        # exp_msg += f'\n当前经验：{exp}/{max_exp}'
 
-    # 提添加藏品
+    # 添加藏品
     if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
         collections['时隙沙漏'] = 1
         grade_msg += f"\n你已经达到最大等级{max_grade}！\n倏然，你手中入场券的那一点金色光芒突然闪烁起来！\n你慢慢的看着它融化，重组，最后在你手中变成了散发着淡金色光芒的蓝色沙漏。\n输入.cp 时隙沙漏 以查看具体效果"
@@ -975,7 +972,7 @@ def attack_boss(user_id, damage, is_world_boss=False):
     big_attack = user_data[user_id]['collections'].get("暴击指虎", 0)
     if big_attack >= 1 and random.randint(1, 100) <= 10:
         damage *= 2
-        big_damage_msg += '尖锐的指虎狠狠地扎进了Boss的要害，\n本次攻击造成的伤害翻倍！\n'
+        big_damage_msg += '尖锐的指虎狠狠地扎进了Boss的要害，\n本次攻击造成的伤害翻倍！\n\n'
     
     if not boss_data:
         return False, "没有找到Boss"
@@ -1004,7 +1001,7 @@ def get_boss_rewards(boss_data, user_id, grade):
         exp = math.floor(boss_data["max_hp"] * 1.3)
         berry = boss_data["max_hp"] * 10
         if is_max_grade:
-            berry += exp*2
+            berry += boss_data["max_hp"] * 4
             reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励：{berry}颗草莓"
             return {"berry": berry}, exp, reward_msg
         reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n获得{berry}颗草莓"
@@ -1036,7 +1033,7 @@ def get_boss_rewards(boss_data, user_id, grade):
             "道具盲盒": random.randint(5, 10),
         }
         if is_max_grade:
-            berry += exp*2
+            berry += boss_data["max_hp"] * 4
             items["迅捷药水"] += 1
             items["幸运药水"] += 1
             items["道具盲盒"] += 5
@@ -1096,15 +1093,6 @@ async def get_world_boss_ranking(bot, user_id, world_boss_data):
 
 async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, msg):
     """处理世界Boss被击败（需要返回修改后的data）"""
-    # 先更新伤害数据（包含当前回合的伤害）
-    damage = world_boss_data["contributors"].get(str(user_id), 0)
-    world_boss_data["contributors"][str(user_id)] = damage + result["damage"]
-    save_data(world_boss_data_path, world_boss_data)
-    
-    # 获取更新后的排行榜数据
-    contributors = sorted(world_boss_data["contributors"].items(), 
-                         key=lambda x: x[1], reverse=True)
-    
     # 发放世界Boss奖励
     rewards, all_rewards = get_world_boss_rewards()
     
@@ -1129,7 +1117,9 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
                 items_text = " ".join([f"{k}x{v}" for k,v in reward["items"].items()])
                 rank_text += f"{items_text}"
             
-            world_boss_at_text += MessageSegment.at(uid)
+            if str(uid) != str(user_id):
+                world_boss_at_text += MessageSegment.at(uid)
+            
             top5_msg.append(rank_text)
 
     # 发放全员奖励（伤害x10草莓 + 伤害x2经验）
@@ -1140,7 +1130,6 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
             berry = reward["berry"]
             exp = reward["exp"]
             current_grade = data[str(uid)].get("grade", 1)
-            max_grade = data[str(uid)].get("max_grade", 30)
 
             # 发放草莓奖励
             data[str(uid)]["berry"] += berry
@@ -1154,9 +1143,9 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
             
             # 如果是当前玩家，添加额外信息
             if uid == str(user_id):
-                player_exp_info = f"\n\n你获得了{berry}草莓"
+                player_exp_info = f"\n\n你获得了{berry}颗草莓"
                 if current_grade >= max_grade:
-                    player_exp_info += f"和{extra_berry}草莓（经验转换）"
+                    player_exp_info += f"和{extra_berry}颗草莓（经验转换）"
                 else:
                     if exp_msg:
                         player_exp_info += f"{exp_msg}"
@@ -1188,6 +1177,10 @@ async def handle_personal_boss(bot, user_id, level, data):
     
     if not success:
         return None, data
+        
+    # 打boss不消耗buff次数
+    data = buff2_change_status(data, user_id, "lucky", 1)
+    data = buff2_change_status(data, user_id, "speed", 1)
     
     msg = big_damage_msg
     msg += f"你对Boss[{result['name']}]造成了{damage}点伤害！"

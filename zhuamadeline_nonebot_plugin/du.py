@@ -175,7 +175,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
     # 失约处理
     if user_data['berry'] < 0:
         user_data['berry'] -= 250
-        msg += f"哎呀！你没有草莓了却又进行了抽卡，并且没有赚回来！\n"
+        msg += f"\n\n哎呀！你没有草莓了却又进行了抽卡，并且没有赚回来！\n"
         msg += f"现在作为惩罚我要再扣除你250草莓\n"
         msg += f"在抓回正数之前\n你无法使用道具，无法祈愿，无法进行pvp竞技！\n买卖蓝莓也是不允许的！"
         

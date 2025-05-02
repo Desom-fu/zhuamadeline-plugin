@@ -109,7 +109,7 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
 
 #随机抓出一个madeline，且有时间间隔限制
-catch = on_command("zhua", aliases={"抓",'ZHUA','Zhua'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+catch = on_command("zhua", aliases={"抓",'ZHUA','Zhua','catch'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @catch.handle()
 async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
     answer = -1
@@ -368,10 +368,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         if liechang_number == "5":
             world_boss_at_text = ''
 
-            # 打boss不消耗buff次数
-            data = buff2_change_status(data, user_id, "lucky", 1)
-            data = buff2_change_status(data, user_id, "speed", 1)
-
             # 优先处理世界Boss
             world_boss_data = open_data(world_boss_data_path)
             if world_boss_data.get("active", False):
@@ -379,8 +375,11 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 success, result, big_damage_msg, damage = attack_boss(user_id, damage, is_world_boss=True)
 
                 if success:
+                    # 打boss不消耗buff次数
+                    data = buff2_change_status(data, user_id, "lucky", 1)
+                    data = buff2_change_status(data, user_id, "speed", 1)
                     msg = big_damage_msg
-                    msg += f"\n你对世界Boss[{result['name']}]造成了{damage}点伤害！"
+                    msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
                     msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
 
                     # 更新当前伤害数据
@@ -418,7 +417,6 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
                     if result["hp"] <= 0:
                         msg, world_boss_at_text, data = await handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, msg)
-
                     msg += hourglass_text + diamond_text
                     save_data(full_path, data)
                     await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None, 30)

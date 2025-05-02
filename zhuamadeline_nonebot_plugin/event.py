@@ -1787,9 +1787,8 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                     "额，来都来了，全体在5猎的玩家要不要打一下？\n"
                     "每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                     "全体在5猎的玩家都必须打世界Boss哦！\n"
-                    "打完之后按造成伤害的贡献分发奖励，前五名有巨额奖励哦！（如果造成伤害相同，按照开打Boss的时间进行排名）\n"
-                    "没进入前五名的也不必担心，每人也能获得300颗草莓！\n"
-                    "除此之外，全体玩家还能获得造成伤害量*2的经验哦！"
+                    "打完之后按造成伤害的贡献分发奖励，前五名有巨额道具奖励哦！（如果造成伤害相同，按照开打Boss的时间进行排名）\n"
+                    "除此之外，全体玩家还能获得造成伤害量*2的经验(若已满级则改成造成伤害了*4的草莓)和造成伤害量*10的草莓哦！"
                 )
                 await send_image_or_text(message, msg, True, None, 20)
                 return
@@ -1803,7 +1802,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
                 "击败Boss后你能获得Boss血量*1.3倍的经验和若干草莓！\n"
-                "若已满级则在当前草莓基础上再翻倍！"
+                "若已满级则在当前草莓基础上再额外获得血量x4的草莓！"
             )
         elif boss_type == "normal":
             msg = (
@@ -1813,7 +1812,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
                 "击败Boss后你能获得Boss血量*1.4倍的经验和若干道具！\n"
-                "若已满级则获得的道具数量翻倍！"
+                "若已满级则获得的道具数量至少加1！"
             )
         elif boss_type == "hard":
             msg = (
@@ -1823,7 +1822,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
                 "击败Boss后你能获得Boss血量*1.5倍的经验和若干草莓和道具！\n"
-                "若已满级则在当前草莓基础上翻倍，并且道具数量翻倍！"
+                "若已满级则在当前草莓基础上额外获得血量x4的草莓，并且道具数量至少加1(道具盲盒至少加5)！"
             )
 
         await send_image_or_text(message, msg, True, None, 20)
