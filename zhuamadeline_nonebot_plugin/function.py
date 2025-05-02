@@ -1004,7 +1004,7 @@ def get_boss_rewards(boss_data, user_id, grade):
         exp = math.floor(boss_data["max_hp"] * 1.3)
         berry = boss_data["max_hp"] * 10
         if is_max_grade:
-            berry *= 2
+            berry += exp*2
             reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励：{berry}颗草莓"
             return {"berry": berry}, exp, reward_msg
         reward_msg = f"你已击败迷你Boss[{boss_data['name']}]！\n获得{berry}颗草莓"
@@ -1014,12 +1014,12 @@ def get_boss_rewards(boss_data, user_id, grade):
         exp = math.floor(boss_data["max_hp"] * 1.4)
         items = {
             "迅捷药水": random.randint(1, 3),
-            "幸运药水": random.randint(1, 2),
+            "幸运药水": random.randint(1, 3),
         }
         if is_max_grade:
-            items["迅捷药水"] *= 2
-            items["幸运药水"] *= 2
-            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励："
+            items["迅捷药水"] += 1
+            items["幸运药水"] += 1
+            reward_msg = f"你已击败普通Boss[{boss_data['name']}]！\n由于已满级，道具都各多获得一瓶："
         else:
             reward_msg = f"你已击败普通Boss[{boss_data['name']}]！\n获得："
         
@@ -1036,10 +1036,11 @@ def get_boss_rewards(boss_data, user_id, grade):
             "道具盲盒": random.randint(5, 10),
         }
         if is_max_grade:
-            berry *= 2
-            for k in items:
-                items[k] *= 2
-            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！\n由于已满级，获得双倍奖励：{berry}颗草莓、"
+            berry += exp*2
+            items["迅捷药水"] += 1
+            items["幸运药水"] += 1
+            items["道具盲盒"] += 5
+            reward_msg = f"你已击败精英Boss[{boss_data['name']}]！\n由于已满级，经验值奖励改为获得经验值*2颗草莓，道具都各多获得一个（盲盒多获得5个），总计：{berry}颗草莓、"
         else:
             reward_msg = f"你已击败精英Boss[{boss_data['name']}]！\n获得{berry}颗草莓、"
         
@@ -1121,26 +1122,6 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
                 for item, count in reward["items"].items():
                     data[str(uid)].setdefault("item", {})[item] = data[str(uid)]["item"].get(item, 0) + count
 
-            # 发放经验
-            exp = damage_done * 2
-            current_grade = data[str(uid)].get("grade", 1)
-            max_grade = data[str(uid)].get("max_grade", 30)
-
-            if current_grade >= max_grade:
-                berry = exp * 2
-                data[str(uid)]["berry"] += berry
-                if uid == str(user_id):
-                    player_exp_info = f"\n\n你获得了{berry}草莓（经验转换）"
-            else:
-                exp_msg, grade_msg, data = calculate_level_and_exp(data, uid, exp, 0)
-                if uid == str(user_id):
-                    player_exp_info = ""
-                    if exp_msg:
-                        player_exp_info += f"\n\n{exp_msg.strip()}"
-                    if grade_msg:
-                        player_exp_info += f"\n{grade_msg.strip()}"
-                    if not player_exp_info:
-                        player_exp_info = f"\n\n你获得了{exp}点经验"
 
             # 构建排名信息
             rank_text = f"第{i+1}名 [{nickname}]（造成{damage_done}点伤害）: "
@@ -1169,7 +1150,7 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
                 extra_berry = exp * 2
                 data[str(uid)]["berry"] += extra_berry
             else:
-                _, _, data = calculate_level_and_exp(data, uid, exp, 0)
+               exp_msg, grade_msg, data = calculate_level_and_exp(data, uid, exp, 0)
             
             # 如果是当前玩家，添加额外信息
             if uid == str(user_id):
@@ -1177,14 +1158,18 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
                 if current_grade >= max_grade:
                     player_exp_info += f"和{extra_berry}草莓（经验转换）"
                 else:
-                    player_exp_info += f"和{exp}点经验"
+                    if exp_msg:
+                        player_exp_info += f"{exp_msg}"
+                    if grade_msg:
+                        player_exp_info += f"{grade_msg}"
+
             
             if uid not in [x[0] for x in rewards]:
                 other_count += 1
 
     # 构建最终消息
     msg += f"\n\n世界Boss[{result['name']}]已被击败！"
-    msg += "\n\n前五名额外奖励：\n" + "\n\n".join(top5_msg)
+    msg += "\n\n前五名额外道具奖励：\n" + "\n\n".join(top5_msg)
     msg += player_exp_info
     msg += "\n\n所有参与者都获得了[伤害值×10]的草莓奖励！"
     msg += "\n除此之外，所有玩家都能获得[伤害值×2]点exp哦！（若已满级则会获得[伤害值×4]颗草莓！）"
