@@ -12,11 +12,15 @@ __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
 help_categories = {
     "catch": {
         "name": "抓取类指令",
-        "aliases": ["catch", "抓取", "zhua"],
+        "aliases": ["catch", "抓取", "zhua", "抓"],
         "commands": [
             f".qhlc (0~{liechang_count}) - 切换猎场",
             ".zhua - 随机抓取Madeline",
-            ".qd - 每日签到",
+            ".count {madeline名字} - 查看某Madeline数量",
+            ".show {madeline名字} - 查看某Madeline详情",
+            f".cklc (0~{liechang_count}) - 查看猎场信息",
+            f".mymadeline (1~{liechang_count}) - 查看Madeline库存",
+            ".madelinejd/.jd - 查看Madeline总进度",
             ".pray - 祈愿抓取(需充能器)",
             ".sbw - 随机展示Madeline"
         ]
@@ -26,28 +30,23 @@ help_categories = {
         "aliases": ["check", "查看", "ck"],
         "commands": [
             ".jrrp - 查看今日人品（签到值）",
-            ".count {madeline名字} - 查看某Madeline数量",
-            ".show {madeline名字} - 查看Madeline详情",
             f".ck (all) - 查看当前/所有状态",
-            f".cklc (0~{liechang_count}) - 查看猎场信息",
-            f".mymadeline (1~{liechang_count}) - 查看库存",
-            ".myitem - 查看所有道具",
-            ".mycp - 查看所有藏品",
-            ".madelinejd/.jd - 查看总进度",
             ".qfjd - 查看全服进度",
             ".jdrank - 查看全服Madeline进度排名",
             ".berryrank (down) - 查看全服草莓(倒序)排名",
             ".qfcklc - 查看全服猎场人数",
             ".qfcklc - 查看全服猎场人数",
-            ".shop - 查看今日商品",
-            ".item {道具名} - 查看道具详情",
-            ".cp {藏品名} - 查看藏品详情"
         ]
     },
     "item": {
-        "name": "道具类指令",
-        "aliases": ["item", "道具"],
+        "name": "道具/藏品类指令",
+        "aliases": ["item", "道具", "collections", "collection", "cp", "藏品", "items", "dj", "daoju"],
         "commands": [
+            ".shop - 查看今日商品",
+            ".item {道具名} - 查看道具详情",
+            ".cp {藏品名} - 查看藏品详情"
+            ".myitem - 查看所有道具",
+            ".mycp - 查看所有藏品",
             ".buy {道具名} [数量] - 购买道具",
             ".use {道具名} - 使用道具",
             ".recycle {道具名} [数量] - 回收道具"
@@ -91,7 +90,8 @@ help_categories = {
         "commands": [
             ".transfer 目标QQ号 数量 - 转账",
             ".berryrank - 草莓排行榜",
-            ".bank save/take 数量 - 银行存取"
+            ".bank save/take 数量 - 银行存取",
+            ".qd - 每日签到"
         ]
     }
 }
@@ -113,12 +113,12 @@ async def zhua_help(args: Message = CommandArg()):
         # 主帮助菜单 - 只显示分类指引
         text = "更多详情请查看wiki: https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O"
         main_help = (
-            "【Madeline帮助系统】\n"
+            "【抓Madeline帮助系统】\n"
             "══════════════\n"
             "输入以下分类指令查看详细帮助：\n"
             "- .help catch - 抓取类指令\n"
             "- .help check - 查看类指令\n"
-            "- .help item - 道具类指令\n"
+            "- .help item - 道具/藏品类指令\n"
             "- .help garden - 果园类指令\n"
             "- .help game - 游戏类指令\n"
             "- .help work - 工作类指令\n"
