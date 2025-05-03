@@ -992,8 +992,8 @@ def attack_boss(user_id, damage, user_data, is_world_boss=False):
             del data[user_id]
 
     # 打boss不消耗buff次数
-    user_data = buff2_change_status(data, user_id, "lucky", 1)
-    user_data = buff2_change_status(data, user_id, "speed", 1)
+    user_data = buff2_change_status(user_data, user_id, "lucky", 1)
+    user_data = buff2_change_status(user_data, user_id, "speed", 1)
     
     save_data(world_boss_data_path if is_world_boss else boss_data_path, data)
     return True, boss_data, big_damage_msg, damage, user_data
