@@ -116,7 +116,7 @@ async def zhua_help(args: Message = CommandArg()):
             "【抓Madeline帮助系统】\n"
             "══════════════\n"
             "输入以下分类指令查看详细帮助：\n"
-            "- .help catch - 抓取类指令\n"
+            "- .help zhua - 抓取类指令\n"
             "- .help check - 查看类指令\n"
             "- .help item - 道具/藏品类指令\n"
             "- .help garden - 果园类指令\n"
