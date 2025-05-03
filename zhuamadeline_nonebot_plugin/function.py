@@ -978,7 +978,7 @@ def attack_boss(user_id, damage, user_data, is_world_boss=False):
     # 没有指虎并且攻击大于等于2，获得指虎
     elif big_attack == 0 and damage >= 2:
         user_data[user_id]['collections']['暴击指虎'] = 1
-        big_damage_msg += '你愤怒一击，直击Boss的要害！\n突然，从Boss身上突然掉下来了一副镶嵌了绿宝石的金属指虎，你捡起了它……\n输入 .cp 暴击指虎 以查看具体效果\n\n'
+        big_damage_msg += '你愤怒一击，直击Boss的要害！\n突然，从Boss身上突然掉下来了一副镶嵌了\n绿宝石的金属指虎，你捡起了它……\n输入 .cp 暴击指虎 以查看具体效果\n\n'
     
     boss_data["hp"] -= damage
     
@@ -1175,14 +1175,16 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
 async def handle_world_boss(bot, user_id, level, data):
     """处理世界Boss（需要返回修改后的data）"""
     world_boss_data = open_data(world_boss_data_path)
+    # 初始化
+    world_boss_at_text = ""
     if not world_boss_data.get("active", False):
-        return None, "", data
+        return None, world_boss_at_text, data
     
     damage = level
     success, result, big_damage_msg, damage, data = attack_boss(user_id, damage, data, is_world_boss=True)
     
     if not success:
-        return None, "", data
+        return None, world_boss_at_text, data
     
     msg = big_damage_msg
     msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
