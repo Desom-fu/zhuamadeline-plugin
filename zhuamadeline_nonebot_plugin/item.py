@@ -1695,6 +1695,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
                                 crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
                                 bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
+                                fox_fur = data[str(user_id)].get("collections",{}).get('淡紫色狐狸毛', 0)
                                 #增加免伤率的部分
                                 #天使之羽，增加2%
                                 if (wing >= 1):
@@ -1704,6 +1705,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     noHitRate += 3
                                 #炸弹包，增加5%
                                 if (bombbag >= 1):
+                                    noHitRate += 5
+                                #狐狸毛，增加5%
+                                if (fox_fur >= 1):
                                     noHitRate += 5
                                 if hitNumber > noHitRate:
                                     cd_time = random.randint(int(nums[0])*45, (int(nums[0])+1)*45)
@@ -1971,6 +1975,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
                             crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
                             bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
+                            fox_fur = data[str(user_id)].get("collections",{}).get('淡紫色狐狸毛', 0)
                             #增加免伤率的部分
                             #天使之羽，增加2%
                             if (wing >= 1):
@@ -1980,6 +1985,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 noHitRate += 3
                             #炸弹包，增加5%
                             if (bombbag >= 1):
+                                noHitRate += 5
+                            #狐狸毛，增加5%
+                            if (fox_fur >= 1):
                                 noHitRate += 5
                             #充能箱100%爆炸
                             if elect_status == True:

@@ -66,7 +66,7 @@ __all__ = [
     'get_world_boss_ranking',
     'handle_world_boss_defeat',
     'handle_personal_boss',
-    
+    "handle_world_boss"    
 ]
 
 #madeline图鉴
@@ -957,7 +957,7 @@ def spawn_world_boss():
     save_data(world_boss_data_path, boss_data)
     return boss_data
 
-def attack_boss(user_id, damage, is_world_boss=False):
+def attack_boss(user_id, damage, user_data, is_world_boss=False):
     """攻击Boss"""
     if is_world_boss:
         data = open_data(world_boss_data_path)
@@ -966,16 +966,19 @@ def attack_boss(user_id, damage, is_world_boss=False):
         data = open_data(boss_data_path)
         boss_data = data.get(user_id, {})
     
+    if not boss_data:
+        return False, "没有找到Boss"
+    
     # 指虎伤害翻倍
     big_damage_msg = ''
-    user_data = open_data(full_path)
     big_attack = user_data[user_id]['collections'].get("暴击指虎", 0)
     if big_attack >= 1 and random.randint(1, 100) <= 10:
         damage *= 2
         big_damage_msg += '尖锐的指虎狠狠地扎进了Boss的要害，\n本次攻击造成的伤害翻倍！\n\n'
-    
-    if not boss_data:
-        return False, "没有找到Boss"
+    # 没有指虎并且攻击大于等于2，获得指虎
+    elif big_attack == 0 and damage >= 2:
+        user_data[user_id]['collections']['暴击指虎'] = 1
+        big_damage_msg += '你愤怒一击，直击Boss的要害！\n突然，从Boss身上突然掉下来了一副镶嵌了绿宝石的金属指虎，你捡起了它……\n输入 .cp 暴击指虎 以查看具体效果\n\n'
     
     boss_data["hp"] -= damage
     
@@ -987,9 +990,13 @@ def attack_boss(user_id, damage, is_world_boss=False):
     else:
         if boss_data["hp"] <= 0:
             del data[user_id]
+
+    # 打boss不消耗buff次数
+    data = buff2_change_status(data, user_id, "lucky", 1)
+    data = buff2_change_status(data, user_id, "speed", 1)
     
     save_data(world_boss_data_path if is_world_boss else boss_data_path, data)
-    return True, boss_data, big_damage_msg, damage
+    return True, boss_data, big_damage_msg, damage, user_data
 
 def get_boss_rewards(boss_data, user_id, grade):
     """获取击败Boss的奖励
@@ -1165,6 +1172,60 @@ async def handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, 
     
     return msg, world_boss_at_text, data  # 返回修改后的data
 
+async def handle_world_boss(bot, user_id, level, data):
+    """处理世界Boss（需要返回修改后的data）"""
+    world_boss_data = open_data(world_boss_data_path)
+    if not world_boss_data.get("active", False):
+        return None, "", data
+    
+    damage = level
+    success, result, big_damage_msg, damage, data = attack_boss(user_id, damage, data, is_world_boss=True)
+    
+    if not success:
+        return None, "", data
+    
+    msg = big_damage_msg
+    msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
+    msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
+
+    # 更新当前伤害数据
+    world_boss_data["contributors"][str(user_id)] = world_boss_data["contributors"].get(str(user_id), 0) + damage
+
+    # 获取排行榜
+    ranking_msg = await get_world_boss_ranking(bot, user_id, world_boss_data)
+    msg += ranking_msg
+
+    # 添加玩家个人排名信息
+    player_rank = None
+    player_damage = world_boss_data["contributors"].get(str(user_id), 0)
+    contributors = sorted(world_boss_data["contributors"].items(), 
+                         key=lambda x: x[1], reverse=True)
+
+    for i, (uid, dmg) in enumerate(contributors):
+        if uid == str(user_id):
+            player_rank = i + 1
+            break
+
+    if player_rank is not None:
+        rank_info = f"\n\n你的排名: 第{player_rank}名 (总伤害: {player_damage})"
+
+        if player_rank > 1:
+            higher_damage = contributors[player_rank-2][1]
+            diff = higher_damage - player_damage
+            rank_info += f"\n距离上一名还差: {diff}伤害"
+
+        if player_rank < len(contributors):
+            lower_damage = contributors[player_rank][1]
+            diff = player_damage - lower_damage
+            rank_info += f"\n领先下一名: {diff}伤害"
+
+        msg += rank_info
+
+    if result["hp"] <= 0:
+        msg, world_boss_at_text, data = await handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, msg)
+    
+    return msg, world_boss_at_text, data
+
 async def handle_personal_boss(bot, user_id, level, data):
     """处理个人Boss（需要返回修改后的data）"""
     grade = data[user_id].setdefault("grade", 1)
@@ -1173,14 +1234,10 @@ async def handle_personal_boss(bot, user_id, level, data):
         return None, data
     
     damage = level
-    success, result, big_damage_msg, damage = attack_boss(user_id, damage)
+    success, result, big_damage_msg, damage, data = attack_boss(user_id, damage, data)
     
     if not success:
         return None, data
-        
-    # 打boss不消耗buff次数
-    data = buff2_change_status(data, user_id, "lucky", 1)
-    data = buff2_change_status(data, user_id, "speed", 1)
     
     msg = big_damage_msg
     msg += f"你对Boss[{result['name']}]造成了{damage}点伤害！"

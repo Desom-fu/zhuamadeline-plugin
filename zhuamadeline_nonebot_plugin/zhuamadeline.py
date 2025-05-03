@@ -366,61 +366,14 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         grade_msg = ''
 
         if liechang_number == "5":
-            world_boss_at_text = ''
-
+            
             # 优先处理世界Boss
-            world_boss_data = open_data(world_boss_data_path)
-            if world_boss_data.get("active", False):
-                damage = level
-                success, result, big_damage_msg, damage = attack_boss(user_id, damage, is_world_boss=True)
-
-                if success:
-                    # 打boss不消耗buff次数
-                    data = buff2_change_status(data, user_id, "lucky", 1)
-                    data = buff2_change_status(data, user_id, "speed", 1)
-                    msg = big_damage_msg
-                    msg += f"你对世界Boss[{result['name']}]造成了{damage}点伤害！"
-                    msg += f"\n世界Boss剩余HP: {result['hp']}/{result['max_hp']}"
-
-                    # 更新当前伤害数据
-                    world_boss_data["contributors"][str(user_id)] = world_boss_data["contributors"].get(str(user_id), 0) + damage
-
-                    # 获取排行榜
-                    ranking_msg = await get_world_boss_ranking(bot, user_id, world_boss_data)
-                    msg += ranking_msg
-
-                    # 添加玩家个人排名信息
-                    player_rank = None
-                    player_damage = world_boss_data["contributors"].get(str(user_id), 0)
-                    contributors = sorted(world_boss_data["contributors"].items(), 
-                                        key=lambda x: x[1], reverse=True)
-
-                    for i, (uid, dmg) in enumerate(contributors):
-                        if uid == str(user_id):
-                            player_rank = i + 1
-                            break
-
-                    if player_rank is not None:
-                        rank_info = f"\n\n你的排名: 第{player_rank}名 (总伤害: {player_damage})"
-
-                        if player_rank > 1:
-                            higher_damage = contributors[player_rank-2][1]
-                            diff = higher_damage - player_damage
-                            rank_info += f"\n距离上一名还差: {diff}伤害"
-
-                        if player_rank < len(contributors):
-                            lower_damage = contributors[player_rank][1]
-                            diff = player_damage - lower_damage
-                            rank_info += f"\n领先下一名: {diff}伤害"
-
-                        msg += rank_info
-
-                    if result["hp"] <= 0:
-                        msg, world_boss_at_text, data = await handle_world_boss_defeat(bot, user_id, data, world_boss_data, result, msg)
-                    msg += hourglass_text + diamond_text
-                    save_data(full_path, data)
-                    await send_image_or_text(catch, msg, True, world_boss_at_text if result["hp"] <= 0 else None, 30)
-                    return
+            msg, world_boss_at_text, data = await handle_world_boss(bot, user_id, level, data)
+            if msg:
+                msg += hourglass_text + diamond_text
+                save_data(full_path, data)
+                await send_image_or_text(catch, msg, True, world_boss_at_text if world_boss_at_text else None, 30)
+                return
 
             # 处理个人Boss
             msg, data = await handle_personal_boss(bot, user_id, level, data)

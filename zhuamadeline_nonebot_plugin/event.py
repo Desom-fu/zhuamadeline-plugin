@@ -1715,29 +1715,28 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             save_data(full_path, user_data)
             msg = (
                 "在探索遗忘神庙时，你触碰了祭坛上倒置的黑色石碑。\n"
-                "石缝中突然渗出暗红色液体，凝结成悬挂的十字架形态。\n"
-                "当你想取下它时，发现这金属竟像从你皮肤里生长出来一般温热。\n"
+                "石缝中突然渗出暗红色液体，凝结成悬挂的逆十字架形态。"
                 "输入 .cp 逆十字架 以查看具体效果" + diamond_text + hourglass_text
             )
             await send_image_or_text(message, msg, True, None, 25)
             return
 
-    # 暴击指虎 - 水淹裂谷 
-    elif rnd <= 545: # 1%
-        if '暴击指虎' not in collections:
-            collections['暴击指虎'] = 1
+    # 淡紫色毛 - 水淹裂谷 
+    elif rnd <= 540: # 0.5%
+        if '淡紫色狐狸毛' not in collections:
+            collections['淡紫色狐狸毛'] = 1
             save_data(full_path, user_data)
             msg = (
                 "当你在裂谷的岩壁上攀爬时，指尖突然陷入一处隐藏的孔洞。\n"
-                "洞穴里嵌着副锈蚀的金属指虎，绿宝石接触到你血液的瞬间，\n"
-                "所有锈迹剥落，露出锋利如新的刃口，仿佛在渴望战斗。\n"
-                "输入 .cp 暴击指虎 以查看具体效果" + diamond_text + hourglass_text
+                "你在孔洞里面摸索的时候，突然摸到了一撮淡紫色的狐狸毛！\n"
+                "但是这撮毛却异常的稳定，没有任何爆炸的迹象。\n"
+                "输入 .cp 淡紫色狐狸毛 以查看具体效果" + diamond_text + hourglass_text
             )
             await send_image_or_text(message, msg, True, None, 25)
             return
 
     # 幸运戒指 - 水晶洞窟
-    elif rnd <= 550: # 0.5%
+    elif rnd <= 550: # 1%
         if '幸运戒指' not in collections:
             collections['幸运戒指'] = 1
             save_data(full_path, user_data)
