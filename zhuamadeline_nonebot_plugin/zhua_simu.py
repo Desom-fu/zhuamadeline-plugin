@@ -6,9 +6,111 @@ import random
 import math
 import datetime
 from pathlib import Path
-from .function import calculate_level_and_exp
-from .config import bot_owner_id, max_grade
+from .config import bot_owner_id
 from .whitelist import whitelist_rule
+
+test_max_grade = 100
+
+# 经验增长规则字典
+exp_growth = {
+    range(1, 6): 5,   # 等级 1-5，max_exp +5
+    range(6, 11): 10,  # 等级 6-10，max_exp +10
+    range(11, 16): 15, # 等级 11-15，max_exp +15
+    range(16, 21): 20, # 等级 16-20，max_exp +20
+    range(21, 101): 25  # 等级 21-30，max_exp +25
+}
+
+# 5猎经验值计算
+def calculate_level_and_exp(data, user_id, level, isitem):
+    """
+    计算等级和经验值的增长（显示溢出经验的版本）
+    参数:
+        data: 用户数据字典
+        user_id: 用户ID
+        level: 本次获得的等级点数
+        isitem: 是不是道具
+    返回:
+        tuple: (经验消息，等级消息，data主数据)
+    """
+    user_data = data[user_id]
+    original_exp = user_data.get("exp", 0)
+    original_grade = user_data.get("grade", 1)
+    original_max_exp = user_data.get("max_exp", 10)
+    
+    exp = original_exp
+    grade = original_grade
+    max_exp = original_max_exp
+    collections = user_data.get("collections", {})
+    
+    exp_msg = ''
+    grade_msg = ''
+    
+    # 如果满级直接返回
+    if grade == test_max_grade:
+        return exp_msg, grade_msg, data
+        
+    # 1. 计算获得的经验值
+    if isitem == 1:
+        gained_exp = math.floor(level / 2)  # 道具获得一半经验
+    else:
+        gained_exp = level
+    
+    # 第一阶段消息：显示获得的经验和当前状态（包含溢出经验）
+    if gained_exp > 0:
+        temp_exp = exp + gained_exp  # 临时计算包含本次获得的经验
+        exp_msg = f'\n\n本次获得{gained_exp}点经验，当前经验：{temp_exp}/{max_exp}'
+    
+    # 2. 实际增加经验
+    exp += gained_exp
+    
+    # 处理可能的多级升级情况
+    upgraded = False
+    while exp >= max_exp and grade < test_max_grade:
+        upgraded = True
+        # 计算升级
+        exp -= max_exp
+        grade += 1
+
+        # 查找对应的经验增长值
+        for level_range, increment in exp_growth.items():
+            if grade in level_range:
+                max_exp += increment
+                break
+        
+        # 特殊等级消息
+        special_grades = {
+            6: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到2级的Madeline了！",
+            11: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到3级的Madeline了！",
+            16: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到4级的Madeline了！",
+            21: f"\n恭喜升到{grade}级，现在你可以在深渊里面抓到5级的Madeline了，同时道具和祈愿的封印也解除了！",
+        }
+
+        if grade in special_grades:
+            grade_msg += special_grades[grade]
+    
+    # 3. 如果有升级，添加升级后的状态
+    if upgraded:
+        grade_msg = f'\n恭喜升级！当前等级：{grade}/{test_max_grade}' + grade_msg
+        # 没有满级才显示升级后经验
+        if grade < test_max_grade:
+            grade_msg += f'\n升级后经验：{exp}/{max_exp}'
+
+    # 添加藏品
+    if grade == test_max_grade and collections.get("时隙沙漏", 0) == 0:
+        collections['时隙沙漏'] = 1
+        grade_msg += f"\n你已经达到最大等级{test_max_grade}！\n倏然，你手中入场券的那一点金色光芒突然闪烁起来！\n你慢慢的看着它融化，重组，最后在你手中变成了散发着淡金色光芒的蓝色沙漏。\n输入.cp 时隙沙漏 以查看具体效果"
+    
+    # 更新数据
+    user_data.update({
+        "exp": exp, 
+        "grade": grade, 
+        "max_exp": max_exp,
+        "collections": collections
+    })
+    
+    # save_data(full_path, data)
+    
+    return exp_msg, grade_msg, data
 
 async def simulate_event(user_data, current_time):
     """模拟事件系统的影响"""
@@ -205,8 +307,8 @@ async def handle_simulation(event: GroupMessageEvent, arg: Message = CommandArg(
         await simu_5.finish("参数必须是数字！格式：\n.simu_5 最高等级 模拟次数")
         return
     
-    if max_grade < 1 or max_grade > max_grade:
-        await simu_5.finish(f"最高等级必须在1-{max_grade}之间")
+    if max_grade < 1 or max_grade > test_max_grade:
+        await simu_5.finish(f"最高等级必须在1-{test_max_grade}之间")
         return
     if simulations < 1 or simulations > 100:
         await simu_5.finish("模拟次数必须在1-100之间")
