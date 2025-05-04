@@ -1538,7 +1538,6 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         if not demon_data[group_id]['clip'] or all(b == 0 for b in demon_data[group_id]['clip']):
             demon_data[group_id]['clip'] = load(identity_found)
             msg += "- 子弹已耗尽，重新装填！\n"
-            msg += "\n"
             # 游戏轮数+1
             demon_data[group_id]['game_turn'] += 1
             # 调用死斗模式伤害计算 (action_type=2)
@@ -1547,6 +1546,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             # 获取死斗模式信息
             death_msg, demon_data = await death_mode(identity_found, group_id, demon_data)
             msg += death_msg
+            msg += "\n"
             
             # 获取刷新道具
             item_msg, demon_data = await refersh_item(identity_found, group_id, demon_data)

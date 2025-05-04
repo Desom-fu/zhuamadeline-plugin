@@ -12,7 +12,7 @@ from .list3 import *
 from .list4 import *
 from .list5 import *
 from .function import open_data, save_data, print_zhua, time_decode, buff2_change_status, get_nickname, spawn_boss, spawn_world_boss
-from .config import ban, bot_owner_id, connect_bot_id, user_path1, user_path2, user_path3, user_path4, user_path5, stuck_path, bar_path, full_path, world_boss_data_path, boss_data_path
+from .config import ban, bot_owner_id, connect_bot_id, user_path1, user_path2, user_path3, user_path4, user_path5, stuck_path, bar_path, full_path, world_boss_data_path, boss_data_path, boss_type_config
 from .whitelist import whitelist_rule
 from .shop import item, fish_prices
 from .pvp import check_liechang
@@ -1794,9 +1794,10 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
         # 生成个人Boss
         boss_data = spawn_boss(user_id, grade, boss_type)
+        boss_type_name = boss_type_config[boss_type]
         if boss_type == "mini":
             msg = (
-                f"你遭遇了[{boss_data['name']}]（迷你级Boss）！\n"
+                f"你遭遇了[{boss_data['name']}]（{boss_type_name}Boss）！\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
                 "击败Boss后才能继续正常抓取Madeline！\n"
@@ -1805,7 +1806,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             )
         elif boss_type == "normal":
             msg = (
-                f"你遭遇了[{boss_data['name']}]（普通级Boss）！不是，为什么技巧是boss啊喂！\n"
+                f"你遭遇了[{boss_data['name']}]（{boss_type_name}Boss）！不是，为什么技巧是boss啊喂！\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "等下，如果我能熟练掌握这个技巧是不是不用打？不行？好吧……"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"
@@ -1815,7 +1816,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             )
         elif boss_type == "hard":
             msg = (
-                f"你遭遇了[{boss_data['name']}]（精英级Boss）！等等……似乎有点不对？\n"
+                f"你遭遇了[{boss_data['name']}]（{boss_type_name}Boss）！等等……似乎有点不对？\n"
                 f"生命值: {boss_data['hp']}/{boss_data['max_hp']}\n"
                 "真的要打吗？\n"
                 "从现在开始，你的每次抓取都会对Boss造成伤害（伤害值等于抓到的Madeline等级）\n"

@@ -44,6 +44,7 @@ __all__ = [
     "boss_data_path",
     "world_boss_data_path",
     "boss_names",
+    "boss_type_config",
     'demon_path',
     "berry_path"
 ]
@@ -141,4 +142,11 @@ boss_names = {
                "反丢水母", "心奥歘"],
     "hard": ["Confringo", "野生小卒", "Desom-fu", "WaterDrop", "海豚", "prehasb", "azure_bluet"],
     "world": ["Fhloy", "Foxeline", "Fronia", "Mosed", "pbot", "水滴伯特", "小小卒", "猫猫伯特", "甜浆果爱好者"]
+}
+
+boss_type_config = {
+    "mini": "迷你级",
+    "normal": "普通级",
+    "hard": "精英级",
+    "world": "世界级",
 }

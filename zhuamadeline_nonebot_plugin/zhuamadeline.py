@@ -655,6 +655,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     # 两个boss相关的data
     boss_data = open_data(boss_data_path).get(user_id, {})
     world_boss_data = open_data(world_boss_data_path)
+    
     # 获取pvp数据
     turn = pvp_data.get('count', 100)  # 获取当前轮数
     
@@ -825,14 +826,14 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 
             message += (
                 f"\n- 世界Boss事件"
-                f"\n全体5猎玩家正在与[{world_boss_data['name']}]战斗！"
+                f"\n全体5猎玩家正在与世界级Boss[{world_boss_data['name']}]战斗！"
                 f"\n世界Boss生命值: {world_boss_data['hp']}/{world_boss_data['max_hp']}"
                 f"{rank_info}"
             )
 
         # 然后展示Boss信息
         message += (
-            f"\n- 你正在与[{boss_data['name']}]（{boss_data['type']}级Boss）战斗！"
+            f"\n- 你正在与[{boss_data['name']}]（{boss_type_config[boss_data['type']]}Boss）战斗！"
             f"\nBoss生命值: {boss_data['hp']}/{boss_data['max_hp']}"
         ) if boss_data else ''
 
