@@ -389,7 +389,7 @@ async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = 
     if not re.match(r'^#?[0-9a-fA-F]{6}$', color_arg):
         await send_image_or_text(user_id, set_bgcolor, 
                                "请输入正确的色号格式（例如 #1f1e33 或 1f1e33）\n"
-                               "注意：需要花费1000草莓来设置自定义背景色", 
+                               "注意：需要花费1000颗草莓来设置自定义背景色", 
                                True, None)
         return
     
@@ -404,8 +404,8 @@ async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = 
     # 发送确认提示（此时消息背景已经是新色号）
     await send_image_or_text(user_id, set_bgcolor, 
                            f"当前预览背景色: #{color_code}\n"
-                           f"确认花费1000草莓永久设置此背景色吗？\n"
+                           f"确认花费1000颗草莓永久设置此背景色吗？\n"
                            f"可以随便输入命令预览背景色\n"
                            "请输入 .confirm 确认或 .deny 取消\n"
-                           f"你当前有 {data[user_id]['berry']} 草莓",
+                           f"你当前有{data[user_id]['berry']}颗草莓",
                            True, None)
