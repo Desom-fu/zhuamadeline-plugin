@@ -125,6 +125,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
             return
         data[user_id]['berry'] -= 1000
         bar_data["pots"] = bar_data.get('pots') + 1000
+        save_data(bar_path, bar_data)
         # 处理设置默认颜色或自定义颜色
         if data[user_id]['temp_bgcolor'] == 'default':
             if 'bg_color' in data[user_id]:
