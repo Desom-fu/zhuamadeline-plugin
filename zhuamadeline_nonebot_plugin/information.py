@@ -93,6 +93,13 @@ help_categories = {
             ".bank save/take 数量 - 银行存取",
             ".qd - 每日签到"
         ]
+    },
+    "other": {
+        "name": "其他类指令",
+        "aliases": ["其他", "other"],
+        "commands": [
+            ".set_bgcolor {色号，例如#1f1e33} - 设置背景颜色"
+        ]
     }
 }
 
@@ -123,6 +130,7 @@ async def zhua_help(event: GroupMessageEvent, args: Message = CommandArg()):
             "- .help game - 游戏类指令\n"
             "- .help work - 工作类指令\n"
             "- .help berry - 草莓类指令\n"
+            "- .help other - 其他类指令\n"
             "══════════════\n"
             "输入指令时不要带{}或()！\n"
             "带有{}为必须，带有()的为非必须~\n"
