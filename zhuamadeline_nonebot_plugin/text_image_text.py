@@ -230,7 +230,15 @@ def draw_text(draw, lines, y, canvas_width, center=True):
         # 计算X坐标（居中或左对齐）
         x = (canvas_width - w) // 2 if center else PADDING
         
-        # 实际绘制
+        # 添加白色描边效果
+        outline_width = 1  # 描边宽度
+        # 在8个方向绘制白色描边
+        for dx in [-outline_width, 0, outline_width]:
+            for dy in [-outline_width, 0, outline_width]:
+                if dx != 0 or dy != 0:  # 跳过中心位置
+                    draw.text((x+dx, y+dy), line, font=font, fill="white")
+        
+        # 实际绘制（中心黑色文字）
         draw.text((x, y), line, font=font, fill="black")
         y += h + LINE_SPACING
     

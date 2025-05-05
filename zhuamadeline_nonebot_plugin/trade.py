@@ -112,6 +112,28 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
             else:
                 await send_image_or_text(user_id, confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
 
+    elif data[user_id]['event'] == 'changing_bgcolor':
+        # 检查草莓是否足够
+        if data[user_id]['berry'] < 1000:
+            data[user_id]['event'] = 'nothing'
+            save_data(full_path, data)
+            await send_image_or_text(user_id, confirm, 
+                                   f"草莓不足！设置背景色需要1000草莓\n"
+                                   f"你只有{data[user_id]['berry']}颗草莓！",
+                                   True, None)
+            return
+        
+        # 扣除草莓
+        data[user_id]['berry'] -= 1000
+        # 保持当前bg_color不变
+        data[user_id]['event'] = 'nothing'
+        # 保存数据
+        save_data(full_path, data)
+        await send_image_or_text(user_id, confirm, 
+                               f"背景色设置成功！当前色号: #{data[user_id]['bg_color']}\n"
+                               f"你还剩{data[user_id]['berry']}颗草莓", 
+                               True, None)
+
 #取消一些事件
 deny = on_command('deny', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @deny.handle()
@@ -136,4 +158,13 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
         data[user_id]['event'] = 'nothing'
         #写入主数据表
         save_data(full_path, data)
-        await send_image_or_text(user_id, deny, "商人失望地离开了...", True, None)
+        await send_image_or_text(user_id, deny, "商人失望地离开了……", True, None)
+    elif data[user_id]['event'] == 'changing_bgcolor':
+        # 恢复默认背景色
+        if 'bg_color' in data[user_id]:
+            del data[user_id]['bg_color']
+        data[user_id]['event'] = 'nothing'
+        save_data(full_path, data)
+        await send_image_or_text(user_id, deny, 
+                               "已取消背景色设置，恢复默认背景色", 
+                               True, None)
