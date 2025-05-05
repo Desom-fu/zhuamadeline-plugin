@@ -470,7 +470,10 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         combined_img_path = generate_image_with_text(
             text1=top_text,
             image_path=img,
-            text2=bottom_text
+            text2=bottom_text,
+            max_chars=20,
+            center=True,
+            user_id=str(user_id)
         )
 
         if combined_img_path:
@@ -683,7 +686,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     # 事件
     status_messages = {
         "trading": "交易进行中", "compulsion_ggl": "强制抽卡", "compulsion_bet1": "强制预言大师", "working": "维护加工器中", 
-        "getspider": "神秘事件1", "getbomb": "神秘事件2"
+        "getspider": "神秘事件1", "getbomb": "神秘事件2", "changing_bgcolor": "更改背景颜色"
     }
     # debuff
     debuff_messages = {

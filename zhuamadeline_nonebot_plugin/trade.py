@@ -123,14 +123,25 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                                    True, None)
             return
         
-        # 扣除草莓
-        data[user_id]['berry'] -= 1000
-        # 保持当前bg_color不变
+        # 处理设置默认颜色或自定义颜色
+        if data[user_id]['temp_bgcolor'] == 'default':
+            if 'bg_color' in data[user_id]:
+                del data[user_id]['bg_color']  # 删除自定义颜色即恢复默认
+            message = "背景色已重置为默认颜色"
+        else:
+            data[user_id]['bg_color'] = data[user_id]['temp_bgcolor']
+            message = f"更改背景色成功！\n当前背景色号为：#{data[user_id]['bg_color']}"
+        
+        # 清除临时数据
+        del data[user_id]['temp_bgcolor']
+        if 'previous_bgcolor' in data[user_id]:
+            del data[user_id]['previous_bgcolor']
+        
         data[user_id]['event'] = 'nothing'
-        # 保存数据
         save_data(full_path, data)
+        
         await send_image_or_text(user_id, confirm, 
-                               f"背景色设置成功！当前色号: #{data[user_id]['bg_color']}\n"
+                               f"{message}\n"
                                f"你还剩{data[user_id]['berry']}颗草莓", 
                                True, None)
 
@@ -160,11 +171,18 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
         save_data(full_path, data)
         await send_image_or_text(user_id, deny, "商人失望地离开了……", True, None)
     elif data[user_id]['event'] == 'changing_bgcolor':
-        # 恢复默认背景色
-        if 'bg_color' in data[user_id]:
-            del data[user_id]['bg_color']
+        # 如果有之前设置过的颜色，则回退到那个颜色
+        if 'previous_bgcolor' in data[user_id]:
+            data[user_id]['bg_color'] = data[user_id]['previous_bgcolor']
+            del data[user_id]['previous_bgcolor']
+            message = "已恢复之前的背景色设置"
+        else:
+            message = "你取消了更改背景色"
+        
+        # 清除临时数据
+        if 'temp_bgcolor' in data[user_id]:
+            del data[user_id]['temp_bgcolor']
         data[user_id]['event'] = 'nothing'
         save_data(full_path, data)
-        await send_image_or_text(user_id, deny, 
-                               "已取消背景色设置，恢复默认背景色", 
-                               True, None)
+        
+        await send_image_or_text(user_id, deny, message, True, None)

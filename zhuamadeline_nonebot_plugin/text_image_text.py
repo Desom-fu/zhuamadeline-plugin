@@ -19,6 +19,16 @@ LINE_SPACING = 5                         # 行间距（像素）
 CACHE_LIMIT = 40                         # 缓存文件保留数量
 DEFAULT_BG_COLOR = (247, 219, 255, 255)  # 默认淡紫色
 
+# 在文件顶部添加颜色亮度计算函数
+def get_color_brightness(color):
+    """计算颜色的亮度（0-255）"""
+    r, g, b = color[0], color[1], color[2]
+    return (0.299 * r + 0.587 * g + 0.114 * b)
+
+def is_dark_color(color, threshold=128):
+    """判断颜色是否为深色"""
+    return get_color_brightness(color) < threshold
+
 def get_user_bg_color(user_id: str):
     """从用户数据中获取背景颜色"""
     try:
@@ -53,14 +63,17 @@ def create_gradient_background(width, height, user_id=None):
     else:
         start_color = DEFAULT_BG_COLOR
         
-    bg = Image.new('RGBA', (width, height), (255, 255, 255, 255))
+    # 根据起始颜色决定深色模式
+    dark_mode = is_dark_color(start_color)
+    
+    bg = Image.new('RGBA', (width, height), (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255))
     draw = ImageDraw.Draw(bg)
     
     center_x, center_y = width // 2, height // 2
     max_radius = math.sqrt(center_x**2 + center_y**2)
     
-    # 渐变颜色配置
-    end_color = (255, 255, 255, 255)    # 白色
+    # 渐变颜色配置（深色模式终点为纯黑，浅色模式为白色）
+    end_color = (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255)
     
     # 使用三次贝塞尔缓动函数控制渐变速度
     def cubic_bezier(t, p0, p1, p2, p3):
@@ -196,7 +209,7 @@ def wrap_text(text, max_chars=20):
     
     return lines
 
-def draw_text(draw, lines, y, canvas_width, center=True):
+def draw_text(draw, lines, y, canvas_width, center=True, user_id=None):
     """
     在画布上绘制多行文本（自动处理溢出）
     
@@ -210,6 +223,13 @@ def draw_text(draw, lines, y, canvas_width, center=True):
     返回：
     - 绘制结束后的Y坐标
     """
+    # 获取当前背景色判断深色模式
+    if user_id:
+        bg_color = get_user_bg_color(user_id)
+    else:
+        bg_color = DEFAULT_BG_COLOR
+    dark_mode = is_dark_color(bg_color)
+    
     for line in lines:
         if line == "\n":  # 处理空行
             y += font_size + LINE_SPACING
@@ -221,28 +241,31 @@ def draw_text(draw, lines, y, canvas_width, center=True):
         
         # 非居中时的溢出处理
         if not center and w > canvas_width - 2 * PADDING:
-            # 计算最大可容纳字符数（近似值）
             max_len = int(len(line) * (canvas_width - 2 * PADDING) / w)
-            line = line[:max(max_len, 1)]  # 至少保留1字符
+            line = line[:max(max_len, 1)]
             bbox = draw.textbbox((0, 0), line, font=font)
             w = bbox[2] - bbox[0]
         
-        # 计算X坐标（居中或左对齐）
+        # 计算X坐标
         x = (canvas_width - w) // 2 if center else PADDING
         
-        # 添加白色描边效果
-        outline_width = 1  # 描边宽度
-        # 在8个方向绘制白色描边
+        # 描边设置
+        outline_width = 1
+        text_color = (255, 255, 255, 255) if dark_mode else (0, 0, 0, 255)
+        outline_color = (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255)
+        
+        # 绘制描边
         for dx in [-outline_width, 0, outline_width]:
             for dy in [-outline_width, 0, outline_width]:
-                if dx != 0 or dy != 0:  # 跳过中心位置
-                    draw.text((x+dx, y+dy), line, font=font, fill="white")
+                if dx != 0 or dy != 0:
+                    draw.text((x+dx, y+dy), line, font=font, fill=outline_color)
         
-        # 实际绘制（中心黑色文字）
-        draw.text((x, y), line, font=font, fill="black")
+        # 绘制主文字
+        draw.text((x, y), line, font=font, fill=text_color)
         y += h + LINE_SPACING
     
     return y
+
 
 def calculate_content_size(draw, lines, image_size=None):
     """
@@ -310,7 +333,7 @@ def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, can
     draw = ImageDraw.Draw(content_layer)
     y = PADDING
     
-    y = draw_text(draw, lines1, y, canvas_width, center)
+    y = draw_text(draw, lines1, y, canvas_width, center, user_id=user_id)
     
     if base_image and img_size:
         y += font_size
@@ -321,7 +344,7 @@ def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, can
         content_layer.paste(img_layer, (img_x, y), img_layer)
         y += img_size[1] + font_size
     
-    y = draw_text(draw, lines2, y, canvas_width, center)
+    y = draw_text(draw, lines2, y, canvas_width, center, user_id=user_id)
     
     canvas = Image.alpha_composite(canvas, content_layer)
     return canvas
@@ -375,7 +398,7 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
             durations = []
             for frame in gif_frames:
                 result = generate_frame(text1, text2, frame.convert("RGBA"), 
-                                      center, max_chars, canvas_size=max_size, user_id=None)
+                                      center, max_chars, canvas_size=max_size, user_id=user_id)
                 processed_frames.append(result.convert("RGB"))
                 durations.append(frame.info.get("duration", 100))
             
