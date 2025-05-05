@@ -65,7 +65,7 @@ async def handle_link(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     user_data = open_data(full_path)
 
     if user_id not in user_data:
-        await send_image_or_text(passwd_command, "请先抓一次madeline在解密哦！", True, None)
+        await send_image_or_text(user_id, passwd_command, "请先抓一次madeline在解密哦！", True, None)
     if "berry" not in user_data[user_id]:
         user_data[user_id]["berry"] = 0  # 初始化用户的 berry 字段
 
@@ -98,12 +98,13 @@ async def handle_link(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     else:
         result = default_msg
 
-    await send_image_or_text(passwd_command, result, True, None)
+    await send_image_or_text(user_id, passwd_command, result, True, None)
 
 #其他谜题
 puzzle_command = on_fullmatch(['.puzzle other', '。puzzle other'], permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @puzzle_command.handle()
 async def puzzle_command_handle(event: Event, bot: Bot):
+    user_id = str(event.user_id)
     puzzle_message = (
         "---------------------------------------\n"
         ".math （1~5）\n"
@@ -224,7 +225,7 @@ async def puzzle_command_handle(event: Event, bot: Bot):
         "解出答案后用 .password 来输入\n"
         "---------------------------------------"
      )
-    await send_image_or_text_forward(
+    await send_image_or_text_forward(user_id, 
         puzzle_command,
         puzzle_message,
         "other",

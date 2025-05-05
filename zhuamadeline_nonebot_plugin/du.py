@@ -52,7 +52,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
 
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
-        await send_image_or_text(ticket, "请先抓一次madeline再来玩吧！", True, None, 30)
+        await send_image_or_text(user_id, ticket, "请先抓一次madeline再来玩吧！", True, None, 30)
         return
     
     # 用户数据初始化
@@ -66,29 +66,29 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
 
     # 事件状态检查
     if user_data['event'] not in ['nothing', 'compulsion_ggl']:
-        await send_image_or_text(ticket, "你还有正在进行中的事件", True, None, 30)
+        await send_image_or_text(user_id, ticket, "你还有正在进行中的事件", True, None, 30)
         return
 
     # Buff状态检查
     if(data[str(user_id)].get('buff','normal')=='lost'): 
-        await send_image_or_text(ticket, "你现在正在迷路中，连路都找不到，怎么能抽卡呢？", True, None, 30)
+        await send_image_or_text(user_id, ticket, "你现在正在迷路中，连路都找不到，怎么能抽卡呢？", True, None, 30)
         return
         
     if(data[str(user_id)].get('buff','normal')=='confuse'): 
-        await send_image_or_text(ticket, "你现在正在找到了个碎片，疑惑着呢，不能抽卡。", True, None, 30)
+        await send_image_or_text(user_id, ticket, "你现在正在找到了个碎片，疑惑着呢，不能抽卡。", True, None, 30)
         return
 
     if(data[str(user_id)].get('debuff','normal')=='tentacle'): 
-        await send_image_or_text(ticket, "你刚被触手玩弄到失神，没有精力抽卡！", True, None, 30)
+        await send_image_or_text(user_id, ticket, "你刚被触手玩弄到失神，没有精力抽卡！", True, None, 30)
         return
         
     if(data[str(user_id)].get('buff','normal')=='hurt'): 
-        await send_image_or_text(ticket, "你现在受伤了，没有精力抽卡！", True, None, 30)
+        await send_image_or_text(user_id, ticket, "你现在受伤了，没有精力抽卡！", True, None, 30)
         return
 
     # 草莓余额检查
     if user_data['berry'] < 0:
-        await send_image_or_text(ticket, f"你现在仍处于失约状态中......还想继续抽卡？你只有{user_data['berry']}颗草莓！", True, None, 30)
+        await send_image_or_text(user_id, ticket, f"你现在仍处于失约状态中......还想继续抽卡？你只有{user_data['berry']}颗草莓！", True, None, 30)
         return
 
     # 生成随机奖励
@@ -101,7 +101,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
             user_data['collections']['奇想魔盒'] = 1
             msg = f"你花费{MENPIAO_COST}颗草莓，购买了一包卡包，但是抽出来了一个奇怪的黑色小盒子！\n输入.cp 奇想魔盒 以查看具体效果"
             save_data(user_path / file_name, data)
-            await send_image_or_text(ticket, msg, True, None, 30)
+            await send_image_or_text(user_id, ticket, msg, True, None, 30)
             return
         else:
             berry = 666
@@ -193,7 +193,7 @@ async def ticket_handle(bot: Bot, event: GroupMessageEvent):
     save_data(bar_path, bar_data)
     
     # 发送最终结果消息
-    await send_image_or_text(ticket, msg, True, None, 30)
+    await send_image_or_text(user_id, ticket, msg, True, None, 30)
     
 # #5人场赌博
 # dubo = on_command('du', permission=GROUP, priority=1, block=True, rule=whitelist_rule)

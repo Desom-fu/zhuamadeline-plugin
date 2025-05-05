@@ -63,7 +63,7 @@ async def myitem_handle(bot: Bot, event: GroupMessageEvent):
     
     # 检查用户是否存在
     if user_id not in data:
-        await send_image_or_text(
+        await send_image_or_text(user_id, 
             myitem,
             "你还没尝试抓过madeline……",
             True,
@@ -73,7 +73,7 @@ async def myitem_handle(bot: Bot, event: GroupMessageEvent):
     
     # 检查是否有道具
     if 'item' not in data[user_id] or not data[user_id]['item']:
-        await send_image_or_text(
+        await send_image_or_text(user_id, 
             myitem,
             "你还没有任何道具哦！",
             True,
@@ -89,7 +89,7 @@ async def myitem_handle(bot: Bot, event: GroupMessageEvent):
     
     # 再次检查有效道具
     if not item_list:
-        await send_image_or_text(
+        await send_image_or_text(user_id, 
             myitem,
             "你没有任何有效道具哦！",
             True,
@@ -104,7 +104,7 @@ async def myitem_handle(bot: Bot, event: GroupMessageEvent):
         text += f"\n- {k} x {v}"
     
     # 使用转发消息格式发送
-    await send_image_or_text_forward(
+    await send_image_or_text_forward(user_id, 
         myitem,
         text,
         "道具库存室",
@@ -128,7 +128,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     current_buff2 = data[str(user_id)].get('buff2', 'normal')
 
     if user_id not in data:
-        await send_image_or_text(pray, "请先抓一次Madeline后在进行祈愿哦！", True, None)
+        await send_image_or_text(user_id, pray, "请先抓一次Madeline后在进行祈愿哦！", True, None)
         return
     
     # 处理各种状态检查
@@ -136,7 +136,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     all_cool_time(cd_path, user_id, group_id)
     
     if data[user_id]['berry'] < 0:
-        await send_image_or_text(pray, f"你现在仍处于失约状态中……无法进行祈愿！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
+        await send_image_or_text(user_id, pray, f"你现在仍处于失约状态中……无法进行祈愿！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
         return
     
     liechang_number = data[str(user_id)].get('lc')
@@ -144,15 +144,15 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     
     # 检查各种不能祈愿的状态
     if data[str(user_id)].get('event', "nothing") != "nothing":
-        await send_image_or_text(pray, "你还有正在进行中的事件。", True, None)
+        await send_image_or_text(user_id, pray, "你还有正在进行中的事件。", True, None)
         return
     
     if data[str(user_id)].get('buff') == 'lost':
-        await send_image_or_text(pray, "你现在正在迷路中，连路都找不到，\n怎么祈愿呢？", True, None)
+        await send_image_or_text(user_id, pray, "你现在正在迷路中，连路都找不到，\n怎么祈愿呢？", True, None)
         return
     
     if data[str(user_id)].get('buff') == 'confuse':
-        await send_image_or_text(pray, "你现在正在找到了个碎片，\n疑惑着呢，不能祈愿。", True, None)
+        await send_image_or_text(user_id, pray, "你现在正在找到了个碎片，\n疑惑着呢，不能祈愿。", True, None)
         return
     
     if data[str(user_id)].get("buff") == "hurt":
@@ -160,7 +160,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
         if current_time < next_time_r:
             delta_time = next_time_r - current_time
-            await send_image_or_text(pray, f"你受伤了，\n需要等{time_text(delta_time)}才能继续！", True, None)
+            await send_image_or_text(user_id, pray, f"你受伤了，\n需要等{time_text(delta_time)}才能继续！", True, None)
             return
         else:
             outofdanger(data, str(user_id), pray, current_time, next_time_r)
@@ -172,19 +172,19 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
         work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time', current_time.strftime("%Y-%m-%d %H:%M:%S")), "%Y-%m-%d %H:%M:%S")
         if current_time < work_end_time:
             text = time_text(str(work_end_time-current_time))
-            await send_image_or_text(pray, f"你正在维护草莓加工器，\n还需要{text}！", True, None)
+            await send_image_or_text(user_id, pray, f"你正在维护草莓加工器，\n还需要{text}！", True, None)
             return
         else:
             data[str(user_id)]['status'] = 'normal'
             save_data(user_path / file_name, data)
     
     if liechang_number == "0":
-        await send_image_or_text(pray, "Madeline竞技场不能祈愿哦，\n请切换到其他猎场再试试", True, None)
+        await send_image_or_text(user_id, pray, "Madeline竞技场不能祈愿哦，\n请切换到其他猎场再试试", True, None)
         return
     
     # 检查是否有充能器
     if data[str(user_id)].get("item", {}).get('madeline充能器', 0) <= 0:
-        await send_image_or_text(pray, "你还没有Madeline充能器，\n无法祈愿……", True, None)
+        await send_image_or_text(user_id, pray, "你还没有Madeline充能器，\n无法祈愿……", True, None)
         return
     
     current_time = datetime.datetime.now()
@@ -201,19 +201,19 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     # 检查祈愿CD
     if current_time < next_time:
         text = time_text(str(next_time-current_time))
-        await send_image_or_text(pray, f"请{text}后再来祈愿吧~", True, None)
+        await send_image_or_text(user_id, pray, f"请{text}后再来祈愿吧~", True, None)
         return
     
     # 检查能量是否足够
     if energy < 600:
-        await send_image_or_text(pray, f"你的能量只有{energy}，不足600，\n无法祈愿……", True, None)
+        await send_image_or_text(user_id, pray, f"你的能量只有{energy}，不足600，\n无法祈愿……", True, None)
         return
     
     # 处理不同猎场的特殊逻辑
     # 5猎要求等级超过21
     if liechang_number == '5':
         if data[user_id].get("grade", 1) <= 20:
-            await send_image_or_text(pray, "你的等级不够，无法完全摆脱水晶粉尘的影响，祈愿仍然被封印……\n请21级后再来试试吧！", True, None)
+            await send_image_or_text(user_id, pray, "你的等级不够，无法完全摆脱水晶粉尘的影响，祈愿仍然被封印……\n请21级后再来试试吧！", True, None)
             return
         
         # 迅捷药水防止掉坑
@@ -240,20 +240,20 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
                 save_data(full_path, data)
                 save_data(stuck_path, stuck_data)
                 text = "你在闭眼祈愿的过程中，没有任何Madeline响应你，结果一不小心你就撞到了寺庙里的红绿灯上！不过幸好祈愿失败不消耗能量……"
-                await send_image_or_text(pray, text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", True, None)
+                await send_image_or_text(user_id, pray, text+"你需要原地等待120分钟，或者使用急救包自救，又或者等待他人来救你……", True, None)
                 return
     
     # 4猎必须要有黄球才能祈愿
     elif liechang_number == "4":
         data[str(user_id)].setdefault('collections', {})
         if not '黄色球体' in data[str(user_id)]['collections']:
-            await send_image_or_text(pray, "地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内祈愿……", True, None)
+            await send_image_or_text(user_id, pray, "地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内祈愿……", True, None)
             return
     
     # 未解锁三猎场抓不了
     elif liechang_number == '3':
         if data[str(user_id)].get("item", {}).get('神秘碎片', 0) < 5:
-            await send_image_or_text(pray, "你还未解锁通往第三猎场的道路...", True, None)
+            await send_image_or_text(user_id, pray, "你还未解锁通往第三猎场的道路...", True, None)
             return
         
         # 迅捷药水防止掉坑
@@ -280,7 +280,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
                 save_data(user_path / file_name, data)
                 save_data(stuck_path, stuck_data)
                 text = "你在闭眼祈愿的过程中，没有任何Madeline响应你，结果一不小心你就撞到了山洞上！不过幸好祈愿失败不消耗能量……"
-                await send_image_or_text(pray, text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", True, None)
+                await send_image_or_text(user_id, pray, text+"你需要原地等待90分钟，或者使用急救包自救，又或者等待他人来救你……", True, None)
                 return
     
     # 2猎祈愿 50% 概率迷路
@@ -296,7 +296,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             stuck_data[user_id] = '2'
             save_data(user_path / file_name, data)
             save_data(stuck_path, stuck_data)
-            await send_image_or_text(pray, "你在祈愿的时候，不小心在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhua)", True, None)
+            await send_image_or_text(user_id, pray, "你在祈愿的时候，不小心在森林里迷路了，不知道何时才能走出去……(请在你觉得可能找到路的时候使用zhua)", True, None)
             return
     # 强制修复受伤bug
     data[str(user_id)]['buff'] = 'normal'
@@ -408,10 +408,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     panding_debuff = 0 # 为以后方便扩展，0无事发生，其他数值无法使用某些特定道具
     # 失约检测
     if data[user_id]['berry'] < 0:
-        await send_image_or_text(daoju, f"你现在仍处于失约状态中……\n无法使用道具！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True)
+        await send_image_or_text(user_id, daoju, f"你现在仍处于失约状态中……\n无法使用道具！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True)
     # 事件检测
     if data[str(user_id)].get('event',"nothing") != "nothing":
-        await send_image_or_text(daoju, f"你还有正在进行中的事件", True)
+        await send_image_or_text(user_id, daoju, f"你还有正在进行中的事件", True)
     # 笨拙检测
     if data[str(user_id)].get('debuff',"normal") == "clumsy":
         panding_debuff = 1
@@ -476,18 +476,18 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             # 身份徽章作为例外不受影响  
             if use_item_name.startswith("身份徽章"):
                 if not "/" in use_item_name:
-                    await send_image_or_text(daoju, f"命令格式不正确，请使用\n.use 身份徽章/0\n.use 身份徽章/1\n.use 身份徽章/2", True)
+                    await send_image_or_text(user_id, daoju, f"命令格式不正确，请使用\n.use 身份徽章/0\n.use 身份徽章/1\n.use 身份徽章/2", True)
                 if data.get(user_id).get('collections').get('身份徽章', 0) > 0:
                     # 从命令中提取状态值（如 0, 1, 2）
                     usepanding = use_item_name.split("/")  # 提取“/”后面的状态值
                     try:
                         command_status = int(usepanding[1])
                     except:
-                        await send_image_or_text(daoju, "无效的状态值，请使用\n0（停用），1（身份模式），或 2（急速模式）。", at_sender=True)
+                        await send_image_or_text(user_id, daoju, "无效的状态值，请使用\n0（停用），1（身份模式），或 2（急速模式）。", at_sender=True)
                         
                     # 检查状态值是否合法
                     if command_status not in [0, 1, 2]:
-                        await send_image_or_text(daoju, "无效的状态值，请使用\n0（停用），1（身份模式），或 2（急速模式）。", at_sender=True)
+                        await send_image_or_text(user_id, daoju, "无效的状态值，请使用\n0（停用），1（身份模式），或 2（急速模式）。", at_sender=True)
                         return
 
                     # 获取当前状态，如果没有则默认初始化为 0（停用）
@@ -499,7 +499,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     # 如果目标状态是 2（急速模式），需要满足条件
                     if command_status == 2:
                         if data[str(user_id)].get('pangguang', 0) != 1:
-                            await send_image_or_text(daoju, "你需要先满足“膀胱”条件，\n才能切换到急速模式。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "你需要先满足“膀胱”条件，\n才能切换到急速模式。", at_sender=True)
                             return
                     # 确定状态描述
                     if command_status == 0:
@@ -513,11 +513,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         # 更新状态
                         data[str(user_id)]['identity_status'] = command_status
                         save_data(full_path, data)
-                        await send_image_or_text(daoju, f"你已经成功切换至{status_text}。", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你已经成功切换至{status_text}。", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"你已经处于{status_text}，\n无需切换哦。", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你已经处于{status_text}，\n无需切换哦。", at_sender=True)
                 else:
-                    await send_image_or_text(daoju, f"你没有足够的“Identity”，\n无法切换状态。", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你没有足够的“Identity”，\n无法切换状态。", at_sender=True)
                     
             if use_item_name == "万能解药":
                 user_data = data.get(str(user_id), {})
@@ -527,10 +527,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 antidote_count = user_items.get(use_item_name, 0)
 
                 if antidote_count <= 0:
-                    await send_image_or_text(daoju, f"你现在没有{use_item_name}，\n无法解除debuff！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}，\n无法解除debuff！", at_sender=True)
 
                 if user_debuff == "normal":
-                    await send_image_or_text(daoju, f"你现在没有debuff，\n无需解除！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你现在没有debuff，\n无需解除！", at_sender=True)
                     
                 # 定义不同 debuff 需要的解药数量
                 debuff_cost = {
@@ -547,7 +547,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 required_amount = debuff_cost.get(user_debuff, debuff_cost["default"])
 
                 if antidote_count < required_amount:
-                    await send_image_or_text(daoju, f"你的{use_item_name}数量不足，无法解除，\n需要至少{required_amount}瓶{use_item_name}才能解除这个debuff，\n你目前只有{antidote_count}瓶！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你的{use_item_name}数量不足，无法解除，\n需要至少{required_amount}瓶{use_item_name}才能解除这个debuff，\n你目前只有{antidote_count}瓶！", at_sender=True)
 
                 # 解除 debuff
                 if user_debuff == "tentacle":
@@ -565,11 +565,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 # 反馈信息
                 remaining = data[str(user_id)]["item"][use_item_name]
-                await send_image_or_text(daoju, f"debuff已解除，\n这个debuff需要消耗{required_amount}瓶{use_item_name}，\n你现在还剩{remaining}瓶{use_item_name}", at_sender=True)
+                await send_image_or_text(user_id, daoju, f"debuff已解除，\n这个debuff需要消耗{required_amount}瓶{use_item_name}，\n你现在还剩{remaining}瓶{use_item_name}", at_sender=True)
 
             # 笨拙判定
             if panding_debuff == 1:
-                await send_image_or_text(daoju, "这股能量仍然在你的身体里游荡，\n你现在无法使用除万能解药以外的\n绝大部分道具/藏品……", at_sender=True)
+                await send_image_or_text(user_id, daoju, "这股能量仍然在你的身体里游荡，\n你现在无法使用除万能解药以外的\n绝大部分道具/藏品……", at_sender=True)
 
             if use_item_name == "草莓鱼竿":
                 # 初始化
@@ -578,7 +578,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 user_collections = user_data.setdefault("collections", {})
 
                 if user_item.get("草莓鱼竿", 0) < 1:
-                    await send_image_or_text(daoju, "你现在没有草莓鱼竿哦，\n无法钓鱼！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, "你现在没有草莓鱼竿哦，\n无法钓鱼！", at_sender=True)
 
                 # 获取以及初始化时间
                 current_time = datetime.datetime.now()
@@ -591,12 +591,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 if next_fishing_time > current_time:
                     fishing_text = time_text(str(next_fishing_time - current_time))
-                    await send_image_or_text(daoju, f"你刚刚才钓过鱼，水里的鱼都跑光啦！\n还需要{fishing_text}鱼才会游回来！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你刚刚才钓过鱼，水里的鱼都跑光啦！\n还需要{fishing_text}鱼才会游回来！", at_sender=True)
 
                 # 扣除 10 草莓作为饵料
                 erliao = 10
                 if user_data.get("berry", 0) < erliao:
-                    await send_image_or_text(daoju, f"你身上的草莓不足以作为饵料来钓鱼哦！\n你现在只有{user_data.get('berry', 0)}颗草莓！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你身上的草莓不足以作为饵料来钓鱼哦！\n你现在只有{user_data.get('berry', 0)}颗草莓！", at_sender=True)
 
                 # 增加钓鱼次数
                 fishing += 1
@@ -673,7 +673,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 统一保存数据
                 save_data(user_path / file_name, data)
                 # 发送消息
-                await send_image_or_text(daoju, message, True, None, 20)
+                await send_image_or_text(user_id, daoju, message, True, None, 20)
 
             # if(use_item_name=="充能箱"):
             #     if(data.get(user_id).get('collections').get('充能箱',0) > 0):
@@ -688,9 +688,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     
             #         data[str(user_id)]['elect_status'] = new_status
             #         save_data(full_path,data)
-            #         await send_image_or_text(daoju, f"你已经成功切换至{status_text}状态。", at_sender=True)
+            #         await send_image_or_text(user_id, daoju, f"你已经成功切换至{status_text}状态。", at_sender=True)
             #     else:
-            #         await send_image_or_text(daoju, f"你的藏品中没有充能箱，无法切换状态。", at_sender=True)
+            #         await send_image_or_text(user_id, daoju, f"你的藏品中没有充能箱，无法切换状态。", at_sender=True)
 
             if(use_item_name=="时间秒表"):
                 if(data.get(user_id).get('item').get('时间秒表',0) > 0):
@@ -717,7 +717,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
                         if current_time < work_end_time:
                             text = time_text(str(work_end_time-current_time))
-                            await send_image_or_text(daoju, f"你正在维护草莓加工器，还需要{text}！\n维护加工器的过程不能使用秒表哦！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你正在维护草莓加工器，还需要{text}！\n维护加工器的过程不能使用秒表哦！", at_sender=True)
                         #时间过了自动恢复正常
                         else:
                             data[str(user_id)]['status'] = 'normal'
@@ -741,7 +741,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         
                         if time_since_last_sleep < datetime.timedelta(hours=4):
                             remaining_time = datetime.timedelta(hours=4) - time_since_last_sleep
-                            await send_image_or_text(daoju, 
+                            await send_image_or_text(user_id, daoju, 
                                 f"好好休息吧，{remaining_time.seconds // 3600}小时"
                                 f"{(remaining_time.seconds % 3600) // 60}分钟"
                                 f"{remaining_time.seconds % 60}秒内\n不要使用时间秒表了……", at_sender=True)
@@ -772,14 +772,14 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 save_data(stuck_path, stuck_data)
                             #写入文件
                             save_data(user_path / file_name, data)
-                            await send_image_or_text(daoju, "使用成功，\n冷却被全部清除了！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "使用成功，\n冷却被全部清除了！", at_sender=True)
                         else:
                             text = time_text(str(next_clock_time-current_time))
-                            await send_image_or_text(daoju, f"不久前使用的时间秒表\n似乎使你所有的秒表都停止运转了。\n请{text}后再尝试使用。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"不久前使用的时间秒表\n似乎使你所有的秒表都停止运转了。\n请{text}后再尝试使用。", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, "你现在没有冷却呀，\n无需使用此道具", at_sender=True)
+                        await send_image_or_text(user_id, daoju, "你现在没有冷却呀，\n无需使用此道具", at_sender=True)
                 else:
-                    await send_image_or_text(daoju, f"你现在没有{use_item_name}", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}", at_sender=True)
             if use_item_name.startswith("道具盲盒"):
                 # 用户输入命令映射：默认单抽
                 COMMAND_MAP = {
@@ -794,7 +794,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 suffix = use_item_name[4:].replace(" ", "")
                 user_choice = COMMAND_MAP.get(suffix)
                 if not user_choice:
-                    await send_image_or_text(daoju, "道具盲盒只能单抽、五连或十连哦，具体指令如下: \n.use 道具盲盒(单抽/五连/十连)，默认为单抽。", at_sender=True)
+                    await send_image_or_text(user_id, daoju, "道具盲盒只能单抽、五连或十连哦，具体指令如下: \n.use 道具盲盒(单抽/五连/十连)，默认为单抽。", at_sender=True)
 
                 # 奖品及其权重
                 PRIZES = [
@@ -901,18 +901,18 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 模拟一万连抽（仅限机器人主人权限）
                 if user_choice == "模拟一万连":
                     if str(event.user_id) not in bot_owner_id:
-                        await send_image_or_text(daoju, "你没有权限执行模拟一万连！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, "你没有权限执行模拟一万连！", at_sender=True)
                     sim_results = [draw_prize() for _ in range(10000)]
                     sim_summary = {}
                     for p in sim_results:
                         sim_summary[p] = sim_summary.get(p, 0) + 1
                     sim_msg = "模拟一万连抽奖结果：\n" + "\n".join(f"{k} x{v}" for k, v in sim_summary.items())
-                    await send_image_or_text(daoju, sim_msg, at_sender=True)
+                    await send_image_or_text(user_id, daoju, sim_msg, at_sender=True)
 
                 # 合并单抽、五连、十连：确定抽奖次数
                 draw_count = 1 if user_choice == "单抽" else (5 if user_choice == "五连抽" else 10)
                 if data[str(user_id)]["item"].get("道具盲盒", 0) < draw_count:
-                    await send_image_or_text(daoju, f"你的道具盲盒不足{draw_count}个，\n无法进行{user_choice}！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你的道具盲盒不足{draw_count}个，\n无法进行{user_choice}！", at_sender=True)
 
                 # 执行抽奖，统计显示文案、数量及特殊文案
                 result_summary = {}  # 格式：{显示文案: {"count": 数量, "msg": 特殊文案}}
@@ -937,7 +937,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     if info["msg"]:
                         output_lines.append(info["msg"])
                 output_msg = "\n".join(output_lines)
-                await send_image_or_text(daoju, output_msg, at_sender=True)
+                await send_image_or_text(user_id, daoju, output_msg, at_sender=True)
 
 
             if use_item_name.startswith("急救包"): 
@@ -958,7 +958,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     hurt_time = (next_time_r - current_time).total_seconds()
 
                     if data.get(user_id, {}).get("buff", "normal") != "hurt":
-                        await send_image_or_text(daoju, "你现在并没有受伤哦！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, "你现在并没有受伤哦！", at_sender=True)
                         return
 
                     # 计算成功率
@@ -1005,7 +1005,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         save_data(user_path / file_name, data)
 
                         remaining_kits = data[user_id]["item"].get("急救包", 0)
-                        await send_image_or_text(daoju, 
+                        await send_image_or_text(user_id, daoju, 
                             f"恭喜你自救成功，你的伤势得到了治疗！\n你消耗了{used_count}个急救包，还剩{remaining_kits}个。",
                             at_sender=True
                         )
@@ -1023,18 +1023,18 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 # 根据模式返回结果
                 remaining_kits = data[user_id]["item"].get("急救包", 0)
                 if auto_mode and auto_reply:
-                    await send_image_or_text(daoju, 
+                    await send_image_or_text(user_id, daoju, 
                         f"你的急救包已经用完，但仍然没有自救成功...\n"
                         f"你一共消耗了{used_count}个急救包，\n还剩{remaining_kits}个。",
                         at_sender=True
                     )
                 elif not auto_mode:
-                    await send_image_or_text(daoju, 
+                    await send_image_or_text(user_id, daoju, 
                         f"似乎是自救失败了，\n也许你可以再试一次，\n亦或继续等待救援。你还剩{remaining_kits}个急救包。",
                         at_sender=True
                     )
                 else:
-                    await send_image_or_text(daoju, f"你现在没有{item_name}。", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True)
 
             
             if ('status' in data[str(user_id)]):
@@ -1043,9 +1043,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 status = 'normal'
             #一些啥都干不了的buff
             if(data[str(user_id)].get('buff')=='lost'): 
-                await send_image_or_text(daoju, f"你现在正在迷路中，连路都找不到，\n怎么使用这个道具呢？", at_sender=True)
+                await send_image_or_text(user_id, daoju, f"你现在正在迷路中，连路都找不到，\n怎么使用这个道具呢？", at_sender=True)
             if(data[str(user_id)].get('buff')=='confuse'): 
-                await send_image_or_text(daoju, f"你现在正在找到了个碎片，疑惑着呢，\n不能使用这个道具。", at_sender=True)
+                await send_image_or_text(user_id, daoju, f"你现在正在找到了个碎片，疑惑着呢，\n不能使用这个道具。", at_sender=True)
 
             #草莓果酱的使用判定，要写在加工物品的判定之前
             #两个参数的指令(判定于是否加工之前)
@@ -1062,11 +1062,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 try:
                     num_of_sell = int(num_of_sell)
                 except:
-                    await send_image_or_text(daoju, "请输入一个正确的整数", at_sender=True)
+                    await send_image_or_text(user_id, daoju, "请输入一个正确的整数", at_sender=True)
                 
                 #判定是否是非正数
                 if (num_of_sell <= 0):
-                    await send_image_or_text(daoju, f"你为什么会想售卖{str(num_of_sell)}瓶果酱呢？\n别想卡bug了！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你为什么会想售卖{str(num_of_sell)}瓶果酱呢？\n别想卡bug了！", at_sender=True)
                     
                 if(data[str(user_id)].get("item").get(use_name, 0) >= num_of_sell):
                     price_total=0
@@ -1088,11 +1088,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     #写入文件
                     save_data(user_path / file_name, data)
                     if berry_bonus_all != 0:
-                        await send_image_or_text(daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}颗草莓！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}颗草莓！", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！", at_sender=True)
                 else:
-                    await send_image_or_text(daoju, f"你现在没有这么多{use_name}。", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你现在没有这么多{use_name}。", at_sender=True)
                 
             #加工果酱时无法使用道具
             if(status =='working'): 
@@ -1100,7 +1100,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
                 if current_time < work_end_time:
                     text = time_text(str(work_end_time-current_time))
-                    await send_image_or_text(daoju, f"你正在维护草莓加工器，\n还需要{text}！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你正在维护草莓加工器，\n还需要{text}！", at_sender=True)
                 #时间过了自动恢复正常
                 else:
                     data[str(user_id)]['status'] = 'normal'
@@ -1112,7 +1112,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
                 if(current_time < next_time_r):
                     delta_time = next_time_r - current_time
-                    await send_image_or_text(daoju, f"你受伤了，\n需要等{time_text(delta_time)}才能继续。", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你受伤了，\n需要等{time_text(delta_time)}才能继续。", at_sender=True)
                 else:
                     outofdanger(data,str(user_id),daoju,current_time,next_time_r)
             #两个参数的指令
@@ -1136,9 +1136,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             data[str(user_id)].get('buff')=='normal'
                         #一些啥都干不了的buff
                         if(data[str(user_id)].get('buff')=='lost'): 
-                            await send_image_or_text(daoju, f"你现在正在迷路中，连路都找不到，\n怎么加工果酱呢？", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你现在正在迷路中，连路都找不到，\n怎么加工果酱呢？", at_sender=True)
                         if(data[str(user_id)].get('buff')=='confuse'): 
-                            await send_image_or_text(daoju, f"你现在正在找到了个碎片，疑惑着呢，\n不能加工果酱。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你现在正在找到了个碎片，疑惑着呢，\n不能加工果酱。", at_sender=True)
                         #如果受伤了则无法使用道具(时间秒表除外)
                         if(data[str(user_id)].get("buff")=="hurt"): 
                             #一些额外操作：如果还没过下次时间，计算与下次的时间间隔，如果过了，可以使用道具
@@ -1146,7 +1146,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
                             if(current_time < next_time_r):
                                 delta_time = next_time_r - current_time
-                                await send_image_or_text(daoju, f"你受伤了，\n需要等{time_text(delta_time)}才能继续。", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你受伤了，\n需要等{time_text(delta_time)}才能继续。", at_sender=True)
                             else:
                                 outofdanger(data,str(user_id),daoju,current_time,next_time_r)
 
@@ -1154,10 +1154,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         try:
                             num = int(arg2)
                         except:
-                            await send_image_or_text(daoju, f"请输入正确的\n想要加工果酱的瓶数（1-12）哦！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"请输入正确的\n想要加工果酱的瓶数（1-12）哦！", at_sender=True)
                         #其次判定是不是1-4之间的
                         if num<1 or num>12:
-                            await send_image_or_text(daoju, f"请输入正确的\n想要加工果酱的瓶数（1-12）哦！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"请输入正确的\n想要加工果酱的瓶数（1-12）哦！", at_sender=True)
 
                         #依然是不可能的代码，但我还是写上了
                         if(not 'berry' in data[str(user_id)]):
@@ -1169,7 +1169,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         else:
                             berry_in_need = str(spend * num)
                             berry_you_have = str(data[str(user_id)].get('berry', 0))
-                            await send_image_or_text(daoju, f"你的草莓不足，\n总共需要{berry_in_need}颗草莓来制作果酱，\n你只有{berry_you_have}颗草莓", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你的草莓不足，\n总共需要{berry_in_need}颗草莓来制作果酱，\n你只有{berry_you_have}颗草莓", at_sender=True)
 
                         current_time = datetime.datetime.now()
                         if(not 'work_end_time' in data[str(user_id)]):
@@ -1181,15 +1181,15 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         #写入文件
                         save_data(user_path / file_name, data)
                         text_time = 120*num // 60
-                        await send_image_or_text(daoju, f"你将{spend}x{num}={spend*num}颗草莓放入草莓加工器中，\n加工出了{num}瓶草莓果酱，\n但是你需要维护加工器{text_time}小时！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你将{spend}x{num}={spend*num}颗草莓放入草莓加工器中，\n加工出了{num}瓶草莓果酱，\n但是你需要维护加工器{text_time}小时！", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{item_name}。", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True)
 
             if(use_item_name=="赌徒之眼"):
                 """
                 在进du局前使用这个道具可以查看该局是否有人想狙你的某个madeline
                 """
-                await send_image_or_text(daoju, f"du局都封了，\n你用这个干什么？", at_sender=True)
+                await send_image_or_text(user_id, daoju, f"du局都封了，\n你用这个干什么？", at_sender=True)
                 
                 
             # 检查是否是药水使用命令(目前有幸运药水、迅捷药水)
@@ -1201,21 +1201,21 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             parts = use_item_name.split("/")
                             use_count = int(parts[1])
                             if use_count <= 0:
-                                await send_image_or_text(daoju, "使用数量必须大于0！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "使用数量必须大于0！", at_sender=True)
                         except (ValueError, IndexError):
-                            await send_image_or_text(daoju, f"请输入正确的{potion_name}使用数量！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"请输入正确的{potion_name}使用数量！", at_sender=True)
                     else:
                         use_count = 1
 
                     # 检查药水数量
                     current_potions = data[str(user_id)].get("item", {}).get(potion_name, 0)
                     if current_potions < use_count:
-                        await send_image_or_text(daoju, f"你的{potion_name}数量不足！\n你只有{current_potions}瓶{potion_name}！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你的{potion_name}数量不足！\n你只有{current_potions}瓶{potion_name}！", at_sender=True)
 
                     # 检查是否有其他药水效果
                     current_buff = data[str(user_id)].get('buff2', "normal")
                     if current_buff != "normal" and current_buff != effect["buff_name"]:
-                        await send_image_or_text(daoju, f"你已经有一个不同的药水效果了，\n不能同时使用{potion_name}！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你已经有一个不同的药水效果了，\n不能同时使用{potion_name}！", at_sender=True)
 
                     # 应用药水效果
                     buff_name = effect["buff_name"]
@@ -1239,9 +1239,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     save_data(user_path / file_name, data)
 
                     if use_count == 1:
-                        await send_image_or_text(daoju, f"使用成功！\n{effect['message']}，持续{effect_per_potion}次。\n当前剩余次数：{remaining_effect}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"使用成功！\n{effect['message']}，持续{effect_per_potion}次。\n当前剩余次数：{remaining_effect}", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"使用成功！\n你{display_buff_name}buff的次数增加了{total_effect}次！\n当前剩余次数：{remaining_effect}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"使用成功！\n你{display_buff_name}buff的次数增加了{total_effect}次！\n当前剩余次数：{remaining_effect}", at_sender=True)
 
             command = use_item_name.split("/")
             #三个参数的指令
@@ -1257,22 +1257,22 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         nums = find_madeline(arg2.lower())
                         #查不到这个madeline的档案，终止
                         if(nums==0): 
-                            await send_image_or_text(daoju, "请输入正确的Madeline名称哦！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！", at_sender=True)
                         #统计充能个数
                         try:
                             num_of_charge = int(arg3)
                         except:
-                            await send_image_or_text(daoju, "请输入一个整数，谢谢。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "请输入一个整数，谢谢。", at_sender=True)
                         #这不能是个负数或零
                         if num_of_charge <= 0:
-                            await send_image_or_text(daoju, "我也想这么做，但是不允许。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "我也想这么做，但是不允许。", at_sender=True)
                         data2 = open_data(user_path/f"UserList{nums[2]}.json")
                         level_num = nums[0]+'_'+nums[1]
                         if(data2[str(user_id)].get(level_num,0) >= num_of_charge):
                             data2[str(user_id)][level_num] -= num_of_charge
                             save_data(user_path/f"UserList{nums[2]}.json",data2)
                         else:
-                            await send_image_or_text(daoju, f"你没有这么多{arg2.lower()}可以拿来充能了！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你没有这么多{arg2.lower()}可以拿来充能了！", at_sender=True)
                         if nums[0]=='5':
                             energy = 1800
                         elif nums[0]=='4':
@@ -1295,9 +1295,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         save_data(user_path / file_name, data)
                         text = str(num_of_charge * energy)
                         total_energy = str(data[str(user_id)]["energy"])
-                        await send_image_or_text(daoju, f"使用成功，\n你获得了{text}点能量值，\n你现在拥有{total_energy}点能量", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"使用成功，\n你获得了{text}点能量值，\n你现在拥有{total_energy}点能量", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{item_name}。", at_sender=True) 
+                        await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True) 
                         
             # 五个参数的指令
             # 批量充能指令
@@ -1314,17 +1314,17 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         try:
                             liechang = int(arg3)  # 猎场号
                             if not 0 < liechang <= liechang_count:
-                                await send_image_or_text(daoju, "请输入正确的猎场号！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "请输入正确的猎场号！", at_sender=True)
                                 return
                         except ValueError:
-                            await send_image_or_text(daoju, "请输入正确的猎场号！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "请输入正确的猎场号！", at_sender=True)
                         
                         try:
                             min_keep = int(arg5)  # 需要保留的最小数量
                             if min_keep < 0:
-                                await send_image_or_text(daoju, "不能设置负数的保留数量！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "不能设置负数的保留数量！", at_sender=True)
                         except ValueError:
-                            await send_image_or_text(daoju, "请输入有效的保留数量！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "请输入有效的保留数量！", at_sender=True)
                         # 读取用户 Madeline 数据
                         data2 = open_data(user_path / f"UserList{liechang}.json")
                         total_charged = 0  # 充能总数
@@ -1341,9 +1341,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 if 1 <= level <= 5:
                                     levels_to_charge = [str(level)]
                                 else:
-                                    await send_image_or_text(daoju, f"请输入有效的Madeline等级（1-5）\n或者all！", at_sender=True)
+                                    await send_image_or_text(user_id, daoju, f"请输入有效的Madeline等级（1-5）\n或者all！", at_sender=True)
                             except ValueError:
-                                await send_image_or_text(daoju, f"请输入一个有效的数字\n或者all作为Madeline等级！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"请输入一个有效的数字\n或者all作为Madeline等级！", at_sender=True)
                         for level in levels_to_charge:
                             if level not in ["1", "2", "3", "4", "5"]:
                                 continue  # 如果是无效等级，直接跳过
@@ -1364,14 +1364,14 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         if total_charged == 0:
                             if min_keep == 0:
                                 if arg4.lower() == "all":
-                                    await send_image_or_text(daoju, f"猎场{liechang}中，\n你没有任何Madeline可用于充能！", at_sender=True)
+                                    await send_image_or_text(user_id, daoju, f"猎场{liechang}中，\n你没有任何Madeline可用于充能！", at_sender=True)
                                 else:
-                                    await send_image_or_text(daoju, f"猎场{liechang}中，\n你没有任何{arg4}级的Madeline可用于充能！", at_sender=True)
+                                    await send_image_or_text(user_id, daoju, f"猎场{liechang}中，\n你没有任何{arg4}级的Madeline可用于充能！", at_sender=True)
                             else:
                                 if arg4.lower() == "all":
-                                    await send_image_or_text(daoju, f"如果要保留{min_keep}个Madeline的话，\n你的猎场{liechang}中的Madeline数量不够，\n不足以充能哦！", at_sender=True)
+                                    await send_image_or_text(user_id, daoju, f"如果要保留{min_keep}个Madeline的话，\n你的猎场{liechang}中的Madeline数量不够，\n不足以充能哦！", at_sender=True)
                                 else:
-                                    await send_image_or_text(daoju, f"如果要保留{min_keep}个Madeline的话，\n你的猎场{liechang}中的{arg4}级Madeline数量不够，\n不足以充能哦！", at_sender=True)
+                                    await send_image_or_text(user_id, daoju, f"如果要保留{min_keep}个Madeline的话，\n你的猎场{liechang}中的{arg4}级Madeline数量不够，\n不足以充能哦！", at_sender=True)
             
                         # **增加用户能量**
                         data[str(user_id)]["energy"] = data[str(user_id)].get("energy", 0) + total_energy
@@ -1384,16 +1384,16 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             
                         if min_keep == 0:
                             if arg4.lower() == "all":
-                                await send_image_or_text(daoju, f"你已成功充能了猎场{liechang}所有等级的Madeline，\n获得了{total_energy}点能量，\n你现在拥有{all_energy}点能量！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你已成功充能了猎场{liechang}所有等级的Madeline，\n获得了{total_energy}点能量，\n你现在拥有{all_energy}点能量！", at_sender=True)
                             else:
-                                await send_image_or_text(daoju, f"你已成功充能了猎场{liechang}所有{arg4}级的Madeline，\n获得了{total_energy}点能量，\n你现在拥有{all_energy}点能量！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你已成功充能了猎场{liechang}所有{arg4}级的Madeline，\n获得了{total_energy}点能量，\n你现在拥有{all_energy}点能量！", at_sender=True)
                         else:
                             if arg4.lower() == "all":
-                                await send_image_or_text(daoju, f"你已成功充能了猎场{liechang}中所有数量大于{min_keep}个的Madeline，\n并且这些Madeline都保留了{min_keep}个！\n充能这些Madeline让你获得了{total_energy}点能量！\n你现在总共拥有{all_energy}点能量！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你已成功充能了猎场{liechang}中所有数量大于{min_keep}个的Madeline，\n并且这些Madeline都保留了{min_keep}个！\n充能这些Madeline让你获得了{total_energy}点能量！\n你现在总共拥有{all_energy}点能量！", at_sender=True)
                             else:
-                                await send_image_or_text(daoju, f"你已成功充能了猎场{liechang}中所有数量大于{min_keep}个的{arg4}级Madeline，\n并且这些Madeline都保留了{min_keep}个！\n充能这些Madeline让你获得了{total_energy}点能量！\n你现在总共拥有{all_energy}点能量！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你已成功充能了猎场{liechang}中所有数量大于{min_keep}个的{arg4}级Madeline，\n并且这些Madeline都保留了{min_keep}个！\n充能这些Madeline让你获得了{total_energy}点能量！\n你现在总共拥有{all_energy}点能量！", at_sender=True)
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{item_name}。", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True)
                         
         #--------------------这些道具只有在0猎才能使用--------------------
             #此处判定是否在0猎
@@ -1401,7 +1401,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             if(liechang_number=='0'): 
                 #两个参数的指令
                 # 只有在包含斜杠时才进行分割
-                await send_image_or_text(daoju, "madeline竞技场目前无法使用这件道具哦~") 
+                await send_image_or_text(user_id, daoju, "madeline竞技场目前无法使用这件道具哦~") 
             else:          
             #--------------------以下道具0号猎场不能使用--------------------                           
 
@@ -1417,7 +1417,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 
                 if time_since_last_sleep < datetime.timedelta(hours=4):
                     remaining_time = datetime.timedelta(hours=4) - time_since_last_sleep
-                    await send_image_or_text(daoju, 
+                    await send_image_or_text(user_id, daoju, 
                         f"好好休息吧，{remaining_time.seconds // 3600}小时"
                         f"{(remaining_time.seconds % 3600) // 60}分钟"
                         f"{remaining_time.seconds % 60}秒内\n不要试图使用抓捕类道具了……", at_sender=True)
@@ -1445,29 +1445,29 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         if collections.get(item_name, 0) > 0:
                             # 判断飞升器是否仅限于4猎使用
                             if user_info.get("lc") != "4":
-                                await send_image_or_text(daoju, "只有在4猎才能使用\nMadeline飞升器！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "只有在4猎才能使用\nMadeline飞升器！", at_sender=True)
 
                             try:
                                 level = int(cmd[1])  # 解析飞升的等级
                             except:
-                                await send_image_or_text(daoju, "等级参数无效，\n请输入1至5之间的等级", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "等级参数无效，\n请输入1至5之间的等级", at_sender=True)
 
                             # 判断等级是否有效
                             if level < 1 or level > 5:
-                                await send_image_or_text(daoju, "等级参数无效，\n请输入1至5之间的等级", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "等级参数无效，\n请输入1至5之间的等级", at_sender=True)
 
                             # 获取用户的库存数据
                             try:
                                 data4 = open_data(user_list4)
                             except:
-                                await send_image_or_text(daoju, f"请先在地下终端猎场里面抓一次玛德琳\n再使用{item_name}哦！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"请先在地下终端猎场里面抓一次玛德琳\n再使用{item_name}哦！", at_sender=True)
 
                             # 没到等级不让融合
                             if collections.get('红色球体', 0) == 0 and level >= 4:
-                                await send_image_or_text(daoju, f"你还未解锁飞升{level}级玛德琳的权限，\n请在达到条件后再飞升哦！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你还未解锁飞升{level}级玛德琳的权限，\n请在达到条件后再飞升哦！", at_sender=True)
 
                             if collections.get('绿色球体', 0) == 0 and level >= 5:
-                                await send_image_or_text(daoju, f"你还未解锁飞升{level}级玛德琳的权限，\n请在达到条件后再飞升哦！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你还未解锁飞升{level}级玛德琳的权限，\n请在达到条件后再飞升哦！", at_sender=True)
 
                             # 获取该等级下所有可用的玛德琳编号
                             available_madelines = []
@@ -1487,7 +1487,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 # 过滤掉数量为0的玛德琳
                                 available_choices = [(num, count) for num, count in madeline_dict.items() if count > 0]
                                 if not available_choices:
-                                    await send_image_or_text(daoju, f"目前你拥有的等级{level}的Madeline数量只有{len(selected_madelines)}个，\n不足3个，无法进行飞升！", at_sender=True)
+                                    await send_image_or_text(user_id, daoju, f"目前你拥有的等级{level}的Madeline数量只有{len(selected_madelines)}个，\n不足3个，无法进行飞升！", at_sender=True)
 
                                 # 随机选择一个玛德琳
                                 num, count = random.choice(available_choices)
@@ -1634,23 +1634,23 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         success = 999
                         arg2 = command[1]   #madeline名字
                         if not arg2:
-                             await send_image_or_text(daoju, "请输入正确的Madeline名称哦！", at_sender=True)
+                             await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！", at_sender=True)
                         #若是解密相关不检查是否拥有提取器
                         """
                         隐藏madeline和一些隐藏线索
                         """
                         if(arg2.lower()=="madeline提取器"):
-                            await send_image_or_text(daoju, "请输入.puzzle confr1ngo来查询confr1ngo相关谜题哦！\n请输入.puzzle other来查询其他谜题哦！")
+                            await send_image_or_text(user_id, daoju, "请输入.puzzle confr1ngo来查询confr1ngo相关谜题哦！\n请输入.puzzle other来查询其他谜题哦！")
                         #隐藏madeline线索
                         for k in range(len(secret_list)):
                             if(arg2.lower()==secret_list[k][0]):
                                 img = madeline_level0_path / f"madeline{str(k+1)}.png"
                                 description = secret_list[k][1]
-                                await send_image_or_text(daoju, "等级：？？？\n" + f"{arg2}\n" + MessageSegment.image(img) + description)
+                                await send_image_or_text(user_id, daoju, "等级：？？？\n" + f"{arg2}\n" + MessageSegment.image(img) + description)
                             #一个特别的隐藏，使用后不获得madeline，而是获得一个新的藏品，并且移除木质十字架
                             if(arg2.lower()=="kmngkggarnkto"):
                                 if data[str(user_id)].get("collections",{}).get('圣十字架', 0) >= 1:
-                                    await send_image_or_text(daoju, "你已经有了一个圣十字架了，所以这串咒语再无意义……" , at_sender=True)  
+                                    await send_image_or_text(user_id, daoju, "你已经有了一个圣十字架了，所以这串咒语再无意义……" , at_sender=True)  
                                 if data[str(user_id)].get("collections",{}).get('木质十字架', 0) > 0:
                                     #只有在持有木质十字架时输入才有效
                                     if (data[str(user_id)].get("collections").get('木质十字架', 0) >= 1):
@@ -1659,9 +1659,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                         data[str(user_id)]['collections']['圣十字架'] = 1
                                         #写入文件
                                         save_data(user_path / file_name, data)
-                                        await send_image_or_text(daoju, "一瞬间，十字架中的宝石散发出耀眼的光芒。光辉穿透浓厚的迷雾，将四周映照得清晰无比。你感受到一股奇异的力量从十字架中涌出，仿佛某种封印正在被解除。光芒逐渐汇聚，形成一个模糊的影像，那是一片神秘的符号与文字交织而成的图案。十字架轻微震颤，仿佛在回应某种远古的力量。\n没过一会，你感受到madeline们的属性被强化：动作更加迅捷，力量更加充沛，甚至连周围的细微动静都变得清晰可辨。尽管光芒渐渐收敛，但这股力量却深深烙印在你体内，成为前行的支柱。\n 输入.cp 圣十字架 以查看具体效果")                            
+                                        await send_image_or_text(user_id, daoju, "一瞬间，十字架中的宝石散发出耀眼的光芒。光辉穿透浓厚的迷雾，将四周映照得清晰无比。你感受到一股奇异的力量从十字架中涌出，仿佛某种封印正在被解除。光芒逐渐汇聚，形成一个模糊的影像，那是一片神秘的符号与文字交织而成的图案。十字架轻微震颤，仿佛在回应某种远古的力量。\n没过一会，你感受到madeline们的属性被强化：动作更加迅捷，力量更加充沛，甚至连周围的细微动静都变得清晰可辨。尽管光芒渐渐收敛，但这股力量却深深烙印在你体内，成为前行的支柱。\n 输入.cp 圣十字架 以查看具体效果")                            
                                 else:
-                                    await send_image_or_text(daoju, "似乎是缺少了什么东西，你输入这串咒语后什么都没有发生。" , at_sender=True)
+                                    await send_image_or_text(user_id, daoju, "似乎是缺少了什么东西，你输入这串咒语后什么都没有发生。" , at_sender=True)
                         if(data[str(user_id)].get("item").get(item_name, 0) > 0):
                             """
                             可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
@@ -1670,18 +1670,18 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             nums = find_madeline(arg2.lower(), only_name = True)
                             # 没有对应的玛德琳
                             if nums == 0:
-                                await send_image_or_text(daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)                            
+                                await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)                            
                             # 检测是否抓到过对应的玛德琳 
                             check_data = open_data(user_path / list_name)
                             # 检查返回值
                             if not nums or len(nums) < 3:
-                                await send_image_or_text(daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)
                             # 判定猎场
                             if str(user_id) not in check_data:
-                                await send_image_or_text(daoju, "请先在本猎场抓到任意一个Madeline\n再使用提取器吧！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "请先在本猎场抓到任意一个Madeline\n再使用提取器吧！", at_sender=True)
                             
                             if liechang_number != nums[2]:
-                                await send_image_or_text(daoju, "你只有切换到你想提取的Madeline所在的猎场，\n才能提取这个猎场的Madeline哦！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "你只有切换到你想提取的Madeline所在的猎场，\n才能提取这个猎场的Madeline哦！", at_sender=True)
                                     
                             rnd = random.randint(1,100)
                             if(rnd <= 20+15*(5-int(nums[0]))):
@@ -1726,7 +1726,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 success = 2
                             data[str(user_id)]["item"][item_name] -= 1
                         else:
-                            await send_image_or_text(daoju, f"你现在没有{item_name}。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True)
 
                 #此处判定猎场是否已解锁
                 #此处判定如果2猎是否有指南针，若没有则迷路
@@ -1766,7 +1766,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #写入森林被困名单
                                 save_data(stuck_path, stuck_data)   
                                 #发送消息
-                                await send_image_or_text(daoju, "你在使用道具的时候，\n一不小心在森林里迷路了，\n不知道何时才能走出去……\n(请在你觉得可能找到路的时候使用zhua)", at_sender=True)
+                                await send_image_or_text(user_id, daoju, "你在使用道具的时候，\n一不小心在森林里迷路了，\n不知道何时才能走出去……\n(请在你觉得可能找到路的时候使用zhua)", at_sender=True)
                 
                 # 3猎掉坑    
                 if liechang_number=='3':
@@ -1774,7 +1774,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         pass
                     else:
                         if data[user_id]['item'].get('神秘碎片',0) < 5:
-                            await send_image_or_text(daoju, "你还未解锁通往第三猎场的道路...", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "你还未解锁通往第三猎场的道路...", at_sender=True)
                         # 迅捷药水防止掉坑放这里
                         current_buff2 = data[str(user_id)].get('buff2', 'normal')
                         if current_buff2 == "speed":
@@ -1823,12 +1823,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #随机事件文本
                                 text = "你在使用道具的过程中，\n没有任何madeline被道具吸引，\n结果一不小心你就撞到了山洞上！\n不过幸好道具没消耗……"
                                 #发送消息
-                                await send_image_or_text(daoju, text+"你需要原地等待90分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)
+                                await send_image_or_text(user_id, daoju, text+"你需要原地等待90分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)
                 # 4猎必须要有黄球才能使用消耗类道具
                 if liechang_number == "4":
                     if not use_item_name.startswith("madeline飞升器"):
                         if(not '黄色球体' in data[str(user_id)]['collections']):
-                            await send_image_or_text(daoju, "地下终端的力量仍然强大……\n你未能满足条件，\n现在无法在地下终端内使用抓捕Madeline的道具……", at_sender = True)
+                            await send_image_or_text(user_id, daoju, "地下终端的力量仍然强大……\n你未能满足条件，\n现在无法在地下终端内使用抓捕Madeline的道具……", at_sender = True)
                 
                 # 5猎要求等级超过21
                 if liechang_number=='5':
@@ -1836,7 +1836,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         pass
                     else:
                         if data[user_id].get("grade", 1) <= 20:
-                            await send_image_or_text(daoju, "你的等级不够，无法完全摆脱脱水晶粉尘的影响，道具仍然被封印……\n请21级后再来试试吧！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, "你的等级不够，无法完全摆脱脱水晶粉尘的影响，道具仍然被封印……\n请21级后再来试试吧！", at_sender=True)
                         # 迅捷药水防止掉坑放这里
                         current_buff2 = data[str(user_id)].get('buff2', 'normal')
                         if current_buff2 == "speed":
@@ -1874,7 +1874,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 #随机事件文本
                                 text = "你在使用道具的过程中，没有任何madeline被道具吸引，\n结果一不小心你就撞到了悬崖峭壁上！\n不过幸好道具没消耗……"
                                 #发送消息
-                                await send_image_or_text(daoju, text+"你需要原地等待120分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)                      
+                                await send_image_or_text(user_id, daoju, text+"你需要原地等待120分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)                      
 
                 if(use_item_name=="胡萝卜"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
@@ -1922,7 +1922,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             success = 1
                         data[str(user_id)]["item"][use_item_name] -= 1                
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{use_item_name}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}", at_sender=True)
                 if(use_item_name=="弹弓"):
                     """
                     没啥特殊的，只是额外正常地再抓一次
@@ -1936,7 +1936,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         puke = data[str(user_id)]['collections'].get("奇想扑克", 0)
                         success = 1  
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{use_item_name}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}", at_sender=True)
                 if(use_item_name=="一次性小手枪"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
                         """
@@ -1950,7 +1950,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         puke = data[str(user_id)]['collections'].get("奇想扑克", 0)
                         success = 1 
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{use_item_name}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}", at_sender=True)
                 if(use_item_name=="充能陷阱"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
                         """
@@ -1960,7 +1960,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         trap_next_time_r = datetime.datetime.strptime(data.get(user_id).get('trap_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
                         if current_time < trap_next_time_r:
                             text = time_text(str(trap_next_time_r-current_time))
-                            await send_image_or_text(daoju, f"刚刚{use_item_name}才爆炸过哦！现在{use_item_name}的能量十分不稳定，请{text}后再使用哦！", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"刚刚{use_item_name}才爆炸过哦！现在{use_item_name}的能量十分不稳定，请{text}后再使用哦！", at_sender=True)
                         #获取充能箱状态
                         elect_status = data[user_id].get("elect_status", False)
                         boom = random.randint(1,100)
@@ -2028,7 +2028,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         data[str(user_id)]["item"][use_item_name] -= 1
 
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{use_item_name}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}", at_sender=True)
 
                 if(use_item_name=="时间献祭器"):
                     if(data.get(user_id).get('item').get('时间献祭器',0) > 0):
@@ -2038,9 +2038,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             data[str(user_id)].get('buff')=='normal'
                         #一些啥都干不了的buff
                         if(data[str(user_id)].get('buff')=='lost'): 
-                            await send_image_or_text(daoju, f"你现在正在迷路中，连路都找不到，\n怎么使用时间献祭器呢？", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你现在正在迷路中，连路都找不到，\n怎么使用时间献祭器呢？", at_sender=True)
                         if(data[str(user_id)].get('buff')=='confuse'): 
-                            await send_image_or_text(daoju, f"你现在正在找到了个碎片，疑惑着呢，\n不能使用时间献祭器。", at_sender=True)
+                            await send_image_or_text(user_id, daoju, f"你现在正在找到了个碎片，疑惑着呢，\n不能使用时间献祭器。", at_sender=True)
                         #如果受伤了则无法使用道具(时间秒表除外)
                         if(data[str(user_id)].get("buff")=="hurt"): 
                             #一些额外操作：如果还没过下次时间，计算与下次的时间间隔，如果过了，可以使用道具
@@ -2048,13 +2048,13 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
                             if(current_time < next_time_r):
                                 delta_time = next_time_r - current_time
-                                await send_image_or_text(daoju, f"你受伤了，\n需要等{time_text(delta_time)}才能继续。", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"你受伤了，\n需要等{time_text(delta_time)}才能继续。", at_sender=True)
                             else:
                                 outofdanger(data,str(user_id),daoju,current_time,next_time_r)
                         #没到下一次抓的时间
                         if(current_time < next_time):
                             text = time_text(str(next_time-current_time))
-                            await send_image_or_text(daoju, f"别抓啦，\n{text}后再来吧！！", at_sender = True)
+                            await send_image_or_text(user_id, daoju, f"别抓啦，\n{text}后再来吧！！", at_sender = True)
 
                         #延长下次抓的cd
                         next_time = current_time + datetime.timedelta(minutes=60)
@@ -2076,7 +2076,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         puke = data[str(user_id)]['collections'].get("奇想扑克", 0)
                         success = 1
                     else:
-                        await send_image_or_text(daoju, f"你现在没有{use_item_name}", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"你现在没有{use_item_name}", at_sender=True)
             
                 #使用成功
                 if(success==1):
@@ -2184,34 +2184,35 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     #写入文件
                     save_data(user_path / file_name, data)
 
-                    await send_image_or_text(daoju, fail_text, at_sender=True)
+                    await send_image_or_text(user_id, daoju, fail_text, at_sender=True)
                     
                 # # 最后检查道具名称是否在商品列表中
                 # if use_item_name not in item or use_item_name not in all_collections:
-                #     await send_image_or_text(daoju, f"现在整个抓玛德琳都没有这个道具/藏品 [{use_item_name}]，你为什么会想用呢？", at_sender=True)
+                #     await send_image_or_text(user_id, daoju, f"现在整个抓玛德琳都没有这个道具/藏品 [{use_item_name}]，你为什么会想用呢？", at_sender=True)
                 # 在商品列表里面就直接回答暂无法使用
-                await send_image_or_text(daoju, f"[{use_item_name}]在抓玛德琳里面不存在，\n或者使用方法有误，\n又或者现在无法使用哦！", at_sender=True)
+                await send_image_or_text(user_id, daoju, f"[{use_item_name}]在抓玛德琳里面不存在，\n或者使用方法有误，\n又或者现在无法使用哦！", at_sender=True)
         else:
-            await send_image_or_text(daoju, "你还没有任何道具哦！", at_sender=True)
+            await send_image_or_text(user_id, daoju, "你还没有任何道具哦！", at_sender=True)
     else:
-        await send_image_or_text(daoju, "你还没尝试抓过madeline……")
+        await send_image_or_text(user_id, daoju, "你还没尝试抓过madeline……")
 
 # 查看道具信息
 ckdj = on_command('item', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @ckdj.handle()
 async def ckdj_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+    user_id = str(event.user_id)
     dj_name = str(arg).strip()
     standard_item = get_alias_name(dj_name, item, item_aliases)
     
     if standard_item in item:
-        await send_image_or_text(
+        await send_image_or_text(user_id, 
             ckdj,
             f"{standard_item}:\n{item[standard_item][2]}",
             True,
             None
         )
     else:
-        await send_image_or_text(
+        await send_image_or_text(user_id, 
             ckdj,
             "请输入正确的道具名称哦！",
             True,

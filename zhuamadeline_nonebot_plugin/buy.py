@@ -42,14 +42,14 @@ async def madeline_shop(bot: Bot, event: Event):
     hour = current_time.hour
     if hour < 6:
         msg = "便利店还没开门，请再等一会吧"
-        await send_image_or_text(shop, msg, True, None, 20)
+        await send_image_or_text(user_id, shop, msg, True, None, 20)
     
     data = open_data(user_path / file_name)
     user_id = str(event.user_id)
     # 事件检测
     if data[str(user_id)].get('event',"nothing") != "nothing":
         msg = "你还有正在进行中的事件"
-        await send_image_or_text(shop, msg, True, None, 20)
+        await send_image_or_text(user_id, shop, msg, True, None, 20)
     
     #输出商店仓库
     current_date = datetime.date.today()  #返回今天日期
@@ -79,7 +79,7 @@ async def madeline_shop(bot: Bot, event: Event):
     item_text = shop_list(shop_data["item"])
     
     # 改为图片形式发送
-    await send_image_or_text(shop, item_text)
+    await send_image_or_text(user_id, shop, item_text)
 
 # 定时任务：每天 18:00 自动补货
 @scheduler.scheduled_job("cron", hour=18, minute=0)
@@ -94,7 +94,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 获取当前时间
     current_time = datetime.datetime.now().time()
     if current_time.hour < 6:
-        await send_image_or_text(buy, "便利店还没开门，请再等一会吧", True, None, 20)
+        await send_image_or_text(user_id, buy, "便利店还没开门，请再等一会吧", True, None, 20)
         return
     
     # 读取或初始化商店数据
@@ -111,7 +111,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     group_id = str(event.group_id)
     user_data = open_data(user_path / file_name)
     if user_id not in user_data:
-        await send_image_or_text(buy, "你还没尝试抓过madeline.....", True, None, 20)
+        await send_image_or_text(user_id, buy, "你还没尝试抓过madeline.....", True, None, 20)
         return
 
     # 处理冷却时间
@@ -128,13 +128,13 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         try:
             n = int(args[1])  # 解析数量
             if n <= 0:
-                await send_image_or_text(buy, "购买数量必须大于 0 哦~", True, None, 20)
+                await send_image_or_text(user_id, buy, "购买数量必须大于 0 哦~", True, None, 20)
                 return
         except ValueError:
-            await send_image_or_text(buy, "请输入正确的道具数量哦~", True, None, 20)
+            await send_image_or_text(user_id, buy, "请输入正确的道具数量哦~", True, None, 20)
             return
     else:
-        await send_image_or_text(buy, "请检查购买指令或购买道具/藏品名称是否正确，正确指令为 .buy 道具|藏品 数量~", True, None, 20)
+        await send_image_or_text(user_id, buy, "请检查购买指令或购买道具/藏品名称是否正确，正确指令为 .buy 道具|藏品 数量~", True, None, 20)
         return
 
     # 处理别名转换
@@ -149,20 +149,20 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
     # 检查是否是今日商品
     if buy_item_name not in today_item:
-        await send_image_or_text(buy, "请检查购买道具/藏品名称是否正确哦~", True, None, 20)
+        await send_image_or_text(user_id, buy, "请检查购买道具/藏品名称是否正确哦~", True, None, 20)
         return
 
     answer = 0
     if n <= 0:
-        await send_image_or_text(buy, f"你为什么会想着买{n}个商品呢？", True, None, 20)
+        await send_image_or_text(user_id, buy, f"你为什么会想着买{n}个商品呢？", True, None, 20)
         return
 
     # 检查商品库存
     if shop_data["item"].get(buy_item_name, 0) == 0:
-        await send_image_or_text(buy, f"来晚啦，{buy_item_name} 已经售空啦！", True, None, 20)
+        await send_image_or_text(user_id, buy, f"来晚啦，{buy_item_name} 已经售空啦！", True, None, 20)
         return
     if shop_data["item"][buy_item_name] < n:
-        await send_image_or_text(buy, f"没有那么多 {buy_item_name} 了……", True, None, 20)
+        await send_image_or_text(user_id, buy, f"没有那么多 {buy_item_name} 了……", True, None, 20)
         return
 
     # 处理购买逻辑
@@ -171,7 +171,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         pay = n * pay_per  # 总价格
 
         if user_data[user_id]['berry'] < pay:
-            await send_image_or_text(buy, f"本次你需要花费 {pay} 颗草莓\n你只有 {user_data[user_id]['berry']} 颗草莓", True, None, 20)
+            await send_image_or_text(user_id, buy, f"本次你需要花费 {pay} 颗草莓\n你只有 {user_data[user_id]['berry']} 颗草莓", True, None, 20)
             return
 
         # 扣除草莓并更新用户道具
@@ -186,26 +186,26 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
             '神秘碎片': 5, '草莓鱼竿': 1,
         }
         if buy_item_name in item_limits and user_data[user_id]['item'][buy_item_name] > item_limits[buy_item_name]:
-            await send_image_or_text(buy, f"{buy_item_name} 已经到达你的获取上限啦\n不能再买了！", True, None, 20)
+            await send_image_or_text(user_id, buy, f"{buy_item_name} 已经到达你的获取上限啦\n不能再买了！", True, None, 20)
             return
 
         # 处理 "神秘碎片" 终身限购
         if buy_item_name == '神秘碎片':
             user_data[user_id].setdefault("buy_fragments_num", 0)
             if user_data[user_id]["buy_fragments_num"] + n > 5:
-                await send_image_or_text(buy, f"你不能买这么多，该道具终身限购 5 个\n你已经购买了 {user_data[user_id]['buy_fragments_num']} 个", True, None, 20)
+                await send_image_or_text(user_id, buy, f"你不能买这么多，该道具终身限购 5 个\n你已经购买了 {user_data[user_id]['buy_fragments_num']} 个", True, None, 20)
                 return
             user_data[user_id]['buy_fragments_num'] += n
         answer = 0
         
     except KeyError:  # 处理购买藏品的情况
         if n >= 2:
-            await send_image_or_text(buy, f"藏品只能购买一个哦！", True, None, 20)
+            await send_image_or_text(user_id, buy, f"藏品只能购买一个哦！", True, None, 20)
             return
 
         user_data[user_id].setdefault("collections", {})
         if user_data[user_id]['collections'].get(buy_item_name, 0) >= 1:
-            await send_image_or_text(buy, f"{buy_item_name} 已经到达你的获取上限啦\n不能再买了！", True, None, 20)
+            await send_image_or_text(user_id, buy, f"{buy_item_name} 已经到达你的获取上限啦\n不能再买了！", True, None, 20)
             return
 
         pay_per = collections[buy_item_name][0]
@@ -215,7 +215,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         category = collections[buy_item_name][1]
         if category == 8:
             if user_data[user_id]['energy'] < pay:
-                await send_image_or_text(buy, f"本次你需要花费 {pay} 点能量\n你只有 {user_data[user_id]['energy']} 点能量", True, None, 20)
+                await send_image_or_text(user_id, buy, f"本次你需要花费 {pay} 点能量\n你只有 {user_data[user_id]['energy']} 点能量", True, None, 20)
                 return
 
             user_data[user_id]['energy'] -= pay
@@ -223,7 +223,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
             answer = 1
         elif category == 9:
             if user_data[user_id]['berry'] < pay:
-                await send_image_or_text(buy, f"本次你需要花费 {pay} 颗草莓\n你只有 {user_data[user_id]['berry']} 颗草莓", True, None, 20)
+                await send_image_or_text(user_id, buy, f"本次你需要花费 {pay} 颗草莓\n你只有 {user_data[user_id]['berry']} 颗草莓", True, None, 20)
                 return
 
             # 扣除草莓并更新用户道具
@@ -248,9 +248,9 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
     # 发送购买成功消息
     if answer == 0:
-        await send_image_or_text(buy, f"购买成功！\n你还剩 {user_data[user_id]['berry']} 颗草莓！", True, None, 20)
+        await send_image_or_text(user_id, buy, f"购买成功！\n你还剩 {user_data[user_id]['berry']} 颗草莓！", True, None, 20)
     elif answer == 1:
-        await send_image_or_text(buy, f"购买成功！\n你还剩 {user_data[user_id]['energy']} 点能量！", True, None, 20)
+        await send_image_or_text(user_id, buy, f"购买成功！\n你还剩 {user_data[user_id]['energy']} 点能量！", True, None, 20)
 
 
 # 回收道具 50%价格回收
@@ -263,14 +263,14 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
     args = str(arg).strip().lower().split()
 
     if len(args) < 1 or len(args) > 2:
-        await send_image_or_text(recycle_item, "格式错误！请输入：\n.recycle 道具名称 (数量) \n或\n .recycle 道具名称 all", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, "格式错误！请输入：\n.recycle 道具名称 (数量) \n或\n .recycle 道具名称 all", True, None, 20)
         return
 
     # 获取道具名称
     item_name = args[0].strip()
     
     if not item_name:
-        await send_image_or_text(recycle_item, "格式错误！请输入：\n.recycle 道具名称 (数量) \n或\n .recycle 道具名称 all", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, "格式错误！请输入：\n.recycle 道具名称 (数量) \n或\n .recycle 道具名称 all", True, None, 20)
         return
     
     # 进行别名转换
@@ -294,36 +294,36 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
                 if item_quantity <= 0:
                     raise ValueError
             except ValueError:
-                await send_image_or_text(recycle_item, "道具数量必须为正整数！", True, None, 20)
+                await send_image_or_text(user_id, recycle_item, "道具数量必须为正整数！", True, None, 20)
                 return
 
     # 检测道具名称是否在商品列表中
     if item_name not in item:
-        await send_image_or_text(recycle_item, f"现在整个抓玛德琳都没有这个道具 [{item_name}]\n你为什么会想回收呢？", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"现在整个抓玛德琳都没有这个道具 [{item_name}]\n你为什么会想回收呢？", True, None, 20)
         return
 
     # 检测道具名称是否在黑名单中
     if item_name in forbid_recycle_item:
-        await send_image_or_text(recycle_item, f"[{item_name}] 在道具回收黑名单中\n你不能回收该道具哦！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"[{item_name}] 在道具回收黑名单中\n你不能回收该道具哦！", True, None, 20)
         return
 
     # 读取玩家数据
     if not (user_path / file_name).exists():
-        await send_image_or_text(recycle_item, "玩家数据文件不存在！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, "玩家数据文件不存在！", True, None, 20)
         return
 
     data = open_data(user_path / file_name)
 
     # 检查玩家是否存在
     if user_id not in data:
-        await send_image_or_text(recycle_item, f"你未注册zhuamadeline账号哦！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"你未注册zhuamadeline账号哦！", True, None, 20)
         return
 
     # 检查玩家是否有该道具
     if "item" not in data[user_id]:
         data[user_id]['item'] = {}
     if item_name not in data[user_id]["item"]:
-        await send_image_or_text(recycle_item, f"你没有道具 [{item_name}] 哦！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"你没有道具 [{item_name}] 哦！", True, None, 20)
         return
 
     # 如果是回收所有道具，获取当前持有数量
@@ -332,7 +332,7 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
 
     # 检查道具数量是否足够
     if data[user_id]["item"][item_name] < item_quantity:
-        await send_image_or_text(recycle_item, f"你的道具 [{item_name}] 数量不足哦！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"你的道具 [{item_name}] 数量不足哦！", True, None, 20)
         return
 
     recycle_per = int(item[item_name][0])  # 查看物品单价
@@ -358,6 +358,6 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
     owner_berry = data[user_id]['berry']
 
     if is_all:
-        await send_image_or_text(recycle_item, f"你成功回收了你所有的{item_quantity}个{item_name}！\n本次回收获得{recycle_price}颗草莓！\n你目前拥有{owner_berry}颗草莓！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"你成功回收了你所有的{item_quantity}个{item_name}！\n本次回收获得{recycle_price}颗草莓！\n你目前拥有{owner_berry}颗草莓！", True, None, 20)
     else:
-        await send_image_or_text(recycle_item, f"你成功回收了{item_quantity}个{item_name}！\n本次回收获得{recycle_price}颗草莓！\n你目前拥有{owner_berry}颗草莓！", True, None, 20)
+        await send_image_or_text(user_id, recycle_item, f"你成功回收了{item_quantity}个{item_name}！\n本次回收获得{recycle_price}颗草莓！\n你目前拥有{owner_berry}颗草莓！", True, None, 20)

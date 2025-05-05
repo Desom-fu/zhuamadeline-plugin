@@ -110,7 +110,7 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     # 参数校验
     if len(args) != 2:
-        await send_image_or_text(bank, "指令格式错误，请使用：\n.bank save/take 数量/all", at_sender=True)
+        await send_image_or_text(user_id, bank, "指令格式错误，请使用：\n.bank save/take 数量/all", at_sender=True)
         return
 
     access, berry_number = args
@@ -119,14 +119,14 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
 
     # 用户数据校验
     if user_id not in data:
-        await send_image_or_text(bank, "请先抓一次Madeline再使用仓库哦！", at_sender=True)
+        await send_image_or_text(user_id, bank, "请先抓一次Madeline再使用仓库哦！", at_sender=True)
         return
 
     user_data = data.setdefault(user_id, {})
     user_data.setdefault('berry', 0)
 
     if user_data['berry'] < 0:
-        await send_image_or_text(bank, f"你现在仍处于失约状态中……\n不允许使用草莓仓库！\n你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
+        await send_image_or_text(user_id, bank, f"你现在仍处于失约状态中……\n不允许使用草莓仓库！\n你只有{data[user_id]['berry']}颗草莓！", at_sender=True)
         return
 
     # 初始化仓库数据
@@ -140,20 +140,20 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             # 存入逻辑
             # 检查时间限制
             if not (8 <= now.hour < 20):
-                await send_image_or_text(bank, "每天 8:00 - 20:00 才能进行存放哦！", at_sender=True)
+                await send_image_or_text(user_id, bank, "每天 8:00 - 20:00 才能进行存放哦！", at_sender=True)
                 return
             if berry_number == "all":
                 deposit = user_data['berry']
                 if deposit <= 0:
-                    await send_image_or_text(bank, "你当前没有草莓可以存入！", at_sender=True)
+                    await send_image_or_text(user_id, bank, "你当前没有草莓可以存入！", at_sender=True)
                     return
             else:
                 deposit = int(berry_number)
                 if deposit <= 0:
-                    await send_image_or_text(bank, "草莓存入数必须是大于0的整数哦！", at_sender=True)
+                    await send_image_or_text(user_id, bank, "草莓存入数必须是大于0的整数哦！", at_sender=True)
                     return
                 if user_data['berry'] < deposit:
-                    await send_image_or_text(bank, f"存入失败，你只有{user_data['berry']}颗草莓\n不足以存入{deposit}颗草莓哦！", at_sender=True)
+                    await send_image_or_text(user_id, bank, f"存入失败，你只有{user_data['berry']}颗草莓\n不足以存入{deposit}颗草莓哦！", at_sender=True)
                     return
 
             user_data['berry'] -= deposit
@@ -165,15 +165,15 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             if berry_number == "all":
                 withdraw = user_bar['bank']
                 if withdraw <= 0:
-                    await send_image_or_text(bank, "你的仓库账户空空如也！", at_sender=True)
+                    await send_image_or_text(user_id, bank, "你的仓库账户空空如也！", at_sender=True)
                     return
             else:
                 withdraw = int(berry_number)
                 if withdraw <= 0:
-                    await send_image_or_text(bank, "草莓取出数必须是大于0的整数哦！", at_sender=True)
+                    await send_image_or_text(user_id, bank, "草莓取出数必须是大于0的整数哦！", at_sender=True)
                     return
                 if user_bar['bank'] < withdraw:
-                    await send_image_or_text(bank, f"取出失败，仓库只有{user_bar['bank']}颗草莓！", at_sender=True)
+                    await send_image_or_text(user_id, bank, f"取出失败，仓库只有{user_bar['bank']}颗草莓！", at_sender=True)
                     return
 
             user_bar['bank'] -= withdraw
@@ -181,7 +181,7 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             action = f"取出{withdraw}颗草莓"
 
         else:
-            await send_image_or_text(bank, "指令格式错误，请使用：\n.bank save/take 数量/all", at_sender=True)
+            await send_image_or_text(user_id, bank, "指令格式错误，请使用：\n.bank save/take 数量/all", at_sender=True)
             return
 
         # 保存数据并响应
@@ -193,7 +193,7 @@ async def bank_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             f"\n当前持有草莓：{user_data['berry']}颗"
             f"\n仓库草莓余额：{user_bar['bank']}颗"
         )
-        await send_image_or_text(bank, message, at_sender=True)
+        await send_image_or_text(user_id, bank, message, at_sender=True)
 
     except ValueError:
-        await send_image_or_text(bank, "指令格式错误，请使用：\n.bank save/take 数量/all", at_sender=True)
+        await send_image_or_text(user_id, bank, "指令格式错误，请使用：\n.bank save/take 数量/all", at_sender=True)

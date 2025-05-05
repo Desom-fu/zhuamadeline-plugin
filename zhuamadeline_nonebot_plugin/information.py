@@ -1,6 +1,6 @@
 from nonebot import on_command
 from nonebot.params import CommandArg
-from nonebot.adapters.onebot.v11 import GROUP, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import GROUP, Message, MessageSegment, GroupMessageEvent
 from .npc import npc_da
 from .whitelist import whitelist_rule
 from .config import liechang_count
@@ -106,9 +106,9 @@ help = on_command(
 )
 
 @help.handle()
-async def zhua_help(args: Message = CommandArg()):
+async def zhua_help(event: GroupMessageEvent, args: Message = CommandArg()):
     category = args.extract_plain_text().strip().lower()
-    
+    user_id = str(event.user_id)
     if not category:
         # 主帮助菜单 - 只显示分类指引
         text = "更多详情请查看wiki: https://docs.qq.com/smartsheet/DS0NHQWFsRWhZS29O"
@@ -128,7 +128,7 @@ async def zhua_help(args: Message = CommandArg()):
             "带有{}为必须，带有()的为非必须~\n"
             "更多功能持续开发中……"
         )
-        await send_image_or_text(help, main_help, False, text)
+        await send_image_or_text(user_id, help, main_help, False, text)
     else:
         # 查找匹配的分类
         matched_category = None
@@ -146,10 +146,10 @@ async def zhua_help(args: Message = CommandArg()):
                         "带有{}为必须，带有()的为非必须~\n"
                         "更多功能持续开发中……")
             
-            await send_image_or_text(help, help_text, False)
+            await send_image_or_text(user_id, help, help_text, False)
         else:
             # 没有匹配的分类，显示错误信息
-            await send_image_or_text(help, "没有找到该分类的指令，请输入 .help 查看所有可用分类", False)
+            await send_image_or_text(user_id, help, "没有找到该分类的指令，请输入 .help 查看所有可用分类", False)
 
 
 # 更新公告
@@ -161,7 +161,8 @@ gong_gao = on_command(
 )
 
 @gong_gao.handle()
-async def gong_gao_handle():
+async def gong_gao_handle(event: GroupMessageEvent):
+    user_id = str(event.user_id)
     text = (
         "“那只狐娘终于回来了！”\n"
         "“是啊，当时那场事件真的是……有点吓人啊……”\n"
@@ -173,7 +174,7 @@ async def gong_gao_handle():
         "“希望这次不要再发生地下终端那样的惨案了……”\n"
         "“我相信他们，这次一定会更好！”"
     )
-    await send_image_or_text(gong_gao, text)
+    await send_image_or_text(user_id, gong_gao, text)
 
 # NPC档案
 npc = on_command(
@@ -185,13 +186,14 @@ npc = on_command(
 )
 
 @npc.handle()
-async def npc_handle(arg: Message = CommandArg()):
+async def npc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+    user_id = str(event.user_id)
     name = str(arg).strip().lower()
     npc_da_lower = {k.lower(): v for k, v in npc_da.items()}
     if name in npc_da_lower: 
-        await send_image_or_text(npc, npc_da_lower[name])
+        await send_image_or_text(user_id, npc, npc_da_lower[name])
     else:
-        await send_image_or_text(npc, "未找到相关NPC信息。")
+        await send_image_or_text(user_id, npc, "未找到相关NPC信息。")
 
 # 猎场信息
 cklc = on_command(
@@ -202,7 +204,7 @@ cklc = on_command(
 )
 
 @cklc.handle()
-async def cklc_handle(arg: Message = CommandArg()):
+async def cklc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     LC_INFO = {
         0: '''· 猎场名称：madeline竞技场
 · 危险等级：PVP！！！
@@ -256,6 +258,7 @@ async def cklc_handle(arg: Message = CommandArg()):
 · 5号猎场：遗忘深渊
 危险等级：4"""
 
+    user_id = str(event.user_id)
     args = str(arg).strip().lower()
     
     # cklc？返回999
@@ -265,7 +268,7 @@ async def cklc_handle(arg: Message = CommandArg()):
         try:
             number_arg = int(args)
         except ValueError:
-            await send_image_or_text(cklc, DEFAULT_TEXT)
+            await send_image_or_text(user_id, cklc, DEFAULT_TEXT)
             return
 
     # 可以看已开放猎场+1的信息
@@ -279,7 +282,7 @@ async def cklc_handle(arg: Message = CommandArg()):
     else:
         text = DEFAULT_TEXT
 
-    await send_image_or_text(cklc, text)
+    await send_image_or_text(user_id, cklc, text)
 
 # 竞技场细则
 pvpck = on_command(
@@ -290,7 +293,8 @@ pvpck = on_command(
 )
 
 @pvpck.handle()
-async def pvpck_handle():
+async def pvpck_handle(event: GroupMessageEvent):
+    user_id = str(event.user_id)
     text = (
         "有关madeline竞技场细则：\n\n"
         "在本猎场，.zhua将会从自己的1/2/3猎收集池里抓取。\n"
@@ -300,4 +304,4 @@ async def pvpck_handle():
         "休息一段时间后就会重新开始哦！\n"
         "详细规则可以查看抓kid wiki！因为基础规则是一样的我懒得重新写抓madeline wiki了！"
     )
-    await send_image_or_text(pvpck, text)
+    await send_image_or_text(user_id, pvpck, text)

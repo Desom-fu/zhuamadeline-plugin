@@ -381,10 +381,10 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     # 调用开放时间检查模块
     is_open, close_text = pvp_opening(current_time)
     if not is_open:
-        await send_image_or_text(message, close_text, True)
+        await send_image_or_text(user_id, message, close_text, True)
     # 当前时间戳
     if (user_id in ban):
-        await send_image_or_text(message, "很抱歉，0猎不让使用脚本，您已经被封禁，请联系Desom-fu哦~", True)
+        await send_image_or_text(user_id, message, "很抱歉，0猎不让使用脚本，您已经被封禁，请联系Desom-fu哦~", True)
     if (pvp_coldtime_data != {}):
         last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
         current_time2 = int(time.time())
@@ -394,16 +394,16 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
             remaining_seconds = 1800 - cooldown_seconds  # 计算剩余冷却时间
             remaining_minutes = remaining_seconds // 60  # 剩余分钟数
             remaining_seconds = remaining_seconds % 60  # 剩余秒数
-            await send_image_or_text(message, f"啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
+            await send_image_or_text(user_id, message, f"啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
     user_path1 = Path() / "data" / "UserList" / "UserList1.json"
     kc_data1 = open_data(user_path1)
     #如果没有注册
     if(not str(user_id) in user_data):
-        await send_image_or_text(message, "你还没有抓过Madeline哦~", True)
+        await send_image_or_text(user_id, message, "你还没有抓过Madeline哦~", True)
     #检测1号猎场madeline是否足够
     check1 = check_liechang(user_id, kc_data1)
     if check1 == False:
-        await send_image_or_text(message, "请在1猎成功解锁\n- 30个1级和2级\n- 4个4级\n- 1个5级\n的Madeline哦！", True)
+        await send_image_or_text(user_id, message, "请在1猎成功解锁\n- 30个1级和2级\n- 4个4级\n- 1个5级\n的Madeline哦！", True)
     # if str(user_id) not in bot_owner_id:
         # await message.finish("现在madeline竞技场暂未开放哦，敬请期待！", at_sender=True)
     # 当前时间戳
@@ -683,17 +683,18 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     if kicked_user_id:
         forward_text += MessageSegment.at(kicked_user_id)
     # 发送挑战结果
-    await not_finish_send_image_or_text(message, pk_text, True, forward_text, 28)
+    await not_finish_send_image_or_text(user_id, message, pk_text, True, forward_text, 28)
 
     # 发送结束结果（如果有）
     if set_final:
-        await send_image_or_text(message, text, False, at_text, 20)
+        await send_image_or_text(user_id, message, text, False, at_text, 20)
         
 
 # .jjc内容
 jjc = on_command('jjc', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @jjc.handle()
 async def jjc_handle(bot: Bot, event: GroupMessageEvent):
+    user_id = str(event.user_id)
     pvp_data = open_data(pvp_path)
     bar_data = open_data(bar_path)  # 读取 bar 数据（包含 pvp_guess）
     pvp_coldtime_data = open_data(pvp_coldtime_path)
@@ -718,7 +719,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
     # 调用开放时间检查模块
     is_open, close_text = pvp_opening(current_time_2)
     if not is_open:
-        await send_image_or_text(jjc, close_text, True)
+        await send_image_or_text(user_id, jjc, close_text, True)
     if pvp_data == {}:
         if (pvp_coldtime_data != {}):
             last_pvp_end_time = pvp_coldtime_data.get('last_pvp_end_time', 0)
@@ -729,9 +730,9 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
                 remaining_minutes = remaining_seconds // 60  # 剩余分钟数
                 remaining_seconds = remaining_seconds % 60  # 剩余秒数
                 
-                await send_image_or_text(jjc, f"啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
+                await send_image_or_text(user_id, jjc, f"啊呀，刚刚打的太激烈了，战场上一片混乱呢！\n请稍等一段时间，我需要打扫上一场留下的痕迹哦~\n请{remaining_minutes}分{remaining_seconds}秒后再来哦！", True)
         
-        await send_image_or_text(jjc, "madeline竞技场尚未开启！", True)
+        await send_image_or_text(user_id, jjc, "madeline竞技场尚未开启！", True)
 
     i = 0
     text = f"总回合数：{totalCount}\n"
@@ -790,7 +791,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
         )
 
     # 使用转发消息格式发送图片
-    await send_image_or_text_forward(
+    await send_image_or_text_forward(user_id, 
         jjc,
         text,
         "Madeline竞技场擂台详情",

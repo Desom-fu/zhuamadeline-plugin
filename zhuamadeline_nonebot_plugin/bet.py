@@ -42,6 +42,7 @@ rule = on_command('rule', permission=GROUP, priority=1, block=True, rule=whiteli
 
 @rule.handle()
 async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+    user_id = str(event.user_id)
     game_type = str(arg)  # 获取玩家请求的游戏编号
     if game_type == '1':
         msg = (
@@ -54,7 +55,7 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 输入.bet 1/梅花/方片/黑桃/红桃\n以猜测该牌的花色，\n猜测正确可以获得中量奖励！\n" +
             "- 输入.bet 1/(任意两个数字，用/分隔，如10/Q)\n以猜测该牌是否为这两个点数，\n猜测正确可以获得大量奖励！"
         )
-        await send_image_or_text(rule, msg, True, None, 30)
+        await send_image_or_text(user_id, rule, msg, True, None, 30)
     elif game_type == '2':
         msg = (
             "游戏2：恶魔轮盘(2人)\n" +
@@ -69,7 +70,7 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 使用 .恶魔帮助 指令可以查看所有的指令~ \n" +
             "- 输入 .bet 2 游玩此游戏"
         )
-        await send_image_or_text(rule, msg, True, None, 30)
+        await send_image_or_text(user_id, rule, msg, True, None, 30)
     elif game_type == '3':
         msg = (
             "游戏3：Madeline竞技场竞猜\n" +
@@ -81,7 +82,7 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 注意1：每局Madeline竞技场\n只能竞猜Madeline一次！\n" +
             "- 注意2：不能竞猜在场超过5回合的玛德琳"
         )
-        await send_image_or_text(rule, msg, True, None, 30)
+        await send_image_or_text(user_id, rule, msg, True, None, 30)
     elif game_type == '4':
         msg = (
             "游戏4：洞窟探险\n" +
@@ -95,9 +96,9 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
             "- 如果只有一个按钮能对应上，不用担心，开门后你能拿走洞窟宝藏里你所交入场费的150%的草莓！\n"+
             "- 你在探险的时候同时也能玩其他游戏哦！"
         )
-        await send_image_or_text(rule, msg, True, None, 30)
+        await send_image_or_text(user_id, rule, msg, True, None, 30)
     else:
-        await send_image_or_text(rule, "请输入正确的游戏编号，\n例如 .rule 1", True, None, 25)
+        await send_image_or_text(user_id, rule, "请输入正确的游戏编号，\n例如 .rule 1", True, None, 25)
 
 # 地下酒馆 - 游戏判定
 bet = on_command('bet', aliases={"game"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -122,7 +123,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
 
     # 如果该用户不在用户名单中，则先抓
     if user_id not in data:
-        await send_image_or_text(bet, "请先抓一次madeline\n再来玩游戏哦！", True, None, 25)
+        await send_image_or_text(user_id, bet, "请先抓一次madeline\n再来玩游戏哦！", True, None, 25)
         return
     
     #debuff清除逻辑
@@ -156,23 +157,23 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     # 一堆事件的判定
     if not (data[str(user_id)]['event'] == 'nothing' or 
            (data[str(user_id)]['event'] == 'compulsion_bet1' and game_type == "1")):
-        await send_image_or_text(bet, "你还有正在进行中的事件", True, None, 25)
+        await send_image_or_text(user_id, bet, "你还有正在进行中的事件", True, None, 25)
         return
             
     if (data[str(user_id)].get('buff','normal')=='lost') and game_type not in ("1", "2"):
-        await send_image_or_text(bet, "你现在正在迷路中，\n连路都找不到，怎么能玩游戏呢？", True, None, 25)
+        await send_image_or_text(user_id, bet, "你现在正在迷路中，\n连路都找不到，怎么能玩游戏呢？", True, None, 25)
         return
         
     if (data[str(user_id)].get('buff','normal')=='confuse') and game_type not in ["1","2","4"]: 
-        await send_image_or_text(bet, "你现在正在找到了个碎片，\n疑惑着呢，不能玩游戏。", True, None, 25)
+        await send_image_or_text(user_id, bet, "你现在正在找到了个碎片，\n疑惑着呢，不能玩游戏。", True, None, 25)
         return
 
     if (data[str(user_id)].get('debuff','normal')=='tentacle'): 
-        await send_image_or_text(bet, "你刚被触手玩弄到失神，\n没有精力玩游戏！", True, None, 25)
+        await send_image_or_text(user_id, bet, "你刚被触手玩弄到失神，\n没有精力玩游戏！", True, None, 25)
         return
         
     if (data[str(user_id)].get('buff','normal')=='hurt') and game_type != "1" and game_type != "2": 
-        await send_image_or_text(bet, "你现在受伤了，\n没有精力玩游戏！", True, None, 25)
+        await send_image_or_text(user_id, bet, "你现在受伤了，\n没有精力玩游戏！", True, None, 25)
         return
         
     # 如果该用户不在酒馆名单中，则先创建数据
@@ -182,7 +183,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
 
     if game_type == '1':
         if data[user_id]['berry'] < 0:
-            await send_image_or_text(bet, f"你现在仍处于失约状态中……\n还想继续game1？\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None, 25)
+            await send_image_or_text(user_id, bet, f"你现在仍处于失约状态中……\n还想继续game1？\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None, 25)
             return
 
         # 检查是否有冷却时间记录
@@ -194,7 +195,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             last_game_time = data[user_id].get('last_game_time', 0)
             time_left = cooldown_time - (current_time - last_game_time)
             if time_left > 0:
-                await send_image_or_text(bet, f"请冷静一会！\n距离下次游玩还要{time_left // 60}分钟{time_left % 60}秒。", True, None, 25)
+                await send_image_or_text(user_id, bet, f"请冷静一会！\n距离下次游玩还要{time_left // 60}分钟{time_left % 60}秒。", True, None, 25)
                 return
         
         # 更新用户的最后游戏时间
@@ -202,13 +203,13 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         
         # 必须有猜测参数
         if not second_game_type:
-            await send_image_or_text(bet, "请直接输入猜测参数，例如：\n.bet 1/大于7\n.bet 1/黑桃\n.bet 1/A/Q", True, None, 25)
+            await send_image_or_text(user_id, bet, "请直接输入猜测参数，例如：\n.bet 1/大于7\n.bet 1/黑桃\n.bet 1/A/Q", True, None, 25)
             return
             
         # 处理猜测
         guess_input = "/".join(game_type_split[1:])
         result = handle_guess_game(data, bar_data, user_id, guess_input)
-        await send_image_or_text(bet, result, True, None, 25)
+        await send_image_or_text(user_id, bet, result, True, None, 25)
         
     elif game_type == '2' and not '/' in args:
         # 获取当前时间戳
@@ -225,16 +226,16 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         # 检查全局冷却时间
         if current_time < demon_coldtime:
             remaining_time = demon_coldtime - current_time
-            await send_image_or_text(bet, f"恶魔轮盘处于冷却中，\n请晚点再来吧！\n剩余冷却时间：{remaining_time // 60}分钟{remaining_time % 60}秒。", True, None, 25)
+            await send_image_or_text(user_id, bet, f"恶魔轮盘处于冷却中，\n请晚点再来吧！\n剩余冷却时间：{remaining_time // 60}分钟{remaining_time % 60}秒。", True, None, 25)
             return
 
         # 检查游戏是否已经开始，如果已经开始，禁止其他玩家加入
         if demon_data[group_id]['start']:
-            await send_image_or_text(bet, "游戏已开始，\n无法加入！", True, None, 25)
+            await send_image_or_text(user_id, bet, "游戏已开始，\n无法加入！", True, None, 25)
             return
             
         if data[user_id]['berry'] < 125:
-            await send_image_or_text(bet, "你需要有至少125草莓\n才能进来玩哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "你需要有至少125草莓\n才能进来玩哦！", True, None, 25)
             return
         else:
             data[user_id]['berry'] -= 125
@@ -251,12 +252,12 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             save_data(full_path, data)
             save_data(bar_path, bar_data)
             save_data(demon_path, demon_data)
-            await send_image_or_text(bet, f"玩家[{nick_name}]加入游戏\n等待第二位玩家加入。", True, None, 25)
+            await send_image_or_text(user_id, bet, f"玩家[{nick_name}]加入游戏\n等待第二位玩家加入。", True, None, 25)
 
         elif len(demon_data[group_id]['pl']) == 1:
             # 第二位玩家加入前检查是否已经加入
             if user_id in demon_data[group_id]['pl']:
-                await send_image_or_text(bet, "你已经加入了游戏\n无需重复加入！", True, None, 25)
+                await send_image_or_text(user_id, bet, "你已经加入了游戏\n无需重复加入！", True, None, 25)
                 return
                 
             # 第二位玩家加入，初始化游戏
@@ -327,9 +328,9 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             save_data(full_path, data)
             save_data(bar_path, bar_data)
             save_data(demon_path, demon_data)
-            await send_image_or_text(bet, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
+            await send_image_or_text(user_id, bet, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
         else:
-            await send_image_or_text(bet, "游戏已开始，无法加入！", True, None, 25)
+            await send_image_or_text(user_id, bet, "游戏已开始，无法加入！", True, None, 25)
     elif game_type == '3' and len(game_type_split) == 2:
         # 初始化必要字段
         pvp_guess = bar_data[user_id].setdefault('pvp_guess', {})
@@ -337,16 +338,16 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         bar_data[user_id].setdefault('bank', 0)
         # 判断本轮是否猜测
         if pvp_guess.get('ifguess', 0) == 1:
-            await send_image_or_text(bet, "本轮你已经猜测过擂台了，不能再猜测了哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "本轮你已经猜测过擂台了，不能再猜测了哦！", True, None, 25)
             return
         # 检测指令
         if not second_game_type:
-            await send_image_or_text(bet, "请输入正确的指令哦！正确指令为 `.bet 3/擂台号`", True, None, 25)
+            await send_image_or_text(user_id, bet, "请输入正确的指令哦！正确指令为 `.bet 3/擂台号`", True, None, 25)
             return
 
         # 检测输入是否合法
         if not second_game_type.isdigit() or not (1 <= int(second_game_type) <= 10):
-            await send_image_or_text(bet, "请输入正确的猜测擂台号！1~10 之间哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "请输入正确的猜测擂台号！1~10 之间哦！", True, None, 25)
             return
         # 转换座位号
         pos = int(second_game_type) - 1
@@ -354,13 +355,13 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         pvp_data = open_data(pvp_path)
         # 检测是否为空
         if not pvp_data:
-            await send_image_or_text(bet, "当前Madeline竞技暂未开始哦，无法进行猜测！", True, None, 25)
+            await send_image_or_text(user_id, bet, "当前Madeline竞技暂未开始哦，无法进行猜测！", True, None, 25)
             return
         # 检测是否存在该擂台
         try:
             pvp_choose = pvp_data['list'][pos]
         except:
-            await send_image_or_text(bet, "目前暂无此擂台哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "目前暂无此擂台哦！", True, None, 25)
             return
         # 获取轮数
         turn = pvp_data.get('count', 100)
@@ -376,7 +377,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         overtake = 5
         # 判定是否超过
         if turn - overtake > choose_turn:
-            await send_image_or_text(bet, f"你所选的擂台的上台回合为[{pvp_choose[5]}]，\n当前回合为[{turn}]，\n已经上台超过{overtake}回合了哦，\n请选择其他擂台哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, f"你所选的擂台的上台回合为[{pvp_choose[5]}]，\n当前回合为[{turn}]，\n已经上台超过{overtake}回合了哦，\n请选择其他擂台哦！", True, None, 25)
             return
         # 填入擂台，战力，轮数，以及本轮已猜的判定标准
         pvp_guess['ifguess'] = 1 # 1为已猜，0为未猜
@@ -389,19 +390,19 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         # 扣除草莓
         kouchu_berry = 150
         if data[user_id]['berry'] < kouchu_berry:
-            await send_image_or_text(bet, f"你需要有至少{kouchu_berry}颗草莓\n才能进行竞技场猜测哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, f"你需要有至少{kouchu_berry}颗草莓\n才能进行竞技场猜测哦！", True, None, 25)
             return
         else:
             data[user_id]['berry'] -= kouchu_berry
         save_data(bar_path, bar_data)
         save_data(full_path, data)
         # 上台回合只能写pvp_choose[5]以防显示错误
-        await send_image_or_text(bet, f"你已经消耗{kouchu_berry}颗草莓\n成功进行竞技场猜测！\n你所选的擂台为[{pos+1}]，\n该擂台擂主为[{choose_nickname}]，\n上台回合为[{pvp_choose[5]}]，\n所选占擂Madeline的战力为[{choose_rank}]！", True, None, 25)
+        await send_image_or_text(user_id, bet, f"你已经消耗{kouchu_berry}颗草莓\n成功进行竞技场猜测！\n你所选的擂台为[{pos+1}]，\n该擂台擂主为[{choose_nickname}]，\n上台回合为[{pvp_choose[5]}]，\n所选占擂Madeline的战力为[{choose_rank}]！", True, None, 25)
     
     # 游戏4逻辑：洞窟探险
     elif game_type == '4' and len(game_type_split) == 4:
         if len(game_type_split) != 4:
-            await send_image_or_text(bet, "请选择正确的\n红蓝黄三个按钮的编号哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "请选择正确的\n红蓝黄三个按钮的编号哦！", True, None, 25)
             return
             
         try:
@@ -409,11 +410,11 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             blue_points = int(third_game_type)
             yellow_points = int(forth_game_type)
         except ValueError:
-            await send_image_or_text(bet, "请选择正确的\n红蓝黄三个按钮的编号哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "请选择正确的\n红蓝黄三个按钮的编号哦！", True, None, 25)
             return
         
         if not (1 <= red_points <= 10) or not (1 <= blue_points <= 10) or not (1 <= yellow_points <= 10):
-            await send_image_or_text(bet, "红蓝黄三按钮的编号\n只能是1-10之间哦！", True, None, 25)
+            await send_image_or_text(user_id, bet, "红蓝黄三按钮的编号\n只能是1-10之间哦！", True, None, 25)
             return
         
         # 获取当前时间
@@ -422,7 +423,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
         
         # 不在开放时间内，不开放
         if not (6 <= current_hour < 22):
-             await send_image_or_text(bet, "当前不在洞窟探险开放时间（6:00 - 22:00）内，\n无法进行洞窟探险哦！", True, None, 25)
+             await send_image_or_text(user_id, bet, "当前不在洞窟探险开放时间（6:00 - 22:00）内，\n无法进行洞窟探险哦！", True, None, 25)
              return
     
         # 获取用户数据
@@ -431,7 +432,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     
         # 检查是否已经玩过
         if user_double_ball.get("ifplay") == 1:
-             await send_image_or_text(bet, "你今天已经进行过洞窟探险了，\n请耐心等待开奖哦！", True, None, 25)
+             await send_image_or_text(user_id, bet, "你今天已经进行过洞窟探险了，\n请耐心等待开奖哦！", True, None, 25)
              return
     
         # 读取奖池
@@ -444,7 +445,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
     
         # 扣除门票费用
         if data.get(user_id, {}).get("berry", 0) < ticket_cost:
-             await send_image_or_text(bet, f"你的草莓数量不足！\n需要{ticket_cost}颗草莓才能探险！", True, None, 25)
+             await send_image_or_text(user_id, bet, f"你的草莓数量不足！\n需要{ticket_cost}颗草莓才能探险！", True, None, 25)
              return
     
         data[user_id]["berry"] -= ticket_cost
@@ -462,9 +463,9 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
 
         save_data(bar_path, bar_data)
         save_data(full_path, data)
-        await send_image_or_text(bet, f"你已成功参与洞窟探险！\n本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色按钮编号：{red_points}，\n蓝色按钮编号：{blue_points}，\n黄色按钮编号：{yellow_points}", True, None, 25)
+        await send_image_or_text(user_id, bet, f"你已成功参与洞窟探险！\n本次入场费用：{ticket_cost}颗草莓。\n你竞猜的红色按钮编号：{red_points}，\n蓝色按钮编号：{blue_points}，\n黄色按钮编号：{yellow_points}", True, None, 25)
     else:
-        await send_image_or_text(bet, "请输入正确的游戏类型\n或者检查输入参数是否正确哦！", True, None, 25)
+        await send_image_or_text(user_id, bet, "请输入正确的游戏类型\n或者检查输入参数是否正确哦！", True, None, 25)
 
 # “游戏1”：猜测
 def handle_guess_game(data, bar_data, user_id, guess_input):
@@ -1203,7 +1204,7 @@ async def refersh_item(identity_found, group_id, demon_data):
     return msg, demon_data
 
 # 开枪函数
-async def shoot(stp, group_id, msg_handle, args):
+async def shoot(user_id, stp, group_id, msg_handle, args):
     bot = get_bot()
     demon_data = open_data(demon_path)
     user_data = open_data(full_path)
@@ -1313,7 +1314,7 @@ async def shoot(stp, group_id, msg_handle, args):
         turn_msg = f"当前是[{pid_nickname}]的回合"
     save_data(bar_path, bar_data)
     save_data(demon_path, demon_data)
-    await send_image_or_text(msg_handle, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
+    await send_image_or_text(user_id, msg_handle, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}', 25)
 
 # 开枪命令
 fire = on_command("开枪",aliases={"射击"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1330,27 +1331,27 @@ async def fire_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     all_cool_time(cd_path, user_id, group_id)
     
     if demon_data[group_id]["start"] == False:
-        await send_image_or_text(fire, "恶魔轮盘尚未开始！", True, None)
+        await send_image_or_text(user_id, fire, "恶魔轮盘尚未开始！", True, None)
         return
         
     if user_id not in demon_data[group_id]['pl']:
-        await send_image_or_text(fire, "只有当前局内玩家能行动哦！", True, None)
+        await send_image_or_text(user_id, fire, "只有当前局内玩家能行动哦！", True, None)
         return
 
     if demon_data[group_id]["pl"][player_turn] != user_id:
-        await send_image_or_text(fire, "现在不是你的回合，\n请等待对方操作！", True, None)
+        await send_image_or_text(user_id, fire, "现在不是你的回合，\n请等待对方操作！", True, None)
         return
     
     if args == "自己":
         stp = 0
         # 调用开枪函数
-        await shoot(stp, group_id, fire, args)
+        await shoot(user_id, stp, group_id, fire, args)
     elif args == "对方":
         stp = 1
         # 调用开枪函数
-        await shoot(stp, group_id, fire, args)
+        await shoot(user_id, stp, group_id, fire, args)
     else:
-        await send_image_or_text(fire, "指令错误！请输入\n<.开枪 自己>\n或者\n<.开枪 对方>\n来开枪哦！", True, None)
+        await send_image_or_text(user_id, fire, "指令错误！请输入\n<.开枪 自己>\n或者\n<.开枪 对方>\n来开枪哦！", True, None)
         return
 
 # 使用道具
@@ -1374,15 +1375,15 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     add_max = 0
     pangguang_add = 0
     if demon_data[group_id]["start"] == False:
-        await send_image_or_text(prop_demon, "恶魔轮盘尚未开始！", True, None)
+        await send_image_or_text(user_id, prop_demon, "恶魔轮盘尚未开始！", True, None)
         return
         
     if user_id not in demon_data[group_id]['pl']:
-        await send_image_or_text(prop_demon, "只有当前局内玩家能行动哦！", True, None)
+        await send_image_or_text(user_id, prop_demon, "只有当前局内玩家能行动哦！", True, None)
         return
 
     if demon_data[group_id]["pl"][player_turn] != user_id:
-        await send_image_or_text(prop_demon, "现在不是你的回合，\n请等待对方操作！", True, None)
+        await send_image_or_text(user_id, prop_demon, "现在不是你的回合，\n请等待对方操作！", True, None)
         return
     identity_found = demon_data[group_id]['identity'] 
     # 身份模式开了就更新dlc
@@ -1405,14 +1406,14 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
     item_dic_lower = {key: value.lower() for key, value in item_dic.items()}  # 生成一个忽略大小写的字典
 
     if args_lower not in item_dic_lower.values():  # 检查输入的名称是否存在于 item_dic（忽略大小写）
-        await send_image_or_text(prop_demon, "你输入的道具不存在，\n请确认后再使用！", True, None)
+        await send_image_or_text(user_id, prop_demon, "你输入的道具不存在，\n请确认后再使用！", True, None)
 
     # 查找玩家的道具中是否存在该道具
     try:
         # 遍历玩家的道具ID，找到第一个匹配的道具名称（忽略大小写）
         item_idx = next(i for i, item_id in enumerate(player_items) if item_dic[item_id].lower() == args_lower)
     except StopIteration:
-        await send_image_or_text(prop_demon, "你并没有这个道具，\n请确认后再使用！", True, None)
+        await send_image_or_text(user_id, prop_demon, "你并没有这个道具，\n请确认后再使用！", True, None)
 
     # 提取数据
     item_id = player_items[item_idx]
@@ -1822,7 +1823,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         msg += end_msg
     save_data(demon_path, demon_data)
     save_data(bar_path, bar_data)
-    await send_image_or_text(prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1), 25)
+    await send_image_or_text(user_id, prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1), 25)
 
 # 查看局势
 check = on_command("查看局势", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -1834,9 +1835,9 @@ async def check_handle(bot: Bot, event: GroupMessageEvent):
     user_id = str(event.user_id)
     demon_data = open_data(demon_path)
     if demon_data[group_id]['start'] == False:
-        await send_image_or_text(check, "当前并没有开始任何一局恶魔轮盘哦！", True, None, 10)
+        await send_image_or_text(user_id, check, "当前并没有开始任何一局恶魔轮盘哦！", True, None, 10)
     if user_id not in demon_data[group_id]['pl']:
-        await send_image_or_text(check, "只有当前局内玩家能查看局势哦！", True, None, 10)
+        await send_image_or_text(user_id, check, "只有当前局内玩家能查看局势哦！", True, None, 10)
     # 生成玩家信息
     player0 = str(demon_data[group_id]['pl'][0])
     player1 = str(demon_data[group_id]['pl'][1])
@@ -1892,7 +1893,7 @@ async def check_handle(bot: Bot, event: GroupMessageEvent):
     pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
     pid_nickname = await get_nickname(bot, pid)
     turn_msg = f"当前是[{pid_nickname}]的回合"
-    await send_image_or_text(check, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}',25)
+    await send_image_or_text(user_id, check, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1)+f'\n{turn_msg}',25)
         
 
 # 恶魔投降指令：随时投降
@@ -1900,6 +1901,7 @@ demon_surrender = on_command("恶魔投降", permission=GROUP, priority=1, block
 
 @demon_surrender.handle()
 async def demon_surrender_handle(bot: Bot, event: Event):
+    user_id = str(event.user_id)
     group_id = str(event.group_id)  # 获取群组ID
     player_id = str(event.user_id)  # 获取发出投降指令的玩家ID
     
@@ -1908,11 +1910,11 @@ async def demon_surrender_handle(bot: Bot, event: Event):
 
     # 判断玩家是否在游戏中
     if demon_data[group_id]['start'] == False:
-        await send_image_or_text(prop_demon_help, "当前没有进行中的游戏！", True)
+        await send_image_or_text(user_id, prop_demon_help, "当前没有进行中的游戏！", True)
     # 获取当前游戏的玩家信息
     players = demon_data[group_id]['pl']  # 当前游戏中的两位玩家ID
     if player_id not in players:
-        await send_image_or_text(prop_demon_help, "你当前不在游戏中，\n无法投降！", True)
+        await send_image_or_text(user_id, prop_demon_help, "你当前不在游戏中，\n无法投降！", True)
 
     # 确定投降的玩家和获胜的玩家
     loser = player_id
@@ -1930,12 +1932,13 @@ async def demon_surrender_handle(bot: Bot, event: Event):
     save_data(demon_path, demon_data)
 
     # 发送投降结果消息
-    await send_image_or_text(demon_surrender, end_msg, False, MessageSegment.at(loser)+MessageSegment.at(winner), 25)
+    await send_image_or_text(user_id, demon_surrender, end_msg, False, MessageSegment.at(loser)+MessageSegment.at(winner), 25)
 
 # 恶魔道具查询功能：展示指定道具的效果
 prop_demon_query = on_command("恶魔道具", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @prop_demon_query.handle()
 async def prop_demon_query_handle(bot: Bot, event: Event, arg: Message = CommandArg()):
+    user_id = str(event.user_id)
     # 去除前后空格，处理用户输入
     prop_name = str(arg).strip().lower()
 
@@ -1945,7 +1948,7 @@ async def prop_demon_query_handle(bot: Bot, event: Event, arg: Message = Command
         # 构建所有道具的效果信息
         all_effects = "\n".join([f"-【{prop}】：{effect}" for prop, effect in item_effects.items()])
         
-        await send_image_or_text(prop_demon_query, all_effects, True, None, 30)
+        await send_image_or_text(user_id, prop_demon_query, all_effects, True, None, 30)
         return
     else:  # 查询指定道具
         # 创建一个忽略大小写的映射字典
@@ -1957,18 +1960,19 @@ async def prop_demon_query_handle(bot: Bot, event: Event, arg: Message = Command
         if original_name:
             # 使用原始名称查询效果
             effect = item_effects[original_name]
-            await send_image_or_text(prop_demon_query, f"道具【{original_name}】效果：\n{effect}", True, None, 30)
+            await send_image_or_text(user_id, prop_demon_query, f"道具【{original_name}】效果：\n{effect}", True, None, 30)
             return
         else:
             # 没找到匹配项
-            await send_image_or_text(prop_demon_query, f"未找到名为【{prop_name}】的道具，\n请检查道具名称是否正确！", True, None)
+            await send_image_or_text(user_id, prop_demon_query, f"未找到名为【{prop_name}】的道具，\n请检查道具名称是否正确！", True, None)
             return
 
 # 恶魔帮助
 prop_demon_help = on_command('恶魔帮助', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @prop_demon_help.handle()
-async def prop_demon_help_handle():
-    await send_image_or_text(prop_demon_help, help_msg, True)
+async def prop_demon_help_handle(event: GroupMessageEvent):
+    user_id = str(event.user_id)
+    await send_image_or_text(user_id, prop_demon_help, help_msg, True)
 
 # 超时检查
 async def check_timeout(group_id):

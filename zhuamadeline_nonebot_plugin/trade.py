@@ -43,7 +43,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
         data[user_id]['event'] = 'nothing'
 
     if data[user_id]['event'] == 'nothing':
-        await send_image_or_text(confirm, "你现在似乎没有需要确定的事情", True, None)
+        await send_image_or_text(user_id, confirm, "你现在似乎没有需要确定的事情", True, None)
         return
 
     elif data[user_id]['event'] == 'trading':
@@ -91,9 +91,9 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                 data[user_id]['event'] = 'nothing'
                 save_data(full_path, data)
                 save_data(madeline_path, data2)
-                await send_image_or_text(confirm, f"交易成功！你获得了{berry}草莓。\n商人很喜欢与你的这一次交易，他期待着下次与你见面", True, None)
+                await send_image_or_text(user_id, confirm, f"交易成功！你获得了{berry}草莓。\n商人很喜欢与你的这一次交易，他期待着下次与你见面", True, None)
             else:
-                await send_image_or_text(confirm, f"你没有足够多的{name}，你需要{amount}个，\n但你目前只拥有{keepNum}个", True, None)
+                await send_image_or_text(user_id, confirm, f"你没有足够多的{name}，你需要{amount}个，\n但你目前只拥有{keepNum}个", True, None)
         
         elif trade_type == 'fish':
             # 鱼类交易逻辑
@@ -108,9 +108,9 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                 data[user_id]['berry'] = data.get(user_id, {}).get('berry', 1000) + berry
                 data[user_id]['event'] = 'nothing'
                 save_data(full_path, data)
-                await send_image_or_text(confirm, f"交易成功！你出售了{amount}条{fish_name}，获得了{berry}草莓。\n商人很喜欢这些新鲜的鱼，他期待着下次与你交易", True, None)
+                await send_image_or_text(user_id, confirm, f"交易成功！你出售了{amount}条{fish_name}，获得了{berry}草莓。\n商人很喜欢这些新鲜的鱼，他期待着下次与你交易", True, None)
             else:
-                await send_image_or_text(confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
+                await send_image_or_text(user_id, confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
 
 #取消一些事件
 deny = on_command('deny', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -131,9 +131,9 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
             data[user_id]['event'] = 'nothing'
 
     if data[user_id]['event'] == 'nothing':
-        await send_image_or_text(deny, "你现在似乎没有需要确定的事情", True, None)
+        await send_image_or_text(user_id, deny, "你现在似乎没有需要确定的事情", True, None)
     elif data[user_id]['event'] == 'trading':
         data[user_id]['event'] = 'nothing'
         #写入主数据表
         save_data(full_path, data)
-        await send_image_or_text(deny, "商人失望地离开了...", True, None)
+        await send_image_or_text(user_id, deny, "商人失望地离开了...", True, None)

@@ -131,7 +131,8 @@ async def admin_command_handle(event: GroupMessageEvent, arg: Message = CommandA
         ".备份"
     ]
     text = "以下为管理员命令(带有括号的是可选项)：\n" + "\n".join(commands)
-    await send_image_or_text(admin_command, text)
+    user_id = str(event.user_id)
+    await send_image_or_text(user_id, admin_command, text)
 
 #查看开放神权命令    
 notadmin_command = on_command("开放神权", permission=GROUP, priority=6, block=True, rule=whitelist_rule)
@@ -143,7 +144,8 @@ async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = Comma
         ".查询三球开奖 (日期)"
     ]
     text = "以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
-    await send_image_or_text(notadmin_command, text)
+    user_id = str(event.user_id)
+    await send_image_or_text(user_id, notadmin_command, text)
 
 clean_userdata = on_command("清理冗余字段", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @clean_userdata.handle()
@@ -666,6 +668,7 @@ async def transfer_energy_handle(event: GroupMessageEvent, arg: Message = Comman
 ck_admin_history = on_command("账单", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @ck_admin_history.handle()
 async def ck_admin_history_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+    user_id = str(event.user_id)
     #判断是不是管理员账号
     if str(event.user_id) not in bot_owner_id:
         return
@@ -687,7 +690,7 @@ async def ck_admin_history_handle(bot: Bot, event: GroupMessageEvent, arg: Messa
             text += f"{v}\n"
         
         # 图片（转发函数）
-        await send_image_or_text_forward(ck_admin_history, text.strip(), f'{today}日账单列表', bot, event.self_id, event.group_id, 50, True)
+        await send_image_or_text_forward(user_id, ck_admin_history, text.strip(), f'{today}日账单列表', bot, event.self_id, event.group_id, 50, True)
         # await ck_admin_history.finish(text, at_sender=True)
     else:
         await ck_admin_history.finish("没有找到该日期的账单！", at_sender=True)
@@ -2021,7 +2024,7 @@ def get_system_data():
 OFFIST = datetime.timedelta(hours = 0)
 
 @status.handle()
-async def handle_status():
+async def handle_status(event: GroupMessageEvent):
     # 获取当前时间
     now_time = datetime.datetime.now()
     
@@ -2061,7 +2064,8 @@ async def handle_status():
         f"---------\n"
         f"实时网速：\n{up}\n{down}"
     )
-    await send_image_or_text(status, message)
+    user_id = str(event.user_id)
+    await send_image_or_text(user_id, status, message)
 
 #查看玩家数量
 len_user = on_command("玩家数", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -2107,7 +2111,8 @@ async def ssq_query_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
 
     # 构建消息
     msg = await build_result_message(bot, event.group_id, result)
-    await send_image_or_text(ssq_query, msg, False, None, 20)
+    user_id = str(event.user_id)
+    await send_image_or_text(user_id, ssq_query, msg, False, None, 20)
 
 async def build_result_message(bot: Bot, group_id: int, result: dict) -> str:
     """构建开奖结果消息"""

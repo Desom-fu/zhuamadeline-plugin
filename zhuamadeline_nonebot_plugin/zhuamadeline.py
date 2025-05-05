@@ -59,13 +59,13 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     if number_arg in ['?','？']:
         number_arg = "999"
     if user_id not in data:
-        await send_image_or_text(qhlc, "你还没尝试抓过Madeline……", True, None)
+        await send_image_or_text(user_id, qhlc, "你还没尝试抓过Madeline……", True, None)
         return
         
     try:
         number_int = int(number_arg)
     except:
-        await send_image_or_text(qhlc, f"请输入正确的猎场号！\n现在只开放了0~{liechang_count}猎哦！", True, None)
+        await send_image_or_text(user_id, qhlc, f"请输入正确的猎场号！\n现在只开放了0~{liechang_count}猎哦！", True, None)
         return
         
     number = str(number_int)
@@ -73,38 +73,38 @@ async def qhlc_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 特殊竞技猎场（0号）
     if number_int == 0:
         if data[user_id]['berry'] < 0:
-            await send_image_or_text(qhlc, f"你现在仍处于失约状态中……\n不允许进入竞技场！\n你只有{data[user_id]['berry']}颗草莓！", True, None)
+            await send_image_or_text(user_id, qhlc, f"你现在仍处于失约状态中……\n不允许进入竞技场！\n你只有{data[user_id]['berry']}颗草莓！", True, None)
             return
 
         if(data[user_id].get('debuff','normal')=='tentacle' ): 
-            await send_image_or_text(qhlc, f"你刚被触手玩弄到失神\n没有精力打Madeline竞技场了！", True, None)
+            await send_image_or_text(user_id, qhlc, f"你刚被触手玩弄到失神\n没有精力打Madeline竞技场了！", True, None)
             return
 
         if data[user_id].get('lc') == number:
-            await send_image_or_text(qhlc, "你现在就在这个猎场呀~", True, None)
+            await send_image_or_text(user_id, qhlc, "你现在就在这个猎场呀~", True, None)
             return
 
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
-        await send_image_or_text(qhlc, f"已经成功切换到madeline竞技场！\n有关madeline竞技场的规则请输入`.0场细则`查询！\n可以通过命令`.cklc {number_int}`\n来查询PVP竞技场的具体信息和准入需求哦！", True, None)
+        await send_image_or_text(user_id, qhlc, f"已经成功切换到madeline竞技场！\n有关madeline竞技场的规则请输入`.0场细则`查询！\n可以通过命令`.cklc {number_int}`\n来查询PVP竞技场的具体信息和准入需求哦！", True, None)
         return
 
     # 普通收集型猎场
     elif 0 < number_int <= liechang_count:
         if data[user_id].get('lc') == number:
-            await send_image_or_text(qhlc, "你现在就在这个猎场呀~", True, None)
+            await send_image_or_text(user_id, qhlc, "你现在就在这个猎场呀~", True, None)
             return
 
         data[user_id]['lc'] = number
         save_data(user_path / file_name, data)
-        await send_image_or_text(qhlc, f"已经成功切换到{number}号猎场！\n可以通过命令`.cklc {number_int}`\n来查询本猎场的具体信息和准入需求哦！", True, None)
+        await send_image_or_text(user_id, qhlc, f"已经成功切换到{number}号猎场！\n可以通过命令`.cklc {number_int}`\n来查询本猎场的具体信息和准入需求哦！", True, None)
         return
     elif number_int == 999:
-        await send_image_or_text(qhlc, f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", True, None)
+        await send_image_or_text(user_id, qhlc, f"\n警告！警告！前方危险性极高！--滋滋--\n暂未开放。", True, None)
         return
     # 处理错误输入
     else:
-        await send_image_or_text(qhlc, f"请输入正确的猎场号！\n现在只开放了1~{liechang_count}猎哦！", True, None)
+        await send_image_or_text(user_id, qhlc, f"请输入正确的猎场号！\n现在只开放了1~{liechang_count}猎哦！", True, None)
         return
 
 
@@ -150,7 +150,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                     data[str(user_id)]['collections'][collection_name] = 1
                     data[str(user_id)]['event'] = "nothing"
                     save_data(user_path/file_name, data)
-                    await send_image_or_text(catch, f"{message}\n输入.cp {collection_name} 以查看具体效果", True, None)
+                    await send_image_or_text(user_id, catch, f"{message}\n输入.cp {collection_name} 以查看具体效果", True, None)
                     return
                 
             #读取信息
@@ -170,7 +170,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 work_end_time = datetime.datetime.strptime(data.get(str(user_id)).get('work_end_time'), "%Y-%m-%d %H:%M:%S")
                 if current_time < work_end_time:
                     text = time_text(str(work_end_time-current_time))
-                    await send_image_or_text(catch, f"你正在维护草莓加工器，\n还需要{text}！", True, None)
+                    await send_image_or_text(user_id, catch, f"你正在维护草莓加工器，\n还需要{text}！", True, None)
                     return
                 #时间过了自动恢复正常
                 else:
@@ -181,12 +181,12 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if(data[str(user_id)].get("buff")=="hurt"): 
                 if(current_time < next_time_r):
                     delta_time = next_time_r - current_time
-                    await send_image_or_text(catch, f"你受伤了，\n需要等{time_text(delta_time)}后才能抓", True, None)
+                    await send_image_or_text(user_id, catch, f"你受伤了，\n需要等{time_text(delta_time)}后才能抓", True, None)
                     return
                     
             #有其他正在进行的事件未完成
             if(data[str(user_id)]['event']!='nothing'):
-                await send_image_or_text(catch, "你还有正在进行中的事件", True, None)
+                await send_image_or_text(user_id, catch, "你还有正在进行中的事件", True, None)
                 return
                 
             # buff2先扣除
@@ -245,7 +245,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
     if(answer == 0):
         delta_time = next_time_r - current_time
         text = time_text(str(delta_time))
-        await send_image_or_text(catch, f"别抓啦，\n{text}后再来吧！", True, None)
+        await send_image_or_text(user_id, catch, f"别抓啦，\n{text}后再来吧！", True, None)
         return
     elif(answer == 1):
         #第一次抓
@@ -255,13 +255,13 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
         #特殊猎场madeline竞技场内事件
         if(data[str(user_id)]['lc']=='0'):
             if data[user_id]['berry'] < 0:
-                await send_image_or_text(catch, f"你现在仍处于失约状态中……不允许进入竞技场！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
+                await send_image_or_text(user_id, catch, f"你现在仍处于失约状态中……不允许进入竞技场！\n你只有{str(data[str(user_id)]['berry'])}颗草莓！", True, None)
                 return
             if(data[user_id].get('debuff','normal')=='tentacle' ): 
-                await send_image_or_text(catch, f"你刚被触手玩弄到失神，\n没有精力打Madeline竞技场了！", True, None)
+                await send_image_or_text(user_id, catch, f"你刚被触手玩弄到失神，\n没有精力打Madeline竞技场了！", True, None)
                 return
             # if data[str(user_id)].get("hourglass_count", 0) > 0:
-            #     await send_image_or_text(catch, f"时隙沙漏的能量只能用于猎场，\n无法用于Madeline竞技场……", True, None)
+            #     await send_image_or_text(user_id, catch, f"时隙沙漏的能量只能用于猎场，\n无法用于Madeline竞技场……", True, None)
             #     return
             nickname = event.sender.nickname
             await madeline_pvp_event(data,str(user_id),nickname,catch,bot)
@@ -372,7 +372,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if msg:
                 msg += hourglass_text + diamond_text
                 save_data(full_path, data)
-                await send_image_or_text(catch, msg, True, world_boss_at_text if world_boss_at_text else None, 30)
+                await send_image_or_text(user_id, catch, msg, True, world_boss_at_text if world_boss_at_text else None, 30)
                 return
 
             # 处理个人Boss
@@ -380,7 +380,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
             if msg:
                 msg += hourglass_text + diamond_text
                 save_data(full_path, data)
-                await send_image_or_text(catch, msg, True, None, 30)
+                await send_image_or_text(user_id, catch, msg, True, None, 30)
                 return
 
             # 没有Boss时的正常经验计算
@@ -496,7 +496,7 @@ async def dailyqd(event: GroupMessageEvent):
     nickname = event.sender.nickname
 
     if user_id not in data:
-        await send_image_or_text(qd, "你还没尝试抓过madeline.....", True, None)
+        await send_image_or_text(user_id, qd, "你还没尝试抓过madeline.....", True, None)
         return
 
     user_data = data.setdefault(user_id, {"berry": 0, "jrrp": 0, "item": {}, "date": "2000-01-01"})
@@ -505,7 +505,7 @@ async def dailyqd(event: GroupMessageEvent):
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
     
     if user_data.get("date", "2000-01-01") == current_date_str:
-        await send_image_or_text(qd, "一天只能签到一次吧......", True, None)
+        await send_image_or_text(user_id, qd, "一天只能签到一次吧......", True, None)
         return
 
     # 计算随机奖励
@@ -539,7 +539,7 @@ async def dailyjrrp(event: GroupMessageEvent):
 
     # 检查用户是否注册
     if user_id not in data:
-        await send_image_or_text(jrrp, "你还没抓过madeline，无法进行今日人品的查询哦！", True, None)
+        await send_image_or_text(user_id, jrrp, "你还没抓过madeline，无法进行今日人品的查询哦！", True, None)
         return
 
     user_data = data.setdefault(user_id, {"jrrp": 0, "date": ""})
@@ -550,13 +550,13 @@ async def dailyjrrp(event: GroupMessageEvent):
 
     # 判断是否已经签到
     if user_data["date"] != current_date_str:
-        await send_image_or_text(jrrp, "请先签到后再查询jrrp哦！", True, None)
+        await send_image_or_text(user_id, jrrp, "请先签到后再查询jrrp哦！", True, None)
         return
 
     # 获取 jrrp 数值
     jrrp_int = user_data.get("jrrp", 0)
     if jrrp_int == 0:
-        await send_image_or_text(jrrp, "啊哦，出错了，今日人品似乎没能成功查询到呢！(可能是因为签到后没有成功保存 jrrp 的数值？)", True, None)
+        await send_image_or_text(user_id, jrrp, "啊哦，出错了，今日人品似乎没能成功查询到呢！(可能是因为签到后没有成功保存 jrrp 的数值？)", True, None)
         return
     
     extra_berry = user_data["item"].get("招财猫", 0) * 3
@@ -571,7 +571,7 @@ async def dailyjrrp(event: GroupMessageEvent):
     reply_text = f"- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
     reply_text += f"\n- 检测到你拥有鱼之契约，\n你今日签到获得的草莓翻倍，\n为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
     
-    await send_image_or_text(jrrp, reply_text, True, None)
+    await send_image_or_text(user_id, jrrp, reply_text, True, None)
 
 
 # 查看状态
@@ -587,7 +587,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
     nickname = await get_nickname(bot, user_id)
 
     if user_id not in data:
-        await send_image_or_text(ck, "你还没尝试抓过Madeline……", True)
+        await send_image_or_text(user_id, ck, "你还没尝试抓过Madeline……", True)
     
     all_judge = str(arg).strip().lower()
     
@@ -915,7 +915,7 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
             else:
                 message += f"\n• 本次Madeline竞技场已结算"
     # 发送图片     
-    await send_image_or_text(ck, message, True, "", 50)
+    await send_image_or_text(user_id, ck, message, True, "", 50)
 
 
 # 转账 - 1000以下150手续费，1000上15%
@@ -928,7 +928,7 @@ async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Com
     arg = str(arg).split(" ")
     if len(arg) != 2:
         msg = "命令格式错误！正确格式：\n.transfer QQ号 数量"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     user_a = str(event.user_id)
@@ -938,12 +938,12 @@ async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Com
         transfer_amount = int(arg[1])
     except ValueError:
         msg = "转移数量必须为数字！"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     if transfer_amount <= 0:
         msg = "转移数量必须大于0！"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     # 打开文件
@@ -953,17 +953,17 @@ async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Com
     # 检查玩家是否存在
     if user_a not in data:
         msg = f"找不到 [{user_a}] 的信息"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     if user_b not in data:
         msg = f"找不到 [{user_b}] 的信息"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     if user_a == user_b:
         msg = "你为什么想给自己转账，想送给我手续费吗？"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     # 计算手续费
@@ -974,7 +974,7 @@ async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Com
     # 检查转出方草莓数量是否足够
     if data[user_a]['berry'] < final_berry:
         msg = f"你的草莓不足，你目前想转移{transfer_amount}颗草莓，草莓税为{tax}，总共为{final_berry}颗草莓，你目前只有{owner_berry}颗草莓！"
-        await send_image_or_text(user_transfer_berry, msg, True, None, 25)
+        await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
     
     # 获取昵称
@@ -997,4 +997,4 @@ async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Com
     msg = f"已成功将{transfer_amount}颗草莓从[{user_a_nickname}]转移给[{user_b_nickname}]！\n本次扣税{tax}颗草莓，已经从转出者[{user_a_nickname}]的草莓余额内扣除！"
     forward_text = MessageSegment.at(user_a) + MessageSegment.at(user_b)
     
-    await send_image_or_text(user_transfer_berry, msg, False, forward_text, 50)
+    await send_image_or_text(user_a, user_transfer_berry, msg, False, forward_text, 50)

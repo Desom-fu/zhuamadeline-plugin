@@ -3,7 +3,8 @@ from pathlib import Path
 import re
 import math
 import uuid
-from .config import save_dir, font_path
+from .config import save_dir, font_path, full_path
+from .function import open_data
 from nonebot.adapters.onebot.v11 import MessageSegment
 
 # 字体设置
@@ -11,14 +12,47 @@ font_size = 24  # 基础字体大小
 font = ImageFont.truetype(str(font_path), font_size)  # 加载字体
 
 # 画布参数
-MAX_WIDTH = 800           # 画布最大宽度（像素）
-MAX_IMAGE_HEIGHT = 600    # 图片最大高度（像素）
-PADDING = 30              # 四周留白（像素）
-LINE_SPACING = 5          # 行间距（像素）
-CACHE_LIMIT = 40          # 缓存文件保留数量
+MAX_WIDTH = 800                          # 画布最大宽度（像素）
+MAX_IMAGE_HEIGHT = 600                   # 图片最大高度（像素）
+PADDING = 30                             # 四周留白（像素）
+LINE_SPACING = 5                         # 行间距（像素）
+CACHE_LIMIT = 40                         # 缓存文件保留数量
+DEFAULT_BG_COLOR = (247, 219, 255, 255)  # 默认淡紫色
 
-def create_gradient_background(width, height):
-    """创建绝对平滑的圆形渐变背景"""
+def get_user_bg_color(user_id: str):
+    """从用户数据中获取背景颜色"""
+    try:
+        # 确保文件存在
+        if not full_path.exists():
+            return DEFAULT_BG_COLOR
+
+        data = open_data(full_path)
+            
+        # 获取用户颜色，如果不存在则返回默认
+        color_str = data.get(str(user_id), {}).get("bg_color")
+        if not color_str:
+            return DEFAULT_BG_COLOR
+            
+        # 转换颜色格式（存储格式为 "#RRGGBB" 或 "RRGGBB"）
+        color_str = color_str.lstrip('#')
+        if len(color_str) == 6:
+            r = int(color_str[0:2], 16)
+            g = int(color_str[2:4], 16)
+            b = int(color_str[4:6], 16)
+            return (r, g, b, 255)  # 添加透明度255
+        else:
+            return DEFAULT_BG_COLOR
+    except Exception:
+        return DEFAULT_BG_COLOR
+
+def create_gradient_background(width, height, user_id=None):
+    """创建带用户自定义颜色的渐变背景"""
+    # 获取用户颜色
+    if user_id:
+        start_color = get_user_bg_color(user_id)
+    else:
+        start_color = DEFAULT_BG_COLOR
+        
     bg = Image.new('RGBA', (width, height), (255, 255, 255, 255))
     draw = ImageDraw.Draw(bg)
     
@@ -26,7 +60,6 @@ def create_gradient_background(width, height):
     max_radius = math.sqrt(center_x**2 + center_y**2)
     
     # 渐变颜色配置
-    start_color = (247, 219, 255, 255)  # 淡紫色
     end_color = (255, 255, 255, 255)    # 白色
     
     # 使用三次贝塞尔缓动函数控制渐变速度
@@ -237,7 +270,7 @@ def calculate_content_size(draw, lines, image_size=None):
     
     return max_width, total_height
 
-def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, canvas_size=None):
+def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, canvas_size=None, user_id=None):
     """生成带固定尺寸的单帧"""
     dummy = Image.new("RGB", (1, 1))
     draw = ImageDraw.Draw(dummy)
@@ -261,7 +294,7 @@ def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, can
         canvas_width = content_width + 2 * PADDING
         canvas_height = content_height + 2 * PADDING
     
-    bg = create_gradient_background(canvas_width, canvas_height)
+    bg = create_gradient_background(canvas_width, canvas_height, user_id)
     canvas = Image.new('RGBA', (canvas_width, canvas_height))
     canvas.paste(bg, (0, 0), bg)
     
@@ -294,7 +327,7 @@ def clean_cache():
         except:
             pass
 
-def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True):
+def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True, user_id=None):
     """
     主生成函数（支持静态图/GIF）
     
@@ -326,7 +359,7 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
             # 计算最大尺寸
             max_size = (0, 0)
             for frame in gif_frames:
-                temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars)
+                temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
                 max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
             
             # 生成统一尺寸的帧
@@ -334,7 +367,7 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
             durations = []
             for frame in gif_frames:
                 result = generate_frame(text1, text2, frame.convert("RGBA"), 
-                                      center, max_chars, canvas_size=max_size)
+                                      center, max_chars, canvas_size=max_size, user_id=None)
                 processed_frames.append(result.convert("RGB"))
                 durations.append(frame.info.get("duration", 100))
             
@@ -351,7 +384,7 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
         
         # 静态图处理保持不变
         image = Image.open(image_path).convert("RGBA") if image_path else None
-        result = generate_frame(text1, text2, image, center, max_chars)
+        result = generate_frame(text1, text2, image, center, max_chars, None, user_id)
         output_path = save_dir / f"send_image{file_id}.png"
         result.save(output_path)
         return output_path
@@ -362,38 +395,41 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
 
 
 # 以下为消息发送相关函数
-async def send_image_or_text(handler, text, at_sender=False, forward_text=None, max_chars=30):
+async def send_image_or_text(user_id = None, handler = None, text = "", at_sender=False, forward_text=None, max_chars=30):
     """发送图文消息的便捷函数"""
     img = generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,
         max_chars=max_chars,
-        center=False
+        center=False,
+        user_id=user_id
     )
     message = (forward_text or "") + (MessageSegment.image(img) if img else text)
     await handler.finish(message, at_sender=at_sender)
 
-async def not_finish_send_image_or_text(handler, text, at_sender=False, forward_text=None, max_chars=30):
+async def not_finish_send_image_or_text(user_id = None, handler = None, text = "", at_sender=False, forward_text=None, max_chars=30):
     """发送图文消息的便捷函数(非finish)"""
     img = generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,
         max_chars=max_chars,
-        center=False
+        center=False,
+        user_id=user_id
     )
     message = (forward_text or "") + (MessageSegment.image(img) if img else text)
     await handler.send(message, at_sender=at_sender)
 
-async def send_image_or_text_forward(handler, text, forward_text, bot, bot_id, group_id, max_chars=30, at_sender=False):
+async def send_image_or_text_forward(user_id, handler, text, forward_text, bot, bot_id, group_id, max_chars=30, at_sender=False):
     """通过转发消息发送图文"""
     img = generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,
         max_chars=max_chars,
-        center=False
+        center=False,
+        user_id=user_id
     )
     if img:
         await handler.finish(forward_text + MessageSegment.image(img), at_sender=at_sender)
@@ -416,7 +452,8 @@ async def auto_send_message(text, bot, group_id, forward_text=None, max_chars=30
         image_path=None,
         text2=None,
         max_chars=max_chars,
-        center=False
+        center=False,
+        user_id=None
     )
     message = (forward_text or "") + (MessageSegment.image(img) if img else text)
     await bot.send_group_msg(group_id=group_id, message=message)

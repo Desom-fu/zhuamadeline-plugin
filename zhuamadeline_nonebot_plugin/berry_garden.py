@@ -125,11 +125,11 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     # migrate_user_data()
 
     # if user_id not in bot_owner_id:
-    #     await send_image_or_text(berry_garden, "花园正在绝赞升级中，暂时不开放哦！不过正在播种的仍会计算产量！")
+    #     await send_image_or_text(user_id, berry_garden, "花园正在绝赞升级中，暂时不开放哦！不过正在播种的仍会计算产量！")
 
     # 基础校验
     if user_id not in data:
-        await send_image_or_text(berry_garden, "请先抓一次madeline再来草莓果园吧！", at_sender=True)
+        await send_image_or_text(user_id, berry_garden, "请先抓一次madeline再来草莓果园吧！", at_sender=True)
         return
 
     # 初始化三个部分数据
@@ -168,7 +168,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
     
     # 检测是否有地契
     if user_collections.get("草莓果园地契", 0) == 0:
-        await send_image_or_text(berry_garden, "你还没有获得草莓果园地契哦\n无法进入草莓果园！", at_sender=True)
+        await send_image_or_text(user_id, berry_garden, "你还没有获得草莓果园地契哦\n无法进入草莓果园！", at_sender=True)
         return
 
     # 解析命令
@@ -187,7 +187,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         for main_cmd, aliases in garden_aliases.items():
             help_msg += f"\n.garden {main_cmd}({'/'.join(aliases)})"
         
-        await send_image_or_text(berry_garden, help_msg, True)
+        await send_image_or_text(user_id, berry_garden, help_msg, True)
         return
         
     # 查询操作
@@ -247,7 +247,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"\n施肥能耗: {level_config['fert_energy']} 基础产量: {level_config['basic_reward']}"
             f"\n偷取范围: {level_config['steal_min']}-{level_config['steal_max']}"
         )
-        await send_image_or_text(berry_garden, reply_msg, True)
+        await send_image_or_text(user_id, berry_garden, reply_msg, True)
     
     # 收菜操作
     elif operation == "收菜":
@@ -278,17 +278,17 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
         if user_garden["isfert"] == 0:
             message += "\n- 施肥时间已到，\n如需要可以重新施肥哦！"
         
-        await send_image_or_text(berry_garden, message, True)
+        await send_image_or_text(user_id, berry_garden, message, True)
         
     elif operation == "偷菜":
         # 检查每日偷菜次数限制
         if user_garden["today_steal"] >= level_config["max_steal_times"]:
-            await send_image_or_text(berry_garden, f"今日偷菜次数已达上限：\n({level_config['max_steal_times']}次)！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, f"今日偷菜次数已达上限：\n({level_config['max_steal_times']}次)！", at_sender=True)
             return
         
         steal_cost = level_config["steal_cost"]
         if berry < steal_cost:
-            await send_image_or_text(berry_garden, f"偷草莓需要{steal_cost}颗草莓\n你的草莓数量不足！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, f"偷草莓需要{steal_cost}颗草莓\n你的草莓数量不足！", at_sender=True)
             return
 
         # 获取当前用户的最小偷取值
@@ -313,7 +313,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
                 targets.append(uid)
 
         if not targets:
-            await send_image_or_text(berry_garden,
+            await send_image_or_text(user_id, berry_garden,
                 "现在没有符合条件的偷取目标！\n"
                 "可能原因：\n"
                 f"- 所有目标的草莓数量都少于\n你的最小偷取值({min_steal})\n"
@@ -324,7 +324,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             return
         
         if not targets:
-            await send_image_or_text(berry_garden, "现在没有可以偷的土地\n请早点过来或者晚点过来偷哦！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, "现在没有可以偷的土地\n请早点过来或者晚点过来偷哦！", at_sender=True)
             return
         
         # 随机选择
@@ -356,21 +356,21 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"今日已偷: {user_garden['today_steal']}/{level_config['max_steal_times']}次"
         )
 
-        await send_image_or_text(berry_garden, message, at_sender=True, forward_text=MessageSegment.at(target_id))
+        await send_image_or_text(user_id, berry_garden, message, at_sender=True, forward_text=MessageSegment.at(target_id))
         
     elif operation == "施肥":
         # 未播种检查
         if user_garden["isseed"] != 1:
-            await send_image_or_text(berry_garden, "请先播种后再进行施肥哦！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, "请先播种后再进行施肥哦！", at_sender=True)
             return
             
         if user_garden["isfert"] == 1:
-            await send_image_or_text(berry_garden, "你已经施肥过了，\n没必要重新施肥哦！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, "你已经施肥过了，\n没必要重新施肥哦！", at_sender=True)
             return
             
         fert_energy = level_config["fert_energy"]
         if energy < fert_energy:
-            await send_image_or_text(berry_garden, f"施肥需要{fert_energy}点能量，\n你目前只有{energy}点！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, f"施肥需要{fert_energy}点能量，\n你目前只有{energy}点！", at_sender=True)
             return
         
         user_data["energy"] -= fert_energy
@@ -384,16 +384,16 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"接下来的12h内你的草莓地收获将会翻倍！"
         )
 
-        await send_image_or_text(berry_garden, message, at_sender=True)
+        await send_image_or_text(user_id, berry_garden, message, at_sender=True)
         
     elif operation == "播种":
         if user_garden["isseed"] == 1:
-            await send_image_or_text(berry_garden, "你已经播种过种子了哦，\n不能重复购买了哦！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, "你已经播种过种子了哦，\n不能重复购买了哦！", at_sender=True)
             return
         
         seed_cost = level_config["seed_cost"]
         if berry < seed_cost:
-            await send_image_or_text(berry_garden, f"购买种子需要{seed_cost}颗草莓！\n你现在只有{berry}颗！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, f"购买种子需要{seed_cost}颗草莓！\n你现在只有{berry}颗！", at_sender=True)
             return
         
         data[user_id]["berry"] -= seed_cost
@@ -408,7 +408,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"施肥可使草莓的产量翻倍！"
         )
 
-        await send_image_or_text(berry_garden, message, at_sender=True)
+        await send_image_or_text(user_id, berry_garden, message, at_sender=True)
     
     # 升级操作
     elif operation == "升级":
@@ -418,7 +418,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
         # 检查是否存在下一等级
         if next_level not in GARDEN_LEVELS:
-            await send_image_or_text(berry_garden, f"当前已是最高等级（Lv{current_level}）！", at_sender=True)
+            await send_image_or_text(user_id, berry_garden, f"当前已是最高等级（Lv{current_level}）！", at_sender=True)
             return
 
         # 获取当前和下一等级配置
@@ -437,7 +437,7 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
 
         # 资源检查
         if current_amount < cost_amount:
-            await send_image_or_text(berry_garden,
+            await send_image_or_text(user_id, berry_garden,
                 f"升级到 Lv{next_level} 需要[{cost_amount}]{'颗草莓' if cost_type == 'berry' else '点能量'}！\n"
                 f"当前余额：{current_amount}，不足以升级！", 
                 at_sender=True
@@ -497,4 +497,4 @@ async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message 
             f"每日偷取次数：{next_config['max_steal_times']} 每日被偷上限：{next_config['max_be_stolen']}"
         )
 
-        await send_image_or_text(berry_garden, message, True)
+        await send_image_or_text(user_id, berry_garden, message, True)
