@@ -393,7 +393,7 @@ async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = 
         
         
         await send_image_or_text(user_id, set_bgcolor, 
-                               f"你确定要花费1000颗草莓将背景色重置为默认颜色吗？\n"
+                               f"你确定要花费1000颗草莓将背景色\n重置为默认颜色吗？\n"
                                "请输入 .confirm 确认或 .deny 取消", 
                                True, None)
         return

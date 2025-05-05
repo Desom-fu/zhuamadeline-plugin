@@ -113,6 +113,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                 await send_image_or_text(user_id, confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
 
     elif data[user_id]['event'] == 'changing_bgcolor':
+        bar_data = open_data(bar_path)
         # 检查草莓是否足够
         if data[user_id]['berry'] < 1000:
             data[user_id]['event'] = 'nothing'
@@ -122,7 +123,8 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                                    f"你只有{data[user_id]['berry']}颗草莓！",
                                    True, None)
             return
-        
+        data[user_id]['berry'] -= 1000
+        bar_data["pots"] = bar_data.get('pots') + 1000
         # 处理设置默认颜色或自定义颜色
         if data[user_id]['temp_bgcolor'] == 'default':
             if 'bg_color' in data[user_id]:

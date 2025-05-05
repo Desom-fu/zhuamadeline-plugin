@@ -98,7 +98,7 @@ help_categories = {
         "name": "其他类指令",
         "aliases": ["其他", "other"],
         "commands": [
-            ".set_bgcolor {色号，例如#1f1e33} - 设置背景颜色"
+            ".set_bgcolor {色号}/default - 设置背景颜色/恢复默认颜色"
         ]
     }
 }
