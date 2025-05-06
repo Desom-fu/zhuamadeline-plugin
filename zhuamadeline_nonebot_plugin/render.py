@@ -2,9 +2,11 @@
 import numpy as np
 from pathlib import Path
 import textwrap
+import random
 from .config import save_dir, font_path, background_dir, background_template
+from .shop import background_shop
 
-__all__ = ["draw_qd"]  # 定义模块公开接口
+__all__ = ["draw_qd", "generate_background_preview"]  # 定义模块公开接口
 
 def texture_render(image: Image, file: str, x: int, y: int, scale: int = 1):
     """
@@ -241,3 +243,56 @@ def draw_qd(
     current_index = (current_index % 15) + 1
 
     return str(file_name), text, luck_text
+
+def generate_background_preview():
+    """生成所有背景的预览拼接图"""
+    # 每行显示的图片数量
+    IMAGES_PER_ROW = 4
+    
+    # 图片尺寸
+    IMAGE_WIDTH = 960
+    IMAGE_HEIGHT = 720
+    
+    # 计算需要多少行
+    bg_count = len(background_shop)
+    rows = (bg_count + IMAGES_PER_ROW - 1) // IMAGES_PER_ROW
+    
+    # 创建最终的大图
+    result_width = IMAGE_WIDTH * IMAGES_PER_ROW
+    result_height = IMAGE_HEIGHT * rows
+    result_image = Image.new('RGB', (result_width, result_height))
+    
+    # 生成每张预览图并拼接
+    preview_images = []
+    for bg_id in background_shop.keys():
+        # 随机生成参数
+        berry = random.randint(1, 100)
+        extra_berry = random.choice([0, 60])
+        double_berry = random.choice([0, 1])
+        
+        # 生成预览图
+        picture_str, _, _ = draw_qd(
+            nickname="预览",
+            berry=berry,
+            extra_berry=extra_berry,
+            double_berry=double_berry,
+            background_variant=str(bg_id)
+        )
+        
+        # 打开图片并添加到列表
+        img = Image.open(Path(picture_str))
+        preview_images.append(img)
+    
+    # 拼接图片
+    for i, img in enumerate(preview_images):
+        row = i // IMAGES_PER_ROW
+        col = i % IMAGES_PER_ROW
+        x = col * IMAGE_WIDTH
+        y = row * IMAGE_HEIGHT
+        result_image.paste(img, (x, y))
+    
+    # 保存拼接后的图片
+    review_path = save_dir / "background_review.png"
+    result_image.save(review_path)
+    
+    return review_path

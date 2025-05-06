@@ -14,6 +14,7 @@ from pathlib import Path
 #加载商店信息和商店交互
 from .shop import item, today_item, forbid_recycle_item, fish_prices, item_aliases
 from .collection import collections, collection_aliases
+from .render import generate_background_preview
 import json
 #加载读取系统时间相关
 import datetime
@@ -458,3 +459,16 @@ async def handle_switch_bg(event: GroupMessageEvent, arg: Message = CommandArg()
     
     success, msg = switch_background(user_id, bg_id)
     await send_image_or_text(user_id, switch_bg, msg, True, None)
+
+# 背景预览命令
+qdbg_review = on_command("qdbg_review", aliases={"背景预览"}, permission=GROUP, priority=1, block=True)
+
+@qdbg_review.handle()
+async def handle_bg_review():
+    """处理背景预览命令"""
+    # 生成预览图
+    review_path = generate_background_preview()
+    
+    # 发送图片
+    await qdbg_review.finish(MessageSegment.image(review_path))
+    return

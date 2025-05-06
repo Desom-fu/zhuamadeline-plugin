@@ -101,6 +101,7 @@ help_categories = {
             ".npc <名字> - 查看npc相关故事",
             ".set_bg <色号>/<default> - 设置背景颜色/恢复默认颜色",
             ".qdbg_shop - 查看签到背景商店",
+            ".qdbg_review - 查看签到图片预览(注意因为是实时生成，需要时间)"
             f".qdbg_buy <1-{len(background_shop)}> - 购买签到背景",
             f".qdbg_change <1-{len(background_shop)}> - 切换签到背景"
         ]

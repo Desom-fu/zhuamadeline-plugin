@@ -321,7 +321,7 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             
             msg += "\n\n"
             msg += item_msg
-            msg += f"\n- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}\n"
+            msg += f"\n- 总弹数{str(len(demon_data[group_id]['clip']))}，实弹数{str(demon_data[group_id]['clip'].count(1))}"
             pid = demon_data[group_id]['pl'][demon_data[group_id]['turn']]
             pid_nickname = await get_nickname(bot, pid)
             turn_msg = f"当前是[{pid_nickname}]的回合"
@@ -1823,7 +1823,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         msg += end_msg
     save_data(demon_path, demon_data)
     save_data(bar_path, bar_data)
-    await send_image_or_text(user_id, prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1) + f"\n- 现在轮到[{next_nickname}]行动！", 25)
+    await send_image_or_text(user_id, prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1) + f"\n现在轮到[{next_nickname}]行动！", 25)
 
 # 查看局势
 check = on_command("查看局势", permission=GROUP, priority=1, block=True, rule=whitelist_rule)

@@ -556,6 +556,9 @@ async def dailyjrrp(event: GroupMessageEvent):
 
     user_data = data.setdefault(user_id, {"jrrp": 0, "date": ""})
     collections = user_data.setdefault('collections', {})
+    # 获取用户当前背景
+    user_data.setdefault("purchased_backgrounds", ["1"])
+    background_variant = user_data.setdefault("current_background", "1")  # 默认为1
 
     # 获取日期信息
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
@@ -578,12 +581,14 @@ async def dailyjrrp(event: GroupMessageEvent):
     double_jrrp = (jrrp_int + extra_berry) * (double + 1)
 
     # 获取图片、文案
-    picture_str, text, luck_text = draw_qd(nickname, jrrp_int, extra_berry, double, "1")
+    picture_str, text, luck_text = draw_qd(nickname, jrrp_int, extra_berry, double, background_variant)
     
-    reply_text = f"- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
-    reply_text += f"\n- 检测到你拥有鱼之契约，\n你今日签到获得的草莓翻倍，\n为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
+    reply_text = f"\n你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
+    reply_text += f"\n- 检测到你拥有鱼之契约，你今日签到获得的草莓翻倍，为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''
     
-    await send_image_or_text(user_id, jrrp, reply_text, True, None)
+    picture = Path(picture_str)
+    
+    await jrrp.finish(reply_text+MessageSegment.image(picture), at_sender=True)
 
 
 # 查看状态
