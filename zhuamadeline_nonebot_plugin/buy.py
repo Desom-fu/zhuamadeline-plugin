@@ -466,12 +466,17 @@ qdbg_review = on_command("qdbg_review", aliases={"背景预览"}, permission=GRO
 @qdbg_review.handle()
 async def handle_bg_review():
     """处理背景预览命令"""
+    REVIEW_IMAGE_PATH = background_dir / "qdbg_review.png"
     try:
-        # 生成预览图
-        review_path = generate_background_preview()
+        # 检查图片是否已存在
+        if not REVIEW_IMAGE_PATH.exists():
+            logger.info("生成新的背景预览图...")
+            generate_background_preview()
+        else:
+            logger.info("使用已存在的背景预览图")
         
         # 发送图片
-        await qdbg_review.finish(MessageSegment.image(review_path))
+        await qdbg_review.finish(MessageSegment.image(REVIEW_IMAGE_PATH))
         return
     except Exception as e:
-        logger.error(f"生成背景预览时出错: {e}")
+        logger.error(f"处理背景预览时出错: {e}")

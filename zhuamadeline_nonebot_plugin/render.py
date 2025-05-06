@@ -249,9 +249,12 @@ def generate_background_preview():
     # 每行显示的图片数量
     IMAGES_PER_ROW = 4
     
-    # 图片尺寸
+    # 图片尺寸 (根据你的draw_qd函数输出尺寸调整)
     IMAGE_WIDTH = 960
-    IMAGE_HEIGHT = 720
+    IMAGE_HEIGHT = 719
+    
+    # 保存路径
+    REVIEW_IMAGE_PATH = background_dir / "qdbg_review.png"
     
     # 计算需要多少行
     bg_count = len(background_shop)
@@ -292,7 +295,6 @@ def generate_background_preview():
         result_image.paste(img, (x, y))
     
     # 保存拼接后的图片
-    review_path = save_dir / "background_review.png"
-    result_image.save(review_path)
+    result_image.save(REVIEW_IMAGE_PATH)
     
-    return review_path
+    return REVIEW_IMAGE_PATH
