@@ -30,3 +30,6 @@
 
 # 抓玛数据文件忽略
 /UserList
+
+# 签到图文件夹忽略
+/qd_background

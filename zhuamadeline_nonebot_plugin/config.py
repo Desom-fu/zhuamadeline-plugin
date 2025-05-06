@@ -40,13 +40,14 @@ __all__ = [
     'backup_path',
     'save_dir',
     'font_path',
-    'background_qd',
     "boss_data_path",
     "world_boss_data_path",
     "boss_names",
     "boss_type_config",
     'demon_path',
-    "berry_path"
+    "berry_path",
+    'background_template',
+    'background_dir'
 ]
 
 # 隐藏行测试，如果push后看不见就说明成功了
@@ -118,7 +119,10 @@ exp_growth = {
 # 绘图相关路径
 save_dir = Path("Data") / "generate_image" 
 font_path = Path("Data") / "fonts"  / "ZhanKu.ttf"
-background_qd = Path()/"Data"/"Image"/"background_qd.png"
+# 基础背景路径
+background_dir = Path("Data") / "qd_background"
+# 背景文件名模板（支持动态替换）
+background_template = "qd{}.png"  # 例如 qd1.png, qd2.png
 
 #赌场信息
 duchang_list = Path() / "data" / "DuChang" / "duchang.json"

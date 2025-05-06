@@ -1,51 +1,191 @@
-﻿#roris的渲染模块，给roris提高颜值
-from PIL import Image, ImageDraw, ImageFont
+﻿from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import numpy as np
 from pathlib import Path
-import textwrap  # 用于处理文本换行
-from .config import save_dir, font_path, background_qd
+import textwrap
+from .config import save_dir, font_path, background_dir, background_template
 
-__all__ = ["draw_qd"]
+__all__ = ["draw_qd"]  # 定义模块公开接口
 
-#将图片渲染到绘制对象上
-def texture_render(image: Image, file: str, x: int, y: int, scale: int=1):
-    texture = Image.open(file)
-    new_size = (int(texture.size[0]*scale), int(texture.size[1]*scale))
-    texture = texture.resize(new_size)
-    image.paste(texture, (x, y), texture)
+def texture_render(image: Image, file: str, x: int, y: int, scale: int = 1):
+    """
+    将纹理图片渲染到目标图像上
+    
+    参数:
+        image: 目标图像对象
+        file: 纹理文件路径
+        x: 粘贴位置的x坐标
+        y: 粘贴位置的y坐标
+        scale: 缩放比例(默认为1)
+    """
+    try:
+        texture = Image.open(file)
+        # 确保图像是RGBA模式(带透明度)
+        if texture.mode != 'RGBA':
+            texture = texture.convert('RGBA')
+            
+        new_size = (int(texture.size[0] * scale), int(texture.size[1] * scale))
+        texture = texture.resize(new_size)
+        
+        # 分离alpha通道作为蒙版
+        if texture.mode == 'RGBA':
+            r, g, b, a = texture.split()
+            image.paste(texture, (x, y), a)  # 使用alpha通道作为蒙版
+        else:
+            image.paste(texture, (x, y))  # 没有透明度则直接粘贴
+    except Exception as e:
+        print(f"渲染纹理时出错: {e}")
 
-#渲染带边缘的作文本
-def draw_text_outline(draw: ImageDraw, x: int, y: int, text: str, font: ImageFont, color: str, outline_color: str):
+def is_dark_background(image: Image, threshold: int = 128) -> bool:
+    """
+    检测图片是否为暗色调背景
+    
+    参数:
+        image: 要检测的图像
+        threshold: 亮度阈值(默认128)
+    返回:
+        bool: 如果平均亮度低于阈值返回True
+    """
+    gray_image = image.convert('L')  # 转换为灰度图像
+    histogram = gray_image.histogram()  # 获取直方图
+    pixels = sum(histogram)
+    brightness = sum(i * num for i, num in enumerate(histogram)) / pixels  # 计算平均亮度
+    return brightness < threshold  # 判断是否低于阈值
+
+def draw_centered_text_outline(draw: ImageDraw, image: Image, add_x: int, add_y: int, 
+                             text: str, font: ImageFont, color: str, outline_color: str, 
+                             image_width: int, image_height: int, blur_bg: bool = True):
+    """
+    绘制带描边的居中文本，可选择模糊背景
+    
+    参数:
+        draw: ImageDraw对象
+        image: 图像对象
+        add_x: x轴偏移量
+        add_y: y轴偏移量
+        text: 要绘制的文本
+        font: 字体对象
+        color: 文本颜色
+        outline_color: 描边颜色
+        image_width: 图像宽度
+        image_height: 图像高度
+        blur_bg: 是否模糊背景(默认为True)
+    """
+    # 计算文本边界框
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]  # 文本实际宽度
+    text_height = text_bbox[3] - text_bbox[1]  # 文本实际高度
+
+    # 计算中心位置
+    x = (image_width - text_width) // 2
+    y = (image_height - text_height) // 2
+    
+    # 应用偏移量
+    x += add_x
+    y += add_y
+    
+    # 如果需要模糊背景
+    if blur_bg:
+        # 设置背景区域边距和羽化范围
+        padding = 30
+        feather = 20  # 渐变范围
+        
+        # 计算背景区域坐标(确保不超出图像边界)
+        bg_x1 = max(0, x - padding)
+        bg_y1 = max(0, y - padding)
+        bg_x2 = min(image_width, x + text_width + padding)
+        bg_y2 = min(image_height, y + text_height + padding)
+        
+        # 创建渐变遮罩
+        mask = Image.new("L", (bg_x2 - bg_x1, bg_y2 - bg_y1), 255)
+        draw_mask = ImageDraw.Draw(mask)
+        
+        # 绘制渐变边缘
+        for i in range(feather):
+            alpha = int(255 * (i / feather))
+            draw_mask.rectangle(
+                (i, i, mask.width - i, mask.height - i),
+                outline=alpha
+            )
+        
+        # 裁剪背景区域
+        bg_region = image.crop((bg_x1, bg_y1, bg_x2, bg_y2))
+        # 应用高斯模糊
+        blurred_bg = bg_region.filter(ImageFilter.GaussianBlur(radius=5))
+        
+        # 使用渐变遮罩合成模糊效果
+        image.paste(blurred_bg, (bg_x1, bg_y1), mask)
+    
+    # 绘制描边(四个方向的偏移)
     draw.text((x-1, y-1), text, fill=outline_color, font=font, align="center")
     draw.text((x+1, y-1), text, fill=outline_color, font=font, align="center")
     draw.text((x-1, y+1), text, fill=outline_color, font=font, align="center")
     draw.text((x+1, y+1), text, fill=outline_color, font=font, align="center")
+    # 绘制主文本
     draw.text((x, y), text, fill=color, font=font, align="center")
 
-# 引入一个全局变量来跟踪文件名
+# 全局变量用于循环保存文件名
 current_index = 1
 
-def draw_qd(nickname: str, berry: int, extra_berry: int = 0, double_berry: int = 0):
-    global current_index  # 声明为全局变量
-    # 创建一个白色背景的图像
-    width, height = 960, 608
-    image = Image.new("RGB", (width, height), "white")
+def draw_qd(
+    nickname: str,
+    berry: int,
+    extra_berry: int = 0,
+    double_berry: int = 0,
+    background_variant: str = "1",
+    blur_bg: bool = True
+):
+    """
+    生成签到卡片图像
+    
+    参数:
+        nickname: 用户昵称
+        berry: 基础草莓数量
+        extra_berry: 额外草莓数量(默认为0)
+        double_berry: 是否双倍草莓(默认为0)
+        background_variant: 背景变体编号(默认为"1")
+        blur_bg: 是否模糊文本背景(默认为True)
+    
+    返回:
+        tuple: (文件路径, 奖励文本, 运势文本)
+    """
+    global current_index
 
-    # 创建一个可以在上面绘制的对象
+    # 设置图像尺寸(宽度960，高度720)
+    width, height = 960, 719
+    # 创建白色背景图像
+    image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
 
-    # 绘制背景图
-    texture_render(image, background_qd, 0, 0)
+    # 根据模板生成背景文件名
+    background_filename = background_template.format(background_variant)
+    background_filepath = background_dir / background_filename
 
-    # 设置字体和颜色
+    # 检查背景文件是否存在，不存在则使用默认背景
+    if not background_filepath.exists():
+        background_filepath = background_dir / "qd1.png"
+
+    # 渲染背景图像
+    texture_render(image, background_filepath, 0, 0)
+    
+    # 检测背景亮度并设置文字颜色
+    background_image = Image.open(background_filepath)
+    if is_dark_background(background_image):
+        text_color = "white"  # 暗背景使用白色文字
+        outline_color = "black"  # 黑色描边
+    else:
+        text_color = "black"  # 亮背景使用黑色文字
+        outline_color = "white"  # 白色描边
+
+    # 加载字体(大小46px)
     font = ImageFont.truetype(font_path, 46)
+    
+    # 生成奖励文本
     if extra_berry == 0:
         text = f"签到成功，奖励{berry}颗草莓"
     else:
         text = f"签到成功，奖励{berry}+{extra_berry}颗草莓"
-    text_color = "black"
-    outline_color = "white"
 
-    # 随机文案
+    # 运势文本字典(根据草莓数量返回不同文案)
     luck_dict = {
         1: "哇哦，大成功诶！但是这不是coc，祝你好运！",
         (2, 10): "三军听令，自刎归天！",
@@ -63,49 +203,41 @@ def draw_qd(nickname: str, berry: int, extra_berry: int = 0, double_berry: int =
         100: "哇哦，100诶！那你一定能一把理论测试如果Y PP毕加索 秒杀大屠杀 AP+脆肚！"
     }
 
-    # 设置默认文案
+    # 默认运势文本
     luck_text = "不可能有这条消息，你升桂了！"
 
-    # 遍历字典查找匹配的范围
+    # 查找匹配的运势文本
     for key, value in luck_dict.items():
-        if isinstance(key, tuple):  # 如果键是一个元组，表示一个范围
+        if isinstance(key, tuple):  # 处理范围键
             if key[0] <= berry <= key[1]:
                 luck_text = value
                 break
-        elif berry == key:  # 如果键是单个值
+        elif berry == key:  # 处理单个值键
             luck_text = value
             break
 
-    # 文本分行（每 11 个字换行）
+    # 文本自动换行(每行最多11个字符)
     wrapped_luck_text = "\n".join(textwrap.wrap(luck_text, width=11))
 
-    # 文本位置
-    x = 325
-    y = 245
-    
+    # 双倍奖励文本
     text2 = f"检测到你拥有鱼之契约\n本次签到获得草莓翻倍为{(berry+extra_berry)*2}颗！"
-    # 获取文本的边界框
-    text_bbox = draw.textbbox((0, 0), text2, font=font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_height = text_bbox[3] - text_bbox[1]
 
-    # 计算中心位置
-    center_x = (image.width - text_width) // 2
-    center_y = (image.height - text_height) // 2
-    
-    # 在图片上绘制文本
+    # 绘制所有文本元素
     if double_berry == 1:
-        draw_text_outline(draw, center_x, y-170, text2, font, text_color, outline_color)
-    draw_text_outline(draw, x, y - 64, f"{nickname}", font, text_color, outline_color)  # 绘制用户名称
-    draw_text_outline(draw, x, y, text, font, text_color, outline_color)  # 绘制奖励多少草莓
-    draw_text_outline(draw, x + 115, y + 96, wrapped_luck_text, font, text_color, outline_color)  # 绘制文案
+        draw_centered_text_outline(draw, image, 0, -180, text2, font, text_color, outline_color, width, height, blur_bg)
+        draw_centered_text_outline(draw, image, 0, -40, f"{nickname}", font, text_color, outline_color, width, height, blur_bg)
+        draw_centered_text_outline(draw, image, 0, 39, text, font, text_color, outline_color, width, height, blur_bg)
+        draw_centered_text_outline(draw, image, 0, 220, wrapped_luck_text, font, text_color, outline_color, width, height, blur_bg)
+    else:
+        draw_centered_text_outline(draw, image, 0, -160, f"{nickname}", font, text_color, outline_color, width, height, blur_bg)
+        draw_centered_text_outline(draw, image, 0, -89, text, font, text_color, outline_color, width, height, blur_bg)
+        draw_centered_text_outline(draw, image, 0, 120, wrapped_luck_text, font, text_color, outline_color, width, height, blur_bg)
 
-    # 保存图像为 PNG 文件，文件名为 output1.png 到 output15.png
+    # 保存图像(output1.png到output15.png循环)
     file_name = save_dir / f"output{current_index}.png"
     image.save(file_name)
 
-    # 更新文件名索引，循环回 1 到 15
+    # 更新文件索引(1-15循环)
     current_index = (current_index % 15) + 1
 
-    # 输出文件路径
     return str(file_name), text, luck_text

@@ -487,7 +487,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
         await catch.finish(message, at_sender=True)
 
-## 每日签到
+# 每日签到
 qd = on_command("qd", aliases={"签到"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @qd.handle()
@@ -504,12 +504,15 @@ async def dailyqd(event: GroupMessageEvent):
 
     user_data = data.setdefault(user_id, {"berry": 0, "jrrp": 0, "item": {}, "date": "2000-01-01"})
     collections = user_data.setdefault('collections', {})
-    # 获取日期信息
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
     
     if user_data.get("date", "2000-01-01") == current_date_str:
         await send_image_or_text(user_id, qd, "一天只能签到一次吧......", True, None)
         return
+
+    # 获取用户当前背景
+    user_data.setdefault("purchased_backgrounds", ["1"])
+    background_variant = user_data.setdefault("current_background", "1")  # 默认为1
 
     # 计算随机奖励
     base_berry = random.randint(1, 100)
@@ -524,7 +527,13 @@ async def dailyqd(event: GroupMessageEvent):
     save_data(user_path / file_name, data)
 
     # 获取签到图片、文案
-    picture_str, text, luck_text = draw_qd(nickname, base_berry, extra_berry, double_berry)
+    picture_str, text, luck_text = draw_qd(
+        nickname=nickname,
+        berry=base_berry,
+        extra_berry=extra_berry,
+        double_berry=double_berry,
+        background_variant=background_variant  # 直接传入背景编号
+    )
     picture = Path(picture_str)
 
     # 发送签到信息
@@ -569,7 +578,7 @@ async def dailyjrrp(event: GroupMessageEvent):
     double_jrrp = (jrrp_int + extra_berry) * (double + 1)
 
     # 获取图片、文案
-    picture_str, text, luck_text = draw_qd(nickname, jrrp_int, extra_berry, double)
+    picture_str, text, luck_text = draw_qd(nickname, jrrp_int, extra_berry, double, "1")
     
     reply_text = f"- 你今日的人品（签到）值为：{jrrp_int}\n{luck_text}"
     reply_text += f"\n- 检测到你拥有鱼之契约，\n你今日签到获得的草莓翻倍，\n为{double_jrrp}！（包含了招财猫加成哦）" if double == 1 else ''

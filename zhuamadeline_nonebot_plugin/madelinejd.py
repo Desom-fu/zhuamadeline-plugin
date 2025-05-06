@@ -76,7 +76,7 @@ async def handle_ckqflc(bot: Bot, event: GroupMessageEvent):
             total_users += 1
     
     # 构建消息（按0-4号猎场顺序）
-    message = "\n猎场人数统计\n\n"
+    message = "猎场人数统计\n\n"
     for lc in range(0, liechang_count + 1):
         message += f"{lc}号猎场: {liechang_stats[f'{lc}号猎场']}人\n"
     

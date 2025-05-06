@@ -379,7 +379,10 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     combined_img_path = generate_image_with_text(
         text1=top_text,
         image_path=img,
-        text2=bottom_text
+        text2=bottom_text,
+        max_chars=20,
+        center=True,
+        user_id=str(user_id)
     )
     
     if combined_img_path:
@@ -2169,7 +2172,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     combined_img_path = generate_image_with_text(
                         text1=top_text,
                         image_path=img,
-                        text2=bottom_text
+                        text2=bottom_text,
+                        max_chars=20,
+                        center=True,
+                        user_id=str(user_id)
                     )
 
                     if combined_img_path:

@@ -8,7 +8,7 @@ from .list2 import *
 from .list3 import *
 from .list4 import *
 from .list5 import *
-from .shop import item
+from .shop import item, background_shop
 from .collection import collections
 from .config import *
 import random
@@ -66,7 +66,10 @@ __all__ = [
     'get_world_boss_ranking',
     'handle_world_boss_defeat',
     'handle_personal_boss',
-    "handle_world_boss"    
+    "handle_world_boss",
+    "get_background_shop",
+    "purchase_background",
+    "switch_background"
 ]
 
 #madeline图鉴
@@ -1261,3 +1264,76 @@ async def handle_personal_boss(bot, user_id, level, data):
         msg += grade_msg if grade_msg else ""
     
     return msg, data
+
+######签到商店######
+def get_background_shop(user_id):
+    """获取背景商店信息，并标记已购买和当前选择的背景"""
+    data = open_data(user_path / file_name)
+    user_data = data.get(str(user_id), {})
+    
+    # 获取用户已购买的背景和当前选择的背景
+    purchased_backgrounds = user_data.get("purchased_backgrounds", ["1"])  # 默认拥有第一个
+    current_bg = user_data.get("current_background", "1")  # 默认为1
+    
+    shop_list = []
+    for bg_id, bg_info in background_shop.items():
+        # 检查是否已购买
+        is_owned = bg_id in purchased_backgrounds or bg_id == "1"  # 第一个默认拥有
+        status = "已购买" if is_owned else f"{bg_info['price']}草莓"
+        
+        # 构建背景信息行
+        bg_line = f"{bg_id}. {bg_info['name']}（{status}）"
+        
+        # 如果是当前选择的背景，添加标记
+        if bg_id == current_bg:
+            bg_line += "\n↑当前选择"
+            
+        shop_list.append(bg_line)
+    
+    return "\n".join(shop_list)
+
+def purchase_background(user_id, bg_id):
+    """购买背景"""
+    data = open_data(user_path / file_name)
+    user_data = data.setdefault(str(user_id), {})
+    
+    # 检查背景ID是否有效
+    if bg_id not in background_shop:
+        return False, "无效的背景编号"
+    
+    # 检查是否已经拥有
+    purchased_backgrounds = user_data.setdefault("purchased_backgrounds", ["1"])
+    if bg_id in purchased_backgrounds or bg_id == "1":
+        return False, "你已经拥有这个背景了"
+    
+    # 检查草莓是否足够
+    price = background_shop[bg_id]["price"]
+    if user_data.get("berry", 0) < price:
+        return False, f"草莓不足，需要{price}颗草莓"
+    
+    # 扣除草莓并添加背景
+    user_data["berry"] -= price
+    purchased_backgrounds.append(bg_id)
+    save_data(user_path / file_name, data)
+    
+    return True, f"成功购买背景[{background_shop[bg_id]['name']}]！"
+
+def switch_background(user_id, bg_id):
+    """切换背景"""
+    data = open_data(user_path / file_name)
+    user_data = data.setdefault(str(user_id), {})
+    
+    # 检查背景ID是否有效
+    if bg_id not in background_shop:
+        return False, "无效的背景编号"
+    
+    # 检查是否拥有该背景
+    purchased_backgrounds = user_data.setdefault("purchased_backgrounds", ["1"])
+    if bg_id not in purchased_backgrounds and bg_id != "1":
+        return False, "你尚未购买这个背景"
+    
+    # 切换背景
+    user_data["current_background"] = bg_id
+    save_data(user_path / file_name, data)
+    
+    return True, f"已切换签到背景为[{background_shop[bg_id]['name']}]"

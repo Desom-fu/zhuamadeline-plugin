@@ -1735,10 +1735,10 @@ async def dailyqd_simu(event: GroupMessageEvent, arg: Message = CommandArg()):
     arg_number = None
     
     # 参数校验
-    if len(args) != 2:
-        await qd_simu.finish("指令格式错误，请使用：.qnmd 数量 0/1", at_sender=True)
+    if len(args) != 3:
+        await qd_simu.finish("指令格式错误，请使用：.qnmd 数量 0/1 第几个背景", at_sender=True)
     
-    arg_text, double_berry = args
+    arg_text, double_berry, qdbg = args
 
     try:
         arg_number = int(arg_text)  # 尝试将参数转换为数字
@@ -1785,7 +1785,7 @@ async def dailyqd_simu(event: GroupMessageEvent, arg: Message = CommandArg()):
             if('招财猫' in data[str(user_id)]['item']):
                 num_of_extra_berry = data[user_id]['item']['招财猫'] * 3
             # 获取图片、文案
-            picture_str, text, luck_text = draw_qd(nickname,arg_number,num_of_extra_berry,double_berry)
+            picture_str, text, luck_text = draw_qd(nickname,arg_number,num_of_extra_berry,double_berry, qdbg)
             picture = Path(picture_str)
             #发送信息
             await qd_simu.finish(MessageSegment.image(picture) + f"玩家: {nickname}\n" + text + "\n" + luck_text, at_sender=True)

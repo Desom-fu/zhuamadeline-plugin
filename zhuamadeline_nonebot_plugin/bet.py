@@ -1823,7 +1823,7 @@ async def prop_demon_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
         msg += end_msg
     save_data(demon_path, demon_data)
     save_data(bar_path, bar_data)
-    await send_image_or_text(user_id, prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1), 25)
+    await send_image_or_text(user_id, prop_demon, msg, False, MessageSegment.at(player0)+MessageSegment.at(player1) + f"\n- 现在轮到[{next_nickname}]行动！", 25)
 
 # 查看局势
 check = on_command("查看局势", permission=GROUP, priority=1, block=True, rule=whitelist_rule)

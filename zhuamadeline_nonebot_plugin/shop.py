@@ -343,3 +343,22 @@ today_item = {
     '草莓果园地契': 20,
     '房产证': 100,
 }
+
+# 签到背景商店
+background_shop = {
+    "1": {"name": "默认（9d-True Love）", "price": 0, "owned": True},
+    "2": {"name": "TSoCM", "price": 1000},
+    "3": {"name": "smots gaming", "price": 1500},
+    "4": {"name": "这不神奇吗？", "price": 1500},
+    "5": {"name": "晚霞", "price": 2000},
+    "6": {"name": "树莓根下", "price": 2000},
+    "7": {"name": "流星雨", "price": 2000},
+    "8": {"name": "杨桃超新星", "price": 2000},
+    "9": {"name": "一览众山小", "price": 2000},
+    "10": {"name": "IWBTG", "price": 3000},
+    "11": {"name": "Arcaea", "price": 3000},
+    "12": {"name": "Lanota-哈帕斯", "price": 3000},
+    "13": {"name": "Lanota-艾娜", "price": 3000},
+    "14": {"name": "Rotaeno-iw", "price": 3000},
+    "15": {"name": "Phigros-iga", "price": 3000},
+}

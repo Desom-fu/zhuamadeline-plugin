@@ -5,6 +5,7 @@ from .npc import npc_da
 from .whitelist import whitelist_rule
 from .config import liechang_count
 from .text_image_text import send_image_or_text
+from .shop import background_shop
 
 __all__ = ['help', 'gong_gao', 'npc', 'cklc', 'pvpck']
 
@@ -43,7 +44,7 @@ help_categories = {
         "commands": [
             ".shop - 查看今日商品",
             ".item <道具名> - 查看道具详情",
-            ".cp <藏品名> - 查看藏品详情"
+            ".cp <藏品名> - 查看藏品详情",
             ".myitem - 查看所有道具",
             ".mycp - 查看所有藏品",
             ".buy <道具名> (数量) - 购买道具",
@@ -88,7 +89,6 @@ help_categories = {
         "aliases": ["berry", "草莓"],
         "commands": [
             ".transfer 目标QQ号 数量 - 转账",
-            ".berryrank - 草莓排行榜",
             ".bank <save>/<take> 数量 - 银行存取",
             ".qd - 每日签到"
         ]
@@ -97,7 +97,12 @@ help_categories = {
         "name": "其他类指令",
         "aliases": ["其他", "other"],
         "commands": [
-            ".set_bg <色号>/<default> - 设置背景颜色/恢复默认颜色"
+            ".公告 - 查看目前公告",
+            ".npc <名字> - 查看npc相关故事",
+            ".set_bg <色号>/<default> - 设置背景颜色/恢复默认颜色",
+            ".qdbg_shop - 查看签到背景商店",
+            f".qdbg_buy <1-{len(background_shop)}> - 购买签到背景",
+            f".qdbg_change <1-{len(background_shop)}> - 切换签到背景"
         ]
     }
 }
