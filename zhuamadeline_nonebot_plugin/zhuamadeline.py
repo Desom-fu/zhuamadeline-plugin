@@ -970,7 +970,7 @@ async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Com
         return
     
     # 计算手续费
-    tax = 100 if transfer_amount <= 1000 else math.floor(transfer_amount * 0.15)
+    tax = 150 if transfer_amount <= 1000 else math.floor(transfer_amount * 0.15)
     final_berry = transfer_amount + tax
     owner_berry = data[user_a]['berry']
     

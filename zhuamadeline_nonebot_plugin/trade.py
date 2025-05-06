@@ -1,4 +1,4 @@
-﻿from nonebot.adapters.onebot.v11 import MessageSegment, Message
+from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP, Bot, Event
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.log import logger
@@ -116,8 +116,6 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
         bar_data = open_data(bar_path)
         # 检查草莓是否足够
         if data[user_id]['berry'] < 1000:
-            data[user_id]['event'] = 'nothing'
-            save_data(full_path, data)
             await send_image_or_text(user_id, confirm, 
                                    f"草莓不足！设置背景色需要1000草莓\n"
                                    f"你只有{data[user_id]['berry']}颗草莓！",

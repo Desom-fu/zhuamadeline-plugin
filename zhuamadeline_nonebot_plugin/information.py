@@ -14,10 +14,10 @@ help_categories = {
         "name": "抓取类指令",
         "aliases": ["catch", "抓取", "zhua", "抓"],
         "commands": [
-            f".qhlc (0~{liechang_count}) - 切换猎场",
+            f".qhlc <0~{liechang_count}> - 切换猎场",
             ".zhua - 随机抓取Madeline",
-            ".count {madeline名字} - 查看某Madeline数量",
-            ".show {madeline名字} - 查看某Madeline详情",
+            ".count <madeline名字> - 查看某Madeline数量",
+            ".show <madeline名字> - 查看某Madeline详情",
             f".cklc (0~{liechang_count}) - 查看猎场信息",
             f".mymadeline (1~{liechang_count}) - 查看Madeline库存",
             ".madelinejd/.jd - 查看Madeline总进度",
@@ -35,7 +35,6 @@ help_categories = {
             ".jdrank - 查看全服Madeline进度排名",
             ".berryrank (down) - 查看全服草莓(倒序)排名",
             ".qfcklc - 查看全服猎场人数",
-            ".qfcklc - 查看全服猎场人数",
         ]
     },
     "item": {
@@ -43,33 +42,33 @@ help_categories = {
         "aliases": ["item", "道具", "collections", "collection", "cp", "藏品", "items", "dj", "daoju"],
         "commands": [
             ".shop - 查看今日商品",
-            ".item {道具名} - 查看道具详情",
-            ".cp {藏品名} - 查看藏品详情"
+            ".item <道具名> - 查看道具详情",
+            ".cp <藏品名> - 查看藏品详情"
             ".myitem - 查看所有道具",
             ".mycp - 查看所有藏品",
-            ".buy {道具名} [数量] - 购买道具",
-            ".use {道具名} - 使用道具",
-            ".recycle {道具名} [数量] - 回收道具"
+            ".buy <道具名> (数量) - 购买道具",
+            ".use <道具名> - 使用道具",
+            ".recycle <道具名> (数量) - 回收道具"
         ]
     },
     "garden": {
         "name": "果园类指令",
         "aliases": ["garden", "果园"],
         "commands": [
-            ".garden ck - 查看果园状态",
-            ".garden seed - 播种",
-            ".garden take - 收菜",
-            ".garden fert - 施肥",
-            ".garden steal - 偷菜",
-            ".garden upgrade - 升级"
+            ".garden <ck> - 查看果园状态",
+            ".garden <seed> - 播种",
+            ".garden <take> - 收菜",
+            ".garden <fert> - 施肥",
+            ".garden <steal> - 偷菜",
+            ".garden <upgrade> - 升级"
         ]
     },
     "game": {
         "name": "游戏类指令",
         "aliases": ["game", "游戏", "bet"],
         "commands": [
-            ".bet {1~4} - 玩游戏",
-            ".rule {1~4} - 查看游戏规则",
+            ".bet <1~4> - 玩游戏",
+            ".rule <1~4> - 查看游戏规则",
             ".ball (日期) - 查看洞窟探险结果"
         ]
     },
@@ -78,7 +77,7 @@ help_categories = {
         "aliases": ["work", "工作"],
         "commands": [
             ".workhelp - 工作帮助",
-            ".work 区域/食物/Madeline - 派遣工作",
+            ".work <区域/食物/Madeline> - 派遣工作",
             ".workspeed - 加速工作",
             ".workjd - 查看工作进度",
             ".worksleep - 休息恢复体力"
@@ -90,7 +89,7 @@ help_categories = {
         "commands": [
             ".transfer 目标QQ号 数量 - 转账",
             ".berryrank - 草莓排行榜",
-            ".bank save/take 数量 - 银行存取",
+            ".bank <save>/<take> 数量 - 银行存取",
             ".qd - 每日签到"
         ]
     },
@@ -98,7 +97,7 @@ help_categories = {
         "name": "其他类指令",
         "aliases": ["其他", "other"],
         "commands": [
-            ".set_bgcolor {色号}/default - 设置背景颜色/恢复默认颜色"
+            ".set_bg <色号>/<default> - 设置背景颜色/恢复默认颜色"
         ]
     }
 }
@@ -132,8 +131,8 @@ async def zhua_help(event: GroupMessageEvent, args: Message = CommandArg()):
             "- .help berry - 草莓类指令\n"
             "- .help other - 其他类指令\n"
             "══════════════\n"
-            "输入指令时不要带{}或()！\n"
-            "带有{}为必须，带有()的为非必须~\n"
+            "输入指令时不要带<>或()！\n"
+            "带有<>为必须，带有()的为非必须~\n"
             "更多功能持续开发中……"
         )
         await send_image_or_text(user_id, help, main_help, False, text)
@@ -150,8 +149,8 @@ async def zhua_help(event: GroupMessageEvent, args: Message = CommandArg()):
             help_text = f"【{matched_category['name']}】\n══════════════\n"
             help_text += "\n".join(matched_category["commands"])
             help_text += "\n══════════════\n输入 .help 查看主菜单\n"
-            help_text += ("输入指令时不要带{}或()！\n"
-                        "带有{}为必须，带有()的为非必须~\n"
+            help_text += ("输入指令时不要带<>或()！\n"
+                        "带有<>为必须，带有()的为非必须~\n"
                         "更多功能持续开发中……")
             
             await send_image_or_text(user_id, help, help_text, False)

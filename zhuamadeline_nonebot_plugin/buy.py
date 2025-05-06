@@ -364,7 +364,7 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
         await send_image_or_text(user_id, recycle_item, f"你成功回收了{item_quantity}个{item_name}！\n本次回收获得{recycle_price}颗草莓！\n你目前拥有{owner_berry}颗草莓！", True, None, 20)
 
 # 自定义背景色命令
-set_bgcolor = on_command('set_bgcolor', aliases={'设置背景色', '自定义背景色', 'set_bg'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+set_bgcolor = on_command('set_bgcolor', aliases={'设置背景色', '自定义背景色', 'set_bg', 'bg_set'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @set_bgcolor.handle()
 async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     # 打开用户数据
