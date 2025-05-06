@@ -1095,7 +1095,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     else:
                         await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！", at_sender=True)
                 else:
-                    await send_image_or_text(user_id, daoju, f"你现在没有这么多{use_name}。", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你现在没有这么多{use_name}，\n你现在只有{data[str(user_id)]["item"][use_name]}瓶。", at_sender=True)
                 
             #加工果酱时无法使用道具
             if(status =='working'): 

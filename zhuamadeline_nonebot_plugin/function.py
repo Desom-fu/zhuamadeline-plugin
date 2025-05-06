@@ -1295,6 +1295,7 @@ def get_background_shop(user_id):
 def purchase_background(user_id, bg_id):
     """购买背景"""
     data = open_data(user_path / file_name)
+    bar_data = open_data(bar_path)
     user_data = data.setdefault(str(user_id), {})
     
     # 检查背景ID是否有效
@@ -1313,6 +1314,8 @@ def purchase_background(user_id, bg_id):
     
     # 扣除草莓并添加背景
     user_data["berry"] -= price
+    # 加奖池
+    bar_data["pots"] = bar_data.get('pots') + price
     purchased_backgrounds.append(bg_id)
     save_data(user_path / file_name, data)
     

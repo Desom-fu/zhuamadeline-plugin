@@ -59,13 +59,13 @@ async def rule_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     elif game_type == '2':
         msg = (
             "游戏2：恶魔轮盘(2人)\n" +
-            "- 本游戏入场费为125草莓\n" +
+            "- 本游戏入场费为250草莓\n" +
             "- 游戏开始时，双方的血量在区间内随机（上限为6），并且都可以获得等量道具，然后由随机一人开始\n" +
             "- 在枪里面有不定量的子弹，实弹空弹随机\n" +
             "- 你可以向自己开枪，也可以向对方开枪，向自己开枪后无论是否实弹下一回合都是你行动\n" +
             "- 如果你向对方开枪，无论是否实弹都是对方行动\n" +
             "- 在回合内，每个人都可以使用道具，道具内容可以使用 .恶魔道具 查看\n" +
-            "- 获胜的一方将获得388颗草莓奖励~\n" +
+            "- 获胜的一方将获得1111颗草莓奖励~\n" +
             "- 注意！步时为10min，使用道具和开枪（无论是否自己）都会刷新步时！若超时对方返还草莓，本回合玩家不返还！\n" +
             "- 使用 .恶魔帮助 指令可以查看所有的指令~ \n" +
             "- 输入 .bet 2 游玩此游戏"
@@ -234,11 +234,11 @@ async def bet_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandA
             await send_image_or_text(user_id, bet, "游戏已开始，\n无法加入！", True, None, 25)
             return
             
-        if data[user_id]['berry'] < 125:
-            await send_image_or_text(user_id, bet, "你需要有至少125草莓\n才能进来玩哦！", True, None, 25)
+        if data[user_id]['berry'] < 250:
+            await send_image_or_text(user_id, bet, "你需要有至少250颗草莓\n才能进来玩哦！", True, None, 25)
             return
         else:
-            data[user_id]['berry'] -= 125
+            data[user_id]['berry'] -= 250
             
         # 将玩家添加至游戏状态
         bar_data[user_id]['game'] = '2'
@@ -804,7 +804,7 @@ help_msg = f"""
 输入 .使用道具 道具名 -|- 使用道具"""
 
 # 奖励设置
-jiangli = 388
+jiangli = 1111
 game_tax = int(jiangli * 0.1) # 向下取整计算 10%
 final_jiangli = jiangli - game_tax
 
