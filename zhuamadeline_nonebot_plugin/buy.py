@@ -466,9 +466,12 @@ qdbg_review = on_command("qdbg_review", aliases={"背景预览"}, permission=GRO
 @qdbg_review.handle()
 async def handle_bg_review():
     """处理背景预览命令"""
-    # 生成预览图
-    review_path = generate_background_preview()
-    
-    # 发送图片
-    await qdbg_review.finish(MessageSegment.image(review_path))
-    return
+    try:
+        # 生成预览图
+        review_path = generate_background_preview()
+        
+        # 发送图片
+        await qdbg_review.finish(MessageSegment.image(review_path))
+        return
+    except Exception as e:
+        logger.error(f"生成背景预览时出错: {e}")
