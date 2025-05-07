@@ -39,14 +39,17 @@ help_categories = {
         ]
     },
     "item": {
-        "name": "道具/藏品类指令",
-        "aliases": ["item", "道具", "collections", "collection", "cp", "藏品", "items", "dj", "daoju"],
+        "name": "道具/藏品/成就类指令",
+        "aliases": ["item", "道具", "collections", "collection", "cp", "藏品", "items", "dj", "daoju", "成就", "cj", "achievement"],
         "commands": [
             ".shop - 查看今日商品",
             ".item <道具名> - 查看道具详情",
             ".cp <藏品名> - 查看藏品详情",
-            ".myitem - 查看所有道具",
-            ".mycp - 查看所有藏品",
+            ".cj <成就名> - 查看成就详情",
+            ".cjmb <成就名> - 查看达成成就所需目标",
+            ".myitem - 查看自己持有的所有道具",
+            ".mycp - 查看自己持有的所有藏品",
+            ".mycj - 查看自己持有的所有成就",
             ".buy <道具名> (数量) - 购买道具",
             ".use <道具名> - 使用道具",
             ".recycle <道具名> (数量) - 回收道具"
@@ -130,7 +133,7 @@ async def zhua_help(event: GroupMessageEvent, args: Message = CommandArg()):
             "输入以下分类指令查看详细帮助：\n"
             "- .help zhua - 抓取类指令\n"
             "- .help check - 查看类指令\n"
-            "- .help item - 道具/藏品类指令\n"
+            "- .help item - 道具/藏品/成就类指令\n"
             "- .help garden - 果园类指令\n"
             "- .help game - 游戏类指令\n"
             "- .help work - 工作类指令\n"

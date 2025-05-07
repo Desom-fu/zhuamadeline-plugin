@@ -69,7 +69,8 @@ __all__ = [
     "handle_world_boss",
     "get_background_shop",
     "purchase_background",
-    "switch_background"
+    "switch_background",
+    "achievement_get"
 ]
 
 #madeline图鉴
@@ -150,6 +151,9 @@ def init_data():
             json.dump({}, f)
     if not cd_path.exists():
         with open(cd_path, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+    if not achievement_path.exists():
+        with open(achievement_path, 'w', encoding='utf-8') as f:
             json.dump({}, f)
 
 # 获取QQ昵称
@@ -1316,7 +1320,9 @@ def purchase_background(user_id, bg_id):
     user_data["berry"] -= price
     # 加奖池
     bar_data["pots"] = bar_data.get('pots') + price
+    # 增加背景
     purchased_backgrounds.append(bg_id)
+    
     save_data(user_path / file_name, data)
     
     return True, f"成功购买背景[{background_shop[bg_id]['name']}]！"
@@ -1340,3 +1346,142 @@ def switch_background(user_id, bg_id):
     save_data(user_path / file_name, data)
     
     return True, f"已切换签到背景为[{background_shop[bg_id]['name']}]"
+
+def achievement_get(user_id):
+    # 打开数据
+    data = open_data(user_path / file_name)
+    achievement_data = open_data(achievement_path)
+    garden_data = open_data(garden_path)
+    bar_data = open_data(bar_path)
+    
+    # 初始化各个函数
+    # 这里是主数据表
+    user_data = data.setdefault(str(user_id), {})
+    items = user_data.setdefault("item", {})
+    collection = user_data.setdefault("collections", {})
+    purchased_backgrounds = user_data.setdefault("purchased_backgrounds", ["1"])
+    
+    # 这里是成就数据表
+    user_achievement = achievement_data.setdefault(str(user_id), {})
+    achievement = user_achievement.setdefault("achievement", {})
+    
+    # 这里是花园数据表
+    user_garden = garden_data.setdefault(str(user_id), {})
+
+    # 这里是酒吧数据表
+    user_bar = bar_data.setdefault(str(user_id), {})
+
+    # Madeline全收集判定
+    if achievement.get("Madeline全收集", 0) <= 0:
+        total_madelines = 0
+        captured_madelines = 0
+        
+        # 遍历所有猎场
+        for lc in range(1, liechang_count + 1):
+            # 获取该猎场的Madeline数据
+            madeline_data = globals().get(f"madeline_data{lc}")
+            if not madeline_data:
+                continue
+                
+            # 计算该猎场的总Madeline数量和已捕获数量
+            for level, madelines in madeline_data.items():
+                total_madelines += len(madelines)
+                
+                # 检查用户是否捕获过该猎场的Madeline
+                user_list_data = open_data(user_path / f"UserList{lc}.json")
+                if str(user_id) in user_list_data:
+                    for madeline_key in user_list_data[str(user_id)]:
+                        if madeline_key.startswith(f"{level}_"):
+                            captured_madelines += 1
+        
+        # 如果捕获数量等于总数量，则获得成就
+        if captured_madelines >= total_madelines:
+            achievement["Madeline全收集"] = 1
+            save_data(achievement_path, achievement_data)
+    
+    # 道具全收集判定(item是全道具字典)
+    if len(items) >= len(item)-3 and achievement.get("道具全收集", 0) <= 0: #去除三个绝版道具
+        achievement["道具全收集"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 藏品全收集判定(collections是全藏品字典)
+    if len(collection) >= len(collections)-2 and achievement.get("藏品全收集", 0) <= 0: #去除2个绝版藏品
+        achievement["藏品全收集"] = 1
+        save_data(achievement_path, achievement_data)
+    
+    # 背景全收集判定
+    if len(purchased_backgrounds) >= len(background_shop) and achievement.get("签到背景全收集", 0) <= 0:
+        achievement["签到背景全收集"] = 1
+        save_data(achievement_path, achievement_data)
+    
+    # 花园等级MAX判定
+    if user_garden.get("garden_level", 1) >= 10 and achievement.get("花园等级MAX", 0) <= 0:
+        achievement["花园等级MAX"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 草莓大富翁判定
+    if user_bar.get("bank", 0) >= 100000 and achievement.get("草莓大富翁", 0) <= 0:
+        achievement["草莓大富翁"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 还是pvp大佬判定 开新猎场得改
+    if (
+        user_bar.get("bank", 0) >= 100000 and 
+        collection.get("圣十字架", 0) >= 1 and
+        collection.get("鲜血之刃", 0) >= 1 and
+        collection.get('灵魂机器人', 0) >= 1 and
+        collection.get('逆十字架', 0) >= 1 and
+        items.get('安定之音', 0) >= 5000 and
+        items.get('残片', 0) >= 29997 and
+        achievement.get("还是PVP大佬", 0) <= 0
+        ):
+        achievement["还是PVP大佬"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 秘宝猎手判定 开新猎场得改
+    if (
+        collection.get("鲜血之刃", 0) >= 1 and
+        collection.get("尘封的宝藏", 0) >= 1 and
+        collection.get('回想之核', 0) >= 1 and
+        collection.get('星光乐谱', 0) >= 1 and
+        collection.get('星钻', 0) >= 1 and
+        collection.get('时隙沙漏', 0) >= 1 and
+        achievement.get("秘宝猎手", 0) <= 0
+        ):
+        achievement["秘宝猎手"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 防护专家判定 开新猎场得改
+    if (
+        collection.get("紫晶魄", 0) >= 1 and
+        collection.get("天使之羽", 0) >= 1 and
+        collection.get('炸弹包', 0) >= 1 and
+        collection.get('淡紫色狐狸毛', 0) >= 1 and
+        achievement.get("防护专家", 0) <= 0
+        ):
+        achievement["防护专家"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 气象专家判定
+    if (
+        collection.get("奇想魔盒", 0) >= 1 and
+        collection.get("奇想扑克", 0) >= 1 and
+        collection.get('炸弹包', 0) >= 1 and
+        collection.get('淡紫色狐狸毛', 0) >= 1 and
+        achievement.get("气象专家", 0) <= 0
+        ):
+        achievement["气象专家"] = 1
+        save_data(achievement_path, achievement_data)
+
+    # 飞升器破坏者判定
+    if collection.get("黄色球体", 0) >= 1 and achievement.get("飞升器破坏者", 0) <= 0:
+        achievement["飞升器破坏者"] = 1
+        save_data(achievement_path, achievement_data)
+
+
+    # 练级狂魔判定
+    if user_data.get("grade", 1) >= 21 and achievement.get("练级狂魔", 0) <= 0:
+        achievement["练级狂魔"] = 1
+        save_data(achievement_path, achievement_data)
+
+    return achievement_data

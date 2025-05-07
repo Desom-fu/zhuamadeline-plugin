@@ -10,9 +10,6 @@ from .function import open_data, save_data
 #加载madeline档案信息
 from .madelinejd import *
 from .config import *
-from .list1 import *
-from .list2 import *
-from .list3 import *
 #加载抓madeline相关的函数
 from .function import *
 from .event import *
@@ -36,6 +33,7 @@ from .whitelist import allowed_groups, allowed_groups2
 from .garage_kit import *
 from .work import *
 from .zhua_simu import *
+from .achievements_command import *
 
 # 初始化
 driver = get_driver()

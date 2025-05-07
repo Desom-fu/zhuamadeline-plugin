@@ -15,6 +15,7 @@ __all__ = [
     "duchang_list",
     "duchang_open_img",
     "full_path",
+    "achievement_path",
     "cd_path",
     "ban",
     "liechang_count",
@@ -94,6 +95,7 @@ backup_path = Path() / "Data" / "UserList_Backup"
 user_path = Path() / "Data" / "UserList"
 file_name = "UserData.json"
 full_path = user_path / file_name
+achievement_path = Path() / "data" / "UserList" / "UserAchievement.json"
 cd_path = Path() / "Data" / "UserList" / "allcooldown.json"
 bar_path = Path() / "data" / "UserList" / "bar.json"
 garden_path = Path() / "data" / "UserList" / "garden.json"
