@@ -2213,7 +2213,7 @@ async def ckdj_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     if standard_item in item:
         await send_image_or_text(user_id, 
             ckdj,
-            f"{standard_item}:\n{item[standard_item][2]}",
+            f"[{standard_item}]:\n{item[standard_item][2]}",
             True,
             None
         )

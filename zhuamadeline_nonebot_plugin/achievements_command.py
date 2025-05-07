@@ -57,7 +57,7 @@ async def ckcj_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     cp_name = str(arg)
     standard_achievement = get_alias_name(cp_name, achievements, achievements_aliases)
     if(standard_achievement in achievements):
-        await send_image_or_text(user_id, ckcj, standard_achievement+":\n"+achievements[standard_achievement][2], True, None, 25)
+        await send_image_or_text(user_id, ckcj, '['+standard_achievement+"]:\n"+achievements[standard_achievement][2], True, None, 25)
     else:
         await send_image_or_text(user_id, ckcj, '请输入正确的成就名称哦！')
 
@@ -69,7 +69,7 @@ async def ckcj_target_handle(event: GroupMessageEvent, arg: Message = CommandArg
     cp_name = str(arg)
     standard_achievement = get_alias_name(cp_name, achievements, achievements_aliases)
     if(standard_achievement in achievements):
-        await send_image_or_text(user_id, ckcj_target, standard_achievement+":\n"+achievements[standard_achievement][1], True, None, 25)
+        await send_image_or_text(user_id, ckcj_target, '['+standard_achievement+"]的目标:\n"+achievements[standard_achievement][1], True, None, 25)
     else:
         await send_image_or_text(user_id, ckcj_target, '请输入正确的成就名称哦！')
 
