@@ -12,7 +12,7 @@ import math
 import time
 from pathlib import Path
 #加载商店信息和商店交互
-from .shop import item, today_item, forbid_recycle_item, fish_prices, item_aliases
+from .shop import item, today_item, forbid_recycle_item, fish_prices, item_aliases, background_shop
 from .collection import collections, collection_aliases
 from .render import generate_background_preview
 import json
@@ -465,18 +465,22 @@ qdbg_review = on_command("qdbg_review", aliases={"背景预览"}, permission=GRO
 
 @qdbg_review.handle()
 async def handle_bg_review():
-    """处理背景预览命令"""
-    REVIEW_IMAGE_PATH = background_dir / "qdbg_review.png"
+    """处理背景预览命令（动态文件名版本）"""
     try:
-        # 检查图片是否已存在
+        # 动态生成预期文件名
+        expected_filename = f"{len(background_shop)}_qdbg_review.png"
+        REVIEW_IMAGE_PATH = background_dir / expected_filename
+        
+        # 检查图片是否需要重新生成
         if not REVIEW_IMAGE_PATH.exists():
-            logger.info("生成新的背景预览图...")
-            generate_background_preview()
+            logger.info(f"生成新的背景预览图: {expected_filename}")
+            REVIEW_IMAGE_PATH = generate_background_preview()  # 调用修改后的生成函数
         else:
-            logger.info("使用已存在的背景预览图")
+            logger.info(f"使用已存在的预览图: {expected_filename}")
         
         # 发送图片
         await qdbg_review.finish(MessageSegment.image(REVIEW_IMAGE_PATH))
         return
+        
     except Exception as e:
-        logger.error(f"处理背景预览时出错: {e}")
+        logger.error(f"背景预览处理失败: {str(e)}", exc_info=True)

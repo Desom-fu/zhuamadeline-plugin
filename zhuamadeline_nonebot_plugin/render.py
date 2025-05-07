@@ -244,36 +244,39 @@ def draw_qd(
 
     return str(file_name), text, luck_text
 
+from PIL import Image, ImageDraw, ImageFont, ImageTransform
+import random
+from pathlib import Path
+import math
+
 def generate_background_preview():
-    """生成所有背景的预览拼接图"""
-    # 每行显示的图片数量
-    IMAGES_PER_ROW = 4
-    
-    # 图片尺寸 (根据你的draw_qd函数输出尺寸调整)
+    """生成带水印的背景预览图"""
+    # 基础配置
+    IMAGES_PER_ROW = 3
     IMAGE_WIDTH = 960
-    IMAGE_HEIGHT = 719
+    IMAGE_HEIGHT = 720
+    WATERMARK_TEXT = "SAMPLE"
+    WATERMARK_OPACITY = 190  # 75%透明度
+    WATERMARK_ANGLE = -30   # 倾斜角度（负数表示左倾）
     
-    # 保存路径
-    REVIEW_IMAGE_PATH = background_dir / "qdbg_review.png"
+    # 准备水印字体
+    font = ImageFont.truetype(font_path, 160)  # 优先使用设定字体
     
-    # 计算需要多少行
+    # 计算布局
     bg_count = len(background_shop)
-    rows = (bg_count + IMAGES_PER_ROW - 1) // IMAGES_PER_ROW
-    
-    # 创建最终的大图
+    rows = math.ceil(bg_count / IMAGES_PER_ROW)
     result_width = IMAGE_WIDTH * IMAGES_PER_ROW
     result_height = IMAGE_HEIGHT * rows
-    result_image = Image.new('RGB', (result_width, result_height))
+    result_image = Image.new('RGB', (result_width, result_height), (255, 255, 255))
     
-    # 生成每张预览图并拼接
-    preview_images = []
+    # 生成每张带水印的预览图
+    watermarked_images = []
     for bg_id in background_shop.keys():
-        # 随机生成参数
+        # 生成原始预览图
         berry = random.randint(1, 100)
         extra_berry = random.choice([0, 60])
         double_berry = random.choice([0, 1])
         
-        # 生成预览图
         picture_str, _, _ = draw_qd(
             nickname="预览",
             berry=berry,
@@ -281,20 +284,58 @@ def generate_background_preview():
             double_berry=double_berry,
             background_variant=str(bg_id)
         )
+        img = Image.open(Path(picture_str)).convert("RGBA")
         
-        # 打开图片并添加到列表
-        img = Image.open(Path(picture_str))
-        preview_images.append(img)
+        # 添加斜体水印 ----------------------------------------
+        watermark = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(watermark)
+        
+        # 计算文字尺寸和位置（考虑旋转）
+        left, top, right, bottom = draw.textbbox((0, 0), WATERMARK_TEXT, font=font)
+        text_width = right - left
+        text_height = bottom - top
+        x = (img.width - text_width) // 2
+        y = (img.height - text_height) // 2
+        
+        # 绘制半透明斜体水印
+        draw.text(
+            (x, y), 
+            WATERMARK_TEXT, 
+            font=font, 
+            fill=(128, 128, 128, WATERMARK_OPACITY)  # 灰色半透明
+        )
+        
+        # 旋转水印
+        rotated_watermark = watermark.rotate(
+            WATERMARK_ANGLE,
+            expand=False,
+            resample=Image.BICUBIC,
+            fillcolor=(0, 0, 0, 0)
+        )
+        
+        # 合并水印与原图
+        img = Image.alpha_composite(img, rotated_watermark).convert("RGB")
+        watermarked_images.append(img)
+        # -----------------------------------------------------
     
-    # 拼接图片
-    for i, img in enumerate(preview_images):
-        row = i // IMAGES_PER_ROW
-        col = i % IMAGES_PER_ROW
-        x = col * IMAGE_WIDTH
-        y = row * IMAGE_HEIGHT
-        result_image.paste(img, (x, y))
+    # 拼接所有图片（最后一行居中）
+    for row in range(rows):
+        start_idx = row * IMAGES_PER_ROW
+        end_idx = min(start_idx + IMAGES_PER_ROW, bg_count)
+        row_images = watermarked_images[start_idx:end_idx]
+        
+        # 计算当前行水平偏移（居中处理）
+        row_width = len(row_images) * IMAGE_WIDTH
+        x_offset = (result_width - row_width) // 2 if (row == rows - 1 and len(row_images) < IMAGES_PER_ROW) else 0
+        
+        # 粘贴当前行图片
+        for col, img in enumerate(row_images):
+            x = x_offset + col * IMAGE_WIDTH
+            y = row * IMAGE_HEIGHT
+            result_image.paste(img, (x, y))
     
-    # 保存拼接后的图片
-    result_image.save(REVIEW_IMAGE_PATH)
+    # 保存文件
+    review_path = background_dir / f"{len(background_shop)}_qdbg_review.png"
+    result_image.save(review_path)
     
-    return REVIEW_IMAGE_PATH
+    return review_path

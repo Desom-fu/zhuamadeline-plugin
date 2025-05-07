@@ -2018,7 +2018,7 @@ async def check_timeout(group_id):
                 player = demon_data[group_id]['pl'][0]
                 pl_nickname = await get_nickname(bot, player)
                 # 退还草莓
-                user_data[str(player)]['berry'] += 125 
+                user_data[str(player)]['berry'] += 250 
                 # 移除玩家游戏状态
                 bar_data[player]['game'] = '1'
                 bar_data[player]['status'] = 'nothing'
@@ -2028,7 +2028,7 @@ async def check_timeout(group_id):
                 save_data(full_path, user_data)
                 save_data(bar_path, bar_data)
                 # 发送通知
-                await auto_send_message(f"由于长时间无第二人进入恶魔轮盘，\n现已向[{pl_nickname}]返还125草莓的门票费\n并重置游戏。", bot, zhuama_group, MessageSegment.at(player),25)
+                await auto_send_message(f"由于长时间无第二人进入恶魔轮盘，\n现已向[{pl_nickname}]返还250草莓的门票费\n并重置游戏。", bot, zhuama_group, MessageSegment.at(player),25)
                 return True
     return False
 
