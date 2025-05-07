@@ -430,7 +430,7 @@ async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = 
                            True, None)
 
 # 查看背景商店
-bg_shop = on_command("背景商店", aliases={"bg_shop", "qdbg_shop"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+bg_shop = on_command("背景商店", aliases={"bg_shop", "qdbg_shop", "qdbg"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @bg_shop.handle()
 async def handle_bg_shop(event: GroupMessageEvent):

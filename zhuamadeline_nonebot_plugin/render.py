@@ -252,7 +252,7 @@ import math
 def generate_background_preview():
     """生成带水印的背景预览图"""
     # 基础配置
-    IMAGES_PER_ROW = 3
+    IMAGES_PER_ROW = 4
     IMAGE_WIDTH = 960
     IMAGE_HEIGHT = 720
     WATERMARK_TEXT = "SAMPLE"

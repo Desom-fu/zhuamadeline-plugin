@@ -1290,7 +1290,7 @@ def get_background_shop(user_id):
         
         # 如果是当前选择的背景，添加标记
         if bg_id == current_bg:
-            bg_line += "\n↑当前选择"
+            bg_line += "\n↑当前选择\n"
             
         shop_list.append(bg_line)
     
