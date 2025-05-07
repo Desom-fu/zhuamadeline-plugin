@@ -1466,8 +1466,6 @@ def achievement_get(user_id):
     if (
         collection.get("奇想魔盒", 0) >= 1 and
         collection.get("奇想扑克", 0) >= 1 and
-        collection.get('炸弹包', 0) >= 1 and
-        collection.get('淡紫色狐狸毛', 0) >= 1 and
         achievement.get("气象专家", 0) <= 0
         ):
         achievement["气象专家"] = 1
