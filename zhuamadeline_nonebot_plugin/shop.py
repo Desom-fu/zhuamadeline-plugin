@@ -361,6 +361,6 @@ background_shop = {
     "13": {"name": "Lanota-艾娜", "price": 3000},
     "14": {"name": "Rotaeno-iw", "price": 3000},
     "15": {"name": "Phigros-iga", "price": 3000},
-    "16": {"name": "MaiMai Splash", "price": 3000},
+    "16": {"name": "MaiMai Prism", "price": 3000},
     "17": {"name": "WACCA Reverse", "price": 3000},
 }
