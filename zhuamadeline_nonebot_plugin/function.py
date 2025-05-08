@@ -1294,7 +1294,12 @@ def get_background_shop(user_id):
             
         shop_list.append(bg_line)
     
-    return "\n".join(shop_list)
+    current_status = ''
+    # 添加当前选择状态
+    if current_bg == "random":
+        current_status = "当前选择：随机模式（每次签到从已购买中随机选择）"
+    
+    return f"\n\n{current_status}\n\n" + "\n".join(shop_list)
 
 def purchase_background(user_id, bg_id):
     """购买背景"""
@@ -1333,7 +1338,12 @@ def switch_background(user_id, bg_id):
     user_data = data.setdefault(str(user_id), {})
     
     # 检查背景ID是否有效
-    if bg_id not in background_shop:
+    if bg_id == "random":
+        # 直接设置为random模式，不立即选择
+        user_data["current_background"] = "random"
+        save_data(user_path / file_name, data)
+        return True, "已设置为随机背景模式，\n每次签到将从已购买背景中随机选择"
+    elif bg_id not in background_shop:
         return False, "无效的背景编号"
     
     # 检查是否拥有该背景
@@ -1346,6 +1356,8 @@ def switch_background(user_id, bg_id):
     save_data(user_path / file_name, data)
     
     return True, f"已切换签到背景为[{background_shop[bg_id]['name']}]"
+
+#####成就系统#####
 
 def achievement_get(user_id):
     # 打开数据

@@ -436,7 +436,12 @@ bg_shop = on_command("背景商店", aliases={"bg_shop", "qdbg_shop", "qdbg"}, p
 async def handle_bg_shop(event: GroupMessageEvent):
     user_id = str(event.user_id)
     shop_info = get_background_shop(user_id)
-    await send_image_or_text(user_id, bg_shop, f"签到背景商店\n\n{shop_info}\n\n输入 .bg_buy <编号> 购买背景\n输入 .bg_change <编号> 切换背景", True, None)
+    await send_image_or_text(user_id, bg_shop, 
+                             "【签到背景商店】\n"
+                             "输入 .qdbg_buy <编号> 购买背景\n"
+                             "输入 .qdbg_change <编号>/<random> 切换背景\n"
+                             "输入 .qdbg_review 进行签到图片预览"
+                             f"{shop_info}", True, None)
 
 # 购买背景
 buy_bg = on_command("购买背景", aliases={"bg_buy", "qdbg_buy"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)

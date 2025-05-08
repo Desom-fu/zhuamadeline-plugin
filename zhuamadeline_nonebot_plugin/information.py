@@ -107,7 +107,7 @@ help_categories = {
             ".qdbg_shop - 查看签到背景商店",
             ".qdbg_review - 查看签到图片预览",
             f".qdbg_buy <1-{len(background_shop)}> - 购买签到背景",
-            f".qdbg_change <1-{len(background_shop)}> - 切换签到背景"
+            f".qdbg_change <1-{len(background_shop)}>/<random> - 切换签到背景（可随机）"
         ]
     }
 }

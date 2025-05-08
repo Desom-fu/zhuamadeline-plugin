@@ -502,6 +502,7 @@ async def dailyqd(event: GroupMessageEvent):
         await send_image_or_text(user_id, qd, "你还没尝试抓过madeline.....", True, None)
         return
 
+    # 初始化
     user_data = data.setdefault(user_id, {"berry": 0, "jrrp": 0, "item": {}, "date": "2000-01-01"})
     collections = user_data.setdefault('collections', {})
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
@@ -513,6 +514,14 @@ async def dailyqd(event: GroupMessageEvent):
     # 获取用户当前背景
     user_data.setdefault("purchased_backgrounds", ["1"])
     background_variant = user_data.setdefault("current_background", "1")  # 默认为1
+
+    # 如果是random模式，从已购买背景中随机选择
+    if background_variant == "random":
+        purchased_backgrounds = user_data["purchased_backgrounds"]
+        if len(purchased_backgrounds) > 0:
+            background_variant = random.choice(purchased_backgrounds)
+        else:
+            background_variant = "1"  # 如果没有购买任何背景，使用默认背景
 
     # 计算随机奖励
     base_berry = random.randint(1, 100)
@@ -559,6 +568,14 @@ async def dailyjrrp(event: GroupMessageEvent):
     # 获取用户当前背景
     user_data.setdefault("purchased_backgrounds", ["1"])
     background_variant = user_data.setdefault("current_background", "1")  # 默认为1
+
+    # 如果是random模式，从已购买背景中随机选择
+    if background_variant == "random":
+        purchased_backgrounds = user_data["purchased_backgrounds"]
+        if len(purchased_backgrounds) > 0:
+            background_variant = random.choice(purchased_backgrounds)
+        else:
+            background_variant = "1"  # 如果没有购买任何背景，使用默认背景
 
     # 获取日期信息
     current_date_str = datetime.date.today().strftime("%Y-%m-%d")
