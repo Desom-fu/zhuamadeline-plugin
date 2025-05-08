@@ -365,7 +365,7 @@ async def handle_recycle_item(event: GroupMessageEvent, arg: Message = CommandAr
         await send_image_or_text(user_id, recycle_item, f"你成功回收了{item_quantity}个{item_name}！\n本次回收获得{recycle_price}颗草莓！\n你目前拥有{owner_berry}颗草莓！", True, None, 20)
 
 # 自定义背景色命令
-set_bgcolor = on_command('set_bgcolor', aliases={'设置背景色', '自定义背景色', 'set_bg', 'bg_set'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+set_bgcolor = on_command('set_bgcolor', aliases={'设置背景色', '自定义背景色', 'set_bg', 'bg_set', 'set-bg', 'bg-set', 'set-bgcolor'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @set_bgcolor.handle()
 async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
     # 打开用户数据
@@ -430,7 +430,7 @@ async def set_bgcolor_handle(bot: Bot, event: GroupMessageEvent, arg: Message = 
                            True, None)
 
 # 查看背景商店
-bg_shop = on_command("背景商店", aliases={"bg_shop", "qdbg_shop", "qdbg"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+bg_shop = on_command("背景商店", aliases={"bg_shop", "qdbg_shop", "qdbg", "bg-shop", "qdbg-shop"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @bg_shop.handle()
 async def handle_bg_shop(event: GroupMessageEvent):
@@ -444,7 +444,7 @@ async def handle_bg_shop(event: GroupMessageEvent):
                              f"{shop_info}", True, None)
 
 # 购买背景
-buy_bg = on_command("购买背景", aliases={"bg_buy", "qdbg_buy"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+buy_bg = on_command("购买背景", aliases={"bg_buy", "qdbg_buy", "bg-buy", "qdbg-buy"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @buy_bg.handle()
 async def handle_buy_bg(event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -455,7 +455,7 @@ async def handle_buy_bg(event: GroupMessageEvent, arg: Message = CommandArg()):
     await send_image_or_text(user_id, buy_bg, msg, True, None)
 
 # 切换背景
-switch_bg = on_command("切换背景", aliases={"bg_change", "qdbg_change"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+switch_bg = on_command("切换背景", aliases={"bg_change", "qdbg_change", "bg-change", "qdbg-change"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @switch_bg.handle()
 async def handle_switch_bg(event: GroupMessageEvent, arg: Message = CommandArg()):
@@ -466,7 +466,7 @@ async def handle_switch_bg(event: GroupMessageEvent, arg: Message = CommandArg()
     await send_image_or_text(user_id, switch_bg, msg, True, None)
 
 # 背景预览命令
-qdbg_review = on_command("qdbg_review", aliases={"背景预览"}, permission=GROUP, priority=1, block=True)
+qdbg_review = on_command("背景预览", aliases={"qdbg_review", "qdbg-review", "bg_review", "bg-review"}, permission=GROUP, priority=1, block=True)
 
 @qdbg_review.handle()
 async def handle_bg_review():
