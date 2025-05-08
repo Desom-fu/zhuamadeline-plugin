@@ -1330,7 +1330,7 @@ def purchase_background(user_id, bg_id):
     
     save_data(user_path / file_name, data)
     
-    return True, f"成功购买背景[{background_shop[bg_id]['name']}]！"
+    return True, f"成功购买背景[{background_shop[bg_id]['name']}]！\n你目前还剩{user_data['berry']}颗草莓"
 
 def switch_background(user_id, bg_id):
     """切换背景"""
