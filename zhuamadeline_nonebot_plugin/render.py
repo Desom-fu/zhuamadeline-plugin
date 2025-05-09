@@ -252,12 +252,25 @@ import math
 def generate_background_preview():
     """生成带水印的背景预览图"""
     # 基础配置
-    IMAGES_PER_ROW = 4
     IMAGE_WIDTH = 960
     IMAGE_HEIGHT = 720
     WATERMARK_TEXT = "SAMPLE"
     WATERMARK_OPACITY = 190  # 75%透明度
     WATERMARK_ANGLE = -30   # 倾斜角度（负数表示左倾）
+
+    # 动态计算 IMAGES_PER_ROW
+    bg_count = len(background_shop)
+    candidates = [3, 4, 5]
+    zero_remainders = [i for i in candidates if bg_count % i == 0]
+    
+    # 没有余数取最大的那个
+    if zero_remainders:
+        IMAGES_PER_ROW = max(zero_remainders)
+    else:
+        # 按余数降序排列，余数相同则选较小的候选值
+        remainders = [(i, bg_count % i) for i in candidates]
+        remainders.sort(key=lambda x: (-x[1], x[0]))
+        IMAGES_PER_ROW = remainders[0][0]
     
     # 准备水印字体
     font = ImageFont.truetype(font_path, 160)  # 优先使用设定字体

@@ -370,4 +370,5 @@ background_shop = {
     "22": {"name": "Rabi-Ribi - Cocoa（可可亚）", "price": 3000},
     "23": {"name": "咸鱼喵喵 - 喵露露", "price": 3000},
     "24": {"name": "Minecraft", "price": 3000},
+    "25": {"name": "空洞骑士Hollow Knight", "price": 3000},
 }
