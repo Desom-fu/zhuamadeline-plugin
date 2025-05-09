@@ -1294,12 +1294,21 @@ def get_background_shop(user_id):
             
         shop_list.append(bg_line)
     
+    # 处理已购买背景显示
+    purchased_count = len(purchased_backgrounds)
+    sorted_purchased = sorted(purchased_backgrounds, key=lambda x: int(x))  # 按数字排序
+    # 每10个换行显示
+    purchased_chunks = [sorted_purchased[i:i+12] for i in range(0, len(sorted_purchased), 12)]
+    purchased_display = "\n".join(["、".join(chunk) for chunk in purchased_chunks])
+    
     current_status = ''
     # 添加当前选择状态
     if current_bg == "random":
-        current_status = "\n\n当前选择：随机模式（每次签到从已购买中随机选择）"
+        current_status = "\n当前选择：随机模式（每次签到从已购买中随机选择）"
     
-    return f"{current_status}\n\n" + "\n".join(shop_list)
+    # 组装完整信息
+    purchase_info = f"\n\n当前购买背景数量：{purchased_count}/{len(background_shop)}\n当前已购买背景：\n{purchased_display}"
+    return f"{purchase_info}{current_status}\n\n" + "\n".join(shop_list)
 
 def purchase_background(user_id, bg_id):
     """购买背景"""
