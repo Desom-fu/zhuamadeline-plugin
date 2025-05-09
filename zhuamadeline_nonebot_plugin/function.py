@@ -1297,9 +1297,9 @@ def get_background_shop(user_id):
     current_status = ''
     # 添加当前选择状态
     if current_bg == "random":
-        current_status = "当前选择：随机模式（每次签到从已购买中随机选择）"
+        current_status = "\n\n当前选择：随机模式（每次签到从已购买中随机选择）"
     
-    return f"\n\n{current_status}\n\n" + "\n".join(shop_list)
+    return f"{current_status}\n\n" + "\n".join(shop_list)
 
 def purchase_background(user_id, bg_id):
     """购买背景"""
