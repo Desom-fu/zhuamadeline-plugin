@@ -338,7 +338,7 @@ async def get_sorted_madelines(file_name: str, user_id: str, liechang_number: st
 
         # 获取对应的madeline名字并添加编号前缀
         madeline_info = madeline_data.get(str(level + 1)).get(num)
-        display_name = f"<{liechang_number}_{level+1}_{num}> {madeline_info.get('name')}"
+        display_name = f"<{liechang_number}-{level+1}-{num}> {madeline_info.get('name')}"
         sorted_madelines[level].append((display_name, v))
 
     # 排序并拼接：从高等级到低等级排列
