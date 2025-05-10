@@ -680,9 +680,9 @@ def find_madeline(value, only_name=False):
         only_name: 如果为True，则只能通过名字查找
     返回格式: [等级, 编号, 猎场编号] 或 0(未找到)
     """
-    # 1. 如果不是仅名字查找，先检查是否是 "猎场_等级_编号" 格式
+    # 1. 如果不是仅名字查找，先检查是否是 "猎场_等级_编号" 格式 （支持短横线）
     if not only_name and re.match(r'^\d+[_-]\d+[_-]\d+$', value):
-        parts = value.split('_')
+        parts = re.split(r'[_-]', value)
         lc, level, num = parts[0], parts[1], parts[2]
         
         # 验证猎场是否存在
