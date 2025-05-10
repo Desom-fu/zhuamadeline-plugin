@@ -1,7 +1,7 @@
 from nonebot.log import logger
 from nonebot import get_driver
 from nonebot.adapters.onebot.v11 import Bot
-from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.adapters.onebot.v11 import MessageSegment, Message
 # 开新猎场要改
 from .list1 import *
 from .list2 import *
@@ -70,6 +70,7 @@ __all__ = [
     "get_background_shop",
     "purchase_background",
     "switch_background",
+    "extract_mixed_qq",
     "achievement_get"
 ]
 
@@ -155,6 +156,34 @@ def init_data():
     if not achievement_path.exists():
         with open(achievement_path, 'w', encoding='utf-8') as f:
             json.dump({}, f)
+
+def extract_mixed_qq(args: Message, param_count: int) -> list:
+    """解析混合包含@消息和纯文本的参数
+    :param args: 原始消息对象
+    :param param_count: 期望的参数数量
+    :return: 参数列表(QQ号或文本)，若参数数量不匹配则返回空列表
+    """
+    arg_list = []
+    text_args = args.extract_plain_text().strip().split()
+    text_ptr = 0  # 纯文本参数的指针
+    
+    # 遍历所有消息段
+    for seg in args:
+        if seg.type == 'at':
+            arg_list.append(seg.data['qq'])
+        elif seg.type == 'text':
+            # 处理纯文本部分
+            seg_text = seg.data['text'].strip()
+            if seg_text:  # 非空文本
+                for word in seg_text.split():
+                    if text_ptr < len(text_args) and word == text_args[text_ptr]:
+                        arg_list.append(word)
+                        text_ptr += 1
+    
+    # 参数数量验证
+    if len(arg_list) != param_count:
+        return []
+    return arg_list
 
 # 获取QQ昵称
 async def get_nickname(bot: Bot, user_id: str) -> str:
@@ -351,8 +380,6 @@ async def get_sorted_madelines(file_name: str, user_id: str, liechang_number: st
     
     return "\n".join(result) if result else "没有库存"
 
-
-    
 #------------madelinejd相关指令----------------
 
 def madelinejd(user_id, target_level=None, nickname=None):

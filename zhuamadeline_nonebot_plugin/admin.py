@@ -6,12 +6,13 @@ from nonebot.params import CommandArg
 from nonebot.log import logger
 from nonebot.exception import FinishedException  # 新增导入
 import json
+import re
 import datetime
 import os
 import time
 from datetime import timedelta
 from pathlib import Path
-from .function import find_madeline, get_sorted_madelines, get_madeline_data, madelinejd, save_data, open_data, get_alias_name
+from .function import find_madeline, get_sorted_madelines, get_madeline_data, madelinejd, save_data, open_data, get_alias_name, extract_mixed_qq
 from .render import *
 import psutil
 import random
@@ -189,7 +190,7 @@ async def delete_account_handle(bot: Bot, event: GroupMessageEvent, arg: Message
         return
 
     # 解析参数，获取要删除的账号的QQ号
-    target_qq = str(arg).strip()
+    target_qq = extract_mixed_qq(arg, 1)
     if not target_qq:
         await delete_account.finish("命令格式错误！正确格式：.删除账号 QQ号", at_sender=True)
         return
@@ -297,15 +298,9 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
     if str(event.user_id) not in bot_owner_id:
         return
 
-    arg = str(arg).split(" ")
     #得到at的人的qq号
+    arg = extract_mixed_qq(arg, 1)
     user_id = arg[0]
-        # 调用API获取昵称
-    try:
-        user_info = await bot.get_stranger_info(user_id=int(user_id))
-        nickname = user_info.get("nickname", "未知昵称")
-    except Exception:
-        await ck_admin_single.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
 
     #打开文件
     data = open_data(user_path/file_name)
@@ -314,6 +309,13 @@ async def ck_admin_single_handle(bot:Bot, event: GroupMessageEvent, arg: Message
     #没有这个玩家
     if(not user_id in data):
         await ck_admin_single.finish(f"找不到 [{user_id}] 的信息", at_sender=True)
+    
+    # 调用API获取昵称
+    try:
+        user_info = await bot.get_stranger_info(user_id=int(user_id))
+        nickname = user_info.get("nickname", "未知昵称")
+    except Exception:
+        await ck_admin_single.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
 
     #有这个玩家
     berry = data[user_id]['berry']
@@ -330,8 +332,11 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         return
 
     #得到at的人的qq号
-    arg = str(arg).split(" ")
-    user_id = arg[0]
+    args = extract_mixed_qq(arg, 2)
+    user_id = args[0]
+    
+    if not args:
+        await grant_single.finish("命令格式错误！正确格式：.发放草莓 玩家QQ号 数量", at_sender=True)
 
     #打开文件
     data = {}
@@ -343,7 +348,7 @@ async def fafang_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
     #有这个玩家
     try:
-        jiangli = int(arg[1])
+        jiangli = int(args[1])
     except:
         await grant_single.finish("命令格式错误！正确格式：.发放草莓 玩家QQ号 数量", at_sender=True)
     else:
@@ -365,8 +370,11 @@ async def set_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         return
 
     #得到at的人的qq号
-    arg = str(arg).split(" ")
-    user_id = arg[0]
+    args = extract_mixed_qq(arg, 2)
+    user_id = args[0]
+
+    if not args:
+        await grant_single.finish("命令格式错误！正确格式：.设定草莓 玩家QQ号 数量", at_sender=True)
 
     #打开文件
     data = {}
@@ -378,30 +386,33 @@ async def set_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 
     #有这个玩家
     try:
-        jiangli = int(arg[1])
+        jiangli = int(args[1])
     except:
         await set_single.finish("命令格式错误！正确格式：.设定草莓 玩家QQ号 数量", at_sender=True)
     # else:
     #     if(jiangli <= 0):
     #         return
-        data[user_id]['berry'] = jiangli
+    data[user_id]['berry'] = jiangli
 
-        #写入文件
-        save_data(user_path / file_name, data)
+    #写入文件
+    save_data(user_path / file_name, data)
 
-        await set_single.finish(MessageSegment.at(user_id)+f"的草莓已设定为{jiangli}！", at_sender=True)
+    await set_single.finish(MessageSegment.at(user_id)+f"的草莓已设定为{jiangli}！", at_sender=True)
 
 #给某个玩家扣除草莓
 deduct_single = on_command("扣除草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @deduct_single.handle()
-async def deduct_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def deduct_handle(event: GroupMessageEvent, args: Message = CommandArg()):
     #判断是不是管理员账号
     if str(event.user_id) not in bot_owner_id:
         return
 
     #得到at的人的qq号
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(args, 2)
     user_id = arg[0]
+
+    if not arg:
+        await grant_single.finish("命令格式错误！正确格式：.扣除草莓 玩家QQ号 数量", at_sender=True)
 
     #打开文件
     data = {}
@@ -429,14 +440,17 @@ async def deduct_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
 #给某个玩家扣除草莓
 init_single = on_command("投入草莓", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @init_single.handle()
-async def init_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def init_handle(event: GroupMessageEvent, args: Message = CommandArg()):
     #判断是不是管理员账号
     if str(event.user_id) not in bot_owner_id:
         return
 
     #得到at的人的qq号
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(args, 2)
     user_id = arg[0]
+
+    if not arg:
+        await grant_single.finish("命令格式错误！正确格式：.扣除投入 玩家QQ号 数量", at_sender=True)
 
     #打开文件
     data = {}
@@ -473,8 +487,8 @@ async def transfer_handle(event: GroupMessageEvent, arg: Message = CommandArg())
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析命令参数
-    arg = str(arg).split(" ")
-    if len(arg) != 3:
+    arg = extract_mixed_qq(arg, 3)
+    if not arg:
         await transfer_berry.finish("命令格式错误！正确格式：.转移草莓 QQ号A QQ号B 数量", at_sender=True)
         return
     user_a = arg[0]  # 转出方QQ号
@@ -515,8 +529,8 @@ async def ck_energy_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
     if str(event.user_id) not in bot_owner_id:
         return
 
-    arg = str(arg).split(" ")
-    user_id = arg[0]
+    args = extract_mixed_qq(arg, 1)
+    user_id = args[0]
 
     try:
         user_info = await bot.get_stranger_info(user_id=int(user_id))
@@ -535,11 +549,14 @@ async def ck_energy_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Co
 # 给某个玩家发放能量
 grant_energy = on_command("发放能量", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @grant_energy.handle()
-async def grant_energy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def grant_energy_handle(event: GroupMessageEvent, args: Message = CommandArg()):
     if str(event.user_id) not in bot_owner_id:
         return
 
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(args, 2)
+    if not arg:
+        await grant_energy.finish("命令格式错误！正确格式：.发放能量 QQ号 数量", at_sender=True)
+        return
     user_id = arg[0]
 
     data = open_data(user_path / file_name)
@@ -564,11 +581,16 @@ async def grant_energy_handle(event: GroupMessageEvent, arg: Message = CommandAr
 # 设定某个玩家的能量
 set_energy = on_command("设定能量", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @set_energy.handle()
-async def set_energy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def set_energy_handle(event: GroupMessageEvent, args: Message = CommandArg()):
     if str(event.user_id) not in bot_owner_id:
         return
 
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(args, 2)
+
+    if not arg:
+        await set_energy.finish("命令格式错误！正确格式：.设定能量 QQ号 数量", at_sender=True)
+        return
+
     user_id = arg[0]
 
     data = open_data(user_path / file_name)
@@ -593,11 +615,16 @@ async def set_energy_handle(event: GroupMessageEvent, arg: Message = CommandArg(
 # 给某个玩家扣除能量
 deduct_energy = on_command("扣除能量", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @deduct_energy.handle()
-async def deduct_energy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def deduct_energy_handle(event: GroupMessageEvent, args: Message = CommandArg()):
     if str(event.user_id) not in bot_owner_id:
         return
 
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(args, 2)
+
+    if not arg:
+        await deduct_energy.finish("命令格式错误！正确格式：.扣除能量 QQ号 数量", at_sender=True)
+        return
+    
     user_id = arg[0]
 
     data = open_data(user_path / file_name)
@@ -622,12 +649,12 @@ async def deduct_energy_handle(event: GroupMessageEvent, arg: Message = CommandA
 # 转移能量
 transfer_energy = on_command("转移能量", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @transfer_energy.handle()
-async def transfer_energy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
+async def transfer_energy_handle(event: GroupMessageEvent, args: Message = CommandArg()):
     if str(event.user_id) not in bot_owner_id:
         return
 
-    arg = str(arg).split(" ")
-    if len(arg) != 3:
+    arg = extract_mixed_qq(args, 3)
+    if not arg:
         await transfer_energy.finish("命令格式错误！正确格式：.转移能量 QQ号A QQ号B 数量", at_sender=True)
         return
 
@@ -704,7 +731,7 @@ async def timeClear_Admin(event: GroupMessageEvent, arg: Message = CommandArg())
     if str(event.user_id) not in bot_owner_id:
         return
     
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(arg, 1)
     #清除冷却目标的qq号
     user_id = arg[0]
 
@@ -737,7 +764,7 @@ async def admin_fish_timeClear_handle(event: GroupMessageEvent, arg: Message = C
     if str(event.user_id) not in bot_owner_id:
         return
     
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(arg, 1)
     #清除冷却目标的qq号
     user_id = arg[0]
 
@@ -765,7 +792,7 @@ async def admin_work_timeClear_handle(event: GroupMessageEvent, arg: Message = C
     if str(event.user_id) not in bot_owner_id:
         return
     
-    arg = str(arg).split(" ")
+    arg = extract_mixed_qq(arg, 1)
     #清除冷却目标的qq号
     user_id = arg[0]
 
@@ -890,8 +917,8 @@ async def handle_fafang_item(event: GroupMessageEvent, arg: Message = CommandArg
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 3:
+    args = extract_mixed_qq(arg, 3)
+    if not args:
         await fafang_item.finish("格式错误！请输入：.发放道具 QQ号 道具名称 数量", at_sender=True)
         return
     user_id, item_name, item_quantity = args[0], args[1], args[2]
@@ -942,7 +969,7 @@ async def handle_deduct_item(event: GroupMessageEvent, arg: Message = CommandArg
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析参数
-    args = str(arg).split(" ")
+    args = extract_mixed_qq(arg, 3)
     if len(args) != 3:
         await deduct_item.finish("格式错误！请输入：.扣除道具 QQ号 道具名称 数量", at_sender=True)
         return
@@ -995,7 +1022,7 @@ async def handle_fafang_item_global(event: GroupMessageEvent, arg: Message = Com
         return
     
     # 参数解析
-    args = str(arg).split(" ")
+    args = str(arg).split()
     if len(args) != 2:
         await fafang_item_global.finish("格式错误！请输入：.全服发放道具 道具名称 数量", at_sender=True)
         return
@@ -1046,7 +1073,7 @@ async def handle_deduct_item_global(event: GroupMessageEvent, arg: Message = Com
         return
     
     # 参数解析
-    args = str(arg).split(" ")
+    args = str(arg).split()
     if len(args) != 2:
         await deduct_item_global.finish("格式错误！请输入：.全服扣除道具 道具名称 数量", at_sender=True)
         return
@@ -1099,7 +1126,7 @@ async def handle_change_all_items(event: GroupMessageEvent, arg: Message = Comma
         return
     
     # 解析参数
-    args = str(arg).split(" ")
+    args = str(arg).split()
     if len(args) != 2:
         await change_all_items.finish("格式错误！请输入：.全服更改道具 旧道具名称 新道具名称", at_sender=True)
         return
@@ -1140,7 +1167,7 @@ async def handle_change_user_item(bot: Bot, event: GroupMessageEvent, arg: Messa
         return
     
     # 解析参数
-    args = str(arg).split(" ")
+    args = extract_mixed_qq(arg, 3)
     if len(args) != 3:
         await change_user_item.finish("格式错误！请输入：.更改道具 qq号 旧道具名称 新道具名称", at_sender=True)
         return
@@ -1191,27 +1218,27 @@ async def query_items_handle(bot: Bot, event: GroupMessageEvent, arg: Message = 
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析命令参数
-    args = str(arg).split(" ")
-    if len(args) != 1:
+    args = extract_mixed_qq(arg, 1)
+    if not args:
         await query_items.finish("格式错误！请输入：.查询道具 QQ号", at_sender=True)
         return
     user_id = args[0]
+    # 打开玩家数据文件
+    data = {}
+    if not (user_path / file_name).exists():
+        await query_cangpins.finish("玩家数据文件不存在！", at_sender=True)
+        return
+    data = open_data(user_path/file_name)
+    # 检查玩家是否存在
+    if user_id not in data:
+        await query_cangpins.finish(f"[{user_id}] 未注册zhuamadeline账号！。", at_sender=True)
+        return
     # 调用API获取昵称
     try:
         user_info = await bot.get_stranger_info(user_id=int(user_id))
         nickname = user_info.get("nickname", "未知昵称")
     except Exception:
         await query_items.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
-    # 打开玩家数据文件
-    data = {}
-    if not (user_path / file_name).exists():
-        await query_items.finish("玩家数据文件不存在！", at_sender=True)
-        return
-    data = open_data(user_path/file_name)
-    # 检查玩家是否存在
-    if user_id not in data:
-        await query_items.finish(f"[{user_id}] 未注册zhuamadeline账号！。", at_sender=True)
-        return
     # 获取玩家的道具信息
     user_items = data[user_id].get("item", {})
     if not user_items:
@@ -1250,8 +1277,8 @@ async def handle_fafang_cangpin(event: GroupMessageEvent, arg: Message = Command
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 2:
+    args = extract_mixed_qq(arg, 2)
+    if not args:
         await fafang_cangpin.finish("格式错误！请输入：.发放藏品 QQ号 藏品名称", at_sender=True)
         return
     user_id, item_name, item_quantity = args[0], args[1], 1
@@ -1300,8 +1327,8 @@ async def handle_deduct_cangpin(event: GroupMessageEvent, arg: Message = Command
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 2:
+    args = extract_mixed_qq(arg, 2)
+    if not args:
         await deduct_cangpin.finish("格式错误！请输入：.扣除藏品 QQ号 藏品名称", at_sender=True)
         return
     user_id, item_name, item_quantity = args[0], args[1], 1
@@ -1346,17 +1373,11 @@ async def query_cangpins_handle(bot: Bot, event: GroupMessageEvent, arg: Message
     if str(event.user_id) not in bot_owner_id:
         return
     # 解析命令参数
-    args = str(arg).split(" ")
-    if len(args) != 1:
+    args = extract_mixed_qq(arg, 1)
+    if not args:
         await query_cangpins.finish("格式错误！请输入：.查询藏品 QQ号", at_sender=True)
         return
     user_id = args[0]
-    # 调用API获取昵称
-    try:
-        user_info = await bot.get_stranger_info(user_id=int(user_id))
-        nickname = user_info.get("nickname", "未知昵称")
-    except Exception:
-        await query_cangpins.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
     # 打开玩家数据文件
     data = {}
     if not (user_path / file_name).exists():
@@ -1367,6 +1388,12 @@ async def query_cangpins_handle(bot: Bot, event: GroupMessageEvent, arg: Message
     if user_id not in data:
         await query_cangpins.finish(f"[{user_id}] 未注册zhuamadeline账号！。", at_sender=True)
         return
+    # 调用API获取昵称
+    try:
+        user_info = await bot.get_stranger_info(user_id=int(user_id))
+        nickname = user_info.get("nickname", "未知昵称")
+    except Exception:
+        await query_cangpins.finish(f"无法获取玩家 [{user_id}] 的昵称。", at_sender=True)
     # 获取玩家的藏品信息
     user_items = data[user_id].get("collections", {})
     if not user_items:
@@ -1406,8 +1433,8 @@ async def handle_change_all_collections(event: GroupMessageEvent, arg: Message =
         return
     
     # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 2:
+    args = extract_mixed_qq(arg, 2)
+    if not args:
         await change_all_collections.finish("格式错误！请输入：.全服更改藏品 旧藏品名称 新藏品名称", at_sender=True)
         return
     
@@ -1447,12 +1474,20 @@ async def handle_change_user_collections(bot: Bot, event: GroupMessageEvent, arg
         return
     
     # 解析参数
-    args = str(arg).split(" ")
-    if len(args) != 3:
+    args = extract_mixed_qq(arg, 3)
+    if not args:
         await change_user_collections.finish("格式错误！请输入：.更改藏品 qq号 旧藏品名称 新藏品名称", at_sender=True)
         return
     
     user_id, old_collections, new_collections = args
+
+    # 读取玩家数据文件
+    data = open_data(user_path / file_name)
+    
+    # 检查该 QQ 号用户是否存在
+    if user_id not in data:
+        await change_user_collections.finish(f"用户 [{nickname}] 不存在！", at_sender=True)
+        return
 
     try:
         user_info = await bot.get_stranger_info(user_id=int(user_id))
@@ -1468,14 +1503,6 @@ async def handle_change_user_collections(bot: Bot, event: GroupMessageEvent, arg
     # 检查新藏品是否存在
     if new_collections not in collections:
         await change_user_collections.finish(f"藏品 [{new_collections}] 不存在，请检查后重新输入！", at_sender=True)
-        return
-    
-    # 读取玩家数据文件
-    data = open_data(user_path / file_name)
-    
-    # 检查该 QQ 号用户是否存在
-    if user_id not in data:
-        await change_user_collections.finish(f"用户 [{nickname}] 不存在！", at_sender=True)
         return
 
     user_data = data[user_id]
@@ -1500,7 +1527,9 @@ async def handle_madelinejd_query(bot: Bot, event: GroupMessageEvent, arg: Messa
     args = str(arg).split()
     if len(args) < 1:
         await madelinejd_query.finish("命令格式错误！正确格式：.查询jd QQ号 猎场号（可选）", at_sender=True)
-    target_qq = args[0]  # 玩家QQ号
+    target_qq_arg1 = extract_mixed_qq(arg, 1)
+    target_qq = target_qq_arg1[0]  # 玩家QQ号
+    
     target_level = None
     if len(args) == 2:
         try:
@@ -1560,10 +1589,17 @@ async def handle_query_madeline(bot: Bot, event: GroupMessageEvent, arg: Message
         await query_madeline.finish("命令格式错误！正确格式：.查询madeline QQ号/madeline名字", at_sender=True)
         return
 
-    qq_id, madeline_name = args[0].strip(), args[1].strip().lower()
-    if not qq_id or not madeline_name:
+    qq_id_arg, madeline_name = args[0].strip(), args[1].strip().lower()
+    if not qq_id_arg or not madeline_name:
         await query_madeline.finish("QQ号或 madeline 名称不能为空！", at_sender=True)
         return
+
+    try:
+        target_qq_arg = extract_mixed_qq(int(qq_id_arg), 1)
+    except ValueError or ArithmeticError:
+        await query_madeline.finish(f"[{qq_id}] 格式错误！", at_sender=True)
+        
+    qq_id = target_qq_arg
 
     # 打开主文件，检查玩家是否存在
     data = open_data(user_path/file_name)
@@ -1580,8 +1616,12 @@ async def handle_query_madeline(bot: Bot, event: GroupMessageEvent, arg: Message
 
     # 查找 madeline 的信息
     nums = find_madeline(madeline_name)
-    if not nums:
-        await query_madeline.finish(f"未找到名为 [{madeline_name}] 的 madeline！", at_sender=True)
+    if nums == 0:
+        if re.match(r'^\d+[_-]\d+[_-]\d+$', madeline_name):
+            await query_madeline.finish(f"未找到编号为<{madeline_name}>的Madeline", True, None)
+        else:
+            await query_madeline.finish(f"未找到名为[{madeline_name}]的Madeline", True, None)
+        return
 
     # 根据猎场号读取对应文件
     arena_number = nums[2]
@@ -1610,7 +1650,14 @@ async def query_madeline_inventory_handle(bot: Bot, event: GroupMessageEvent, ar
     
     # 提取玩家的QQ号和猎场号
     args = str(arg).strip().split()
-    target_qq = args[0]  # 玩家QQ号
+    target = args[0] 
+
+    try:
+        target_qq_arg = extract_mixed_qq(int(target), 1)
+    except ValueError or ArithmeticError:
+        await query_madeline.finish(f"[{target}] 格式错误！", at_sender=True)
+    
+    target_qq = target_qq_arg[0]  # 玩家QQ号
     # 获取玩家昵称
     try:
         user_info = await bot.get_stranger_info(user_id=int(target_qq))
@@ -1821,7 +1868,7 @@ async def clear_game_handle(bot: Bot, event: GroupMessageEvent, arg: Message = C
             if key.isdigit() and isinstance(value, dict) and value.get("game") == "2":
                 value["status"] = "nothing"
                 value["game"] = "1"
-                user_data[str(key)]["berry"] += 125
+                user_data[str(key)]["berry"] += 250
         demon_data[group_id] = demon_default()
         demon_data[group_id]['demon_coldtime'] = 0
         text = "本局恶魔轮盘du已强制结束，对应的门票费已返还"
@@ -1865,9 +1912,7 @@ async def coolclear_handle(bot:Bot, event: GroupMessageEvent, arg: Message = Com
     if str(event.user_id) not in bot_owner_id:
         return
     #得到at的人的qq号
-    arg = str(arg).split(" ")
-    if len(arg) != 1:
-        await clear_game.finish("命令格式错误！正确格式：.无视冷却 qq号", at_sender=True)
+    arg = extract_mixed_qq(arg, 1)
     user_id = arg[0]
     data = open_data(full_path)
     #没有这个玩家

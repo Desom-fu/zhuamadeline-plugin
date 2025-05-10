@@ -957,10 +957,10 @@ async def cha_berry(bot: Bot, event: GroupMessageEvent, arg: Message = CommandAr
 user_transfer_berry = on_command("transfer", permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @user_transfer_berry.handle()
-async def transfer_handle(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()):
+async def transfer_handle(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg()):
     # 解析命令参数
-    arg = str(arg).split(" ")
-    if len(arg) != 2:
+    arg = extract_mixed_qq(args, 2)
+    if not arg:
         msg = "命令格式错误！正确格式：\n.transfer QQ号 数量"
         await send_image_or_text(user_a, user_transfer_berry, msg, True, None, 25)
         return
