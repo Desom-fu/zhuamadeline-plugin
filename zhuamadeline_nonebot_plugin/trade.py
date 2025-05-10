@@ -42,11 +42,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
     elif 'event' not in data[user_id]:
         data[user_id]['event'] = 'nothing'
 
-    if data[user_id]['event'] == 'nothing':
-        await send_image_or_text(user_id, confirm, "你现在似乎没有需要确定的事情", True, None)
-        return
-
-    elif data[user_id]['event'] == 'trading':
+    if data[user_id]['event'] == 'trading':
         trade_type = data[user_id]['trade'].get('类型', 'madeline')  # 默认为玛德琳交易
         amount = data[user_id]['trade']['数量']
         price = data[user_id]['trade']['单价']
@@ -111,6 +107,7 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                 await send_image_or_text(user_id, confirm, f"交易成功！你出售了{amount}条{fish_name}，获得了{berry}草莓。\n商人很喜欢这些新鲜的鱼，他期待着下次与你交易", True, None)
             else:
                 await send_image_or_text(user_id, confirm, f"你没有足够多的{fish_name}，你需要{amount}条，\n但你目前只拥有{keepNum}条", True, None)
+                
 
     elif data[user_id]['event'] == 'changing_bgcolor':
         bar_data = open_data(bar_path)
@@ -145,6 +142,8 @@ async def confirm_handle(bot: Bot, event: GroupMessageEvent):
                                f"{message}\n"
                                f"你还剩{data[user_id]['berry']}颗草莓", 
                                True, None)
+    else:
+        await send_image_or_text(user_id, confirm, "你现在似乎没有需要确定的事情", True, None)
 
 #取消一些事件
 deny = on_command('deny', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
@@ -163,10 +162,8 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
         
         if 'event' not in data[user_id]:
             data[user_id]['event'] = 'nothing'
-
-    if data[user_id]['event'] == 'nothing':
-        await send_image_or_text(user_id, deny, "你现在似乎没有需要确定的事情", True, None)
-    elif data[user_id]['event'] == 'trading':
+        
+    if data[user_id]['event'] == 'trading':
         data[user_id]['event'] = 'nothing'
         #写入主数据表
         save_data(full_path, data)
@@ -187,3 +184,5 @@ async def deny_handle(bot: Bot, event: GroupMessageEvent):
         save_data(full_path, data)
         
         await send_image_or_text(user_id, deny, message, True, None)
+    else:
+        await send_image_or_text(user_id, deny, "你现在似乎没有需要确定的事情", True, None)
