@@ -338,7 +338,8 @@ async def get_sorted_madelines(file_name: str, user_id: str, liechang_number: st
 
         # 获取对应的madeline名字并添加编号前缀
         madeline_info = madeline_data.get(str(level + 1)).get(num)
-        display_name = f"<{liechang_number}-{level+1}-{num}> {madeline_info.get('name')}"
+        madeline_code = f'<{liechang_number}_{level+1}_{num}>'
+        display_name = f"{madeline_code} {madeline_info.get('name')}"
         sorted_madelines[level].append((display_name, v))
 
     # 排序并拼接：从高等级到低等级排列
@@ -560,7 +561,7 @@ def print_zhua(level, num, liechang_number):
     description = current_data.get(str(level)).get(str(num)).get('description')
 
     # 编号
-    madeline_code = f"<{liechang_number}-{level}-{num}>"
+    madeline_code = f"<{liechang_number}_{level}_{num}>"
     
     # 确定该madeline的打印信息
     madeline = [level, name, img, description, num, liechang_number, madeline_code]
@@ -612,7 +613,7 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     #描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
     # 编号信息
-    madeline_code = f"<{liechang_number}-{level}-{num}>"
+    madeline_code = f"<{liechang_number}_{level}_{num}>"
     #确定该madeline的打印信息
     madeline = [level, name, img, description, num, liechang_number, madeline_code]
     return madeline
