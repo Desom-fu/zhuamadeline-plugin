@@ -507,7 +507,7 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
     # 查找 madeline
     nums = find_madeline(name)
     if not nums:
-        if re.match(r'^\d+_\d+_\d+$', name):
+        if re.match(r'^\d+[_-]\d+[_-]\d+$', name):
             await send_image_or_text(user_id, count_madeline, f"未找到编号为<{name}>的Madeline", True, None)
         else:
             await send_image_or_text(user_id, count_madeline, f"未找到名为[{name}]的Madeline", True, None)
@@ -541,7 +541,7 @@ async def zhanshi(event: Event, arg: Message = CommandArg()):
             at_sender=True
         )
     else:
-        if re.match(r'^\d+_\d+_\d+$', name):
+        if re.match(r'^\d+[_-]\d+[_-]\d+$', name):
             await send_image_or_text(user_id, show, f"你还没抓到过编号为<{name}>的Madeline", True)
         else:
             await send_image_or_text(user_id, show, f"你还没抓到过[{madeline_name}]", True)
@@ -558,7 +558,7 @@ async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message =
 
     nums = find_madeline(name)
     if not nums:
-        if re.match(r'^\d+_\d+_\d+$', name):
+        if re.match(r'^\d+[_-]\d+[_-]\d+$', name):
             await send_image_or_text(user_id, count_madeline, f"未找到编号为<{name}>的Madeline", True, None)
         else:
             await send_image_or_text(user_id, count_madeline, f"未找到名为[{name}]的Madeline", True, None)
@@ -588,7 +588,7 @@ async def cha_madeline_number(bot: Bot, event: GroupMessageEvent, arg: Message =
                 None
             )
         else:
-            if re.match(r'^\d+_\d+_\d+$', name):
+            if re.match(r'^\d+[_-]\d+[_-]\d+$', name):
                 await send_image_or_text(user_id, count_madeline, f"你还没抓到过编号为<{name}>的Madeline", True)
             else:
                 await send_image_or_text(user_id, count_madeline, f"你还没抓到过[{madeline_name}]", True)

@@ -211,7 +211,7 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
     # 查找 madeline 信息
     madeline_info = find_madeline(madeline)
     if madeline_info == 0:
-        if re.match(r'^\d+_\d+_\d+$', madeline):
+        if re.match(r'^\d+[_-]\d+[_-]\d+$', madeline):
             await send_image_or_text(user_id, count_madeline, f"未找到编号为<{madeline}>的Madeline", True, None)
         else:
             await send_image_or_text(user_id, count_madeline, f"未找到名为[{madeline}]的Madeline", True, None)

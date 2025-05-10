@@ -560,7 +560,7 @@ def print_zhua(level, num, liechang_number):
     description = current_data.get(str(level)).get(str(num)).get('description')
 
     # 编号
-    madeline_code = f"<{liechang_number}_{level}_{num}>"
+    madeline_code = f"<{liechang_number}-{level}-{num}>"
     
     # 确定该madeline的打印信息
     madeline = [level, name, img, description, num, liechang_number, madeline_code]
@@ -612,7 +612,7 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     #描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
     # 编号信息
-    madeline_code = f"<{liechang_number}_{level}_{num}>"
+    madeline_code = f"<{liechang_number}-{level}-{num}>"
     #确定该madeline的打印信息
     madeline = [level, name, img, description, num, liechang_number, madeline_code]
     return madeline
@@ -681,7 +681,7 @@ def find_madeline(value, only_name=False):
     返回格式: [等级, 编号, 猎场编号] 或 0(未找到)
     """
     # 1. 如果不是仅名字查找，先检查是否是 "猎场_等级_编号" 格式
-    if not only_name and re.match(r'^\d+_\d+_\d+$', value):
+    if not only_name and re.match(r'^\d+[_-]\d+[_-]\d+$', value):
         parts = value.split('_')
         lc, level, num = parts[0], parts[1], parts[2]
         
