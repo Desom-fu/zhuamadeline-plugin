@@ -803,13 +803,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
     
 
 # 22:00 - 22:30 检查是否需要执行结算任务
-@scheduler.scheduled_job(
-    "interval",
-    minutes=1,
-    start_date=datetime.datetime.now().replace(hour=22, minute=0, second=0),
-    end_date=datetime.datetime.now().replace(hour=22, minute=30, second=0),
-    timezone="Asia/Shanghai"
-)
+@scheduler.scheduled_job("cron", minute="*", id="check_pvp_end_job")
 async def check_pvp_end_job():
     bot = get_bot()
     if not bot:
@@ -817,6 +811,13 @@ async def check_pvp_end_job():
         return
 
     group_id = zhuama_group    # 目标群号
+
+    # 获取当前时间的小时
+    current_time = datetime.datetime.now()
+
+    # 判断当前时间是否在 22：00 - 22：30 之间
+    if not (current_time.hour == 22 and 0 <= current_time.minute <= 30):
+        return
 
     # 读取用户数据
     user_data = open_data(full_path)
