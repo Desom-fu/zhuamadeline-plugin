@@ -33,3 +33,6 @@
 
 # 签到图文件夹忽略
 /qd_background
+
+# 隔壁投稿文件夹忽略
+/liulangqingma

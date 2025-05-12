@@ -78,7 +78,8 @@ async def madeline_shop(bot: Bot, event: Event):
         save_data(shop_database, shop_data)
     
     # 获取商品列表文本
-    item_text = shop_list(shop_data["item"])
+    item_text = f'当前你拥有的草莓数量为：{data.get(user_id, {}).get("berry", 0)}\n————————————\n\n'
+    item_text += shop_list(shop_data["item"])
     
     # 改为图片形式发送
     await send_image_or_text(user_id, shop, item_text)
