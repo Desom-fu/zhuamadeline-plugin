@@ -551,7 +551,16 @@ def give_berry(level):
     if(level==5): berry_give = 25   
     return berry_give
 
-#给定madeline的文件坐标，输出该madeline相关的信息 [等级，名字，图像路径，描述，编号，猎场编号]
+def find_image_with_any_extension(directory, base_filename):
+    """在目录中查找具有任何图片后缀的文件"""
+    image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']  # 可以添加更多图片格式
+    for ext in image_extensions:
+        img_path = directory / (base_filename + ext)
+        if img_path.exists():
+            return img_path
+    # 如果没有找到任何图片文件，返回默认路径（第一个扩展名）
+    return directory / (base_filename + image_extensions[0])
+
 def print_zhua(level, num, liechang_number):
     madeline_path = current_liechang(liechang_number)
     # 锁定madeline档案
@@ -577,12 +586,9 @@ def print_zhua(level, num, liechang_number):
     original_name = current_data.get(str(level)).get(str(num)).get('name')
     name = f"{original_name}"
     
-    # 图片信息
-    houzhui = '.png'
-    if current_data.get(str(level)).get(str(num)).get('gif', False): houzhui = '.gif'
-    if current_data.get(str(level)).get(str(num)).get('jpg', False): houzhui = '.jpg'
-    madeline_file_name = madeline_filename.format(index=str(num)) + houzhui
-    img = zhua_path / madeline_file_name
+    # 图片信息 - 自动查找任何图片后缀
+    base_filename = madeline_filename.format(index=str(num))
+    img = find_image_with_any_extension(zhua_path, base_filename)
     
     # 描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
@@ -594,7 +600,7 @@ def print_zhua(level, num, liechang_number):
     madeline = [level, name, img, description, num, liechang_number, madeline_code]
     return madeline
 
-#madeline的抓取函数
+# madeline的抓取函数
 def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     #随机选择一个等级
     rnd = random.randint(1,1000)
@@ -631,12 +637,9 @@ def zhua_random(a=10, b=50, c=200, d=500, liechang_number='1'):
     logger.info(f"{level}级madeline，该级共{length}个，选择了{num}号")
     #名字信息
     name = current_data.get(str(level)).get(str(num)).get('name')
-    #图片信息
-    houzhui = '.png'
-    if(current_data.get(str(level)).get(str(num)).get('gif',False)): houzhui = '.gif' #自动加后缀名
-    if(current_data.get(str(level)).get(str(num)).get('jpg',False)): houzhui = '.jpg' #自动加后缀名
-    madeline_file_name = madeline_filename.format(index=str(num)) + houzhui
-    img = zhua_path / madeline_file_name
+    #图片信息 - 自动查找任何图片后缀
+    base_filename = madeline_filename.format(index=str(num))
+    img = find_image_with_any_extension(zhua_path, base_filename)
     #描述信息
     description = current_data.get(str(level)).get(str(num)).get('description')
     # 编号信息
