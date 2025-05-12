@@ -1,7 +1,7 @@
 from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from nonebot.adapters.onebot.v11 import GROUP
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
-from nonebot import on_command, get_bots
+from nonebot import on_command, get_bot
 from nonebot.params import CommandArg
 from nonebot.log import logger
 
@@ -42,11 +42,10 @@ async def cancel_interest_send():
 
 # 2:00执行一次报酬发放
 async def add_interest():
-    bots = get_bots()
-    if not bots:
+    bot = get_bot()
+    if not bot:
         logger.error("没有可用的Bot实例，无法发放报酬！")
         return
-    bot = list(bots.values())[0]
     
     bar_data = open_data(bar_path)
     bar_data.setdefault("pots", 0)

@@ -1978,11 +1978,10 @@ async def prop_demon_help_handle(event: GroupMessageEvent):
 async def check_timeout(group_id):
     demon_data = open_data(demon_path)
     bar_data = open_data(bar_path)
-    bots = get_bots()
-    if not bots:
+    bot = get_bot()
+    if not bot:
         logger.error("没有可用的Bot实例，无法检测bet2！")
         return
-    bot = list(bots.values())[0]  # 获取第一个 Bot 实例
     # 确保 'demon_data' 和 'group_id' 存在
     # 初始化 group_id 中的游戏数据
     if group_id not in demon_data:
@@ -2105,11 +2104,10 @@ async def reset_double_ball_send():
     end_date=datetime.datetime.now().replace(hour=23, minute=0, second=0),    # 今天23:00结束
 )
 async def double_ball_lottery():
-    bots = get_bots()
-    if not bots:
+    bot = get_bot()
+    if not bot:
         logger.error("没有可用的Bot实例，无法开奖！")
         return
-    bot = list(bots.values())[0]
 
     bar_data = open_data(bar_path)
     pots = bar_data.setdefault("pots", 0)

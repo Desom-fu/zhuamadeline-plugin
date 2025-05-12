@@ -905,7 +905,7 @@ async def restock_shop(send_message=False):
         try:
             bot = get_bot()
         except:
-            logger.error("没有可用的Bot实例，自动补货！")
+            logger.error("没有可用的Bot实例，无法自动补货！")
         await bot.send_group_msg(group_id=zhuama_group, message="18：00了，商店补货了！需要的可以来买啊~")
     
     

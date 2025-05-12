@@ -807,7 +807,7 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
 async def check_pvp_end_job():
     bot = get_bot()
     if not bot:
-        logger.error("没有可用的 Bot 实例，无法执行任务！")
+        logger.error("没有可用的Bot实例，无法结算pvp！")
         return
 
     group_id = zhuama_group    # 目标群号
