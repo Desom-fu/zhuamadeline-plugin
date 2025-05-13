@@ -475,6 +475,26 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             logger.info(f"user_item_name是{use_item_name}，pan_item_name是{panding_item}")
 
             fail_text = "失败！"   #失败文本
+            
+            # 批量使用检测
+            if panding_item in ["胡萝卜", "弹弓", "一次性小手枪", "充能陷阱"] and "/" in use_item_name:
+                try:
+                    count = int(use_item_name.split("/")[1])
+                    if 1 <= count <= 30:
+                        # 调用批量使用函数
+                        await handle_batch_capture(
+                            bot, event, 
+                            item_name=use_item_name.split("/")[0],
+                            count=count,
+                            data=data,
+                            user_id=user_id,
+                        )
+                        return
+                    else:
+                        await send_image_or_text(user_id, daoju, "抓捕类道具只能批量使用1-30个哦~", at_sender=True)
+                        return
+                except ValueError:
+                    await send_image_or_text(user_id, daoju, "输入参数有误！\n批量使用需要为数字\n且数量为1-30！", at_sender=True)
         #--------------------这些道具不限制所在猎场的使用--------------------
             # 身份徽章作为例外不受影响  
             if use_item_name.startswith("身份徽章"):
@@ -2201,6 +2221,388 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             await send_image_or_text(user_id, daoju, "你还没有任何道具哦！", at_sender=True)
     else:
         await send_image_or_text(user_id, daoju, "你还没尝试抓过madeline……")
+
+# 批量使用道具的石山
+async def handle_batch_capture(
+    bot: Bot, 
+    event: GroupMessageEvent,
+    item_name: str,
+    count: int,
+    data: dict,
+    user_id: str
+):
+    """处理批量使用抓捕道具"""
+    # 初始化变量
+    captured_madelines = []
+    new_captures = []
+    used_count = 0
+    stop_reason = None
+    liechang_number = data[str(user_id)].get('lc')
+    nickname = event.sender.nickname
+    total_berry = 0  # 初始化总草莓数
+
+    # 新增效果触发统计
+    effect_stats = {
+        '魔盒': {'count': 0, 'triggers': []},
+        '扑克': {'count': 0, 'triggers': []},
+        '乐谱': {'count': 0, 'triggers': []}
+    }
+    
+    # 检查道具数量
+    if data[str(user_id)].get("item", {}).get(item_name, 0) < count:
+        await send_image_or_text(user_id, daoju, 
+            f"你的{item_name}数量不足！\n你只有{data[str(user_id)]['item'].get(item_name, 0)}个{item_name}！", 
+            at_sender=True)
+        return
+    
+    # 检查是否在休息状态
+    current_time = datetime.datetime.now()
+    if 'last_sleep_time' in data[str(user_id)]:
+        last_sleep_time = datetime.datetime.strptime(
+            data[str(user_id)]['last_sleep_time'], 
+            "%Y-%m-%d %H:%M:%S"
+        )
+        if (current_time - last_sleep_time) < datetime.timedelta(hours=4):
+            remaining = datetime.timedelta(hours=4) - (current_time - last_sleep_time)
+            await send_image_or_text(user_id, daoju,
+                f"好好休息吧，{remaining.seconds//3600}小时"
+                f"{(remaining.seconds%3600)//60}分钟内\n不要试图使用抓捕类道具了...",
+                at_sender=True)
+            return
+    
+    # 检查猎场限制
+    if liechang_number == "0":
+        await send_image_or_text(user_id, daoju,
+            "Madeline竞技场不能使用抓捕道具哦！",
+            at_sender=True)
+        return
+    
+    # 检查受伤状态
+    if data[str(user_id)].get("buff") == "hurt":
+        next_time = datetime.datetime.strptime(
+            data[str(user_id)]['next_time'],
+            "%Y-%m-%d %H:%M:%S"
+        )
+        if current_time < next_time:
+            delta = next_time - current_time
+            await send_image_or_text(user_id, daoju,
+                f"你受伤了，需要等{time_text(delta)}才能继续！",
+                at_sender=True)
+            return
+    
+    # 开始批量使用
+    for i in range(1, count + 1): # 从1开始计数
+        current_berry = 0  # 本次抓捕获得的草莓
+        # 检查是否应该停止
+        if stop_reason:
+            # 回滚多扣除的道具数量
+            if used_count > 0:
+                data[str(user_id)]["item"][item_name] += (count - used_count)
+            break
+        
+        # 消耗道具
+        data[str(user_id)]["item"][item_name] -= 1
+        used_count += 1
+        
+        # 处理迅捷药水效果
+        current_buff2 = data[str(user_id)].get('buff2', 'normal')
+        if current_buff2 == "speed":
+            data = buff2_change_status(data, user_id, current_buff2, 0)
+        
+        # 根据道具类型执行抓捕
+        if item_name == "胡萝卜":
+            # 胡萝卜特殊逻辑：70%概率抓兔类Madeline
+            rnd = random.randint(1,10)
+            if rnd <= 7:
+                # 从兔类里抓
+                weights = {
+                    3: 30,  # 3级的概率为30%
+                    4: 45,  # 4级的概率为45%
+                    5: 25   # 5级的概率为25%
+                }
+                weighted_choices = []
+                for level, weight in weights.items():
+                    weighted_choices.extend([level] * weight)
+                chosen_level = random.choice(weighted_choices)
+                
+                # 获取对应猎场的兔类Madeline列表
+                liechang_mapping = {
+                    '1': rabbit_madeline1,
+                    '2': rabbit_madeline2,
+                    '3': rabbit_madeline3,
+                    '4': rabbit_madeline4
+                }
+                rabbit_madeline_list = liechang_mapping.get(liechang_number, [])
+                rabbit = [rabbit for rabbit in rabbit_madeline_list if rabbit[0] == chosen_level]
+                
+                if rabbit:  # 确保列表不为空
+                    rabbit_rnd = random.randint(0, len(rabbit)-1)
+                    information = print_zhua(rabbit[rabbit_rnd][0], rabbit[rabbit_rnd][1], liechang_number)
+                else:
+                    information = zhua_random(30, 150, 600, 850, liechang_number=liechang_number)
+            else:
+                # 30%概率正常抓取
+                information = zhua_random(30, 150, 600, 850, liechang_number=liechang_number)
+                
+        elif item_name == "弹弓":
+            # 弹弓：正常抓取
+            information = zhua_random(liechang_number=liechang_number)
+            
+        elif item_name == "一次性小手枪":
+            # 一次性小手枪：正常抓取
+            information = zhua_random(20, 100, 500, 800, liechang_number=liechang_number)
+            
+        elif item_name == "充能陷阱":
+            # 充能陷阱特殊逻辑：50%概率受伤，50%概率抓345级
+            current_time = datetime.datetime.now()
+            trap_next_time_r = datetime.datetime.strptime(
+                data.get(user_id).get('trap_time', '2000-01-01 00:00:00'), 
+                "%Y-%m-%d %H:%M:%S"
+            )
+            
+            # 检查充能陷阱冷却
+            if current_time < trap_next_time_r:
+                stop_reason = "充能陷阱冷却中"
+                continue
+                
+            boom = random.randint(1,100)
+            elect_status = data[user_id].get("elect_status", False)
+            
+            # 充能箱100%爆炸
+            if elect_status:
+                boom = 100
+                
+            if boom >= 51:
+                # 受伤逻辑
+                hitNumber = random.randint(1,100)
+                noHitRate = 0
+                # 防护类藏品检查
+                wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
+                crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
+                bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
+                fox_fur = data[str(user_id)].get("collections",{}).get('淡紫色狐狸毛', 0)
+                
+                # 计算免伤率
+                noHitRate += 2 if wing >= 1 else 0
+                noHitRate += 3 if crystal >= 1 else 0
+                noHitRate += 5 if bombbag >= 1 else 0
+                noHitRate += 5 if fox_fur >= 1 else 0
+                
+                if hitNumber > noHitRate or elect_status:
+                    # 受伤处理
+                    cd_time = 60 if elect_status else 120
+                    
+                    # 设置冷却时间
+                    next_time = current_time + datetime.timedelta(minutes=cd_time)
+                    trap_next_time = current_time + datetime.timedelta(minutes=10)
+                    
+                    # 回想之核效果
+                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                    if dream >= 1:
+                        next_time = current_time + datetime.timedelta(minutes=cd_time-1)
+                        
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]["buff"] = "hurt"
+                    
+                    # 设置停止原因
+                    stop_reason = f"充能陷阱爆炸！需要休息{cd_time}分钟"
+                    if elect_status:
+                        stop_reason = f"由于充能箱撞开，充能陷阱必定爆炸！需要休息{cd_time}分钟"
+                    continue
+                else:
+                    # 免伤处理
+                    next_time = current_time
+                    trap_next_time = current_time + datetime.timedelta(minutes=10)
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    stop_reason = "充能陷阱爆炸但被防护"
+                    continue
+            else:
+                # 50%概率成功抓取345级
+                information = zhua_random(50, 350, 1000, 1001, liechang_number=liechang_number)
+        
+        # 处理抓捕结果
+        if item_name != "充能陷阱" or (item_name == "充能陷阱" and boom < 51):
+            information = tool_zhuamadeline(information, data, user_id)
+            captured_madelines.append(information)
+            
+            # 检查是否出新
+            if information[7]:  # new_print字段
+                new_captures.append(information)
+
+            # ============= 草莓计算和效果统计 =============
+            level = information[0]
+            
+            # 奇想魔盒效果（10%概率触发）
+            if data[str(user_id)].get('collections', {}).get("奇想魔盒", 0) >= 1:
+                if random.randint(1, 100) <= 10:
+                    bonus = 5 * level
+                    current_berry += bonus
+                    effect_stats['魔盒']['count'] += 1
+                    effect_stats['魔盒']['triggers'].append(i)
+            
+            # 奇想扑克效果（10%概率触发）
+            if data[str(user_id)].get('collections', {}).get("奇想扑克", 0) >= 1:
+                if random.randint(1, 100) <= 10:
+                    bonus = 5 * level
+                    current_berry += bonus
+                    effect_stats['扑克']['count'] += 1
+                    effect_stats['扑克']['triggers'].append(i)
+            
+            # 星光乐谱效果（20%概率翻倍当前草莓）
+            if (data[str(user_id)].get('collections', {}).get('星光乐谱', 0) >= 1 and 
+                random.randint(1, 10) <= 2 and 
+                current_berry > 0):
+                current_berry *= 2
+                effect_stats['乐谱']['count'] += 1
+                effect_stats['乐谱']['triggers'].append(i)
+            
+            # 累加到总草莓
+            if current_berry > 0:
+                total_berry += current_berry
+                data[str(user_id)]['berry'] += current_berry
+            # ============= 草莓计算结束 =============
+        
+        # 检查猎场特殊事件（仅在未因充能陷阱停止时）
+        if not stop_reason and liechang_number == "2":
+            # 2猎迷路检查
+            if data[str(user_id)].get("item", {}).get("指南针", 0) == 0:
+                if random.randint(1, 10) >= 5:
+                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)   
+                    cd_time = 480 - dream
+                    stop_reason = f"迷路了！需要等待{cd_time}分钟"
+                    current_time = datetime.datetime.now()
+                    next_time = current_time + datetime.timedelta(minutes=dream)
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['buff'] = 'lost'
+                    # 更新被困名单
+                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                    stuck_data = open_data(stuck_path)
+                    stuck_data[user_id] = '2'
+                    save_data(stuck_path, stuck_data)
+        
+        elif not stop_reason and liechang_number == "3":
+            # 3猎受伤检查
+            if current_buff2 != "speed":
+                helmet = data[str(user_id)].get("collections", {}).get("矿工头盔", 0)
+                rnd_hurt = 10 - (5 if helmet >= 1 else 0)
+                if random.randint(1, 100) <= rnd_hurt:
+                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)                    
+                    cd_time = 90 - dream
+                    stop_reason = f"受伤了！需要休息{cd_time}分钟"
+                    current_time = datetime.datetime.now()
+                    next_time = current_time + datetime.timedelta(minutes=cd_time)
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['buff'] = 'hurt'
+                    # 更新被困名单
+                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                    stuck_data = open_data(stuck_path)
+                    stuck_data[user_id] = '3'
+                    save_data(stuck_path, stuck_data)
+        
+        elif not stop_reason and liechang_number == "5":
+            # 5猎受伤检查
+            if current_buff2 != "speed" and random.randint(1, 100) <= 20:
+                dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)
+                cd_time = 120 - dream
+                stop_reason = f"受伤了！需要休息{cd_time}分钟"
+                current_time = datetime.datetime.now()
+                next_time = current_time + datetime.timedelta(minutes=cd_time)
+                data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                data[str(user_id)]['buff'] = 'hurt'
+                # 更新被困名单
+                stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                stuck_data = open_data(stuck_path)
+                stuck_data[user_id] = '5'
+                save_data(stuck_path, stuck_data)
+    
+    # 保存数据
+    save_data(user_path / file_name, data)
+    
+    # 构建结果消息
+    result_msg = f"这是 [{nickname}] 的批量抓捕结果\n"
+    if used_count != count:
+        result_msg += f"\n你想批量使用{count}个{item_name}\n但是只成功使用了{used_count}个！"
+    else:
+        result_msg += f"\n你批量使用了{used_count}个{item_name}！"
+    
+    if stop_reason:
+        result_msg += f"\n\n※ {stop_reason}\n终止批量使用！"
+    
+    # 如果没有捕获到任何Madeline（如全部因爆炸停止）
+    if not captured_madelines:
+        await send_image_or_text(user_id, daoju, 
+            f"批量使用{item_name}没有捕获到任何Madeline！\n{stop_reason if stop_reason else ''}",
+            at_sender=True)
+        return
+    
+    # 显示捕获的Madeline (3个一行)
+    # 显示捕获的Madeline (3个一行)
+    result_msg += "\n\n捕获的Madeline：\n\n"
+    for i in range(0, len(captured_madelines), 3):
+        batch = captured_madelines[i:i+3]
+        line = "、".join(
+            f"（新）{m[0]}级[{m[1]}]" if m[7] else f"{m[0]}级[{m[1]}]" 
+            for m in batch
+        )
+        result_msg += f"{line}\n"
+
+    result_msg += f"\n"
+    # 添加效果触发统计
+    for effect_name, stat in effect_stats.items():
+        if stat['count'] > 0:
+            triggers = "、".join(map(str, stat['triggers']))
+            result_msg += f"{effect_name}触发{stat['count']}次（第{triggers}次）\n"
+
+    # 选择要展示的Madeline详情
+    if new_captures:
+        display_info = random.choice(new_captures)
+        result_msg += "\n※ 从新捕获的Madeline中随机展示一个："
+    else:
+        display_info = random.choice(captured_madelines)
+        result_msg += "\n※ 随机展示一个捕获的Madeline："
+    
+    # 添加展示的Madeline详情
+    level = display_info[0]
+    name = display_info[1]
+    img = display_info[2]
+    description = display_info[3]
+    madeline_code = display_info[6]
+    new_print = display_info[7] if display_info[7] else ""
+    
+    berry_text = f'\n\n本次你获得了{total_berry}颗草莓' if total_berry != 0 else ''
+    
+    # 构建展示文本
+    top_text = (
+        f"{result_msg}\n\n"+
+        (new_print + '\n' if new_print else '') +
+        f'等级: {level}\n' +
+        f'{madeline_code}\n{name}'
+    )
+    
+    bottom_text = (
+        f'{description}' +
+        f'{berry_text}'
+    )
+    
+    # 生成图片消息
+    combined_img_path = generate_image_with_text(
+        text1=top_text,
+        image_path=img,
+        text2=bottom_text,
+        max_chars=25,
+        center=True,
+        user_id=str(user_id)
+    )
+    
+    if combined_img_path:
+        message = MessageSegment.image(combined_img_path)
+    else:
+        message = f"{top_text}\n"+ MessageSegment.image(img) +f"\n{bottom_text}"
+    
+    # 发送结果
+    await daoju.finish(message)
 
 # 查看道具信息
 ckdj = on_command('item', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
