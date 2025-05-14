@@ -101,7 +101,7 @@ async def update_all_gardens(garden_data: dict):
     return garden_data
 
 # 主命令
-berry_garden = on_command("garden", aliases={"berrygarden", 'berry_garden'}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
+berry_garden = on_command("garden", aliases={"berrygarden", 'berry_garden', "果园"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 
 @berry_garden.handle()
 async def berry_garden_handle(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg()):

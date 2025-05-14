@@ -548,6 +548,13 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     user_data.setdefault('work_skiptime', 0)
     user_data.setdefault('last_sleep_time', "2000-01-01 00:00:00")  # 默认值（很久以前）
 
+    #debuff清除逻辑
+    debuff_clear(data,user_id)
+            
+    if user_data.get("buff",'normal')=="hurt": 
+        await send_image_or_text(user_id, sleep, f"你受伤了，无法睡觉！", True, None)
+        return
+
     # 检查冷却时间（23小时）
     last_sleep_time_str = user_data['last_sleep_time']
     last_sleep_time = datetime.datetime.strptime(last_sleep_time_str, "%Y-%m-%d %H:%M:%S")

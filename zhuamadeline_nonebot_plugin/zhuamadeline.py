@@ -467,7 +467,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
         bottom_text += extra_text
 
-        combined_img_path = generate_image_with_text(
+        combined_img_path = await generate_image_with_text(
             text1=top_text,
             image_path=img,
             text2=bottom_text,

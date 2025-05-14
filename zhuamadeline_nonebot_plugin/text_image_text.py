@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageSequence, ImageFilter
 from pathlib import Path
 import re
 import math
+import asyncio
 import uuid
 from .config import save_dir, font_path, full_path
 from .function import open_data
@@ -358,7 +359,7 @@ def clean_cache():
         except:
             pass
 
-def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True, user_id=None):
+async def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True, user_id=None):
     """
     主生成函数（支持静态图/GIF）
     
@@ -375,60 +376,74 @@ def generate_image_with_text(text1, image_path, text2, max_chars=20, center=True
     # 参数检查
     if not text1 and not image_path and not text2:
         return None
-    
+
     image_path = str(image_path) if image_path else None
-    is_gif = image_path and image_path.lower().endswith(".gif")
-    
-    clean_cache()
+    is_gif = image_path and Path(image_path).exists() and image_path.lower().endswith(".gif")
+
+    # 清理缓存（同步操作，但很快）
+    clean_cache()  
     file_id = uuid.uuid4().hex[:8]
-    
+
     try:
-        if is_gif and Path(image_path).exists():
-            gif = Image.open(image_path)
-            gif_frames = [frame.copy() for frame in ImageSequence.Iterator(gif)]
-            
-            # 计算最大尺寸
-            max_size = (0, 0)
-            for frame in gif_frames:
-                temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
-                max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
-            
-            # 生成统一尺寸的帧
-            processed_frames = []
-            durations = []
-            for frame in gif_frames:
-                result = generate_frame(text1, text2, frame.convert("RGBA"), 
-                                      center, max_chars, canvas_size=max_size, user_id=user_id)
-                processed_frames.append(result.convert("RGB"))
-                durations.append(frame.info.get("duration", 100))
-            
-            output_path = save_dir / f"send_image{file_id}.gif"
-            processed_frames[0].save(
-                output_path,
-                save_all=True,
-                append_images=processed_frames[1:],
-                duration=durations,
-                loop=0,
-                optimize=False
+        if is_gif:
+            # 将GIF处理放到线程池
+            return await asyncio.to_thread(
+                _process_gif_sync,  # 同步处理函数
+                text1, image_path, text2, max_chars, center, user_id, file_id
             )
-            return output_path
-        
-        # 静态图处理保持不变
-        image = Image.open(image_path).convert("RGBA") if image_path else None
-        result = generate_frame(text1, text2, image, center, max_chars, None, user_id)
-        output_path = save_dir / f"send_image{file_id}.png"
-        result.save(output_path)
-        return output_path
-    
+        else:
+            # 静态图片异步化
+            return await asyncio.to_thread(
+                _process_static_image_sync,
+                text1, image_path, text2, max_chars, center, user_id, file_id
+            )
     except Exception as e:
         print(f"图像生成失败: {str(e)}")
         return None
+
+def _process_gif_sync(text1, image_path, text2, max_chars, center, user_id, file_id):
+    """同步处理GIF的函数"""
+    gif = Image.open(image_path)
+    gif_frames = [frame.copy() for frame in ImageSequence.Iterator(gif)]
+    
+    max_size = (0, 0)
+    for frame in gif_frames:
+        temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
+        max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
+    
+    processed_frames = []
+    durations = []
+    for frame in gif_frames:
+        result = generate_frame(text1, text2, frame.convert("RGBA"), 
+                              center, max_chars, max_size, user_id)
+        processed_frames.append(result.convert("RGB"))
+        durations.append(frame.info.get("duration", 100))
+    
+    output_path = save_dir / f"send_image{file_id}.gif"
+    processed_frames[0].save(
+        output_path,
+        save_all=True,
+        append_images=processed_frames[1:],
+        duration=durations,
+        loop=0,
+        optimize=False
+    )
+    return output_path
+
+
+def _process_static_image_sync(text1, image_path, text2, max_chars, center, user_id, file_id):
+    """同步处理静态图片的函数"""
+    image = Image.open(image_path).convert("RGBA") if image_path else None
+    result = generate_frame(text1, text2, image, center, max_chars, None, user_id)
+    output_path = save_dir / f"send_image{file_id}.png"
+    result.save(output_path)
+    return output_path
 
 
 # 以下为消息发送相关函数
 async def send_image_or_text(user_id = None, handler = None, text = "", at_sender=False, forward_text=None, max_chars=30):
     """发送图文消息的便捷函数"""
-    img = generate_image_with_text(
+    img = await generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,
@@ -441,7 +456,7 @@ async def send_image_or_text(user_id = None, handler = None, text = "", at_sende
 
 async def not_finish_send_image_or_text(user_id = None, handler = None, text = "", at_sender=False, forward_text=None, max_chars=30):
     """发送图文消息的便捷函数(非finish)"""
-    img = generate_image_with_text(
+    img = await generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,
@@ -454,7 +469,7 @@ async def not_finish_send_image_or_text(user_id = None, handler = None, text = "
 
 async def send_image_or_text_forward(user_id, handler, text, forward_text, bot, bot_id, group_id, max_chars=30, at_sender=False):
     """通过转发消息发送图文"""
-    img = generate_image_with_text(
+    img = await generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,
@@ -478,7 +493,7 @@ async def send_image_or_text_forward(user_id, handler, text, forward_text, bot, 
 
 async def auto_send_message(text, bot, group_id, forward_text=None, max_chars=30):
     """自动发送消息到群组"""
-    img = generate_image_with_text(
+    img = await generate_image_with_text(
         text1=text,
         image_path=None,
         text2=None,

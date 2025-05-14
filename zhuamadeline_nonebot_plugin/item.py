@@ -22,7 +22,7 @@ from .list3 import *
 from .list4 import *
 from .list5 import *
 #加载商店信息和商店交互
-from .shop import item, item_aliases, trap_item, potion_effects, buff2_config
+from .shop import item, item_aliases, trap_item, potion_effects, buff2_config, piliang_item
 from .collection import collection_aliases, collections
 from .secret import secret_list
 from .function import *
@@ -376,7 +376,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     )
     
     # 生成图片消息
-    combined_img_path = generate_image_with_text(
+    combined_img_path = await generate_image_with_text(
         text1=top_text,
         image_path=img,
         text2=bottom_text,
@@ -477,9 +477,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             fail_text = "失败！"   #失败文本
             
             # 批量使用检测
-            if panding_item in ["胡萝卜", "弹弓", "一次性小手枪", "充能陷阱"] and "/" in use_item_name:
+            if panding_item in piliang_item and "/" in use_item_name:
                 try:
-                    count = int(use_item_name.split("/")[1])
+                    count = use_item_name.split("/")[1]
+                    if count == 'all':
+                        count = min(30, data.get(user_id).get('item').get(panding_item,0))
+                    count = int(count)
                     if 1 <= count <= 30:
                         # 调用批量使用函数
                         await handle_batch_capture(
@@ -1083,6 +1086,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
 
                 #判定是否是整数
                 try:
+                    # 加上all判定
+                    if num_of_sell == "all":
+                        num_of_sell = int(data[str(user_id)].get("item").get(use_name, 0))
+                    
                     num_of_sell = int(num_of_sell)
                 except:
                     await send_image_or_text(user_id, daoju, "请输入一个正确的整数", at_sender=True)
@@ -1107,13 +1114,17 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         price_total += berry + berry_bonus
                     data[user_id]['berry'] += price_total
                     data[str(user_id)]["item"][use_name] -= num_of_sell
-                    if(data[str(user_id)]["item"].get(use_name)<=0): del data[str(user_id)]["item"][use_name]
+                    
+                    after_text = ''
+                    if data[str(user_id)]["item"][use_name] > 0:
+                        after_text = f"\n你现在还剩{data[str(user_id)]["item"][use_name]}瓶。"
+                    
                     #写入文件
                     save_data(user_path / file_name, data)
                     if berry_bonus_all != 0:
-                        await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}颗草莓！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{price_total-berry_bonus_all}+{str(berry_bonus_all)}={str(price_total)}颗草莓！{after_text}", at_sender=True)
                     else:
-                        await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"恭喜！\n{str(num_of_sell)}瓶草莓果酱卖出了\n{str(price_total)}颗草莓！{after_text}", at_sender=True)
                 else:
                     await send_image_or_text(user_id, daoju, f"你现在没有这么多{use_name}，\n你现在只有{data[str(user_id)]["item"][use_name]}瓶。", at_sender=True)
                 
@@ -2189,7 +2200,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     )
 
                     # 生成图片消息
-                    combined_img_path = generate_image_with_text(
+                    combined_img_path = await generate_image_with_text(
                         text1=top_text,
                         image_path=img,
                         text2=bottom_text,
@@ -2241,7 +2252,7 @@ async def handle_batch_capture(
     nickname = event.sender.nickname
     total_berry = 0  # 初始化总草莓数
 
-    # 新增效果触发统计
+    # 效果触发统计
     effect_stats = {
         '魔盒': {'count': 0, 'triggers': []},
         '扑克': {'count': 0, 'triggers': []},
@@ -2276,6 +2287,24 @@ async def handle_batch_capture(
             "Madeline竞技场不能使用抓捕道具哦！",
             at_sender=True)
         return
+    # 5猎要求等级超过21
+    elif liechang_number == '5':
+        if data[user_id].get("grade", 1) <= 20:
+            await send_image_or_text(user_id, daoju, "你的等级不够，无法完全摆脱水晶粉尘的影响，祈愿仍然被封印……\n请21级后再来试试吧！", True, None)
+            return
+            
+    # 4猎必须要有黄球才能祈愿
+    elif liechang_number == "4":
+        data[str(user_id)].setdefault('collections', {})
+        if not '黄色球体' in data[str(user_id)]['collections']:
+            await send_image_or_text(user_id, daoju, "地下终端的力量仍然强大……你未能满足条件，现在无法在地下终端内祈愿……", True, None)
+            return
+    
+    # 未解锁三猎场抓不了
+    elif liechang_number == '3':
+        if data[str(user_id)].get("item", {}).get('神秘碎片', 0) < 5:
+            await send_image_or_text(user_id, daoju, "你还未解锁通往第三猎场的道路...", True, None)
+            return
     
     # 检查受伤状态
     if data[str(user_id)].get("buff") == "hurt":
@@ -2291,25 +2320,32 @@ async def handle_batch_capture(
             return
     
     # 开始批量使用
-    for i in range(1, count + 1): # 从1开始计数
+    for i in range(1, count + 1):
         current_berry = 0  # 本次抓捕获得的草莓
         # 检查是否应该停止
         if stop_reason:
-            # 回滚多扣除的道具数量
-            if used_count > 0:
-                data[str(user_id)]["item"][item_name] += (count - used_count)
             break
+
+        # 记录初始状态用于回滚
+        initial_state = {
+            'berry': data[str(user_id)].get('berry', 0),
+            'speed_times': data[str(user_id)].get('speed_times', 0),
+            'buff2': data[str(user_id)].get('buff2', 'normal'),
+            'item_count': data[str(user_id)]["item"].get(item_name, 0)
+        }
         
         # 消耗道具
         data[str(user_id)]["item"][item_name] -= 1
         used_count += 1
-        
-        # 处理迅捷药水效果
+
+        # 处理迅捷药水效果（仅3猎和5猎生效）
+        if liechang_number in ["3", "5"]: 
+            # 使用buff2_change_status确保状态同步
+            data = buff2_change_status(data, user_id, "speed", 0)
+
         current_buff2 = data[str(user_id)].get('buff2', 'normal')
-        if current_buff2 == "speed":
-            data = buff2_change_status(data, user_id, current_buff2, 0)
         
-        # 根据道具类型执行抓捕
+        # ============= 特殊道具效果处理 =============
         if item_name == "胡萝卜":
             # 胡萝卜特殊逻辑：70%概率抓兔类Madeline
             rnd = random.randint(1,10)
@@ -2344,14 +2380,6 @@ async def handle_batch_capture(
                 # 30%概率正常抓取
                 information = zhua_random(30, 150, 600, 850, liechang_number=liechang_number)
                 
-        elif item_name == "弹弓":
-            # 弹弓：正常抓取
-            information = zhua_random(liechang_number=liechang_number)
-            
-        elif item_name == "一次性小手枪":
-            # 一次性小手枪：正常抓取
-            information = zhua_random(20, 100, 500, 800, liechang_number=liechang_number)
-            
         elif item_name == "充能陷阱":
             # 充能陷阱特殊逻辑：50%概率受伤，50%概率抓345级
             current_time = datetime.datetime.now()
@@ -2389,17 +2417,14 @@ async def handle_batch_capture(
                 noHitRate += 5 if fox_fur >= 1 else 0
                 
                 if hitNumber > noHitRate or elect_status:
+                    # 回想之核效果
+                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
                     # 受伤处理
-                    cd_time = 60 if elect_status else 120
+                    cd_time = 60-dream if elect_status else 120-dream
                     
                     # 设置冷却时间
                     next_time = current_time + datetime.timedelta(minutes=cd_time)
                     trap_next_time = current_time + datetime.timedelta(minutes=10)
-                    
-                    # 回想之核效果
-                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
-                    if dream >= 1:
-                        next_time = current_time + datetime.timedelta(minutes=cd_time-1)
                         
                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                     data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -2416,13 +2441,19 @@ async def handle_batch_capture(
                     trap_next_time = current_time + datetime.timedelta(minutes=10)
                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                     data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
-                    stop_reason = "充能陷阱爆炸但被防护"
+                    stop_reason = "充能陷阱爆炸，但是被保护了！"
                     continue
             else:
                 # 50%概率成功抓取345级
                 information = zhua_random(50, 350, 1000, 1001, liechang_number=liechang_number)
         
-        # 处理抓捕结果
+        # 普通道具处理
+        elif item_name == "弹弓":
+            information = zhua_random(liechang_number=liechang_number)
+        elif item_name == "一次性小手枪":
+            information = zhua_random(20, 100, 500, 800, liechang_number=liechang_number)
+        
+        # 处理抓捕结果（充能陷阱成功时才处理）
         if item_name != "充能陷阱" or (item_name == "充能陷阱" and boom < 51):
             information = tool_zhuamadeline(information, data, user_id)
             captured_madelines.append(information)
@@ -2430,61 +2461,47 @@ async def handle_batch_capture(
             # 检查是否出新
             if information[7]:  # new_print字段
                 new_captures.append(information)
-
-            # ============= 草莓计算和效果统计 =============
-            level = information[0]
-            
-            # 奇想魔盒效果（10%概率触发）
-            if data[str(user_id)].get('collections', {}).get("奇想魔盒", 0) >= 1:
-                if random.randint(1, 100) <= 10:
-                    bonus = 5 * level
-                    current_berry += bonus
-                    effect_stats['魔盒']['count'] += 1
-                    effect_stats['魔盒']['triggers'].append(i)
-            
-            # 奇想扑克效果（10%概率触发）
-            if data[str(user_id)].get('collections', {}).get("奇想扑克", 0) >= 1:
-                if random.randint(1, 100) <= 10:
-                    bonus = 5 * level
-                    current_berry += bonus
-                    effect_stats['扑克']['count'] += 1
-                    effect_stats['扑克']['triggers'].append(i)
-            
-            # 星光乐谱效果（20%概率翻倍当前草莓）
-            if (data[str(user_id)].get('collections', {}).get('星光乐谱', 0) >= 1 and 
-                random.randint(1, 10) <= 2 and 
-                current_berry > 0):
-                current_berry *= 2
-                effect_stats['乐谱']['count'] += 1
-                effect_stats['乐谱']['triggers'].append(i)
-            
-            # 累加到总草莓
-            if current_berry > 0:
-                total_berry += current_berry
-                data[str(user_id)]['berry'] += current_berry
-            # ============= 草莓计算结束 =============
         
-        # 检查猎场特殊事件（仅在未因充能陷阱停止时）
-        if not stop_reason and liechang_number == "2":
-            # 2猎迷路检查
-            if data[str(user_id)].get("item", {}).get("指南针", 0) == 0:
-                if random.randint(1, 10) >= 5:
-                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)   
-                    cd_time = 480 - dream
-                    stop_reason = f"迷路了！需要等待{cd_time}分钟"
-                    current_time = datetime.datetime.now()
-                    next_time = current_time + datetime.timedelta(minutes=dream)
-                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                    data[str(user_id)]['buff'] = 'lost'
-                    # 更新被困名单
-                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                    stuck_data = open_data(stuck_path)
-                    stuck_data[user_id] = '2'
-                    save_data(stuck_path, stuck_data)
+        # ============= 草莓计算 =============
+        # 默认不给草莓，只有触发效果才给
+        current_berry = 0
         
-        elif not stop_reason and liechang_number == "3":
-            # 3猎受伤检查
-            if current_buff2 != "speed":
+        # 奇想魔盒效果（10%概率触发）
+        if data[str(user_id)].get('collections', {}).get("奇想魔盒", 0) >= 1:
+            if random.randint(1, 100) <= 10:
+                level = information[0]
+                bonus = 5 * level
+                current_berry += bonus
+                effect_stats['魔盒']['count'] += 1
+                effect_stats['魔盒']['triggers'].append(i)
+        
+        # 奇想扑克效果（10%概率触发）
+        if data[str(user_id)].get('collections', {}).get("奇想扑克", 0) >= 1:
+            if random.randint(1, 100) <= 10:
+                level = information[0]
+                bonus = 5 * level
+                current_berry += bonus
+                effect_stats['扑克']['count'] += 1
+                effect_stats['扑克']['triggers'].append(i)
+        
+        # 星光乐谱效果（20%概率翻倍当前草莓）
+        if (data[str(user_id)].get('collections', {}).get('星光乐谱', 0) >= 1 and 
+            random.randint(1, 10) <= 2 and 
+            current_berry > 0):
+            current_berry *= 2
+            effect_stats['乐谱']['count'] += 1
+            effect_stats['乐谱']['triggers'].append(i)
+        
+        # 累加草莓
+        if current_berry > 0:
+            total_berry += current_berry
+            data[str(user_id)]['berry'] += current_berry
+        # ============= 草莓计算结束 =============
+        
+        # 检查猎场特殊事件（仅在3猎和5猎）
+        if liechang_number in ["3", "5"]:
+            # 3猎受伤检查（无药水保护时）
+            if liechang_number == "3" and current_buff2 != "speed":
                 helmet = data[str(user_id)].get("collections", {}).get("矿工头盔", 0)
                 rnd_hurt = 10 - (5 if helmet >= 1 else 0)
                 if random.randint(1, 100) <= rnd_hurt:
@@ -2500,32 +2517,56 @@ async def handle_batch_capture(
                     stuck_data = open_data(stuck_path)
                     stuck_data[user_id] = '3'
                     save_data(stuck_path, stuck_data)
-        
-        elif not stop_reason and liechang_number == "5":
-            # 5猎受伤检查
-            if current_buff2 != "speed" and random.randint(1, 100) <= 20:
-                dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)
-                cd_time = 120 - dream
-                stop_reason = f"受伤了！需要休息{cd_time}分钟"
-                current_time = datetime.datetime.now()
-                next_time = current_time + datetime.timedelta(minutes=cd_time)
-                data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                data[str(user_id)]['buff'] = 'hurt'
-                # 更新被困名单
-                stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                stuck_data = open_data(stuck_path)
-                stuck_data[user_id] = '5'
-                save_data(stuck_path, stuck_data)
+            
+            # 5猎受伤检查（无药水保护时）
+            elif liechang_number == "5" and current_buff2 != "speed":
+                if random.randint(1, 100) <= 20:
+                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)
+                    cd_time = 120 - dream
+                    stop_reason = f"受伤了！需要休息{cd_time}分钟"
+                    current_time = datetime.datetime.now()
+                    next_time = current_time + datetime.timedelta(minutes=cd_time)
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['buff'] = 'hurt'
+                    # 更新被困名单
+                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                    stuck_data = open_data(stuck_path)
+                    stuck_data[user_id] = '5'
+                    save_data(stuck_path, stuck_data)
+    
+    # 如果中途停止，执行回滚
+    if stop_reason:
+        # 回滚道具数量
+        data[str(user_id)]["item"][item_name] = initial_state['item_count']
+
+        # 回滚草莓数量
+        data[str(user_id)]['berry'] = initial_state['berry']
+
+        # 回滚迅捷药水状态（仅限3猎和5猎）
+        if liechang_number in ["3", "5"]:
+            data[str(user_id)]['speed_times'] = initial_state['speed_times']
+            data[str(user_id)]['buff2'] = initial_state['buff2']
+
+        # 清空效果触发记录
+        for effect in effect_stats.values():
+            effect['count'] = 0
+            effect['triggers'] = []
     
     # 保存数据
     save_data(user_path / file_name, data)
     
     # 构建结果消息
     result_msg = f"这是 [{nickname}] 的批量抓捕结果\n"
+    
+    # 查询是否还有道具
+    used_after_text = ''
+    if data[str(user_id)]["item"][item_name] > 0:
+        used_after_text = f"\n你现在还剩{data[str(user_id)]["item"][item_name]}个{item_name}！"
+        
     if used_count != count:
-        result_msg += f"\n你想批量使用{count}个{item_name}\n但是只成功使用了{used_count}个！"
+        result_msg += f"\n你想批量使用{count}个{item_name}\n但是只成功使用了{used_count}个！{used_after_text}"
     else:
-        result_msg += f"\n你批量使用了{used_count}个{item_name}！"
+        result_msg += f"\n你批量使用了{used_count}个{item_name}！{used_after_text}"
     
     if stop_reason:
         result_msg += f"\n\n※ {stop_reason}\n终止批量使用！"
@@ -2533,35 +2574,68 @@ async def handle_batch_capture(
     # 如果没有捕获到任何Madeline（如全部因爆炸停止）
     if not captured_madelines:
         await send_image_or_text(user_id, daoju, 
-            f"批量使用{item_name}没有捕获到任何Madeline！\n{stop_reason if stop_reason else ''}",
+            f"批量使用{item_name}没有捕获到任何Madeline！\n{stop_reason if stop_reason else ''}{used_after_text}",
             at_sender=True)
         return
+
+    # ============= 新增：统计各级别捕获数量 =============
+    level_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    new_level_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
     
-    # 显示捕获的Madeline (3个一行)
-    # 显示捕获的Madeline (3个一行)
-    result_msg += "\n\n捕获的Madeline：\n\n"
-    for i in range(0, len(captured_madelines), 3):
-        batch = captured_madelines[i:i+3]
+    for m in captured_madelines:
+        level = m[0]
+        level_counts[level] += 1
+        if m[7]:  # 如果是新捕获
+            new_level_counts[level] += 1
+    
+    # 构建统计文本
+    summary_msg = "\n\n※ 捕获统计："
+    for level in range(5, 0, -1):  # 从5级到1级显示
+        if level_counts[level] > 0:
+            new_count = new_level_counts[level]
+            normal_count = level_counts[level] - new_count
+            summary_msg += f"\n- {level}级：{level_counts[level]}个"
+            if new_count > 0:
+                summary_msg += f"（新：{new_count}个）"
+    # ============= 统计结束 =============
+
+    # 显示捕获的Madeline (2个一行)
+    result_msg += "\n\n捕获的Madeline：\n"
+    for i in range(0, len(captured_madelines), 2):
+        batch = captured_madelines[i:i+2]
         line = "、".join(
             f"（新）{m[0]}级[{m[1]}]" if m[7] else f"{m[0]}级[{m[1]}]" 
             for m in batch
         )
-        result_msg += f"{line}\n"
+        result_msg += f"\n{line}"
 
-    result_msg += f"\n"
+    # 添加统计信息
+    result_msg += summary_msg
+
     # 添加效果触发统计
+    has_effects = any(stat['count'] > 0 for stat in effect_stats.values())
+    if has_effects:
+        result_msg += "\n"  # 只在有触发效果时加换行
+    
     for effect_name, stat in effect_stats.items():
         if stat['count'] > 0:
             triggers = "、".join(map(str, stat['triggers']))
-            result_msg += f"{effect_name}触发{stat['count']}次（第{triggers}次）\n"
+            result_msg += f"\n{effect_name}触发{stat['count']}次（第{triggers}次）"
 
-    # 选择要展示的Madeline详情
+    # ============= 选择展示的Madeline（出新 > 高级别） =============
     if new_captures:
-        display_info = random.choice(new_captures)
-        result_msg += "\n※ 从新捕获的Madeline中随机展示一个："
+        # 从新捕获的里面选最高级的
+        max_level = max(m[0] for m in new_captures)
+        top_new = [m for m in new_captures if m[0] == max_level]
+        display_info = random.choice(top_new)
+        result_msg += f"\n\n※ 从新捕获的最高级（{max_level}级）Madeline中随机展示一个："
     else:
-        display_info = random.choice(captured_madelines)
-        result_msg += "\n※ 随机展示一个捕获的Madeline："
+        # 从所有捕获的里面选最高级的
+        max_level = max(m[0] for m in captured_madelines)
+        top_normal = [m for m in captured_madelines if m[0] == max_level]
+        display_info = random.choice(top_normal)
+        result_msg += f"\n\n※ 从捕获的最高级（{max_level}级）Madeline中随机展示一个："
+    # ============= 优化结束 =============
     
     # 添加展示的Madeline详情
     level = display_info[0]
@@ -2573,6 +2647,15 @@ async def handle_batch_capture(
     
     berry_text = f'\n\n本次你获得了{total_berry}颗草莓' if total_berry != 0 else ''
     
+    # 迅捷药水相关
+    buff2_text = ''
+    buff2_name = buff2_config['speed']['name']
+    times_field = f"speed_times"
+    
+    buff2_remaining = data[str(user_id)].get(times_field, 0) - 1
+    if buff2_remaining != -1:
+        buff2_text = f"\n\n{buff2_name}buff加成剩余{buff2_remaining}次"
+    
     # 构建展示文本
     top_text = (
         f"{result_msg}\n\n"+
@@ -2583,11 +2666,12 @@ async def handle_batch_capture(
     
     bottom_text = (
         f'{description}' +
-        f'{berry_text}'
+        f'{berry_text}' +
+        f"{buff2_text}"
     )
     
     # 生成图片消息
-    combined_img_path = generate_image_with_text(
+    combined_img_path = await generate_image_with_text(
         text1=top_text,
         image_path=img,
         text2=bottom_text,
