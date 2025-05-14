@@ -2322,28 +2322,66 @@ async def handle_batch_capture(
     # 开始批量使用
     for i in range(1, count + 1):
         current_berry = 0  # 本次抓捕获得的草莓
-        # 检查是否应该停止
-        if stop_reason:
-            break
-
-        # 记录初始状态用于回滚
-        initial_state = {
-            'berry': data[str(user_id)].get('berry', 0),
-            'speed_times': data[str(user_id)].get('speed_times', 0),
-            'buff2': data[str(user_id)].get('buff2', 'normal'),
-            'item_count': data[str(user_id)]["item"].get(item_name, 0)
-        }
-        
-        # 消耗道具
-        data[str(user_id)]["item"][item_name] -= 1
-        used_count += 1
-
         # 处理迅捷药水效果（仅3猎和5猎生效）
         if liechang_number in ["3", "5"]: 
             # 使用buff2_change_status确保状态同步
             data = buff2_change_status(data, user_id, "speed", 0)
 
         current_buff2 = data[str(user_id)].get('buff2', 'normal')
+        
+        # 检查猎场特殊事件（仅在3猎和5猎）
+        if liechang_number in ["3", "5"]:
+            # 3猎受伤检查（无药水保护时）
+            if liechang_number == "3" and current_buff2 != "speed":
+                helmet = data[str(user_id)].get("collections", {}).get("矿工头盔", 0)
+                rnd_hurt = 10 - (5 if helmet >= 1 else 0)
+                if random.randint(1, 100) <= rnd_hurt:
+                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)                    
+                    cd_time = 90 - dream
+                    stop_reason = f"受伤了！需要休息{cd_time}分钟"
+                    current_time = datetime.datetime.now()
+                    next_time = current_time + datetime.timedelta(minutes=cd_time)
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['buff'] = 'hurt'
+                    # 更新被困名单
+                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                    stuck_data = open_data(stuck_path)
+                    stuck_data[user_id] = '3'
+                    save_data(stuck_path, stuck_data)
+                    break
+            
+            # 5猎受伤检查（无药水保护时）
+            elif liechang_number == "5" and current_buff2 != "speed":
+                if random.randint(1, 100) <= 20:
+                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)
+                    cd_time = 120 - dream
+                    stop_reason = f"受伤了！需要休息{cd_time}分钟"
+                    current_time = datetime.datetime.now()
+                    next_time = current_time + datetime.timedelta(minutes=cd_time)
+                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                    data[str(user_id)]['buff'] = 'hurt'
+                    # 更新被困名单
+                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
+                    stuck_data = open_data(stuck_path)
+                    stuck_data[user_id] = '5'
+                    save_data(stuck_path, stuck_data)
+                    break
+                    
+        # 检查是否应该停止
+        if stop_reason:
+            break
+
+        # # 记录初始状态用于回滚
+        # initial_state = {
+        #     'berry': data[str(user_id)].get('berry', 0),
+        #     'speed_times': data[str(user_id)].get('speed_times', 0),
+        #     'buff2': data[str(user_id)].get('buff2', 'normal'),
+        #     'item_count': data[str(user_id)]["item"].get(item_name, 0)
+        # }
+        
+        # 消耗道具
+        data[str(user_id)]["item"][item_name] -= 1
+        used_count += 1
         
         # ============= 特殊道具效果处理 =============
         if item_name == "胡萝卜":
@@ -2434,7 +2472,7 @@ async def handle_batch_capture(
                     stop_reason = f"充能陷阱爆炸！需要休息{cd_time}分钟"
                     if elect_status:
                         stop_reason = f"由于充能箱撞开，充能陷阱必定爆炸！需要休息{cd_time}分钟"
-                    continue
+                    break
                 else:
                     # 免伤处理
                     next_time = current_time
@@ -2442,7 +2480,7 @@ async def handle_batch_capture(
                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                     data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
                     stop_reason = "充能陷阱爆炸，但是被保护了！"
-                    continue
+                    break
             else:
                 # 50%概率成功抓取345级
                 information = zhua_random(50, 350, 1000, 1001, liechang_number=liechang_number)
@@ -2497,60 +2535,24 @@ async def handle_batch_capture(
             total_berry += current_berry
             data[str(user_id)]['berry'] += current_berry
         # ============= 草莓计算结束 =============
-        
-        # 检查猎场特殊事件（仅在3猎和5猎）
-        if liechang_number in ["3", "5"]:
-            # 3猎受伤检查（无药水保护时）
-            if liechang_number == "3" and current_buff2 != "speed":
-                helmet = data[str(user_id)].get("collections", {}).get("矿工头盔", 0)
-                rnd_hurt = 10 - (5 if helmet >= 1 else 0)
-                if random.randint(1, 100) <= rnd_hurt:
-                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)                    
-                    cd_time = 90 - dream
-                    stop_reason = f"受伤了！需要休息{cd_time}分钟"
-                    current_time = datetime.datetime.now()
-                    next_time = current_time + datetime.timedelta(minutes=cd_time)
-                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                    data[str(user_id)]['buff'] = 'hurt'
-                    # 更新被困名单
-                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                    stuck_data = open_data(stuck_path)
-                    stuck_data[user_id] = '3'
-                    save_data(stuck_path, stuck_data)
-            
-            # 5猎受伤检查（无药水保护时）
-            elif liechang_number == "5" and current_buff2 != "speed":
-                if random.randint(1, 100) <= 20:
-                    dream = data[str(user_id)].get("collections", {}).get("回想之核", 0)
-                    cd_time = 120 - dream
-                    stop_reason = f"受伤了！需要休息{cd_time}分钟"
-                    current_time = datetime.datetime.now()
-                    next_time = current_time + datetime.timedelta(minutes=cd_time)
-                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                    data[str(user_id)]['buff'] = 'hurt'
-                    # 更新被困名单
-                    stuck_path = Path() / "data" / "UserList" / "Struct.json"
-                    stuck_data = open_data(stuck_path)
-                    stuck_data[user_id] = '5'
-                    save_data(stuck_path, stuck_data)
     
-    # 如果中途停止，执行回滚
-    if stop_reason:
-        # 回滚道具数量
-        data[str(user_id)]["item"][item_name] = initial_state['item_count']
+    # # 如果中途停止，执行回滚
+    # if stop_reason:
+    #     # 回滚道具数量
+    #     data[str(user_id)]["item"][item_name] = initial_state['item_count']
 
-        # 回滚草莓数量
-        data[str(user_id)]['berry'] = initial_state['berry']
+    #     # 回滚草莓数量
+    #     data[str(user_id)]['berry'] = initial_state['berry']
 
-        # 回滚迅捷药水状态（仅限3猎和5猎）
-        if liechang_number in ["3", "5"]:
-            data[str(user_id)]['speed_times'] = initial_state['speed_times']
-            data[str(user_id)]['buff2'] = initial_state['buff2']
+    #     # 回滚迅捷药水状态（仅限3猎和5猎）
+    #     if liechang_number in ["3", "5"]:
+    #         data[str(user_id)]['speed_times'] = initial_state['speed_times']
+    #         data[str(user_id)]['buff2'] = initial_state['buff2']
 
-        # 清空效果触发记录
-        for effect in effect_stats.values():
-            effect['count'] = 0
-            effect['triggers'] = []
+    #     # 清空效果触发记录
+    #     for effect in effect_stats.values():
+    #         effect['count'] = 0
+    #         effect['triggers'] = []
     
     # 保存数据
     save_data(user_path / file_name, data)
@@ -2686,7 +2688,7 @@ async def handle_batch_capture(
         message = f"{top_text}\n"+ MessageSegment.image(img) +f"\n{bottom_text}"
     
     # 发送结果
-    await daoju.finish(message)
+    await daoju.finish(message, at_sender = True)
 
 # 查看道具信息
 ckdj = on_command('item', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
