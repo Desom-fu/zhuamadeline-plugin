@@ -2490,6 +2490,11 @@ async def handle_batch_capture(
             information = zhua_random(liechang_number=liechang_number)
         elif item_name == "一次性小手枪":
             information = zhua_random(20, 100, 500, 800, liechang_number=liechang_number)
+        else:
+            # 错误道具，加回去
+            data[str(user_id)]["item"][item_name] += 1
+            stop_reason = "你所使用的这个道具无法批量使用！"
+            break
         
         # 处理抓捕结果（充能陷阱成功时才处理）
         if item_name != "充能陷阱" or (item_name == "充能陷阱" and boom < 51):
