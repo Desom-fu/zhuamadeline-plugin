@@ -2429,7 +2429,7 @@ async def handle_batch_capture(
             # 检查充能陷阱冷却
             if current_time < trap_next_time_r:
                 stop_reason = "充能陷阱冷却中"
-                continue
+                break
                 
             boom = random.randint(1,100)
             elect_status = data[user_id].get("elect_status", False)
