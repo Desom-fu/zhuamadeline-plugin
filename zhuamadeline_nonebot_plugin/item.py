@@ -394,7 +394,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     
     await pray.finish(message, at_sender=True)
 
-#使用道具，整个抓madeline里最繁琐的函数，且会持续更新
+#使用道具，整个抓madeline里最石山的函数，且会持续更新
 daoju = on_command('use', permission=GROUP, priority=1, block=True, rule=whitelist_rule)
 @daoju.handle()
 async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = CommandArg()):
