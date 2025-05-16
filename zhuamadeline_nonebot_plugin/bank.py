@@ -34,17 +34,27 @@ bar_path = Path() / "data" / "UserList" / "bar.json"
 demon_path = Path() / "data" / "UserList" / "demon.json"
 pvp_path = Path() / "data" / "UserList" / "pvp.json"
 
-# 1:00重置报酬发放状态防止没执行
+# 1:05 - 1:15重置报酬发放状态防止没执行
+@scheduler.scheduled_job("cron", minute="*", id="check_if_bank")
 async def cancel_interest_send():
+    # 获取当前时间的小时
+    current_time = datetime.datetime.now()
+
+    # 判断当前时间是否在 1:05 - 1:15 之间
+    if not (current_time.hour == 1 and 5 <= current_time.minute <= 15):
+        return
     bar_data = open_data(bar_path)
     bar_data["interest_send"] = False
     save_data(bar_path, bar_data)
 
-# 2:00执行一次报酬发放
+# 2:00 - 2:30 执行报酬发放
+@scheduler.scheduled_job("cron", minute="*", id="fafang_interest")
 async def add_interest():
-    bot = get_bot()
-    if not bot:
-        logger.error("没有可用的Bot实例，无法发放报酬！")
+    # 获取当前时间的小时
+    current_time = datetime.datetime.now()
+
+    # 判断当前时间是否在 2:00 - 2:30 之间
+    if not (current_time.hour == 2 and 0 <= current_time.minute <= 130):
         return
     
     bar_data = open_data(bar_path)
@@ -52,6 +62,11 @@ async def add_interest():
     
     # 检查是否已发放报酬
     if bar_data.get("interest_send", False):
+        return
+
+    bot = get_bot()
+    if not bot:
+        logger.error("没有可用的Bot实例，无法发放报酬！")
         return
     
     add_pots = 0
@@ -94,9 +109,6 @@ async def add_interest():
     message = "今日报酬已发放，请使用命令 .ck all\n查看今天增加报酬（向下取整）为多少哦~"
 
     await bot.send_group_msg(group_id=zhuama_group, message=message)
-
-scheduler.scheduled_job("cron", hour=2, minute=0)(add_interest)
-scheduler.scheduled_job("cron", hour=1, minute=0)(cancel_interest_send)
 
 # 提取草莓命令
 bank = on_command('bank', aliases = {"berrybank"}, permission=GROUP, priority=1, block=True, rule=whitelist_rule)

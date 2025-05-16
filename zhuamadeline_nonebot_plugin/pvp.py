@@ -805,11 +805,6 @@ async def jjc_handle(bot: Bot, event: GroupMessageEvent):
 # 22:00 - 22:30 检查是否需要执行结算任务
 @scheduler.scheduled_job("cron", minute="*", id="check_pvp_end_job")
 async def check_pvp_end_job():
-    bot = get_bot()
-    if not bot:
-        logger.error("没有可用的Bot实例，无法结算pvp！")
-        return
-
     group_id = zhuama_group    # 目标群号
 
     # 获取当前时间的小时
@@ -819,6 +814,11 @@ async def check_pvp_end_job():
     if not (current_time.hour == 22 and 0 <= current_time.minute <= 30):
         return
 
+    bot = get_bot()
+    if not bot:
+        logger.error("没有可用的Bot实例，无法结算pvp！")
+        return
+    
     # 读取用户数据
     user_data = open_data(full_path)
 

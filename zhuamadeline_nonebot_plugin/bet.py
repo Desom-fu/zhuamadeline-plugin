@@ -2082,28 +2082,32 @@ def reward_amount(pool: int) -> int:
     else:
         return 300
     
-# 22:05 - 22:25 每分钟执行一次
-@scheduler.scheduled_job(
-    "interval",  # 使用间隔触发器
-    minutes=1,   # 每隔1分钟
-    start_date=datetime.datetime.now().replace(hour=22, minute=5, second=0), 
-    end_date=datetime.datetime.now().replace(hour=22, minute=25, second=0), 
-)
+# 22:05 - 22:15 每分钟执行一次
+@scheduler.scheduled_job("cron", minute="*", id="check_if_ball")
 async def reset_double_ball_send():
+    # 获取当前时间的小时
+    current_time = datetime.datetime.now()
+
+    # 判断当前时间是否在 22：05 - 22：15 之间
+    if not (current_time.hour == 22 and 5 <= current_time.minute <= 15):
+        return
+    
     bar_data = open_data(bar_path)
     bar_data.setdefault("double_ball_send", False)
     bar_data["double_ball_send"] = False
     save_data(bar_path, bar_data)
 
 # 22:30 开奖
-# 22:30 - 23:00 每分钟执行一次
-@scheduler.scheduled_job(
-    "interval",  # 使用间隔触发器
-    minutes=1,   # 每隔1分钟
-    start_date=datetime.datetime.now().replace(hour=22, minute=30, second=0),  # 今天22:30开始
-    end_date=datetime.datetime.now().replace(hour=23, minute=0, second=0),    # 今天23:00结束
-)
+# 22:30 - 22:59 每分钟执行一次
+@scheduler.scheduled_job("cron", minute="*", id="fafang_ball")
 async def double_ball_lottery():
+    # 获取当前时间的小时
+    current_time = datetime.datetime.now()
+
+    # 判断当前时间是否在 22：30 - 22：59 之间
+    if not (current_time.hour == 22 and 30 <= current_time.minute <= 59):
+        return
+    
     bot = get_bot()
     if not bot:
         logger.error("没有可用的Bot实例，无法开奖！")
