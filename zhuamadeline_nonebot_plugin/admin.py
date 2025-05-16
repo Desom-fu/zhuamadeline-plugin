@@ -142,7 +142,7 @@ async def notadmin_command_handle(event: GroupMessageEvent, arg: Message = Comma
     commands = [
         ".状态",
         ".玩家数",
-        ".查询三球开奖 (日期)"
+        ".ball (日期)"
     ]
     text = "以下为开放神权(带有括号的是可选项)：\n" + "\n".join(commands)
     user_id = str(event.user_id)
