@@ -384,7 +384,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
                 return
 
             # 没有Boss时的正常经验计算
-            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)
+            exp_msg, grade_msg, data, _, _ = calculate_level_and_exp(data, user_id, level, 0)
         
         #奖励草莓
         lucky_give = 0
@@ -434,7 +434,7 @@ async def zhuamadeline(bot: Bot, event: GroupMessageEvent):
 
             if buff2_config[current_buff2]['show_condition'](berry_give):
                 if buff2_remaining != -1:
-                    buff2_text = f"\n{buff2_name}buff加成剩余{buff2_remaining}次"
+                    buff2_text = f"\n\n{buff2_name}buff加成剩余{buff2_remaining}次"
 
         reward_text = f"{berry_give}颗草莓"
         if current_buff2 == 'lucky' and berry_give != 0 and buff2_remaining > -1:

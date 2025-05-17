@@ -877,6 +877,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
     
     exp_msg = ''
     grade_msg = ''
+    grade_msg_spe = ''
     
     # 如果满级直接返回
     if grade == max_grade:
@@ -919,11 +920,11 @@ def calculate_level_and_exp(data, user_id, level, isitem):
         }
 
         if grade in special_grades:
-            grade_msg += special_grades[grade]
+            grade_msg_spe += special_grades[grade]
     
     # 3. 如果有升级，添加升级后的状态
     if upgraded:
-        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}' + grade_msg
+        grade_msg = f'\n恭喜升级！当前等级：{grade}/{max_grade}' + grade_msg_spe
         # 没有满级才显示升级后经验
         if grade < max_grade:
             grade_msg += f'\n升级后经验：{exp}/{max_exp}'
@@ -931,8 +932,9 @@ def calculate_level_and_exp(data, user_id, level, isitem):
     # 添加藏品
     if grade == max_grade and collections.get("时隙沙漏", 0) == 0:
         collections['时隙沙漏'] = 1
-        grade_msg += f"\n你已经达到最大等级{max_grade}！\n倏然，你手中入场券的那一点金色光芒突然闪烁起来！\n你慢慢的看着它融化，重组，最后在你手中变成了散发着淡金色光芒的蓝色沙漏。\n输入.cp 时隙沙漏 以查看具体效果"
-    
+        max_grade_msg += f"\n你已经达到最大等级{max_grade}！\n倏然，你手中入场券的那一点金色光芒突然闪烁起来！\n你慢慢的看着它融化，重组，最后在你手中变成了散发着淡金色光芒的蓝色沙漏。\n输入.cp 时隙沙漏 以查看具体效果"
+        grade_msg += max_grade_msg
+        
     # 更新数据
     user_data.update({
         "exp": exp, 
@@ -943,7 +945,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
     
     # save_data(full_path, data)
     
-    return exp_msg, grade_msg, data
+    return exp_msg, grade_msg, data, gained_exp, grade
 
 # boss相关
 def spawn_boss(user_id, grade, boss_type=None):

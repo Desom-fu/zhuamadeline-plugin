@@ -3,7 +3,7 @@ from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import GROUP, Message, MessageSegment, GroupMessageEvent
 from .npc import npc_da
 from .whitelist import whitelist_rule
-from .config import liechang_count
+from .config import liechang_count, piliang_item_max
 from .text_image_text import send_image_or_text
 from .shop import background_shop
 
@@ -52,7 +52,7 @@ help_categories = {
             ".mycj - 查看自己持有的所有成就",
             ".cjlist - 查看成就列表",
             ".buy <道具名> (数量) - 购买道具",
-            ".use <道具名>(/数量|all) - 使用道具(部分道具可批量使用，抓捕类道具上限30)",
+            f".use <道具名>(/数量|all) - 使用道具(部分道具可批量使用，抓捕类道具上限{piliang_item_max})",
             ".recycle <道具名> (数量) - 回收道具"
         ]
     },

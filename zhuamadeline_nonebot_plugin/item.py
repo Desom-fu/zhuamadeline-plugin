@@ -11,6 +11,7 @@ import datetime
 #加载数学算法相关
 import random
 import time
+import re
 from pathlib import Path
 #加载madeline档案信息
 from .madelinejd import *
@@ -329,7 +330,7 @@ async def pray_handle(bot: Bot, event: GroupMessageEvent, arg: Message = Command
     exp_msg = ''
     grade_msg = ''
     if information[5] == '5' and random.randint(1,100) <= 30:
-        exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 0)
+        exp_msg, grade_msg, data, _, _ = calculate_level_and_exp(data, user_id, level, 0)
     
     # 处理奇想魔盒效果
     berry_give = 0
@@ -481,9 +482,12 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 try:
                     count = use_item_name.split("/")[1]
                     if count == 'all':
-                        count = min(30, data.get(user_id).get('item').get(panding_item,0))
+                        count = min(piliang_item_max, data.get(user_id).get('item').get(panding_item,0))
+                        if count == 0:
+                            await send_image_or_text(user_id, daoju, f"你一个{panding_item}都没有哦，请先去获取一些吧！", at_sender=True)
+                            return
                     count = int(count)
-                    if 1 <= count <= 30:
+                    if 1 <= count <= piliang_item_max:
                         # 调用批量使用函数
                         await handle_batch_capture(
                             bot, event, 
@@ -494,10 +498,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         )
                         return
                     else:
-                        await send_image_or_text(user_id, daoju, "抓捕类道具只能批量使用1-30个哦~", at_sender=True)
+                        await send_image_or_text(user_id, daoju, f"抓捕类道具只能批量使用1-{piliang_item_max}个哦~", at_sender=True)
                         return
                 except ValueError:
-                    await send_image_or_text(user_id, daoju, "输入参数有误！\n批量使用需要为数字\n且数量为1-30！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"输入参数有误！\n批量使用需要为数字\n且数量为1-{piliang_item_max}！", at_sender=True)
         #--------------------这些道具不限制所在猎场的使用--------------------
             # 身份徽章作为例外不受影响  
             if use_item_name.startswith("身份徽章"):
@@ -2128,10 +2132,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                     
                     exp_msg = ''
                     grade_msg = ''
-                    # 只要抓到的是5号猎场的玛德琳就给经验，不看是否在拿个猎场
+                    # 只要抓到的是5号猎场的玛德琳就给经验，不看是否在哪个猎场
                     if lc == '5':
                         if random.randint(1,100) <= 20:
-                            exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, level, 1)# 最后一个1代表是道具
+                            exp_msg, grade_msg, data, _, _ = calculate_level_and_exp(data, user_id, level, 1)# 最后一个1代表是道具
 
                     #如果是奇想魔盒相关道具则进行判定
                     berry_give = 0
@@ -2251,12 +2255,16 @@ async def handle_batch_capture(
     liechang_number = data[str(user_id)].get('lc')
     nickname = event.sender.nickname
     total_berry = 0  # 初始化总草莓数
+    original_exp = 0  # 初始化原始经验
+    original_max_exp = 0  # 初始化原始最大经验
 
     # 效果触发统计
     effect_stats = {
         '魔盒': {'count': 0, 'triggers': []},
         '扑克': {'count': 0, 'triggers': []},
-        '乐谱': {'count': 0, 'triggers': []}
+        '乐谱': {'count': 0, 'triggers': []},
+        '经验': {'count': 0, 'exp': 0, 'triggers': []},
+        '升级': {'count': 0, 'grade_msg': '', 'triggers': []}
     }
     
     # 检查道具数量
@@ -2428,7 +2436,10 @@ async def handle_batch_capture(
             
             # 检查充能陷阱冷却
             if current_time < trap_next_time_r:
-                stop_reason = "充能陷阱冷却中"
+                # 扣掉的道具数量加回去
+                data[str(user_id)]["item"][item_name] += 1
+                text = time_text(str(trap_next_time_r-current_time))
+                stop_reason = f"充能陷阱冷却中，还需要等待{text}"
                 break
                 
             boom = random.randint(1,100)
@@ -2505,41 +2516,62 @@ async def handle_batch_capture(
             if information[7]:  # new_print字段
                 new_captures.append(information)
         
-        # ============= 草莓计算 =============
-        # 默认不给草莓，只有触发效果才给
-        current_berry = 0
-        
-        # 奇想魔盒效果（10%概率触发）
-        if data[str(user_id)].get('collections', {}).get("奇想魔盒", 0) >= 1:
-            if random.randint(1, 100) <= 10:
-                level = information[0]
-                bonus = 5 * level
-                current_berry += bonus
-                effect_stats['魔盒']['count'] += 1
-                effect_stats['魔盒']['triggers'].append(i)
-        
-        # 奇想扑克效果（10%概率触发）
-        if data[str(user_id)].get('collections', {}).get("奇想扑克", 0) >= 1:
-            if random.randint(1, 100) <= 10:
-                level = information[0]
-                bonus = 5 * level
-                current_berry += bonus
-                effect_stats['扑克']['count'] += 1
-                effect_stats['扑克']['triggers'].append(i)
-        
-        # 星光乐谱效果（20%概率翻倍当前草莓）
-        if (data[str(user_id)].get('collections', {}).get('星光乐谱', 0) >= 1 and 
-            random.randint(1, 10) <= 2 and 
-            current_berry > 0):
-            current_berry *= 2
-            effect_stats['乐谱']['count'] += 1
-            effect_stats['乐谱']['triggers'].append(i)
-        
-        # 累加草莓
-        if current_berry > 0:
-            total_berry += current_berry
-            data[str(user_id)]['berry'] += current_berry
-        # ============= 草莓计算结束 =============
+            # ============= 草莓计算 =============
+            # 默认不给草莓，只有触发效果才给
+            current_berry = 0
+
+            # 奇想魔盒效果（10%概率触发）
+            if data[str(user_id)].get('collections', {}).get("奇想魔盒", 0) >= 1:
+                if random.randint(1, 100) <= 10:
+                    level = information[0]
+                    bonus = 5 * level
+                    current_berry += bonus
+                    effect_stats['魔盒']['count'] += 1
+                    effect_stats['魔盒']['triggers'].append(i)
+
+            # 奇想扑克效果（10%概率触发）
+            if data[str(user_id)].get('collections', {}).get("奇想扑克", 0) >= 1:
+                if random.randint(1, 100) <= 10:
+                    level = information[0]
+                    bonus = 5 * level
+                    current_berry += bonus
+                    effect_stats['扑克']['count'] += 1
+                    effect_stats['扑克']['triggers'].append(i)
+
+            # 星光乐谱效果（20%概率翻倍当前草莓）
+            if (data[str(user_id)].get('collections', {}).get('星光乐谱', 0) >= 1 and 
+                random.randint(1, 10) <= 2 and 
+                current_berry > 0):
+                current_berry *= 2
+                effect_stats['乐谱']['count'] += 1
+                effect_stats['乐谱']['triggers'].append(i)
+
+            # 累加草莓
+            if current_berry > 0:
+                total_berry += current_berry
+                data[str(user_id)]['berry'] += current_berry
+            # ============= 草莓计算结束 =============
+            
+            # ============= 经验计算 =============
+            # 只要抓到的是5号猎场的玛德琳就给经验
+            if information[5] == '5' and random.randint(1,100) <= 20:
+                
+                # 初始化两个经验，方便构建
+                if original_exp == 0 and original_max_exp == 0:
+                    original_exp = data[str(user_id)]["exp"]
+                    original_max_exp = data[str(user_id)]["max_exp"]
+                
+                # 获取经验
+                exp_msg, grade_msg, data, exp, grade= calculate_level_and_exp(data, user_id, information[0], 1)
+                if exp_msg:
+                    effect_stats['经验']['count'] += 1
+                    effect_stats['经验']['exp'] += exp
+                    effect_stats['经验']['triggers'].append(i)
+                    
+                if grade_msg:
+                    effect_stats['升级']["grade_msg"] = grade_msg
+                    
+            # ============= 经验计算结束 =============
     
     # # 如果中途停止，执行回滚
     # if stop_reason:
@@ -2576,7 +2608,7 @@ async def handle_batch_capture(
         result_msg += f"\n你批量使用了{used_count}个{item_name}！{used_after_text}"
     
     if stop_reason:
-        result_msg += f"\n\n※ {stop_reason}\n终止批量使用！"
+        result_msg += f"\n\n※ {stop_reason}\n终止批量使用！"    
     
     # 如果没有捕获到任何Madeline（如全部因爆炸停止）
     if not captured_madelines:
@@ -2653,6 +2685,22 @@ async def handle_batch_capture(
     new_print = display_info[7] if display_info[7] else ""
     
     berry_text = f'\n\n本次你获得了{total_berry}颗草莓' if total_berry != 0 else ''
+    exp_grade_msg = ''
+    
+    # 在最终展示的Madeline信息中，添加经验信息（如果有的话）
+    if effect_stats['经验']['count'] > 0:
+        exp_grade_msg = f"\n\n本次获得{effect_stats['经验']['exp']}点经验，"
+        exp_grade_msg += f"当前经验：{original_exp + effect_stats['经验']['exp']}/{original_max_exp}"
+
+        # 显示升级信息（如果有）
+        if effect_stats['升级']["grade_msg"]:
+            # 提取原字符串中的升级后经验部分
+            msg = effect_stats['升级']["grade_msg"]
+            # 使用正则表达式替换数字部分
+            updated_msg = re.sub(r'升级后经验：\d+/', f'升级后经验：{data[str(user_id)]["exp"]}/', msg)
+            exp_grade_msg += updated_msg
+        else:
+            exp_grade_msg += f"\n当前经验：{data[str(user_id)]['exp']}/{data[str(user_id)]['max_exp']}"
     
     # 迅捷药水相关
     buff2_text = ''
@@ -2674,7 +2722,8 @@ async def handle_batch_capture(
     bottom_text = (
         f'{description}' +
         f'{berry_text}' +
-        f"{buff2_text}"
+        f"{buff2_text}" +
+        f"{exp_grade_msg}"
     )
     
     # 生成图片消息
