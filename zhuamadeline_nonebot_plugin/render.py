@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 import textwrap
 import random
+import math
 from .config import save_dir, font_path, background_dir, background_template
 from .shop import background_shop
 
@@ -243,11 +244,6 @@ def draw_qd(
     current_index = (current_index % 15) + 1
 
     return str(file_name), text, luck_text
-
-from PIL import Image, ImageDraw, ImageFont, ImageTransform
-import random
-from pathlib import Path
-import math
 
 def generate_background_preview():
     """生成带水印的背景预览图"""
