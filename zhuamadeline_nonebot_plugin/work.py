@@ -592,7 +592,7 @@ async def sleep_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     save_data(full_path, data)
     await send_image_or_text(user_id, 
         sleep,
-        f"你已经成功躺下休息了，下次可抓时间延长4小时，\n获得{power_per_hour * 4}点体力。",
+        f"你已经成功躺下休息了，\n下次可抓时间延长4小时，\n获得{power_per_hour * 4}点体力。",
         True,
         None
     )
