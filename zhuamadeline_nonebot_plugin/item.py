@@ -464,7 +464,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
             usepanding = use_item_name.split("/")
             panding_item = usepanding[0]
             user_items = data[str(user_id)].get("item", {})
-            if any([
+            if user_items.get(panding_item, 0) > 0 and any([
                 panding_item in trap_item,
                 panding_item == '时间献祭器' and pan_current_time > pan_next_time_r,
                 panding_item == 'madeline提取器' and len(usepanding) == 2,
@@ -482,7 +482,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 try:
                     count = use_item_name.split("/")[1]
                     if count == 'all':
-                        count = min(piliang_item_max, data.get(user_id).get('item').get(panding_item,0))
+                        count = min(piliang_item_max, user_items.get(panding_item,0))
                         if count == 0:
                             await send_image_or_text(user_id, daoju, f"你一个{panding_item}都没有哦，请先去获取一些吧！", at_sender=True)
                             return
