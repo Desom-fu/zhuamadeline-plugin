@@ -316,7 +316,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','海星','水母','胖头鱼']
             elif area == 'smots-8':
                 hours = 12
-                tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表','海星','水母','胖头鱼','胖头鱼罐头','水晶胖头鱼','星鱼']
+                tool_list = ['弹弓','一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表','胖头鱼','胖头鱼罐头','水晶胖头鱼','星鱼']
             user_data['working'] = False
             user_data['work_area'] = None
             work_per_hour = user_data['work_per_hour']
@@ -674,7 +674,7 @@ async def work_help_handle(bot: Bot, Bot_event: GroupMessageEvent):
         "丛林: 随机数量的草莓、急救包、弹弓、海星\n"+
         "7d: 随机数量的草莓、急救包、弹弓、一次性小手枪、海星、水母\n"+
         "mauve: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、海星、水母、胖头鱼\n"+
-        "smots-8: 随机数量的草莓、急救包、一次性小手枪、充能陷阱、道具盲盒、胡萝卜、madeline提取器、时间秒表、海星、水母、胖头鱼、胖头鱼罐头、水晶胖头鱼、星鱼")
+        "smots-8: 随机数量的草莓、一次性小手枪、充能陷阱、道具盲盒、胡萝卜、madeline提取器、时间秒表、胖头鱼、胖头鱼罐头、水晶胖头鱼、星鱼")
     
     # 使用转发消息发送长帮助文本
     await send_image_or_text_forward(user_id, 
