@@ -2245,7 +2245,9 @@ async def double_ball_lottery():
             user_nickname = await get_nickname(bot, user_id)
             msg_text += f' [{user_nickname}] '  # 获取中奖者的昵称
             at_text += MessageSegment.at(user_id)  # @中奖者
-        msg_text += "匹配了一个石门按钮！\n获得入场费用150%的探险补给！\n请通过`.ck all`查看战利品！\n"
+        msg_text += "匹配了一个石门按钮！\n获得入场费用150%的探险补给！\n请通过`.ck all`查看战利品！\n\n"
+    else:
+        msg_text += "很遗憾，本次无人获得探险补给！\n\n"
 
     # 记录开奖历史
     bar_data.setdefault("double_ball_history", [])
@@ -2264,7 +2266,7 @@ async def double_ball_lottery():
     # 设定奖池最少为0
     if bar_data["pots"] < 0:
         bar_data["pots"] = 0
-    msg_text += f"\n剩余宝藏总量：{bar_data['pots']}颗草莓！"
+    msg_text += f"剩余宝藏总量：{bar_data['pots']}颗草莓！"
     msg_text += f"\n\n若忘记按钮密码，\n可以通过命令 '.ball (日期)' 来查询历史按钮密码哦！"
     bar_data["double_ball_send"] = True  # 设置开奖标记
 

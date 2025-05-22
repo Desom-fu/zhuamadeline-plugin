@@ -1669,7 +1669,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 if(len(command)==2):
                     item_name = command[0]   #参数1
                     if(item_name.lower()=="madeline提取器"):
-                        success = 999
                         arg2 = command[1]   #madeline名字
                         if not arg2:
                              await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！", at_sender=True)
@@ -1700,71 +1699,6 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                         await send_image_or_text(user_id, daoju, "一瞬间，十字架中的宝石散发出耀眼的光芒。光辉穿透浓厚的迷雾，将四周映照得清晰无比。你感受到一股奇异的力量从十字架中涌出，仿佛某种封印正在被解除。光芒逐渐汇聚，形成一个模糊的影像，那是一片神秘的符号与文字交织而成的图案。十字架轻微震颤，仿佛在回应某种远古的力量。\n没过一会，你感受到madeline们的属性被强化：动作更加迅捷，力量更加充沛，甚至连周围的细微动静都变得清晰可辨。尽管光芒渐渐收敛，但这股力量却深深烙印在你体内，成为前行的支柱。\n 输入.cp 圣十字架 以查看具体效果")                            
                                 else:
                                     await send_image_or_text(user_id, daoju, "似乎是缺少了什么东西，你输入这串咒语后什么都没有发生。" , at_sender=True)
-                        if(data[str(user_id)].get("item").get(item_name, 0) > 0):
-                            """
-                            可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
-                            """
-                            list_name = f"UserList{liechang_number}.json"
-                            nums = find_madeline(arg2.lower(), only_name = True)
-                            # 没有对应的玛德琳
-                            if nums == 0:
-                                await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)                            
-                            # 检测是否抓到过对应的玛德琳 
-                            check_data = open_data(user_path / list_name)
-                            # 检查返回值
-                            if not nums or len(nums) < 3:
-                                await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)
-                            # 判定猎场
-                            if str(user_id) not in check_data:
-                                await send_image_or_text(user_id, daoju, "请先在本猎场抓到任意一个Madeline\n再使用提取器吧！", at_sender=True)
-                            
-                            if liechang_number != nums[2]:
-                                await send_image_or_text(user_id, daoju, "你只有切换到你想提取的Madeline所在的猎场，\n才能提取这个猎场的Madeline哦！", at_sender=True)
-                                    
-                            rnd = random.randint(1,100)
-                            if(rnd <= 20+15*(5-int(nums[0]))):
-                                success = 1
-                                information = print_zhua(int(nums[0]), int(nums[1]), nums[2])
-                            else:
-                                #受伤，更新下次抓的时间
-                                hitNumber = random.randint(1,100)
-                                noHitRate = 0
-                                #判定道具的部分
-                                wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
-                                crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
-                                bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
-                                fox_fur = data[str(user_id)].get("collections",{}).get('淡紫色狐狸毛', 0)
-                                #增加免伤率的部分
-                                #天使之羽，增加2%
-                                if (wing >= 1):
-                                    noHitRate += 2
-                                #紫晶魄，增加3%
-                                if (crystal >= 1):
-                                    noHitRate += 3
-                                #炸弹包，增加5%
-                                if (bombbag >= 1):
-                                    noHitRate += 5
-                                #狐狸毛，增加5%
-                                if (fox_fur >= 1):
-                                    noHitRate += 5
-                                if hitNumber > noHitRate:
-                                    cd_time = random.randint(int(nums[0])*45, (int(nums[0])+1)*45)
-                                    current_time = datetime.datetime.now()
-                                    #检测回想之核
-                                    dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
-                                    next_time = current_time + datetime.timedelta(minutes=cd_time-dream)
-                                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                                    data[str(user_id)]["buff"] = "hurt"  #受伤
-                                    fail_text = f"提取失败！提取器爆炸了，\n你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
-                                else:
-                                    current_time = datetime.datetime.now()
-                                    next_time = current_time
-                                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
-                                    fail_text = f"提取失败！提取器爆炸了，\n但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
-                                success = 2
-                            data[str(user_id)]["item"][item_name] -= 1
-                        else:
-                            await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True)
 
                 #此处判定猎场是否已解锁
                 #此处判定如果2猎是否有指南针，若没有则迷路
@@ -1913,6 +1847,80 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 text = "你在使用道具的过程中，没有任何madeline被道具吸引，\n结果一不小心你就撞到了悬崖峭壁上！\n不过幸好道具没消耗……"
                                 #发送消息
                                 await send_image_or_text(user_id, daoju, text+"你需要原地等待120分钟，\n或者使用急救包自救，\n又或者等待他人来救你……", at_sender=True)                      
+
+                # madeline提取器
+                if(len(command)==2):
+                    item_name = command[0]   #参数1
+                    if(item_name.lower()=="madeline提取器"):
+                        arg2 = command[1]   #madeline名字
+                        if not arg2:
+                             await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！", at_sender=True)
+
+                        if(data[str(user_id)].get("item").get(item_name, 0) > 0):
+                            """
+                            可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
+                            """
+                            list_name = f"UserList{liechang_number}.json"
+                            nums = find_madeline(arg2.lower(), only_name = True)
+                            # 没有对应的玛德琳
+                            if nums == 0:
+                                await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)                            
+                            # 检测是否抓到过对应的玛德琳 
+                            check_data = open_data(user_path / list_name)
+                            # 检查返回值
+                            if not nums or len(nums) < 3:
+                                await send_image_or_text(user_id, daoju, "请输入正确的Madeline名称哦！\n不能是编号哦！", at_sender=True)
+                            # 判定猎场
+                            if str(user_id) not in check_data:
+                                await send_image_or_text(user_id, daoju, "请先在本猎场抓到任意一个Madeline\n再使用提取器吧！", at_sender=True)
+                            
+                            if liechang_number != nums[2]:
+                                await send_image_or_text(user_id, daoju, "你只有切换到你想提取的Madeline所在的猎场，\n才能提取这个猎场的Madeline哦！", at_sender=True)
+                                    
+                            rnd = random.randint(1,100)
+                            if(rnd <= 20+15*(5-int(nums[0]))):
+                                success = 1
+                                information = print_zhua(int(nums[0]), int(nums[1]), nums[2])
+                            else:
+                                #受伤，更新下次抓的时间
+                                hitNumber = random.randint(1,100)
+                                noHitRate = 0
+                                #判定道具的部分
+                                wing = data[str(user_id)].get("collections",{}).get('天使之羽', 0)
+                                crystal = data[str(user_id)].get("collections",{}).get('紫晶魄', 0)
+                                bombbag = data[str(user_id)].get("collections",{}).get('炸弹包', 0)
+                                fox_fur = data[str(user_id)].get("collections",{}).get('淡紫色狐狸毛', 0)
+                                #增加免伤率的部分
+                                #天使之羽，增加2%
+                                if (wing >= 1):
+                                    noHitRate += 2
+                                #紫晶魄，增加3%
+                                if (crystal >= 1):
+                                    noHitRate += 3
+                                #炸弹包，增加5%
+                                if (bombbag >= 1):
+                                    noHitRate += 5
+                                #狐狸毛，增加5%
+                                if (fox_fur >= 1):
+                                    noHitRate += 5
+                                if hitNumber > noHitRate:
+                                    cd_time = random.randint(int(nums[0])*45, (int(nums[0])+1)*45)
+                                    current_time = datetime.datetime.now()
+                                    #检测回想之核
+                                    dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
+                                    next_time = current_time + datetime.timedelta(minutes=cd_time-dream)
+                                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                    data[str(user_id)]["buff"] = "hurt"  #受伤
+                                    fail_text = f"提取失败！提取器爆炸了，\n你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
+                                else:
+                                    current_time = datetime.datetime.now()
+                                    next_time = current_time
+                                    data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
+                                    fail_text = f"提取失败！提取器爆炸了，\n但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
+                                success = 2
+                            data[str(user_id)]["item"][item_name] -= 1
+                        else:
+                            await send_image_or_text(user_id, daoju, f"你现在没有{item_name}。", at_sender=True)
 
                 if(use_item_name=="胡萝卜"):
                     if(data[str(user_id)].get("item").get(use_item_name, 0) > 0):
