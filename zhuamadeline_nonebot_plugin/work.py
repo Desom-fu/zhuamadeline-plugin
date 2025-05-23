@@ -119,6 +119,10 @@ work = on_command('外出', aliases={'work'}, permission=GROUP, priority=2, bloc
 
 @work.handle()
 async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = CommandArg()):
+    # 获取用户数据
+    user_id = str(event.get_user_id())
+    data = open_data(full_path)
+    
     # 解析命令参数
     command = str(arg).split("/")
     if len(command) != 3:
@@ -126,10 +130,6 @@ async def work_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Command
         return
     
     area, food, madeline = [part.lower() for part in command]
-    
-    # 获取用户数据
-    user_id = str(event.get_user_id())
-    data = open_data(full_path)
     
     if user_id not in data:
         await send_image_or_text(user_id, work, "你还没尝试抓过madeline……", True, None)
