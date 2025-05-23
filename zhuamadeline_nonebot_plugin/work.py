@@ -316,7 +316,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 tool_list = ['急救包','弹弓','一次性小手枪','充能陷阱','道具盲盒','海星','水母','胖头鱼']
             elif area == 'smots-8':
                 hours = 12
-                tool_list = ['弹弓','一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表','胖头鱼','胖头鱼罐头','水晶胖头鱼','星鱼']
+                tool_list = ['一次性小手枪','充能陷阱','道具盲盒','胡萝卜','madeline提取器','时间秒表','胖头鱼','胖头鱼罐头','水晶胖头鱼','星鱼']
             user_data['working'] = False
             user_data['work_area'] = None
             work_per_hour = user_data['work_per_hour']
