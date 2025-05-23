@@ -424,11 +424,11 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                 
                 for i in range(work_per_hour):
                     # 插入工作事件
-                    get_salary = random.randint(1,10)
-                    if get_salary <= 7:
+                    get_salary = random.randint(1,100)
+                    if get_salary <= 75:
                         salary = random.randint(20,50)
                         tool_num = 0
-                    elif get_salary <= 9:
+                    elif get_salary <= 95:
                         salary = 0
                         tool_type = random.choice(tool_list)
                         tool_num = random.randint(1,3)
