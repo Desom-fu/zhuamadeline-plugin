@@ -441,7 +441,7 @@ async def status_work_handle(bot: Bot, Bot_event: GroupMessageEvent):
                         event = random.choice(simple_work_events)
                     else:
                         event = random.choice(complex_work_events)
-                        salary *= 2
+                        salary *= 3
                         tool_num *= 2
                     
                     if salary > 0:
