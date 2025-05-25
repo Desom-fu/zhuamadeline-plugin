@@ -190,7 +190,8 @@ async def delete_account_handle(bot: Bot, event: GroupMessageEvent, arg: Message
         return
 
     # 解析参数，获取要删除的账号的QQ号
-    target_qq = extract_mixed_qq(arg, 1)
+    arg_qq = extract_mixed_qq(arg, 1)
+    target_qq = arg_qq[0]
     if not target_qq:
         await delete_account.finish("命令格式错误！正确格式：.删除账号 QQ号", at_sender=True)
         return
