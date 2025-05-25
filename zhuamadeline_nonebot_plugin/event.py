@@ -169,8 +169,11 @@ async def PlainStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
-        
-        user_info['event'] = 'trading'
+
+        # 只获取用户拥有的且数量>=1的玛德琳
+        available_madelines = [k for k, v in data1[user_id].items() if v >= 1]
+        if not available_madelines:
+            return
 
         k1 = random.choice(list(data1[user_id].keys()))
         k = k1.split('_')
@@ -198,6 +201,11 @@ async def PlainStuck(user_data, user_id, message, diamond_text, hourglass_text):
             amount = 1
         else:
             raise KeyError("Invalid level number")
+
+        # 确保收购数量不超过用户实际拥有的数量
+        user_madeline_count = data1[user_id][k1]
+        amount = min(amount, user_madeline_count)
+
         price = math.floor(price * priceRate)
 
         user_info['trade']['数量'] = amount
@@ -406,9 +414,12 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
-        
-        user_info['event'] = 'trading'
 
+        # 只获取用户拥有的且数量>=1的玛德琳
+        available_madelines = [k for k, v in data2[user_id].items() if v >= 1]
+        if not available_madelines:
+            return
+        
         k1 = random.choice(list(data2[user_id].keys()))
         k = k1.split('_')
         level = int(k[0])
@@ -435,6 +446,10 @@ async def ForestStuck(user_data, user_id, message, diamond_text, hourglass_text)
             amount = 1
         else:
             raise KeyError("Invalid level number")
+
+        # 确保收购数量不超过用户实际拥有的数量
+        user_madeline_count = data2[user_id][k1]
+        amount = min(amount, user_madeline_count)
 
         price = math.floor(price * priceRate)
 
@@ -853,9 +868,11 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
         
-        #变更事件为交易中
-        user_info['event'] = 'trading'
-        
+        # 只获取用户拥有的且数量>=1的玛德琳
+        available_madelines = [k for k, v in data3[user_id].items() if v >= 1]
+        if not available_madelines:
+            return
+
         #在该用户拥有的madeline列表里抽取一个拥有的madeline
         k1 = random.choice(list(data3[user_id].keys()))
         k = k1.split('_')
@@ -885,6 +902,10 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             amount = 1
         else:
             raise KeyError("Invalid level number")
+
+        # 确保收购数量不超过用户实际拥有的数量
+        user_madeline_count = data3[user_id][k1]
+        amount = min(amount, user_madeline_count)
         
         price = math.floor(price * priceRate)
         #交易属性栏要加入3个键值对：交易数量，交易单价，交易物品
@@ -1278,11 +1299,12 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
 
-        #变更事件为交易中
-        user_info['event'] = 'trading'
         #交易物品可以是本猎场的madeline或藏品(藏品没写，因为没什么人有)
         #在该用户拥有的madeline列表里抽取一个拥有的madeline
-        
+        # 只获取用户拥有的且数量>=1的玛德琳
+        available_madelines = [k for k, v in data4[user_id].items() if v >= 1]
+        if not available_madelines:
+            return
         # 玛德琳交易逻辑（保持原样）
         k1 = random.choice(list(data4[user_id].keys()))
         k = k1.split('_')
@@ -1313,6 +1335,10 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         else:
             raise KeyError("Invalid level number")
         
+        # 确保收购数量不超过用户实际拥有的数量
+        user_madeline_count = data4[user_id][k1]
+        amount = min(amount, user_madeline_count)
+
         price = math.floor(price * priceRate)
         #交易属性栏要加入3个键值对：交易数量，交易单价，交易物品
         user_info['trade']['数量'] = amount
@@ -1832,26 +1858,28 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         data5 = open_data(user_path5)
         if user_id not in data5:
             return
-            
+
         # 决定是收购玛德琳还是鱼类（50%概率）
         trade_type = random.choice(["madeline", "fish"])
-        
+
         # 处理buff2状态逻辑
         user_data = buff2_change_status(user_data, user_id, "lucky", 1)
         user_data = buff2_change_status(user_data, user_id, "speed", 1)
         user_info = user_data.get(user_id,{})
-        
-        #变更事件为交易中
-        user_info['event'] = 'trading'
-        
+
         if trade_type == "madeline":
-            # 玛德琳交易逻辑（保持原样）
-            k1 = random.choice(list(data5[user_id].keys()))
+            # 只获取用户拥有的且数量>=1的玛德琳
+            available_madelines = [k for k, v in data5[user_id].items() if v >= 1]
+            if not available_madelines:
+                return
+
+            # 从符合条件的玛德琳中随机选择
+            k1 = random.choice(available_madelines)
             k = k1.split('_')
             level = int(k[0]) #抽取的madeline等级
             num = k[1] #抽取的madeline的ID
             #胡萝卜池的madeline低价收购
-            if [level, int(num)] in rabbit_madeline4:
+            if [level, int(num)] in rabbit_madeline5:
                 priceRate = 0.8
             else:
                 priceRate = 1
@@ -1874,38 +1902,42 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
                 amount = 1
             else:
                 raise KeyError("Invalid level number")
-            
+
+            # 确保收购数量不超过用户实际拥有的数量
+            user_madeline_count = data5[user_id][k1]
+            amount = min(amount, user_madeline_count)
+
             price = math.floor(price * priceRate)
             #交易属性栏要加入3个键值对：交易数量，交易单价，交易物品
             user_info['trade']['数量'] = amount
             user_info['trade']['单价'] = price
             user_info['trade']['物品'] = [int(liechang_number),k1] #存储为[猎场号，madeline属性]
             user_info['trade']['类型'] = 'madeline' # 添加交易类型标识
-            
+
         else:
             # 鱼类交易逻辑
             available_fish = [fish for fish in fish_prices.keys() if items.get(fish, 0) > 0]
-            
+
             if not available_fish:
                 return  # 没有鱼可交易，直接返回
-                
+
             fish_name = random.choice(available_fish)
             fish_count = items[fish_name]
             amount = random.randint(1, min(8, fish_count))
             base_price = fish_prices[fish_name]
             price = math.floor(base_price * random.uniform(1.0, 1.5))
-            
+
             user_info['trade']['数量'] = amount
             user_info['trade']['单价'] = price
             user_info['trade']['物品'] = [-2, fish_name]  # -2表示鱼类交易
             user_info['trade']['类型'] = 'fish'  # 添加交易类型标识
-        
+
         user_info['event'] = 'trading'
         next_time = current_time
         user_info['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
         #写入主数据表
         save_data(full_path, user_data)
-        
+
         if trade_type == "madeline":
             msg = (
                 f"你遇到了一位流浪商人，他似乎想从你这里买点东西\n"+
