@@ -42,12 +42,12 @@ async def madeline_shop(bot: Bot, event: Event):
     #比较营业时间与时间点
     current_time = datetime.datetime.now().time()
     hour = current_time.hour
+    user_id = str(event.user_id)
     if hour < 6:
         msg = "便利店还没开门，请再等一会吧"
         await send_image_or_text(user_id, shop, msg, True, None, 20)
     
     data = open_data(user_path / file_name)
-    user_id = str(event.user_id)
     # 事件检测
     if data[str(user_id)].get('event',"nothing") != "nothing":
         msg = "你还有正在进行中的事件"
@@ -95,6 +95,7 @@ buy = on_command('buy', permission=GROUP, priority=1, block=True, rule=whitelist
 @buy.handle()
 async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 获取当前时间
+    user_id = str(event.get_user_id())
     current_time = datetime.datetime.now().time()
     if current_time.hour < 6:
         await send_image_or_text(user_id, buy, "便利店还没开门，请再等一会吧", True, None, 20)
@@ -110,7 +111,6 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         save_data(shop_database, shop_data)
 
     # 读取用户数据
-    user_id = str(event.get_user_id())
     group_id = str(event.group_id)
     user_data = open_data(user_path / file_name)
     if user_id not in user_data:

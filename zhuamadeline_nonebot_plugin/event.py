@@ -874,7 +874,7 @@ async def CrystalStuck(user_data, user_id, message, diamond_text, hourglass_text
             return
 
         #在该用户拥有的madeline列表里抽取一个拥有的madeline
-        k1 = random.choice(list(data3[user_id].keys()))
+        k1 = random.choice(available_madelines)
         k = k1.split('_')
         level = int(k[0]) #抽取的madeline等级
         num = k[1] #抽取的madeline的ID
@@ -1306,7 +1306,7 @@ async def LabStuck(user_data, user_id, message, diamond_text, hourglass_text):
         if not available_madelines:
             return
         # 玛德琳交易逻辑（保持原样）
-        k1 = random.choice(list(data4[user_id].keys()))
+        k1 = random.choice(available_madelines)
         k = k1.split('_')
         level = int(k[0]) #抽取的madeline等级
         num = k[1] #抽取的madeline的ID
