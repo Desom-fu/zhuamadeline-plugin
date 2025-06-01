@@ -2306,7 +2306,7 @@ async def handle_batch_capture(
     # 5猎要求等级超过21
     elif liechang_number == '5':
         if data[user_id].get("grade", 1) <= 20:
-            await send_image_or_text(user_id, daoju, "你的等级不够，无法完全摆脱水晶粉尘的影响，祈愿仍然被封印……\n请21级后再来试试吧！", True, None)
+            await send_image_or_text(user_id, daoju, "你的等级不够，无法完全摆脱水晶粉尘的影响，道具仍然被封印……\n请21级后再来试试吧！", True, None)
             return
             
     # 4猎必须要有黄球才能祈愿
