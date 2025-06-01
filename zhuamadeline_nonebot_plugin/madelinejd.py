@@ -437,13 +437,13 @@ total_madelinejd_query = on_command(
 )
 @total_madelinejd_query.handle()
 async def handle_total_madelinejd_query(bot: Bot, event: GroupMessageEvent):
-    # 初始化计数 # 添加新猎场时更新
+    # 初始化计数 
     hunt_count = [[0, 0, 0, 0, 0] for _ in range(liechang_count)]  # 各猎场的各级别 madeline 数量
     hunt_max_count = [[0, 0, 0, 0, 0] for _ in range(liechang_count)]  # 各猎场的各级别 madeline 总数
     unique_madelines = [set() for _ in range(liechang_count)]  # 每个猎场独立的 madeline 唯一集
 
     # 计算每个猎场的最大数量
-    for lc, madeline_data in enumerate([madeline_data1, madeline_data2, madeline_data3, madeline_data4]):  # 添加新猎场时更新
+    for lc, madeline_data in enumerate([madeline_data1, madeline_data2, madeline_data3, madeline_data4, madeline_data5]):  # 添加新猎场时更新
         for k, v in madeline_data.items():
             unique_count = len(set(v))  # 当前等级的玛德琳种类数
             hunt_max_count[lc][int(k) - 1] = unique_count  # 确保唯一性
