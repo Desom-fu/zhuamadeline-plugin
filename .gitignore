@@ -36,3 +36,6 @@
 
 # 隔壁投稿文件夹忽略
 /liulangqingma
+
+# 忽略忽略脚本
+update_list.py

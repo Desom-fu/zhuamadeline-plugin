@@ -89,7 +89,7 @@ shop_work_img = Path() / "data" / "Shop" / "营业图.png"
 # 批量道具使用上限
 piliang_item_max = 50
 # 定义猎场数 全局变量 开新猎场要改
-liechang_count = 4
+liechang_count = 5
 # 定义时间沙漏最高次数
 hourglass_max = 5
 #定义通信群id
