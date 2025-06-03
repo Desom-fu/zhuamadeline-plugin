@@ -388,7 +388,7 @@ async def generate_image_with_text(text1, image_path, text2, max_chars=20, cente
         if is_gif:
             # 将GIF处理放到线程池
             return await asyncio.to_thread(
-                _process_gif_sync,  # 同步处理函数
+                _process_gif_sync,
                 text1, image_path, text2, max_chars, center, user_id, file_id
             )
         else:
@@ -402,23 +402,124 @@ async def generate_image_with_text(text1, image_path, text2, max_chars=20, cente
         return None
 
 def _process_gif_sync(text1, image_path, text2, max_chars, center, user_id, file_id):
-    """同步处理GIF的函数"""
+    """同步处理GIF的函数 - 只生成一次背景"""
     gif = Image.open(image_path)
     gif_frames = [frame.copy() for frame in ImageSequence.Iterator(gif)]
     
+    # 计算最大尺寸
     max_size = (0, 0)
-    for frame in gif_frames:
-        temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
-        max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
+    dummy = Image.new("RGB", (1, 1))
+    draw_dummy = ImageDraw.Draw(dummy)
     
+    lines1 = wrap_text(text1, max_chars) if text1 else []
+    lines2 = wrap_text(text2, max_chars) if text2 else []
+    
+    # 计算所有帧中最大原始尺寸
+    max_orig_width = max(frame.width for frame in gif_frames)
+    max_orig_height = max(frame.height for frame in gif_frames)
+    
+    # 计算统一缩放比例
+    max_img_width = min(MAX_WIDTH - 2 * PADDING, font_size * 20)
+    scale = min(MAX_IMAGE_HEIGHT / max_orig_height, max_img_width / max_orig_width, 1.0)
+    img_size = (int(max_orig_width * scale), int(max_orig_height * scale))
+    
+    # 计算内容总尺寸
+    content_width, content_height = calculate_content_size(draw_dummy, lines1 + lines2, img_size)
+    canvas_width = content_width + 2 * PADDING
+    canvas_height = content_height + 2 * PADDING
+    max_size = (canvas_width, canvas_height)
+    
+    # 生成一次背景（使用最大尺寸）
+    bg = create_gradient_background(max_size[0], max_size[1], user_id)
+    
+    # 计算固定位置
+    # 顶部文本位置
+    y_top = PADDING
+    
+    # 图片位置（居中或靠左）
+    img_x = (max_size[0] - img_size[0]) // 2 if center else PADDING
+    y_img = y_top
+    
+    # 计算顶部文本高度
+    for line in lines1:
+        if line == "\n":
+            y_img += font_size + LINE_SPACING
+        else:
+            bbox = draw_dummy.textbbox((0, 0), line, font=font)
+            h = bbox[3] - bbox[1]
+            y_img += h + LINE_SPACING
+    y_img += font_size  # 文本和图片之间的间距
+    
+    # 底部文本起始位置
+    y_bottom = y_img + img_size[1] + font_size
+    
+    # 处理每一帧
     processed_frames = []
     durations = []
+    
     for frame in gif_frames:
-        result = generate_frame(text1, text2, frame.convert("RGBA"), 
-                              center, max_chars, max_size, user_id)
-        processed_frames.append(result.convert("RGB"))
+        # 创建透明内容层
+        content_layer = Image.new('RGBA', max_size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(content_layer)
+        
+        # 绘制顶部文本
+        y_current = y_top
+        for line in lines1:
+            if line == "\n":
+                y_current += font_size + LINE_SPACING
+                continue
+                
+            bbox = draw.textbbox((0, 0), line, font=font)
+            w = bbox[2] - bbox[0]
+            x = (max_size[0] - w) // 2 if center else PADDING
+            
+            # 绘制文本（带描边）
+            outline_width = 1
+            bg_color = get_user_bg_color(user_id)
+            dark_mode = is_dark_color(bg_color)
+            text_color = (255, 255, 255, 255) if dark_mode else (0, 0, 0, 255)
+            outline_color = (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255)
+            
+            for dx in [-outline_width, 0, outline_width]:
+                for dy in [-outline_width, 0, outline_width]:
+                    if dx != 0 or dy != 0:
+                        draw.text((x+dx, y_current+dy), line, font=font, fill=outline_color)
+            draw.text((x, y_current), line, font=font, fill=text_color)
+            
+            y_current += (bbox[3] - bbox[1]) + LINE_SPACING
+        
+        # 绘制图片
+        resized_img = frame.resize(img_size, Image.LANCZOS).convert('RGBA')
+        content_layer.paste(resized_img, (img_x, y_img), resized_img)
+        
+        # 绘制底部文本
+        y_current = y_bottom
+        for line in lines2:
+            if line == "\n":
+                y_current += font_size + LINE_SPACING
+                continue
+                
+            bbox = draw.textbbox((0, 0), line, font=font)
+            w = bbox[2] - bbox[0]
+            x = (max_size[0] - w) // 2 if center else PADDING
+            
+            # 绘制文本（带描边）
+            for dx in [-outline_width, 0, outline_width]:
+                for dy in [-outline_width, 0, outline_width]:
+                    if dx != 0 or dy != 0:
+                        draw.text((x+dx, y_current+dy), line, font=font, fill=outline_color)
+            draw.text((x, y_current), line, font=font, fill=text_color)
+            
+            y_current += (bbox[3] - bbox[1]) + LINE_SPACING
+        
+        # 合成最终帧
+        frame_img = Image.new('RGBA', max_size)
+        frame_img.paste(bg, (0, 0))
+        frame_img = Image.alpha_composite(frame_img, content_layer)
+        processed_frames.append(frame_img.convert("RGB"))
         durations.append(frame.info.get("duration", 100))
     
+    # 保存GIF
     output_path = save_dir / f"send_image{file_id}.gif"
     processed_frames[0].save(
         output_path,
