@@ -1916,12 +1916,13 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
         else:
             # 鱼类交易逻辑
-            available_fish = [fish for fish in fish_prices.keys() if items.get(fish, 0) > 0]
+            selected_fish = random.choice(list(fish_prices.keys()))
 
-            if not available_fish:
-                return  # 没有鱼可交易，直接返回
+            # 检查玩家是否有这种鱼
+            if items.get(selected_fish, 0) <= 0:
+                return
 
-            fish_name = random.choice(available_fish)
+            fish_name = random.choice(selected_fish)
             fish_count = items[fish_name]
             amount = random.randint(1, min(8, fish_count))
             base_price = fish_prices[fish_name]
