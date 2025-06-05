@@ -38,12 +38,12 @@ def get_user_bg_color(user_id: str):
             return DEFAULT_BG_COLOR
 
         data = open_data(full_path)
-            
+
         # 获取用户颜色，如果不存在则返回默认
         color_str = data.get(str(user_id), {}).get("bg_color")
         if not color_str:
             return DEFAULT_BG_COLOR
-            
+
         # 转换颜色格式（存储格式为 "#RRGGBB" 或 "RRGGBB"）
         color_str = color_str.lstrip('#')
         if len(color_str) == 6:
@@ -63,38 +63,38 @@ def create_gradient_background(width, height, user_id=None):
         start_color = get_user_bg_color(user_id)
     else:
         start_color = DEFAULT_BG_COLOR
-        
+
     # 根据起始颜色决定深色模式
     dark_mode = is_dark_color(start_color)
-    
+
     bg = Image.new('RGBA', (width, height), (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255))
     draw = ImageDraw.Draw(bg)
-    
+
     center_x, center_y = width // 2, height // 2
     max_radius = math.sqrt(center_x**2 + center_y**2)
-    
+
     # 渐变颜色配置（深色模式终点为纯黑，浅色模式为白色）
     end_color = (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255)
-    
+
     # 使用三次贝塞尔缓动函数控制渐变速度
     def cubic_bezier(t, p0, p1, p2, p3):
         """三次贝塞尔缓动函数"""
         u = 1 - t
         return u**3*p0 + 3*u**2*t*p1 + 3*u*t**2*p2 + t**3*p3
-    
+
     steps = 256  # 增加采样点使过渡更平滑
     for i in range(steps, 0, -1):
         # 使用贝塞尔曲线控制渐变进度（参数可调整）
         t = i / steps
         progress = cubic_bezier(t, 0, 0.2, 0.8, 1.0)  # 自定义缓动曲线
-        
+
         radius = int(max_radius * progress)
-        
+
         # 颜色插值（使用HSL色彩空间会更平滑）
         r = int(start_color[0] + (end_color[0] - start_color[0]) * progress)
         g = int(start_color[1] + (end_color[1] - start_color[1]) * progress)
         b = int(start_color[2] + (end_color[2] - start_color[2]) * progress)
-        
+
         # 绘制渐变圆环
         if radius > 0:  # 避免绘制半径为0的圆
             draw.ellipse(
@@ -103,11 +103,11 @@ def create_gradient_background(width, height, user_id=None):
                 fill=(r, g, b, 255),
                 outline=None
             )
-    
+
     # 应用精细的高斯模糊（半径减小但多次应用效果更好）
     for _ in range(3):
         bg = bg.filter(ImageFilter.GaussianBlur(radius=1))
-    
+
     return bg
 
 # 愚人节特供！
@@ -120,21 +120,21 @@ def create_gradient_background(width, height, user_id=None):
 #     """
 #     lines = []
 #     paragraphs = text.split("\n")
-    
+
 #     for paragraph in paragraphs:
 #         if not paragraph.strip():
 #             lines.append("\n")  # 保留空行
 #             continue
-        
+
 #         # 使用正则表达式分割单词和数字块
 #         tokens = re.findall(r'([a-zA-Z]+|\d+|\s|[^\w\s])', paragraph)
-        
+
 #         current_line = []
 #         current_length = 0
-        
+
 #         for token in tokens:
 #             token_length = len(token)
-            
+
 #             # 如果当前行 + 新 token 不超过 max_chars，则加入当前行
 #             if current_length + token_length <= max_chars:
 #                 current_line.append(token)
@@ -145,11 +145,11 @@ def create_gradient_background(width, height, user_id=None):
 #                     lines.append("".join(current_line))
 #                 current_line = [token]
 #                 current_length = token_length
-        
+
 #         # 添加最后一行
 #         if current_line:
 #             lines.append("".join(current_line))
-    
+
 #     return lines
 
 def wrap_text(text, max_chars=20):
@@ -171,7 +171,7 @@ def wrap_text(text, max_chars=20):
     """
     lines = []
     paragraphs = text.split("\n")
-    
+
     # 改进后的正则表达式模式
     token_pattern = re.compile(
         r"($$\d+[\+\-\*/=]+\d+$$|"   # 数学表达式
@@ -182,20 +182,20 @@ def wrap_text(text, max_chars=20):
         r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|"  # 中文字符
         r"\s)"           # 空白字符
     )
-    
+
     for paragraph in paragraphs:
         if not paragraph.strip():
             lines.append("\n")  # 保留空行
             continue
-        
+
         tokens = token_pattern.findall(paragraph)
         current_line = []
         current_length = 0
-        
+
         for token in tokens:
             # 每个token视为1个字符单位（实际宽度后续计算）
             token_length = 1
-            
+
             if current_length + token_length <= max_chars:
                 current_line.append(token)
                 current_length += token_length
@@ -204,10 +204,10 @@ def wrap_text(text, max_chars=20):
                     lines.append("".join(current_line))
                 current_line = [token]
                 current_length = token_length
-        
+
         if current_line:
             lines.append("".join(current_line))
-    
+
     return lines
 
 def draw_text(draw, lines, y, canvas_width, center=True, user_id=None):
@@ -230,41 +230,41 @@ def draw_text(draw, lines, y, canvas_width, center=True, user_id=None):
     else:
         bg_color = DEFAULT_BG_COLOR
     dark_mode = is_dark_color(bg_color)
-    
+
     for line in lines:
         if line == "\n":  # 处理空行
             y += font_size + LINE_SPACING
             continue
-            
+
         # 获取文本实际尺寸
         bbox = draw.textbbox((0, 0), line, font=font)
         w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        
+
         # 非居中时的溢出处理
         if not center and w > canvas_width - 2 * PADDING:
             max_len = int(len(line) * (canvas_width - 2 * PADDING) / w)
             line = line[:max(max_len, 1)]
             bbox = draw.textbbox((0, 0), line, font=font)
             w = bbox[2] - bbox[0]
-        
+
         # 计算X坐标
         x = (canvas_width - w) // 2 if center else PADDING
-        
+
         # 描边设置
         outline_width = 1
         text_color = (255, 255, 255, 255) if dark_mode else (0, 0, 0, 255)
         outline_color = (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255)
-        
+
         # 绘制描边
         for dx in [-outline_width, 0, outline_width]:
             for dy in [-outline_width, 0, outline_width]:
                 if dx != 0 or dy != 0:
                     draw.text((x+dx, y+dy), line, font=font, fill=outline_color)
-        
+
         # 绘制主文字
         draw.text((x, y), line, font=font, fill=text_color)
         y += h + LINE_SPACING
-    
+
     return y
 
 
@@ -282,60 +282,60 @@ def calculate_content_size(draw, lines, image_size=None):
     """
     max_width = 0
     total_height = 0
-    
+
     # 测量文本尺寸
     for line in lines:
         if line == "\n":
             total_height += font_size + LINE_SPACING
             continue
-            
+
         bbox = draw.textbbox((0, 0), line, font=font)
         w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
         max_width = max(max_width, w)
         total_height += h + LINE_SPACING
-    
+
     # 加入图片尺寸
     if image_size:
         img_w, img_h = image_size
         max_width = max(max_width, img_w)
         total_height += img_h + 2 * font_size  # 图片前后间距
-    
+
     return max_width, total_height
 
 def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, canvas_size=None, user_id=None):
     """生成带固定尺寸的单帧"""
     dummy = Image.new("RGB", (1, 1))
     draw = ImageDraw.Draw(dummy)
-    
+
     lines1 = wrap_text(text1, max_chars) if text1 else []
     lines2 = wrap_text(text2, max_chars) if text2 else []
-    
+
     img_size = None
     if base_image:
         max_img_width = min(MAX_WIDTH - 2 * PADDING, font_size * 20)
         orig_w, orig_h = base_image.size
         scale = min(MAX_IMAGE_HEIGHT / orig_h, max_img_width / orig_w, 1.0)
         img_size = (int(orig_w * scale), int(orig_h * scale))
-    
+
     content_width, content_height = calculate_content_size(draw, lines1 + lines2, img_size)
-    
+
     # 使用传入的固定尺寸或动态计算
     if canvas_size:
         canvas_width, canvas_height = canvas_size
     else:
         canvas_width = content_width + 2 * PADDING
         canvas_height = content_height + 2 * PADDING
-    
+
     bg = create_gradient_background(canvas_width, canvas_height, user_id)
     canvas = Image.new('RGBA', (canvas_width, canvas_height))
     canvas.paste(bg, (0, 0), bg)
-    
+
     content_layer = Image.new('RGBA', (canvas_width, canvas_height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(content_layer)
     y = PADDING
-    
+
     y = draw_text(draw, lines1, y, canvas_width, center, user_id=user_id)
-    
+
     if base_image and img_size:
         y += font_size
         resized_img = base_image.resize(img_size, Image.LANCZOS).convert('RGBA')
@@ -344,9 +344,9 @@ def generate_frame(text1, text2, base_image=None, center=True, max_chars=20, can
         img_x = (canvas_width - img_size[0]) // 2 if center else PADDING
         content_layer.paste(img_layer, (img_x, y), img_layer)
         y += img_size[1] + font_size
-    
+
     y = draw_text(draw, lines2, y, canvas_width, center, user_id=user_id)
-    
+
     canvas = Image.alpha_composite(canvas, content_layer)
     return canvas
 
@@ -402,124 +402,25 @@ async def generate_image_with_text(text1, image_path, text2, max_chars=20, cente
         return None
 
 def _process_gif_sync(text1, image_path, text2, max_chars, center, user_id, file_id):
-    """同步处理GIF的函数 - 只生成一次背景"""
+    """同步处理GIF的函数"""
     gif = Image.open(image_path)
     gif_frames = [frame.copy() for frame in ImageSequence.Iterator(gif)]
-    
-    # 计算最大尺寸
+
+
     max_size = (0, 0)
-    dummy = Image.new("RGB", (1, 1))
-    draw_dummy = ImageDraw.Draw(dummy)
-    
-    lines1 = wrap_text(text1, max_chars) if text1 else []
-    lines2 = wrap_text(text2, max_chars) if text2 else []
-    
-    # 计算所有帧中最大原始尺寸
-    max_orig_width = max(frame.width for frame in gif_frames)
-    max_orig_height = max(frame.height for frame in gif_frames)
-    
-    # 计算统一缩放比例
-    max_img_width = min(MAX_WIDTH - 2 * PADDING, font_size * 20)
-    scale = min(MAX_IMAGE_HEIGHT / max_orig_height, max_img_width / max_orig_width, 1.0)
-    img_size = (int(max_orig_width * scale), int(max_orig_height * scale))
-    
-    # 计算内容总尺寸
-    content_width, content_height = calculate_content_size(draw_dummy, lines1 + lines2, img_size)
-    canvas_width = content_width + 2 * PADDING
-    canvas_height = content_height + 2 * PADDING
-    max_size = (canvas_width, canvas_height)
-    
-    # 生成一次背景（使用最大尺寸）
-    bg = create_gradient_background(max_size[0], max_size[1], user_id)
-    
-    # 计算固定位置
-    # 顶部文本位置
-    y_top = PADDING
-    
-    # 图片位置（居中或靠左）
-    img_x = (max_size[0] - img_size[0]) // 2 if center else PADDING
-    y_img = y_top
-    
-    # 计算顶部文本高度
-    for line in lines1:
-        if line == "\n":
-            y_img += font_size + LINE_SPACING
-        else:
-            bbox = draw_dummy.textbbox((0, 0), line, font=font)
-            h = bbox[3] - bbox[1]
-            y_img += h + LINE_SPACING
-    y_img += font_size  # 文本和图片之间的间距
-    
-    # 底部文本起始位置
-    y_bottom = y_img + img_size[1] + font_size
-    
-    # 处理每一帧
+    for frame in gif_frames:
+        temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
+        max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
+        
     processed_frames = []
     durations = []
-    
+
     for frame in gif_frames:
-        # 创建透明内容层
-        content_layer = Image.new('RGBA', max_size, (0, 0, 0, 0))
-        draw = ImageDraw.Draw(content_layer)
-        
-        # 绘制顶部文本
-        y_current = y_top
-        for line in lines1:
-            if line == "\n":
-                y_current += font_size + LINE_SPACING
-                continue
-                
-            bbox = draw.textbbox((0, 0), line, font=font)
-            w = bbox[2] - bbox[0]
-            x = (max_size[0] - w) // 2 if center else PADDING
-            
-            # 绘制文本（带描边）
-            outline_width = 1
-            bg_color = get_user_bg_color(user_id)
-            dark_mode = is_dark_color(bg_color)
-            text_color = (255, 255, 255, 255) if dark_mode else (0, 0, 0, 255)
-            outline_color = (0, 0, 0, 255) if dark_mode else (255, 255, 255, 255)
-            
-            for dx in [-outline_width, 0, outline_width]:
-                for dy in [-outline_width, 0, outline_width]:
-                    if dx != 0 or dy != 0:
-                        draw.text((x+dx, y_current+dy), line, font=font, fill=outline_color)
-            draw.text((x, y_current), line, font=font, fill=text_color)
-            
-            y_current += (bbox[3] - bbox[1]) + LINE_SPACING
-        
-        # 绘制图片
-        resized_img = frame.resize(img_size, Image.LANCZOS).convert('RGBA')
-        content_layer.paste(resized_img, (img_x, y_img), resized_img)
-        
-        # 绘制底部文本
-        y_current = y_bottom
-        for line in lines2:
-            if line == "\n":
-                y_current += font_size + LINE_SPACING
-                continue
-                
-            bbox = draw.textbbox((0, 0), line, font=font)
-            w = bbox[2] - bbox[0]
-            x = (max_size[0] - w) // 2 if center else PADDING
-            
-            # 绘制文本（带描边）
-            for dx in [-outline_width, 0, outline_width]:
-                for dy in [-outline_width, 0, outline_width]:
-                    if dx != 0 or dy != 0:
-                        draw.text((x+dx, y_current+dy), line, font=font, fill=outline_color)
-            draw.text((x, y_current), line, font=font, fill=text_color)
-            
-            y_current += (bbox[3] - bbox[1]) + LINE_SPACING
-        
-        # 合成最终帧
-        frame_img = Image.new('RGBA', max_size)
-        frame_img.paste(bg, (0, 0))
-        frame_img = Image.alpha_composite(frame_img, content_layer)
-        processed_frames.append(frame_img.convert("RGB"))
+        result = generate_frame(text1, text2, frame.convert("RGBA"), 
+                              center, max_chars, max_size, user_id)
+        processed_frames.append(result.convert("RGB"))
         durations.append(frame.info.get("duration", 100))
-    
-    # 保存GIF
+        
     output_path = save_dir / f"send_image{file_id}.gif"
     processed_frames[0].save(
         output_path,
