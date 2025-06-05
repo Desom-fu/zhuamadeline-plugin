@@ -104,8 +104,8 @@ async def ckcjlist_handle(bot: Bot, event: GroupMessageEvent):
 
         # 构建成就列表文本
         text = f"【{nickname}的成就列表】\n"
-        for k, v in achievements_list:
-            text += f"\n· {k} ×{v}"
+        for k, _ in achievements_list:
+            text += f"\n· {k}"
         
         await send_image_or_text_forward(user_id, ckcjlist, text, '成就列表', bot, event.self_id, event.group_id, 30, True)
 
