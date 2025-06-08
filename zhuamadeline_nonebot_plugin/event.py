@@ -1801,8 +1801,8 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             # 11级以上可以遇到所有类型Boss
             boss_type = random.choice(["mini", "normal", "hard"])
 
-        # 10%几率触发世界Boss（需要11级以上）
-        if grade >= 11 and random.randint(1, 10) == 1:
+        # 10%几率触发世界Boss（需要16级以上）
+        if grade >= 16 and random.randint(1, 100) <= 1:
             if not open_data(world_boss_data_path).get("active", False):
                 world_boss_data = spawn_world_boss()
                 msg = (
