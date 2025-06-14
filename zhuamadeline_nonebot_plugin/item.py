@@ -422,6 +422,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     pan_current_time = datetime.datetime.now()  #读取当前系统时间
     pan_next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
     trap_next_time_r = datetime.datetime.strptime(data.get(user_id).get('trap_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+    tiqu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('tiqu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
     if(str(user_id) in data):
         group_id = str(event.group_id)
         # 添加全局冷却
@@ -1860,6 +1861,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             """
                             可以提取特定的一个madeline，但是等级越高成功概率越低，且若失败了会给与更长的冷却时间
                             """
+                            current_time = datetime.datetime.now()
+                            tiqu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('tiqu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+                            if current_time < tiqu_next_time_r:
+                                text = time_text(str(tiqu_next_time_r-current_time))
+                                await send_image_or_text(user_id, daoju, f"刚刚{use_item_name}才爆炸过哦！现在{use_item_name}的能量十分不稳定，请{text}后再使用哦！", at_sender=True)
                             list_name = f"UserList{liechang_number}.json"
                             nums = find_madeline(arg2.lower(), only_name = True)
                             # 没有对应的玛德琳
@@ -1909,12 +1915,16 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     #检测回想之核
                                     dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
                                     next_time = current_time + datetime.timedelta(minutes=cd_time-dream)
+                                    tiqu_next_time = current_time + datetime.timedelta(minutes=5)
+                                    data[str(user_id)]['tiqu_time'] = tiqu_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     data[str(user_id)]["buff"] = "hurt"  #受伤
                                     fail_text = f"提取失败！提取器爆炸了，\n你受伤了，需要休息{str(cd_time)}分钟"  #失败文本
                                 else:
                                     current_time = datetime.datetime.now()
                                     next_time = current_time
+                                    tiqu_next_time = current_time + datetime.timedelta(minutes=5)
+                                    data[str(user_id)]['tiqu_time'] = tiqu_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     fail_text = f"提取失败！提取器爆炸了，\n但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
                                 success = 2

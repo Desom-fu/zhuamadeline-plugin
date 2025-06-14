@@ -594,9 +594,6 @@ def handle_guess_game(data, bar_data, user_id, guess_input):
     # 幸运戒指检查 - 只在亏损时触发
     if is_loss and has_lucky_ring:
         if random.random() <= 0.1:
-            # 重置数据
-            data[user_id]['berry'] = original_berry - TICKET_COST
-            bar_data["pots"] = original_pots
 
             # 重新抽牌
             new_card_value = random.choice(card_collection)
