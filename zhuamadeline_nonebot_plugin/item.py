@@ -1953,12 +1953,13 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             for level, weight in weights.items():
                                 weighted_choices.extend([level] * weight)
                             chosen_level = random.choice(weighted_choices)
-                            #----后续如果新加猎场了，直接修改这里----
+                            #----后续如果新加猎场了，直接修改这里，开新猎场要改----
                             liechang_mapping = {
                                 '1': rabbit_madeline1,
                                 '2': rabbit_madeline2,
                                 '3': rabbit_madeline3,
-                                '4': rabbit_madeline4
+                                '4': rabbit_madeline4,
+                                '5': rabbit_madeline5
                             }
                             # 获取对应的列表并筛选
                             rabbit_madeline_list = liechang_mapping.get(liechang_number, [])
@@ -2426,11 +2427,13 @@ async def handle_batch_capture(
                 chosen_level = random.choice(weighted_choices)
                 
                 # 获取对应猎场的兔类Madeline列表
+                # 开新猎场要改
                 liechang_mapping = {
                     '1': rabbit_madeline1,
                     '2': rabbit_madeline2,
                     '3': rabbit_madeline3,
-                    '4': rabbit_madeline4
+                    '4': rabbit_madeline4,
+                    '5': rabbit_madeline5
                 }
                 rabbit_madeline_list = liechang_mapping.get(liechang_number, [])
                 rabbit = [rabbit for rabbit in rabbit_madeline_list if rabbit[0] == chosen_level]
