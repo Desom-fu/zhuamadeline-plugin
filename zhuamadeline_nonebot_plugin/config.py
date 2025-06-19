@@ -119,7 +119,8 @@ exp_growth = {
     range(6, 11): 10,  # 等级 6-10，max_exp +10
     range(11, 16): 15, # 等级 11-15，max_exp +15
     range(16, 21): 20, # 等级 16-20，max_exp +20
-    range(21, 31): 25  # 等级 21-30，max_exp +25
+    range(21, 26): 25, # 等级 21-25，max_exp +25
+    range(26, 31): 50  # 等级 26-30，max_exp +50
 }
 # 绘图相关路径
 save_dir = Path("Data") / "generate_image" 

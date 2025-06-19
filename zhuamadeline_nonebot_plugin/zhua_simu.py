@@ -17,7 +17,8 @@ exp_growth = {
     range(6, 11): 10,  # 6-10级
     range(11, 16): 15, # 11-15级
     range(16, 21): 20, # 16-20级
-    range(21, 101): 25 # 21-100级
+    range(21, 26): 25, # 21-26级
+    range(26, 101): 50 # 26-100级
 }
 
 def calculate_level_and_exp(data, user_id, exp_gained, isitem):

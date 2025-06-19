@@ -1385,6 +1385,10 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
     exp = user_info.setdefault("exp", 0)
     grade = user_info.setdefault("grade", 1)
     current_time = datetime.datetime.now()
+    if grade >= 30:
+        boss_minus = 40
+    else:
+        boss_minus = 0
 
     bot = get_bot()
 
@@ -1789,7 +1793,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             await send_image_or_text(user_id, message, msg, True, None, 25)
             return
 
-    elif rnd <= 605:  # 5%几率触发Boss事件
+    elif rnd <= 605 - boss_minus:  # 5%几率触发Boss事件
         # 检查玩家等级决定Boss类型
         if grade < 6:
             # 6级以下只能遇到迷你Boss
@@ -1802,7 +1806,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
             boss_type = random.choice(["mini", "normal", "hard"])
 
         # 1%几率触发世界Boss（需要11级以上）
-        if grade >= 11 and random.randint(1, 100) <= 2:
+        if grade >= 11 and random.randint(1, 1000) <= 5:
             if not open_data(world_boss_data_path).get("active", False):
                 world_boss_data = spawn_world_boss()
                 msg = (
@@ -1854,7 +1858,7 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
         await send_image_or_text(user_id, message, msg, True, None, 20)
         return
     
-    elif rnd <= 655 and not hourglass_text: # 5%
+    elif rnd <= 655 - boss_minus and not hourglass_text: # 5%
         data5 = open_data(user_path5)
         if user_id not in data5:
             return
@@ -1916,13 +1920,12 @@ async def AbyssStuck(user_data, user_id, message, diamond_text, hourglass_text):
 
         else:
             # 鱼类交易逻辑
-            selected_fish = random.choice(list(fish_prices.keys()))
-
-            # 检查玩家是否有这种鱼
-            if items.get(selected_fish, 0) <= 0:
-                return
-
-            fish_name = random.choice(selected_fish)
+            available_fish = [fish for fish in fish_prices.keys() if items.get(fish, 0) > 0]
+            
+            if not available_fish:
+                return  # 没有鱼可交易，直接返回
+                
+            fish_name = random.choice(available_fish)
             fish_count = items[fish_name]
             amount = random.randint(1, min(8, fish_count))
             base_price = fish_prices[fish_name]
