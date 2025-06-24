@@ -983,7 +983,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 jijiu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('jijiu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
                 if current_time < jijiu_next_time_r:
                     text = time_text(str(jijiu_next_time_r-current_time))
-                    await send_image_or_text(user_id, daoju, f"你之前已经使用过{use_item_name}，\n现在已经脱力了……\n请{text}后再使用急救包！", at_sender=True)
+                    await send_image_or_text(user_id, daoju, f"你之前已经使用过急救包，\n现在已经脱力了……\n请{text}后再使用急救包！", at_sender=True)
                 while data.get(user_id, {}).get('item', {}).get('急救包', 0) > 0:
                     auto_reply = True
                     current_time = datetime.datetime.now()
