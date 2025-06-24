@@ -167,7 +167,7 @@ def wrap_text(text, max_chars=20):
     1. 数学表达式（如1+2）视为1单元
     2. 英文单词（含下划线）视为1单元
     3. 单个中文字符视为1单元
-    # 4. 符号组合（如@#）视为1单元（暂时不要）
+    4. 未匹配到的字符也显示，每个算1单位
     """
     lines = []
     paragraphs = text.split("\n")
@@ -177,7 +177,6 @@ def wrap_text(text, max_chars=20):
         r"($$\d+[\+\-\*/=]+\d+$$|"   # 数学表达式
         r"[a-zA-Z_]+(?:'[a-zA-Z_]+)*|"  # 英文单词（含下划线）
         r"\d+|"          # 连续数字
-        # r"[^\w\s\u4e00-\u9fff]{2,}|"  # 符号组合（2+字符）
         r"[^\w\s\u4e00-\u9fff]|"  # 单个符号
         r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]|"  # 中文字符
         r"\s)"           # 空白字符
@@ -188,12 +187,27 @@ def wrap_text(text, max_chars=20):
             lines.append("\n")  # 保留空行
             continue
 
-        tokens = token_pattern.findall(paragraph)
+        # 获取所有匹配项及其位置
+        matches = []
+        last_end = 0
+        for match in token_pattern.finditer(paragraph):
+            # 添加未匹配到的字符
+            if match.start() > last_end:
+                unmatched = paragraph[last_end:match.start()]
+                matches.extend(list(unmatched))  # 将未匹配的字符拆分为单个字符
+            matches.append(match.group())
+            last_end = match.end()
+        
+        # 添加最后未匹配的部分
+        if last_end < len(paragraph):
+            unmatched = paragraph[last_end:]
+            matches.extend(list(unmatched))
+
         current_line = []
         current_length = 0
 
-        for token in tokens:
-            # 每个token视为1个字符单位（实际宽度后续计算）
+        for token in matches:
+            # 每个token视为1个字符单位
             token_length = 1
 
             if current_length + token_length <= max_chars:
