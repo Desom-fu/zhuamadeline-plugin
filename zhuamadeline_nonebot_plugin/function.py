@@ -118,7 +118,7 @@ def init_data():
         with open(world_boss_data_path, 'w', encoding='utf-8') as f:
             json.dump({"active": False, "hp": 0, "contributors": {}}, f)
     if not pvp_path.exists():
-        with open(full_path, 'w', encoding='utf-8') as f:
+        with open(pvp_path, 'w', encoding='utf-8') as f:
             json.dump({}, f)
     if not pvp_coldtime_path.exists():
         with open(pvp_coldtime_path, 'w', encoding='utf-8') as f:
@@ -1057,7 +1057,7 @@ def get_boss_rewards(boss_data, user_id, grade):
     elif boss_data["type"] == "normal":
         exp = math.floor(boss_data["max_hp"] * 1.4)
         items = {
-            "道具盲盒": random.randint(20, 30),
+            "道具盲盒": random.randint(20, 40),
         }
         if is_max_grade:
             items["道具盲盒"] += 10
@@ -1073,7 +1073,7 @@ def get_boss_rewards(boss_data, user_id, grade):
         exp = math.floor(boss_data["max_hp"] * 1.5)
         berry = boss_data["max_hp"] * 10
         items = {
-            "道具盲盒": random.randint(20, 30),
+            "道具盲盒": random.randint(20, 40),
         }
         if is_max_grade:
             berry += boss_data["max_hp"] * 5

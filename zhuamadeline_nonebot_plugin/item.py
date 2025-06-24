@@ -423,6 +423,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
     pan_next_time_r = datetime.datetime.strptime(data.get(str(user_id)).get('next_time'), "%Y-%m-%d %H:%M:%S")
     trap_next_time_r = datetime.datetime.strptime(data.get(user_id).get('trap_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
     tiqu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('tiqu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+    jijiu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('tiqu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
     if(str(user_id) in data):
         group_id = str(event.group_id)
         # 添加全局冷却
@@ -978,7 +979,11 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                 auto_mode = len(command) == 2 and command[1] == "auto"
                 auto_reply = False
                 used_count = 0  # 记录消耗的急救包数量
-
+                current_time = datetime.datetime.now()
+                jijiu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('jijiu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
+                if current_time < jijiu_next_time_r:
+                    text = time_text(str(jijiu_next_time_r-current_time))
+                    await send_image_or_text(user_id, daoju, f"你之前已经使用过{use_item_name}，\n现在已经脱力了……\n请{text}后再使用急救包！", at_sender=True)
                 while data.get(user_id, {}).get('item', {}).get('急救包', 0) > 0:
                     auto_reply = True
                     current_time = datetime.datetime.now()
@@ -1033,6 +1038,10 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         # 保存用户数据
                         user_path = Path() / "data" / "UserList"
                         file_name = "UserData.json"
+                        next_time = current_time
+                        dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                        jijiu_next_time = current_time + datetime.timedelta(minutes=30-dream)
+                        data[str(user_id)]['jijiu_time'] = jijiu_next_time.strftime("%Y-%m-%d %H:%M:%S")
                         save_data(user_path / file_name, data)
 
                         remaining_kits = data[user_id]["item"].get("急救包", 0)
@@ -1865,7 +1874,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                             tiqu_next_time_r = datetime.datetime.strptime(data.get(user_id).get('tiqu_time', '2000-01-01 00:00:00'), "%Y-%m-%d %H:%M:%S")
                             if current_time < tiqu_next_time_r:
                                 text = time_text(str(tiqu_next_time_r-current_time))
-                                await send_image_or_text(user_id, daoju, f"刚刚{use_item_name}才爆炸过哦！现在{use_item_name}的能量十分不稳定，请{text}后再使用哦！", at_sender=True)
+                                await send_image_or_text(user_id, daoju, f"刚刚madeline提取器才爆炸过哦！\n现在madeline提取器的能量十分不稳定\n请{text}后再使用哦！", at_sender=True)
                             list_name = f"UserList{liechang_number}.json"
                             nums = find_madeline(arg2.lower(), only_name = True)
                             # 没有对应的玛德琳
@@ -1915,7 +1924,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     #检测回想之核
                                     dream = data[str(user_id)].get("collections",{}).get("回想之核", 0)
                                     next_time = current_time + datetime.timedelta(minutes=cd_time-dream)
-                                    tiqu_next_time = current_time + datetime.timedelta(minutes=5)
+                                    tiqu_next_time = current_time + datetime.timedelta(minutes=5-dream)
                                     data[str(user_id)]['tiqu_time'] = tiqu_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     data[str(user_id)]["buff"] = "hurt"  #受伤
@@ -1923,7 +1932,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 else:
                                     current_time = datetime.datetime.now()
                                     next_time = current_time
-                                    tiqu_next_time = current_time + datetime.timedelta(minutes=5)
+                                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                                    tiqu_next_time = current_time + datetime.timedelta(minutes=5-dream)
                                     data[str(user_id)]['tiqu_time'] = tiqu_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                     fail_text = f"提取失败！提取器爆炸了，\n但是有一股神秘的力量抵挡了本次爆炸伤害"  #失败文本
@@ -2058,9 +2068,8 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                     elect_text = '由于你把充能箱撞开了，\n你使用的这个充能陷阱必定爆炸，\n但是只会炸伤你60min！\n'
                                 next_time = current_time + datetime.timedelta(minutes=cd_time)
                                 # 限制充能陷阱10min内只能用一次
-                                trap_next_time = current_time + datetime.timedelta(minutes=10)
-                                #检测回想之核
                                 dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                                trap_next_time = current_time + datetime.timedelta(minutes=10-dream)
                                 if dream >= 1:
                                     next_time = current_time + datetime.timedelta(minutes=cd_time-1)
                                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -2069,8 +2078,9 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                                 fail_text = elect_text + f"你在布置充能陷阱的时候，\n突然间能量迸发，充能陷阱爆炸了！\n你受伤了，需要休息{str(cd_time)}分钟。"  #失败文本
                             else:
                                 next_time = current_time
+                                dream = data[str(user_id)]['collections'].get("回想之核", 0)
                                 # 限制充能陷阱10min内只能用一次
-                                trap_next_time = current_time + datetime.timedelta(minutes=10)
+                                trap_next_time = current_time + datetime.timedelta(minutes=10-dream)
                                 data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                                 data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
                                 fail_text = f"你在布置充能陷阱的时候，\n突然间能量迸发，充能陷阱爆炸了！\n但是有一股神秘的力量抵挡了本次爆炸伤害。"  #失败文本
@@ -2494,7 +2504,8 @@ async def handle_batch_capture(
                     
                     # 设置冷却时间
                     next_time = current_time + datetime.timedelta(minutes=cd_time)
-                    trap_next_time = current_time + datetime.timedelta(minutes=10)
+                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                    trap_next_time = current_time + datetime.timedelta(minutes=10-dream)
                         
                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                     data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -2508,7 +2519,8 @@ async def handle_batch_capture(
                 else:
                     # 免伤处理
                     next_time = current_time
-                    trap_next_time = current_time + datetime.timedelta(minutes=10)
+                    dream = data[str(user_id)]['collections'].get("回想之核", 0)
+                    trap_next_time = current_time + datetime.timedelta(minutes=10-dream)
                     data[str(user_id)]['next_time'] = next_time.strftime("%Y-%m-%d %H:%M:%S")
                     data[str(user_id)]['trap_time'] = trap_next_time.strftime("%Y-%m-%d %H:%M:%S")
                     stop_reason = "充能陷阱爆炸，但是被保护了！"
