@@ -415,35 +415,51 @@ async def generate_image_with_text(text1, image_path, text2, max_chars=20, cente
         print(f"图像生成失败: {str(e)}")
         return None
 
+# def _process_gif_sync(text1, image_path, text2, max_chars, center, user_id, file_id):
+#     """同步处理GIF的函数"""
+#     gif = Image.open(image_path)
+#     gif_frames = [frame.copy() for frame in ImageSequence.Iterator(gif)]
+
+
+#     max_size = (0, 0)
+#     for frame in gif_frames:
+#         temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
+#         max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
+        
+#     processed_frames = []
+#     durations = []
+
+#     for frame in gif_frames:
+#         result = generate_frame(text1, text2, frame.convert("RGBA"), 
+#                               center, max_chars, max_size, user_id)
+#         processed_frames.append(result.convert("RGB"))
+#         durations.append(frame.info.get("duration", 100))
+        
+#     output_path = save_dir / f"send_image{file_id}.gif"
+#     processed_frames[0].save(
+#         output_path,
+#         save_all=True,
+#         append_images=processed_frames[1:],
+#         duration=durations,
+#         loop=0,
+#         optimize=False
+#     )
+#     return output_path
+
 def _process_gif_sync(text1, image_path, text2, max_chars, center, user_id, file_id):
-    """同步处理GIF的函数"""
+    """同步处理GIF的函数（只取第一帧）"""
     gif = Image.open(image_path)
-    gif_frames = [frame.copy() for frame in ImageSequence.Iterator(gif)]
-
-
-    max_size = (0, 0)
-    for frame in gif_frames:
-        temp = generate_frame(text1, text2, frame.convert("RGBA"), center, max_chars, None, user_id)
-        max_size = (max(max_size[0], temp.width), max(max_size[1], temp.height))
-        
-    processed_frames = []
-    durations = []
-
-    for frame in gif_frames:
-        result = generate_frame(text1, text2, frame.convert("RGBA"), 
-                              center, max_chars, max_size, user_id)
-        processed_frames.append(result.convert("RGB"))
-        durations.append(frame.info.get("duration", 100))
-        
-    output_path = save_dir / f"send_image{file_id}.gif"
-    processed_frames[0].save(
-        output_path,
-        save_all=True,
-        append_images=processed_frames[1:],
-        duration=durations,
-        loop=0,
-        optimize=False
-    )
+    
+    # 只取第一帧
+    first_frame = next(ImageSequence.Iterator(gif)).copy()
+    
+    # 处理静态图片
+    result = generate_frame(text1, text2, first_frame.convert("RGBA"), 
+                          center, max_chars, None, user_id)
+    
+    # 保存为PNG格式
+    output_path = save_dir / f"send_image{file_id}.png"
+    result.save(output_path)
     return output_path
 
 
