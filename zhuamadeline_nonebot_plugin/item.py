@@ -2596,7 +2596,10 @@ async def handle_batch_capture(
                     original_max_exp = data[str(user_id)]["max_exp"]
                 
                 # 获取经验
-                exp_msg, grade_msg, data, exp, grade= calculate_level_and_exp(data, user_id, information[0], 1)
+                try:
+                    exp_msg, grade_msg, data, exp, grade= calculate_level_and_exp(data, user_id, information[0], 1)
+                except:
+                    exp_msg, grade_msg, data = calculate_level_and_exp(data, user_id, information[0], 1)
                 if exp_msg:
                     effect_stats['经验']['count'] += 1
                     effect_stats['经验']['exp'] += exp
