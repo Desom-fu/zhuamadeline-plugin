@@ -504,6 +504,7 @@ async def daoju_handle(event: GroupMessageEvent, bot: Bot, arg: Message = Comman
                         return
                 except ValueError:
                     await send_image_or_text(user_id, daoju, f"输入参数有误！\n批量使用需要为数字\n且数量为1-{piliang_item_max}！", at_sender=True)
+                    return
         #--------------------这些道具不限制所在猎场的使用--------------------
             # 身份徽章作为例外不受影响  
             if use_item_name.startswith("身份徽章"):
