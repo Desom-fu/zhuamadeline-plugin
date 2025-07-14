@@ -881,7 +881,7 @@ def calculate_level_and_exp(data, user_id, level, isitem):
     
     # 如果满级直接返回
     if grade == max_grade:
-        return exp_msg, grade_msg, data
+        return exp_msg, grade_msg, data, exp, grade
         
     # 1. 计算获得的经验值
     if isitem == 1:
