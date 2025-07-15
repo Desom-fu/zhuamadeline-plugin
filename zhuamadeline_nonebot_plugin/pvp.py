@@ -567,14 +567,14 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
     user_collections = user_data.get(str(user_id), {}).get('collections', {})
     # 宝藏号角的触发
     horn = int(user_collections.get("宝藏号角", 0))
-    if horn > 0 and random.randint(1, 100) <= 15:
+    if horn > 0:
         reward = levela * 2
         # 虽然不太可能，但是我还是setdefault
         user_data[str(user_id)].setdefault("energy", 0)
         user_data[str(user_id)].setdefault("item", {}).setdefault("体力", 0)
         # 安全增加奖励
         if random.randint(1, 10) <= 5:
-            user_data[str(user_id)]["energy"] = int(user_data[str(user_id)].get("energy", 0)) + reward
+            user_data[str(user_id)]["energy"] = int(user_data[str(user_id)].get("energy", 0)) + reward*7
             pk_text += f"随着宝藏号角的吹起，你充满了能量！你的能量增加了{reward}点，现在一共有{user_data[str(user_id)]["energy"]}点。\n\n"
         else:
             user_data[str(user_id)]["item"]["体力"] = int(user_data[str(user_id)]["item"].get("体力", 0)) + reward
