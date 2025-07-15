@@ -575,7 +575,7 @@ async def madeline_pvp_event(user_data, user_id, nickname, message, bot):
         # 安全增加奖励
         if random.randint(1, 10) <= 5:
             user_data[str(user_id)]["energy"] = int(user_data[str(user_id)].get("energy", 0)) + reward*7
-            pk_text += f"随着宝藏号角的吹起，你充满了能量！你的能量增加了{reward}点，现在一共有{user_data[str(user_id)]["energy"]}点。\n\n"
+            pk_text += f"随着宝藏号角的吹起，你充满了能量！你的能量增加了{reward*7}点，现在一共有{user_data[str(user_id)]["energy"]}点。\n\n"
         else:
             user_data[str(user_id)]["item"]["体力"] = int(user_data[str(user_id)]["item"].get("体力", 0)) + reward
             pk_text += f"随着宝藏号角的吹起，你恢复了体力！你的体力增加了{reward}点，现在一共有{user_data[str(user_id)]["item"]["体力"]}点。\n\n"
