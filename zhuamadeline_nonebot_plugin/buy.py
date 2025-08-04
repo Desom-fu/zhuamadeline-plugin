@@ -65,14 +65,14 @@ async def madeline_shop(bot: Bot, event: Event):
         previous_date_str = shop_data["date"]
 
         if previous_date_str != current_date_str:
-            shop_data["item"] = today_item
+            shop_data["item"] = today_item()
             shop_data["date"] = current_date_str
             #写入商店库存
             save_data(shop_database, shop_data)
         #写入商店库存
         save_data(shop_database, shop_data)
     else:
-        shop_data["item"] = today_item
+        shop_data["item"] = today_item()
         shop_data["date"] = current_date_str
         #写入商店库存
         save_data(shop_database, shop_data)
@@ -106,7 +106,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     shop_data = open_data(shop_database) if os.path.exists(shop_database) else {}
     
     if shop_data.get("date") != current_date:
-        shop_data["item"] = today_item
+        shop_data["item"] = today_item()
         shop_data["date"] = current_date
         save_data(shop_database, shop_data)
 
@@ -151,7 +151,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         buy_item_name = standard_collection
 
     # 检查是否是今日商品
-    if buy_item_name not in today_item:
+    if buy_item_name not in today_item():
         await send_image_or_text(user_id, buy, "请检查购买道具/藏品名称是否正确哦~", True, None, 20)
         return
 
