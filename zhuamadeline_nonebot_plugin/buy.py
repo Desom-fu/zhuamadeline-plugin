@@ -43,6 +43,7 @@ async def madeline_shop(bot: Bot, event: Event):
     current_time = datetime.datetime.now().time()
     hour = current_time.hour
     user_id = str(event.user_id)
+    today_items = today_item()
     if hour < 6:
         msg = "便利店还没开门，请再等一会吧"
         await send_image_or_text(user_id, shop, msg, True, None, 20)
@@ -65,14 +66,14 @@ async def madeline_shop(bot: Bot, event: Event):
         previous_date_str = shop_data["date"]
 
         if previous_date_str != current_date_str:
-            shop_data["item"] = today_item()
+            shop_data["item"] = today_items
             shop_data["date"] = current_date_str
             #写入商店库存
             save_data(shop_database, shop_data)
         #写入商店库存
         save_data(shop_database, shop_data)
     else:
-        shop_data["item"] = today_item()
+        shop_data["item"] = today_items
         shop_data["date"] = current_date_str
         #写入商店库存
         save_data(shop_database, shop_data)
@@ -104,9 +105,10 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
     # 读取或初始化商店数据
     current_date = datetime.date.today().strftime("%Y-%m-%d")
     shop_data = open_data(shop_database) if os.path.exists(shop_database) else {}
+    today_items = today_item()
     
     if shop_data.get("date") != current_date:
-        shop_data["item"] = today_item()
+        shop_data["item"] = today_items
         shop_data["date"] = current_date
         save_data(shop_database, shop_data)
 
@@ -151,7 +153,7 @@ async def buy_handle(event: GroupMessageEvent, arg: Message = CommandArg()):
         buy_item_name = standard_collection
 
     # 检查是否是今日商品
-    if buy_item_name not in today_item():
+    if buy_item_name not in today_items:
         await send_image_or_text(user_id, buy, "请检查购买道具/藏品名称是否正确哦~", True, None, 20)
         return
 
